@@ -18,7 +18,7 @@ public class QuestTestStarter : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R) && runtime != null)
         {
-            runtime.AddItem("item1");
+            runtime.AddItem("Item1");
         }
     }
 }
