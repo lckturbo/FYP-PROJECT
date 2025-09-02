@@ -743,17 +743,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1137061555}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1643434a78d36d4d9f91e1afafed1e3, type: 3}
+  m_Script: {fileID: 11500000, guid: 47353dde7e97d6c4493bdbac3e1051ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  jumpForce: 5
+  speed: 5
+  jumpForce: 10
   groundCheck: {fileID: 1544897981}
   groundCheckRadius: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 524288
-  questManager: {fileID: 210349611}
 --- !u!61 &1137061558
 BoxCollider2D:
   m_ObjectHideFlags: 0
