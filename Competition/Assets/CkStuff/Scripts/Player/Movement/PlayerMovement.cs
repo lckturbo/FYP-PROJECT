@@ -1,49 +1,47 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Config")]
-    public MovementConfig config;
+    [SerializeField] private MovementConfig config;
 
     [Header("Checks")]
-    public Transform groundCheck;       // child at feet
-    public Transform wallCheckLeft;     // child at left side
-    public Transform wallCheckRight;    // child at right side
-    public float checkRadius = 0.2f;
-    public LayerMask groundLayer;       // floors/platforms
-    public LayerMask wallLayer;         // walls only
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private Transform wallCheckLeft;
+    [SerializeField] private Transform wallCheckRight;
+    [SerializeField] private float checkRadius = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask wallLayer;
 
-    [Header("Input")]
-    public string horizontalAxis = "Horizontal";
-    public string jumpButton = "Jump";
-    public KeyCode dashKey = KeyCode.LeftShift;
+    [Header("HUD")]
+    [SerializeField] private bool showHud = true;
 
-    [Header("Debug")]
-    public bool debug = true;
-    public bool showHud = true;
+    // Components
+    private Rigidbody2D rb;
+    private SpriteRenderer sr;
 
-    Rigidbody2D rb;
-    SpriteRenderer sr;
+    // Input state
+    private float inputX;
+    private bool jumpPressed;
+    private bool jumpHeld;
+    private bool dashPressed;
 
-    float inputX;
-    bool jumpPressed, jumpHeld, dashPressed;
+    // Movement state
+    private bool isGrounded;
+    private bool isTouchingWallLeft, isTouchingWallRight;
+    private bool wallSliding;
 
-    bool isGrounded;
-    bool isTouchingWallLeft, isTouchingWallRight;
-    int airJumpsLeft;
+    private int airJumpsLeft;
 
-    float coyoteTimer;
-    float jumpBufferTimer;
+    private float coyoteTimer;
+    private float jumpBufferTimer;
 
-    bool isDashing;
-    float dashTimer;
-    float dashCooldownTimer;
-    int dashDir = 1;
-
-    // Debug state tracking
-    bool wasGrounded, wasWallSliding;
-    int lastFacing = 1;
+    private bool isDashing;
+    private float dashTimer;
+    private float dashCooldownTimer;
+    private int dashDir = 1;
 
     void Awake()
     {
@@ -56,18 +54,40 @@ public class PlayerMovement : MonoBehaviour
     {
         config = cfg;
         airJumpsLeft = config.maxAirJumps;
-        Log("Applied config");
+    }
+
+    public void OnMove(InputAction.CallbackContext ctx)
+    {
+        Vector2 value = ctx.ReadValue<Vector2>();
+        inputX = Mathf.Clamp(value.x, -1f, 1f);
+    }
+
+    public void OnJump(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
+        {
+            jumpPressed = true;
+            jumpHeld = true;
+        }
+        if (ctx.canceled)
+        {
+            jumpHeld = false;
+        }
+    }
+
+    public void OnDash(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
+        {
+            dashPressed = true;
+        }
     }
 
     void Update()
     {
         if (config == null) return;
 
-        inputX = Input.GetAxisRaw(horizontalAxis);
-        jumpPressed = Input.GetButtonDown(jumpButton);
-        jumpHeld = Input.GetButton(jumpButton);
-        dashPressed = Input.GetKeyDown(dashKey);
-
+        // Grounding + coyote
         if (isGrounded)
         {
             coyoteTimer = config.coyoteTime;
@@ -78,26 +98,23 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimer -= Time.deltaTime;
         }
 
+        // Jump buffer
         if (jumpPressed) jumpBufferTimer = config.jumpBufferTime;
         else jumpBufferTimer -= Time.deltaTime;
 
+        // Dash cooldown
         dashCooldownTimer -= Time.deltaTime;
 
-        // Dash start
+        // Start dash
         if (config.enableDash && dashPressed && !isDashing && dashCooldownTimer <= 0f)
         {
             isDashing = true;
             dashTimer = config.dashTime;
             dashCooldownTimer = config.dashCooldown;
 
-            int facing = 1;
-            if (Mathf.Abs(inputX) > 0.01f) facing = inputX > 0 ? 1 : -1;
-            else if (sr && config.flipSprite) facing = sr.flipX ? -1 : 1;
-
+            int facing = (Mathf.Abs(inputX) > 0.01f) ? (inputX > 0 ? 1 : -1) : (sr && config.flipSprite && sr.flipX ? -1 : 1);
             dashDir = facing;
             rb.velocity = new Vector2(dashDir * config.dashSpeed, 0f);
-
-            Log("Dash start dir=" + dashDir);
         }
 
         // Variable jump height
@@ -106,50 +123,34 @@ public class PlayerMovement : MonoBehaviour
             if (rb.velocity.y < 0f)
                 rb.velocity += Vector2.up * Physics2D.gravity.y * (config.fallGravityMultiplier - 1f) * Time.deltaTime;
             else if (rb.velocity.y > 0f && !jumpHeld)
-            {
                 rb.velocity += Vector2.up * Physics2D.gravity.y * (config.lowJumpMultiplier - 1f) * Time.deltaTime;
-                Log("Jump cut");
-            }
         }
 
         // Flip sprite
         if (config.flipSprite && sr && Mathf.Abs(inputX) > 0.01f)
-        {
-            int facing = inputX < 0f ? -1 : 1;
-            if (facing != lastFacing)
-            {
-                Log("Facing " + (facing > 0 ? "Right" : "Left"));
-                lastFacing = facing;
-            }
             sr.flipX = inputX < 0f;
-        }
+
+        // Clear one-frame latches
+        jumpPressed = false;
+        dashPressed = false;
     }
 
     void FixedUpdate()
     {
         if (config == null) return;
 
-        // Checks
+        // Collision checks
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, groundLayer);
         isTouchingWallLeft = Physics2D.OverlapCircle(wallCheckLeft.position, checkRadius, wallLayer);
         isTouchingWallRight = Physics2D.OverlapCircle(wallCheckRight.position, checkRadius, wallLayer);
-        bool isTouchingAnyWall = isTouchingWallLeft || isTouchingWallRight;
+        bool touchingWall = isTouchingWallLeft || isTouchingWallRight;
 
-        if (isGrounded != wasGrounded)
-        {
-            Log(isGrounded ? "Landed" : "Left ground");
-            wasGrounded = isGrounded;
-        }
-
+        // Dashing
         if (isDashing)
         {
             rb.velocity = new Vector2(dashDir * config.dashSpeed, 0f);
             dashTimer -= Time.fixedDeltaTime;
-            if (dashTimer <= 0f)
-            {
-                isDashing = false;
-                Log("Dash end");
-            }
+            if (dashTimer <= 0f) isDashing = false;
             return;
         }
 
@@ -159,53 +160,52 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = new Vector2(Mathf.Lerp(rb.velocity.x, targetX, lerp), rb.velocity.y);
 
         // Wall slide
-        bool wallSliding = false;
-        if (config.enableWallMoves && isTouchingAnyWall && !isGrounded && Mathf.Abs(inputX) > 0.01f)
+        wallSliding = false;
+        if (config.enableWallMoves && touchingWall && !isGrounded && rb.velocity.y < 0f)
         {
             wallSliding = true;
             if (rb.velocity.y < -config.wallSlideSpeed)
                 rb.velocity = new Vector2(rb.velocity.x, -config.wallSlideSpeed);
-            if (!wasWallSliding) Log("Wall slide start");
+
+            rb.velocity = new Vector2(rb.velocity.x * 0.2f, rb.velocity.y); // optional slow horizontal
         }
-        if (wasWallSliding && !wallSliding) Log("Wall slide end");
-        wasWallSliding = wallSliding;
+
+        // Prevent glue
+        bool intoLeft = isTouchingWallLeft && rb.velocity.x < 0f;
+        bool intoRight = isTouchingWallRight && rb.velocity.x > 0f;
+        if (intoLeft || intoRight)
+            rb.velocity = new Vector2(0f, rb.velocity.y);
 
         // Jumps
         if (jumpBufferTimer > 0f)
         {
-            if (config.enableWallMoves && isTouchingAnyWall && !isGrounded)
+            if (config.enableWallMoves && touchingWall && !isGrounded)
             {
+                // Wall jump (don’t reset airJumpsLeft!)
                 jumpBufferTimer = 0f;
 
-                // pick which wall we hit
-                int wallDir = 0;
-                if (isTouchingWallRight) wallDir = 1;
-                else if (isTouchingWallLeft) wallDir = -1;
-
+                int wallDir = isTouchingWallRight ? 1 : -1;
                 Vector2 jv = new Vector2(-wallDir * config.wallJumpPower.x, config.wallJumpPower.y);
                 rb.velocity = new Vector2(jv.x, 0f);
                 rb.AddForce(new Vector2(0f, jv.y), ForceMode2D.Impulse);
 
                 if (sr && config.flipSprite) sr.flipX = wallDir > 0;
-                airJumpsLeft = config.maxAirJumps;
-
-                Log("Wall jump off " + (wallDir > 0 ? "Right" : "Left") + " wall");
             }
             else if (coyoteTimer > 0f)
             {
+                // Ground jump
                 jumpBufferTimer = 0f;
                 coyoteTimer = 0f;
                 rb.velocity = new Vector2(rb.velocity.x, 0f);
                 rb.AddForce(Vector2.up * config.jumpForce, ForceMode2D.Impulse);
-                Log("Ground jump");
             }
             else if (airJumpsLeft > 0)
             {
+                // Air jump
                 jumpBufferTimer = 0f;
                 airJumpsLeft--;
                 rb.velocity = new Vector2(rb.velocity.x, 0f);
                 rb.AddForce(Vector2.up * config.jumpForce, ForceMode2D.Impulse);
-                Log("Air jump, left=" + airJumpsLeft);
             }
         }
     }
@@ -238,19 +238,13 @@ public class PlayerMovement : MonoBehaviour
         style.fontSize = 12;
 
         string text =
-            "Velocity: (" + rb.velocity.x.ToString("0.00") + ", " + rb.velocity.y.ToString("0.00") + ")\n" +
+            "Vel: (" + rb.velocity.x.ToString("0.00") + ", " + rb.velocity.y.ToString("0.00") + ")\n" +
             "InputX: " + inputX.ToString("0.00") + "\n" +
-            "Grounded: " + isGrounded + "\n" +
-            "WallLeft: " + isTouchingWallLeft + "  WallRight: " + isTouchingWallRight + "\n" +
-            "WallSlide: " + wasWallSliding + "  Dashing: " + isDashing + "\n" +
+            "Grounded: " + isGrounded + "  WallL: " + isTouchingWallLeft + "  WallR: " + isTouchingWallRight + "\n" +
+            "WallSlide: " + wallSliding + "  Dashing: " + isDashing + "  DashCD: " + Mathf.Max(0, dashCooldownTimer).ToString("0.00") + "\n" +
             "AirJumpsLeft: " + airJumpsLeft + "\n" +
             "Coyote: " + Mathf.Max(0, coyoteTimer).ToString("0.00") + "  Buffer: " + Mathf.Max(0, jumpBufferTimer).ToString("0.00");
 
-        GUI.Box(new Rect(10, 10, 280, 120), text, style);
-    }
-
-    void Log(string msg)
-    {
-        if (debug) Debug.Log("[Player] " + msg);
+        GUI.Box(new Rect(10, 10, 320, 90), text, style);
     }
 }
