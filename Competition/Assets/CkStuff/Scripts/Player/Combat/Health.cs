@@ -2,21 +2,19 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] private int maxHealth;
+    private int maxHealth;
     private int currentHealth;
     public float healRate = 0f;
 
     float healAccumulator;
 
-    void Start()
-    {
-        currentHealth = maxHealth;
-    }
     public void ApplyStats(CharacterStats stats)
     {
         maxHealth = stats.maxHealth;
-        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        //currentHealth = Mathf.Min(currentHealth, maxHealth); 
+        currentHealth = maxHealth;
         healRate = stats.healRate;
+        Debug.Log("(Player) MaxHealth: " + maxHealth);
     }
 
     void Update()

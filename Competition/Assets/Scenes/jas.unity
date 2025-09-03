@@ -294,6 +294,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 8187509112680270130, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
+      propertyPath: maxHealth
+      value: 2147483647
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -912,6 +916,7 @@ MonoBehaviour:
   _enemyWP:
   - {fileID: 714174324}
   - {fileID: 1682750452}
+  _rb2D: {fileID: 0}
   _speed: 5
   _maxHealth: 130
   _idleTimer: 2
