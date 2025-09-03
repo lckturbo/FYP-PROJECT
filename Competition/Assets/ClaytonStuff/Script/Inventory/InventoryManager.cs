@@ -34,11 +34,19 @@ public class InventoryManager : MonoBehaviour
     {
         playerInventory.AddItem(item, amount);
         Debug.Log($"Added {amount} {item.itemName} to {(item.category == ItemCategory.Main ? "Main" : "Sub")} Inventory");
+
+        //  Update UI after adding
+        var ui = FindObjectOfType<InventoryUIManager>();
+        if (ui != null) ui.RefreshUI();
     }
 
     public void RemoveItemFromInventory(Item item, int amount = 1)
     {
         playerInventory.RemoveItem(item, amount);
         Debug.Log($"Removed {amount} {item.itemName}");
+
+        //  Update UI after removing
+        var ui = FindObjectOfType<InventoryUIManager>();
+        if (ui != null) ui.RefreshUI();
     }
 }
