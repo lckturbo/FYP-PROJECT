@@ -1,7 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.InputSystem;
-using ISystem_Actions;  // Namespace for using InputSystem_Actions
 
 public class NPCDialogueTrigger : MonoBehaviour
 {
@@ -9,18 +7,9 @@ public class NPCDialogueTrigger : MonoBehaviour
 
     private bool playerInRange = false;
 
-    private InputSystem_Actions iSystemActions;
-
-    void Awake()
-    {
-        iSystemActions = new InputSystem_Actions();
-        iSystemActions.Player.Enable();
-    }
-
-
     void Update()
     {
-        if (playerInRange && iSystemActions.Player.Interact.WasPressedThisFrame())
+        if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             if (!DialogueManager.Instance.IsDialogueActive)
             {
