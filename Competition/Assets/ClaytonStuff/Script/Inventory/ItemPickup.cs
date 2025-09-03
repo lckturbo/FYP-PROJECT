@@ -3,33 +3,57 @@ using UnityEngine;
 public class ItemPickup : MonoBehaviour
 {
     public Item item; // The item to give when picked up
+    private bool playerInRange = false; // Track if player is near
+
+    private void Update()
+    {
+        if (playerInRange && Input.GetKeyDown(KeyCode.F))
+        {
+            CollectItem();
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
-            // Add item to inventory
-            InventoryManager inv = other.GetComponent<InventoryManager>();
-            if (inv != null)
-            {
-                inv.AddItemToInventory(item, 1);
-            }
+            playerInRange = true;
+            // Optionally, show UI prompt like "Press F to collect"
+        }
+    }
 
-            // Check all active quests and update collection quests
-            QuestManager qm = FindObjectOfType<QuestManager>();
-            if (qm != null && qm.activeQuests != null)
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = false;
+            // Hide UI prompt if any
+        }
+    }
+
+    private void CollectItem()
+    {
+        // Add item to inventory
+        InventoryManager inv = FindObjectOfType<InventoryManager>();
+        if (inv != null)
+        {
+            inv.AddItemToInventory(item, 1);
+        }
+
+        // Update active collection quests
+        QuestManager qm = FindObjectOfType<QuestManager>();
+        if (qm != null && qm.activeQuests != null)
+        {
+            foreach (Quest quest in qm.activeQuests)
             {
-                foreach (Quest quest in qm.activeQuests)
+                if (quest is CollectionQuestRuntime collectionQuest)
                 {
-                    if (quest is CollectionQuestRuntime collectionQuest)
-                    {
-                        collectionQuest.AddItem(item.itemName); // Pass the item name to the quest
-                    }
+                    collectionQuest.AddItem(item.itemName);
                 }
             }
-
-            // Destroy the item from the world
-            Destroy(gameObject);
         }
+
+        // Destroy the item from the world
+        Destroy(gameObject);
     }
 }
