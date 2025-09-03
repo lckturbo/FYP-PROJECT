@@ -14,7 +14,6 @@ public class Health : MonoBehaviour
         //currentHealth = Mathf.Min(currentHealth, maxHealth); 
         currentHealth = maxHealth;
         healRate = stats.healRate;
-        Debug.Log("(Player) MaxHealth: " + maxHealth);
     }
 
     void Update()
@@ -33,7 +32,6 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(int dmg)
     {
-        Debug.Log("(Player) Health: " + currentHealth);
         currentHealth = Mathf.Max(0, currentHealth - dmg);
         // TODO: death, i-frames, sfx
     }
