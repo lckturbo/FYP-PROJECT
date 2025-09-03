@@ -9,8 +9,9 @@ public class EnemyStats : ScriptableObject
     public int maxHealth;
     [Header("Combat")]
     public int atkDmg;
-    public int atkCD;
+    public float atkCD;
     public int atkRange;
+    public int dmgReduction;
 
     [Header("FSM stats")]
     public float idleTimer;

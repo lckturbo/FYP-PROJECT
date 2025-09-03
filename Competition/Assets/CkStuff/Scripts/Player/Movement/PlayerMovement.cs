@@ -251,6 +251,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Log(string msg)
     {
-        if (debug) Debug.Log("[Player] " + msg);
+        //if (debug) Debug.Log("[Player] " + msg);
     }
 }
