@@ -738,6 +738,51 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!1 &591996506 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5862402635565456391, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
+  m_PrefabInstance: {fileID: 2141456381}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &591996515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591996506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddd0f2af27089cc409b52d231f59db24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testQuest: {fileID: 11400000, guid: f71853f72140b044f914cb78cfaae31c, type: 2}
+--- !u!114 &591996516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591996506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 952b8eb6487ec4341be27e1b4d2fe2f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerInventory: {fileID: 591996517}
+--- !u!114 &591996517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591996506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cc4b81b3ffc8b849bcc27e06c84fd02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainInventory: []
+  subInventory: []
 --- !u!1 &672802771
 GameObject:
   m_ObjectHideFlags: 0
@@ -1066,14 +1111,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 45ecd6757fc66f14ba751f124788305e, type: 2}
   groundCheck: {fileID: 1544897981}
-  wallCheck: {fileID: 0}
+  wallCheckLeft: {fileID: 0}
+  wallCheckRight: {fileID: 0}
   checkRadius: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 524288
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 0
   horizontalAxis: Horizontal
   jumpButton: Jump
   dashKey: 304
+  debug: 1
+  showHud: 1
 --- !u!61 &1137061558
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1485,7 +1536,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -1.42, z: 0}
-  m_LocalScale: {x: 20, y: 1, z: 1}
+  m_LocalScale: {x: 30, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1535,51 +1586,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!1 &1728565300 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6616519682247713838, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
-  m_PrefabInstance: {fileID: 2141456381}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1728565309
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1728565300}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddd0f2af27089cc409b52d231f59db24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  testQuest: {fileID: 11400000, guid: f71853f72140b044f914cb78cfaae31c, type: 2}
---- !u!114 &1728565310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1728565300}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 952b8eb6487ec4341be27e1b4d2fe2f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerInventory: {fileID: 1728565311}
---- !u!114 &1728565311
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1728565300}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cc4b81b3ffc8b849bcc27e06c84fd02, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainInventory: []
-  subInventory: []
 --- !u!1 &1882984563
 GameObject:
   m_ObjectHideFlags: 0
@@ -2140,15 +2146,15 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6616519682247713838, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 5862402635565456391, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1728565311}
-    - targetCorrespondingSourceObject: {fileID: 6616519682247713838, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
+      addedObject: {fileID: 591996517}
+    - targetCorrespondingSourceObject: {fileID: 5862402635565456391, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1728565310}
-    - targetCorrespondingSourceObject: {fileID: 6616519682247713838, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
+      addedObject: {fileID: 591996516}
+    - targetCorrespondingSourceObject: {fileID: 5862402635565456391, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1728565309}
+      addedObject: {fileID: 591996515}
   m_SourcePrefab: {fileID: 100100000, guid: 9586fbc58eaad6e4f8389e0e1abde1bc, type: 3}
 --- !u!1 &2142514477
 GameObject:
