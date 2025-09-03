@@ -19,6 +19,11 @@ public class InventoryUIManager : MonoBehaviour
 
     private int selectedMainSlot = -1; // -1 = none selected
 
+    private int selectedSubSlot = -1; // -1 = none selected
+    private int subColumns = 6;       // grid width
+    private int subRows = 5;         // grid height
+
+
     void Start()
     {
         inventoryManager = FindObjectOfType<InventoryManager>();
@@ -31,7 +36,7 @@ public class InventoryUIManager : MonoBehaviour
             mainSlots.Add(slot);
         }
 
-        for (int i = 0; i < 60; i++)
+        for (int i = 0; i < 30; i++)
         {
             var slot = Instantiate(slotPrefab, subInventoryPanel.transform);
             subSlots.Add(slot);
@@ -51,15 +56,131 @@ public class InventoryUIManager : MonoBehaviour
             ToggleSubInventory();
         }
 
-        // Number key selection (1–6)
-        for (int i = 0; i < 6; i++)
+        if (!subInventoryOpen)
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            // Main inventory number key selection
+            for (int i = 0; i < 6; i++)
             {
-                SelectMainSlot(i);
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                {
+                    SelectMainSlot(i);
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                UseSelectedItem();
+            }
+        }
+        else
+        {
+            // Sub-inventory navigation with arrows
+            if (Input.GetKeyDown(KeyCode.RightArrow)) MoveSubSelection(1, 0);
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveSubSelection(-1, 0);
+            if (Input.GetKeyDown(KeyCode.UpArrow)) MoveSubSelection(0, -1);
+            if (Input.GetKeyDown(KeyCode.DownArrow)) MoveSubSelection(0, 1);
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                UseSelectedItemSub();
             }
         }
     }
+
+    private void MoveSubSelection(int dx, int dy)
+    {
+        // Initialize to (0,0) if none selected yet
+        if (selectedSubSlot == -1) selectedSubSlot = 0;
+
+        int x = selectedSubSlot % subColumns;
+        int y = selectedSubSlot / subColumns;
+
+        x = Mathf.Clamp(x + dx, 0, subColumns - 1);
+        y = Mathf.Clamp(y + dy, 0, subRows - 1);
+
+        int newIndex = y * subColumns + x;
+        if (newIndex != selectedSubSlot)
+        {
+            selectedSubSlot = newIndex;
+            UpdateSubHighlight();
+        }
+    }
+    private void UseSelectedItemSub()
+    {
+        if (selectedSubSlot < 0 || selectedSubSlot >= inventoryManager.playerInventory.subInventory.Count)
+        {
+            Debug.Log("No valid sub item selected.");
+            return;
+        }
+
+        var slot = inventoryManager.playerInventory.subInventory[selectedSubSlot];
+        if (slot.item == null || slot.quantity <= 0)
+        {
+            Debug.Log("Selected sub slot is empty.");
+            return;
+        }
+
+        if (slot.item.itemName == "Heal Potion")
+        {
+            //Debug.Log("Using Heal Potion from Sub Inventory...");
+            //var player = FindObjectOfType<Player>(); // replace with your health script
+            //if (player != null) player.Heal(50);
+
+            inventoryManager.RemoveItemFromInventory(slot.item, 1);
+        }
+        else
+        {
+            Debug.Log($"Selected sub item: {slot.item.itemName} (not usable here).");
+        }
+    }
+
+
+    private void UpdateSubHighlight()
+    {
+        for (int i = 0; i < subSlots.Count; i++)
+        {
+            var highlight = subSlots[i].transform.Find("Highlight").gameObject;
+            highlight.SetActive(i == selectedSubSlot);
+        }
+    }
+
+
+    private void UseSelectedItem()
+    {
+        if (selectedMainSlot < 0 || selectedMainSlot >= inventoryManager.playerInventory.mainInventory.Count)
+        {
+            Debug.Log("No valid item selected.");
+            return;
+        }
+
+        var slot = inventoryManager.playerInventory.mainInventory[selectedMainSlot];
+        if (slot.item == null || slot.quantity <= 0)
+        {
+            Debug.Log("Selected slot is empty.");
+            return;
+        }
+
+        // Example: Check if item is Heal Potion
+        if (slot.item.itemName == "Heal Potion")
+        {
+            Debug.Log("Using Heal Potion...");
+
+            //// Call player heal logic here
+            //var player = FindObjectOfType<Player>(); // replace with your player health script
+            //if (player != null)
+            //{
+            //    player.Heal(50); // heal amount example
+            //}
+
+            // Remove one from inventory
+            inventoryManager.RemoveItemFromInventory(slot.item, 1);
+        }
+        else
+        {
+            Debug.Log($"Selected item: {slot.item.itemName} (not usable here).");
+        }
+    }
+
 
     private void ToggleSubInventory()
     {
