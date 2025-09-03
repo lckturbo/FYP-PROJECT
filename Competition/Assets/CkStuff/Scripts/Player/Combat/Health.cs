@@ -3,11 +3,10 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
     [Header("Character Stats")]
-    public CharacterStats stats;
-    public bool useStatsDirectly = true;
+    [SerializeField] private CharacterStats stats;
+    [SerializeField] private bool useStatsDirectly = true;
 
-    [Header("Runtime Health")]
-    public int currentHp;
+    private int currentHp;
 
     void Awake()
     {
