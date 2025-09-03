@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemPickup : MonoBehaviour
@@ -42,16 +43,17 @@ public class ItemPickup : MonoBehaviour
 
         // Update active collection quests
         QuestManager qm = FindObjectOfType<QuestManager>();
-        if (qm != null && qm.activeQuests != null)
+        // Create a snapshot to avoid modifying while iterating
+        var questsCopy = new List<Quest>(qm.activeQuests);
+
+        foreach (Quest quest in questsCopy)
         {
-            foreach (Quest quest in qm.activeQuests)
+            if (quest is CollectionQuestRuntime collectionQuest)
             {
-                if (quest is CollectionQuestRuntime collectionQuest)
-                {
-                    collectionQuest.AddItem(item.itemName);
-                }
+                collectionQuest.AddItem(item.itemName);
             }
         }
+
 
         // Destroy the item from the world
         Destroy(gameObject);

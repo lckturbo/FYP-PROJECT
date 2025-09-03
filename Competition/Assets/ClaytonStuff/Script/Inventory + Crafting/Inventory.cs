@@ -21,11 +21,12 @@ public class Inventory : MonoBehaviour
 
     public void AddItem(Item item, int amount = 1)
     {
-        List<InventorySlot> targetInventory = (item.category == ItemCategory.Main) ? mainInventory : subInventory;
+        List<InventorySlot> targetInventory =
+            (item.category == ItemCategory.Main) ? mainInventory : subInventory;
 
-        // If stackable and already in inventory, just add
         if (item.isStackable)
         {
+            // Try to find an existing stack
             InventorySlot slot = targetInventory.Find(s => s.item == item);
             if (slot != null)
             {
@@ -34,9 +35,14 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        // Otherwise create a new slot
-        targetInventory.Add(new InventorySlot(item, amount));
+        // For non-stackables OR new stack, add new slot(s)
+        for (int i = 0; i < amount; i++)
+        {
+            targetInventory.Add(new InventorySlot(item, item.isStackable ? amount : 1));
+            if (item.isStackable) break; // already added whole stack
+        }
     }
+
 
     public void RemoveItem(Item item, int amount = 1)
     {
