@@ -26,12 +26,15 @@ public class Health : MonoBehaviour
             if (currentHp <= 0) currentHp = stats.maxHealth;
             currentHp = Mathf.Min(currentHp, stats.maxHealth);
         }
+
     }
 
     public void TakeDamage(int damage)
     {
         currentHp -= damage;
         currentHp = Mathf.Max(0, currentHp);
+
+        Debug.Log("(Player) Current HP: " + currentHp + "/" + stats.maxHealth);
 
         if (currentHp <= 0)
         {
