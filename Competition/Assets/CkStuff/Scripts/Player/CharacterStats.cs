@@ -4,10 +4,5 @@ using UnityEngine;
 public class CharacterStats : ScriptableObject
 {
     [Header("Health")]
-    public int maxHealth = 8;
-    public float healRate = 0f;
-
-    [Header("Stamina (optional)")]
-    public float staminaMax = 100f;
-    public float staminaRegen = 20f;
+    public int maxHealth = 0;
 }

@@ -2,39 +2,49 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    private int maxHealth;
-    private int currentHealth;
-    public float healRate = 0f;
+    [Header("Character Stats")]
+    public CharacterStats stats;
+    public bool useStatsDirectly = true;
 
-    float healAccumulator;
+    [Header("Runtime Health")]
+    public int currentHp;
 
-    public void ApplyStats(CharacterStats stats)
+    void Awake()
     {
-        maxHealth = stats.maxHealth;
-        //currentHealth = Mathf.Min(currentHealth, maxHealth); 
-        currentHealth = maxHealth;
-        healRate = stats.healRate;
-        Debug.Log("(Player) MaxHealth: " + maxHealth);
-    }
-
-    void Update()
-    {
-        if (healRate > 0f && currentHealth < maxHealth)
+        if (stats != null)
         {
-            healAccumulator += healRate * Time.deltaTime;
-            if (healAccumulator >= 1f)
-            {
-                int heal = Mathf.FloorToInt(healAccumulator);
-                healAccumulator -= heal;
-                currentHealth = Mathf.Min(maxHealth, currentHealth + heal);
-            }
+            ApplyStats(stats);
         }
     }
 
-    public void TakeDamage(int dmg)
+    public void ApplyStats(CharacterStats newStats)
     {
-        Debug.Log("(Player) Health: " + currentHealth);
-        currentHealth = Mathf.Max(0, currentHealth - dmg);
-        // TODO: death, i-frames, sfx
+        stats = newStats;
+
+        if (useStatsDirectly)
+        {
+            if (currentHp <= 0) currentHp = stats.maxHealth;
+            currentHp = Mathf.Min(currentHp, stats.maxHealth);
+        }
+
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHp -= damage;
+        currentHp = Mathf.Max(0, currentHp);
+
+        Debug.Log("(Player) Current HP: " + currentHp + "/" + stats.maxHealth);
+
+        if (currentHp <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Debug.Log(gameObject.name + " has died.");
+        // TODO: trigger death animation, end turn, etc.
     }
 }
