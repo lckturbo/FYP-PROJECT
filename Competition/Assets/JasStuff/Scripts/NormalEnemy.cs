@@ -11,5 +11,8 @@ public class NormalEnemy : BasicFSM
 
         // play animation
         // player take damage
+        Health health = player.GetComponent<Health>();
+        if (health != null)
+            health.TakeDamage(10); // !! to balance
     }
 }
