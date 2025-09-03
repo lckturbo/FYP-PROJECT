@@ -1,11 +1,14 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance { get; private set; }
 
     private float speed = 5.0f;
-    private bool canMove = true;   // ← 移動可能かどうか
+    private InputAction moveAction; // 左右移動
+
+    private bool canMove = true;   // 移動可能かどうか
 
     void Awake()
     {
@@ -13,26 +16,21 @@ public class PlayerController : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    void Start()
+    {
+        moveAction = InputSystem.actions.FindAction("Move");
+        moveAction.Enable();
+    }
+
     void Update()
     {
-        if (!canMove) return; // 会話中は入力を無視する
-
-        // 移動量を計算
-        float moveX = 0.0f;
-
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+        if (canMove)
         {
-            // 左へ移動
-            moveX = -1.0f;
+            var moveValue = moveAction.ReadValue<Vector2>();
+            var move = new Vector3(moveValue.x, 0f, 0f) * speed * Time.deltaTime;
+            transform.Translate(move);
         }
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
-        {
-            // 右へ移動
-            moveX = 1.0f;
-        }
-
-        // 移動させる
-        transform.Translate(new Vector3(moveX, 0f, 0f) * speed * Time.deltaTime);
+        var MoveValue = moveAction.ReadValue<Vector2>();
     }
 
     /// <summary>
