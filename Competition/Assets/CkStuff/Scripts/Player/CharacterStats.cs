@@ -5,7 +5,7 @@ public class CharacterStats : ScriptableObject
 {
     [Header("Health")]
     public int maxHealth = 8;
-    public float healRate = 0f; // per second (Producer > 0)
+    public float healRate = 0f;
 
     [Header("Stamina (optional)")]
     public float staminaMax = 100f;
