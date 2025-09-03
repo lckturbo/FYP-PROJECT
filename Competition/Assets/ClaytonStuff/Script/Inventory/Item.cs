@@ -13,4 +13,5 @@ public class Item : ScriptableObject
     public Sprite icon;
     public bool isStackable;
     public ItemCategory category; //  defines whether item goes to Main or Sub inventory
+    public int healing;
 }
