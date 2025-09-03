@@ -17,6 +17,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected GameObject player;
     protected EnemyStates _states;
     [SerializeField] private Transform[] _enemyWP;
+    [SerializeField] private Rigidbody2D _rb2D;
     private int _currWPIndex;
     [SerializeField] private float _speed;
 
