@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Security.Cryptography;
 using UnityEngine;
 
 public abstract class EnemyBase : MonoBehaviour
@@ -14,37 +12,53 @@ public abstract class EnemyBase : MonoBehaviour
         Death
     }
 
+    [Header("Enemy Stats")]
+    [SerializeField] protected EnemyStats _enemyStats;
+
     protected GameObject player;
     protected EnemyStates _states;
     [SerializeField] private Transform[] _enemyWP;
     [SerializeField] private Rigidbody2D _rb2D;
     private int _currWPIndex;
-    [SerializeField] private float _speed;
+    private float _speed;
 
     [Header("Health")]
     private float _currHealth;
-    [SerializeField] private float _maxHealth;
+    private float _maxHealth;
 
     [Header("Idle")]
-    [SerializeField] private float _idleTimer;
+    private float _idleTimer;
     private float _currIdleTimer;
 
     [Header("Attack")]
-    [SerializeField] protected float _atkRange;
-    [SerializeField] protected float _atkDmg;
+    protected int _atkRange;
+    protected int _atkDmg;
     protected float _atkCD;
 
     [Header("Chase")]
-    [SerializeField] private float _chaseRange;
+    private float _chaseRange;
 
     [Header("Investigate")]
-    [SerializeField] private float _investigateTimer;
+    private float _investigateTimer;
     private float _currInvTimer;
+
+    protected void Initialize(EnemyStats stats)
+    { 
+        _speed = stats.speed;
+        _maxHealth = stats.maxHealth; 
+        _atkRange = stats.atkRange;
+        _atkDmg = stats.atkDmg;
+        _atkCD = stats.atkCD;
+        _idleTimer = stats.idleTimer;
+        _chaseRange = stats.chaseRange;
+        _investigateTimer = stats.investigateTimer;
+    }
 
     private void Start()
     {
-        if (player == null) 
-            player = GameObject.FindWithTag("Player");
+        if (_enemyStats == null) return;
+        if (player == null) player = GameObject.FindWithTag("Player");
+        Initialize(_enemyStats);
 
         _currHealth = _maxHealth;
         _states = EnemyStates.Idle;
@@ -69,6 +83,7 @@ public abstract class EnemyBase : MonoBehaviour
         Debug.Log("(Enemy) Idle State");
         if (_currIdleTimer <= _idleTimer)
         {
+            LookForPlayer();
             _currIdleTimer -= Time.deltaTime;
 
             if (_currIdleTimer <= 0)
@@ -126,10 +141,12 @@ public abstract class EnemyBase : MonoBehaviour
         Debug.Log("(Enemy) Investigate State");
         if(_currInvTimer <= _investigateTimer)
         {
+            LookForPlayer();
             _currInvTimer -= Time.deltaTime;
             if(_currInvTimer <= 0)
             {
                 _states = EnemyStates.Idle;
+                _currInvTimer = _investigateTimer;
             }
         }
     }
@@ -141,6 +158,19 @@ public abstract class EnemyBase : MonoBehaviour
         // respawn new enemy
     }
 
+    protected void LookForPlayer()
+    {
+        Debug.Log("(Enemy) Looking for player");
+        if (player == null) return;
+        if(Vector3.Distance(transform.position, player.transform.position) < _chaseRange)
+        {
+            _states = EnemyStates.Chase;
+        }
+        else
+        {
+            _states = EnemyStates.Investigate;
+        }
+    }
     // mobs -> all fsm
     // mini-boss -> patrol(?), combat, investigate, chase
     protected abstract void StateMachine();

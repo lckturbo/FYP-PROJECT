@@ -13,6 +13,7 @@ public class NormalEnemy : BasicFSM
         // player take damage
         Health health = player.GetComponent<Health>();
         if (health != null)
-            health.TakeDamage(10); // !! to balance
+            health.TakeDamage(_atkDmg);
+
     }
 }
