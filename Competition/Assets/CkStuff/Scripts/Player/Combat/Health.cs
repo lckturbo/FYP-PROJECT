@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    public int maxHealth = 8;
-    public int currentHealth = 8;
+    private int maxHealth;
+    private int currentHealth;
     public float healRate = 0f;
 
     float healAccumulator;
@@ -11,8 +11,10 @@ public class Health : MonoBehaviour
     public void ApplyStats(CharacterStats stats)
     {
         maxHealth = stats.maxHealth;
-        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        //currentHealth = Mathf.Min(currentHealth, maxHealth); 
+        currentHealth = maxHealth;
         healRate = stats.healRate;
+        Debug.Log("(Player) MaxHealth: " + maxHealth);
     }
 
     void Update()
@@ -31,6 +33,7 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(int dmg)
     {
+        Debug.Log("(Player) Health: " + currentHealth);
         currentHealth = Mathf.Max(0, currentHealth - dmg);
         // TODO: death, i-frames, sfx
     }
