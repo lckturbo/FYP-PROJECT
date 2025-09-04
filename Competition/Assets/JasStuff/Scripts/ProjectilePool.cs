@@ -5,8 +5,8 @@ using UnityEngine;
 public class ProjectilePool : MonoBehaviour
 {
     public static ProjectilePool instance;
-    [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private int poolSize;
+    [SerializeField] private GameObject _projectilePrefab;
+    [SerializeField] private int _poolSize;
 
     private Queue<GameObject> projectiles = new Queue<GameObject>();
 
@@ -22,9 +22,9 @@ public class ProjectilePool : MonoBehaviour
 
     private void InitPool()
     {
-        for(int i = 0; i < poolSize; i++)
+        for(int i = 0; i < _poolSize; i++)
         {
-            GameObject proj = Instantiate(projectilePrefab);
+            GameObject proj = Instantiate(_projectilePrefab);
             proj.transform.SetParent(gameObject.transform);
             proj.SetActive(false);
             projectiles.Enqueue(proj);
@@ -37,7 +37,7 @@ public class ProjectilePool : MonoBehaviour
         if (projectiles.Count > 0)
             proj = projectiles.Dequeue();
         else
-            proj = Instantiate(projectilePrefab);
+            proj = Instantiate(_projectilePrefab);
 
         proj.SetActive(true);
         return proj;
