@@ -10,6 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ffc4d158180ed77419b404e371f98a5f, type: 3}
-  m_Name: NPC_text
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
-  lines: []
+  m_Name: GrettingDialogue
+  m_EditorClassIdentifier: 
+  lines:
+  - speakerName: NPC
+    text: HI there player this is jack i be your NPC
+  - speakerName: 
+    text: im here to kill you die die die die die die die die die die die die die
