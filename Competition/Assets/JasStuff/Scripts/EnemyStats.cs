@@ -22,9 +22,11 @@ public class EnemyStats : ScriptableObject
     public int atkRange;
     public float dmgReduction;
 
+    [Header("Boss Stats")]
+    public float AOERadius;
+
     [Header("FSM stats")]
     public float idleTimer;
     public float chaseRange;
     public float investigateTimer;
-
 }

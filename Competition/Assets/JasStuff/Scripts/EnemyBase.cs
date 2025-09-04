@@ -34,10 +34,10 @@ public abstract class EnemyBase : MonoBehaviour
     protected int _atkDmg;
     protected float _atkCD;
     protected float _currAtkTimer;
+    protected float _AOERadius;
 
     // CHASE //
     private float _chaseRange;
-
     // INVESTIGATE //
     private float _investigateTimer;
     private float _currInvTimer;
@@ -55,6 +55,7 @@ public abstract class EnemyBase : MonoBehaviour
         _chaseRange = stats.chaseRange;
         _investigateTimer = stats.investigateTimer;
         _dmgReduction = stats.dmgReduction;
+        _AOERadius = stats.AOERadius;
     }
 
     protected virtual void Start()
@@ -84,7 +85,6 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Idle()
     {
-        MsgLog("Idle State");
         if (_currIdleTimer <= _idleTimer)
         {
             //LookForPlayer();
@@ -101,8 +101,6 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Patrol()
     {
         if (_enemyWP.Length == 0 || _enemyWP == null) return;
-
-        MsgLog("Patrol State");
 
         Transform target = _enemyWP[_currWPIndex];
         float dir = target.position.x - transform.position.x;
@@ -126,8 +124,8 @@ public abstract class EnemyBase : MonoBehaviour
     {
         float dir = player.position.x - transform.position.x;
         FaceDir(dir);
-        // transition to battle scene once successfully hit player
-        // notify battlesys enemyturn is over
+        // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
+        // TODO: NOTIFY BATTLESYSTEM ENEMYTURN IS OVER
     }
 
     // PLAYER -> CALL TO KILL ENEMIES
@@ -155,7 +153,6 @@ public abstract class EnemyBase : MonoBehaviour
         if (player == null) return;
 
         PlayerNearby();
-        MsgLog("Chase State");
 
         float dir = player.position.x - transform.position.x;
         FaceDir(dir);
@@ -166,7 +163,6 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Investigate()
     {
-        MsgLog("Investigate State");
         if (_currInvTimer <= _investigateTimer)
         {
             //LookForPlayer();
@@ -181,15 +177,13 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Death()
     {
-        MsgLog("Death State");
-        // play animation
+        // TODO: ANIMATION
         Destroy(gameObject, 2f);
-        // respawn new enemy
+        // TODO: RESPAWN NEW ENEMIES
     }
     protected virtual bool PlayerNearby()
     {
         if (player == null) return false;
-        //Debug.Log("(Enemy) Player is nearby");
         Vector2 dirToPlayer = (player.position - transform.position).normalized;
         float dist = Vector3.Distance(transform.position, player.position);
         LayerMask playerLayer = LayerMask.GetMask("Player");
@@ -224,23 +218,42 @@ public abstract class EnemyBase : MonoBehaviour
         {
             enemySprite.flipX = true;
             scale.x = Mathf.Abs(scale.x);
-            MsgLog("dir > 0: " + transform.localScale.x);
         }
         else if (dir < 0)
         {
             enemySprite.flipX = false;
             scale.x = -Mathf.Abs(scale.x);
-            MsgLog("dir < 0: " + transform.localScale.x);
         }
 
         transform.localScale = scale;
     }
 
-    // mobs -> all fsm
-    // mini-boss -> patrol(?), combat, investigate, chase
-    protected abstract void StateMachine();
+    protected virtual void StateMachine()
+    {
+        switch (_states)
+        {
+            case EnemyStates.Idle:
+                Idle();
+                break;
+            case EnemyStates.Patrol:
+                Patrol();
+                break;
+            case EnemyStates.Attack:
+                Attack();
+                break;
+            case EnemyStates.Investigate:
+                Investigate();
+                break;
+            case EnemyStates.Chase:
+                Chase();
+                break;
+            case EnemyStates.Death:
+                Death();
+                break;
+        }
+    }
 
-    private void MsgLog(string msg)
+    protected void MsgLog(string msg)
     {
         if (msg != null)
             Debug.Log("(Enemy) " + msg);
