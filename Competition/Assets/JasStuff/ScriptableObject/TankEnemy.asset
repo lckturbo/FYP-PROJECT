@@ -12,11 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
   m_Name: TankEnemy
   m_EditorClassIdentifier: 
+  type: 1
   speed: 3
-  maxHealth: 200
+  maxHealth: 100
   atkDmg: 20
   atkCD: 5
-  atkRange: 3
+  atkRange: 4
+  dmgReduction: 0.5
   idleTimer: 3
-  chaseRange: 8
+  chaseRange: 6
   investigateTimer: 2

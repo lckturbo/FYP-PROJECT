@@ -79,12 +79,12 @@ public abstract class EnemyBase : MonoBehaviour
 
         // for testing
         if (Input.GetKeyDown(KeyCode.L))
-            TakeDamage(50);
+            TakeDamage(10);
     }
 
     protected virtual void Idle()
     {
-        Debug.Log("(Enemy) Idle State");
+        MsgLog("Idle State");
         if (_currIdleTimer <= _idleTimer)
         {
             //LookForPlayer();
@@ -102,7 +102,7 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (_enemyWP.Length == 0 || _enemyWP == null) return;
 
-        Debug.Log("(Enemy) Patrol State");
+        MsgLog("Patrol State");
 
         Transform target = _enemyWP[_currWPIndex];
         float dir = target.position.x - transform.position.x;
@@ -129,19 +129,33 @@ public abstract class EnemyBase : MonoBehaviour
         // transition to battle scene once successfully hit player
         // notify battlesys enemyturn is over
     }
-    protected virtual void TakeDamage(float amt)
+
+    // PLAYER -> CALL TO KILL ENEMIES
+    public virtual void TakeDamage(float amt)
     {
         if (_currHealth <= 0)
             _states = EnemyStates.Death;
 
-        _currHealth -= amt;
+        switch (_enemyStats.type)
+        {
+            case EnemyStats.EnemyTypes.Basic:
+                _currHealth -= amt;
+                break;
+            case EnemyStats.EnemyTypes.Tank:
+                _currHealth -= Mathf.RoundToInt(amt * (1f - _dmgReduction));
+                break;
+            case EnemyStats.EnemyTypes.MiniBoss:
+                break;
+        }
+
+        MsgLog(_enemyStats.type + " HP: " + _currHealth + "/" + _maxHealth);
     }
     protected virtual void Chase()
     {
         if (player == null) return;
 
         PlayerNearby();
-        Debug.Log("(Enemy) Chase State");
+        MsgLog("Chase State");
 
         float dir = player.position.x - transform.position.x;
         FaceDir(dir);
@@ -152,7 +166,7 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Investigate()
     {
-        Debug.Log("(Enemy) Investigate State");
+        MsgLog("Investigate State");
         if (_currInvTimer <= _investigateTimer)
         {
             //LookForPlayer();
@@ -167,7 +181,7 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Death()
     {
-        Debug.Log("(Enemy) Death State");
+        MsgLog("Death State");
         // play animation
         Destroy(gameObject, 2f);
         // respawn new enemy
@@ -183,7 +197,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (hit.collider != null && hit.collider.CompareTag("Player"))
         {
-            Debug.Log("(Enemy) Player found");
+            MsgLog("Player found");
             if (dist <= _chaseRange)
             {
                 if (dist <= _atkRange)
@@ -200,12 +214,6 @@ public abstract class EnemyBase : MonoBehaviour
         return false;
     }
 
-    public int GetDamage()
-    {
-        if (_enemyStats == null) return 0;
-        return _enemyStats.atkDmg;
-    }
-
     protected void FaceDir(float dir)
     {
         if (player == null) return;
@@ -216,13 +224,13 @@ public abstract class EnemyBase : MonoBehaviour
         {
             enemySprite.flipX = true;
             scale.x = Mathf.Abs(scale.x);
-            Debug.Log("(Enemy) dir > 0 :" + transform.localScale.x);
+            MsgLog("dir > 0: " + transform.localScale.x);
         }
         else if (dir < 0)
         {
             enemySprite.flipX = false;
             scale.x = -Mathf.Abs(scale.x);
-            Debug.Log("(Enemy) dir < 0 :" + transform.localScale.x);
+            MsgLog("dir < 0: " + transform.localScale.x);
         }
 
         transform.localScale = scale;
@@ -231,4 +239,10 @@ public abstract class EnemyBase : MonoBehaviour
     // mobs -> all fsm
     // mini-boss -> patrol(?), combat, investigate, chase
     protected abstract void StateMachine();
+
+    private void MsgLog(string msg)
+    {
+        if (msg != null)
+            Debug.Log("(Enemy) " + msg);
+    }
 }
