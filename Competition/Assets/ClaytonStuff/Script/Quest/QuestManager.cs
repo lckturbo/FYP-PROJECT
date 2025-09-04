@@ -4,6 +4,7 @@ using UnityEngine;
 public class QuestManager : MonoBehaviour
 {
     public List<Quest> activeQuests = new List<Quest>();
+    private List<Quest> questsToRemove = new List<Quest>(); // buffer for removals
 
     public Quest StartQuest(QuestData questData)
     {
@@ -11,22 +12,32 @@ public class QuestManager : MonoBehaviour
         newQuest.StartQuest();
         newQuest.OnQuestCompleted += HandleQuestCompleted;
         activeQuests.Add(newQuest);
-        return newQuest; // <-- return the quest instance
+        return newQuest;
     }
-
 
     private void HandleQuestCompleted(Quest quest)
     {
         Debug.Log($"Quest Finished: {quest.questData.questName}");
-        activeQuests.Remove(quest);
-        Destroy(quest);
+        questsToRemove.Add(quest); // mark for removal, don’t remove immediately
     }
 
     private void Update()
     {
+        // Update all quests
         foreach (var quest in activeQuests)
         {
             quest.CheckProgress();
+        }
+
+        // Remove completed quests safely after loop
+        if (questsToRemove.Count > 0)
+        {
+            foreach (var quest in questsToRemove)
+            {
+                activeQuests.Remove(quest);
+                Destroy(quest);
+            }
+            questsToRemove.Clear();
         }
     }
 }
