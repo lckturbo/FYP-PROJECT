@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public abstract class EnemyBase : MonoBehaviour
@@ -44,6 +45,17 @@ public abstract class EnemyBase : MonoBehaviour
     // FOR TANKS //
     private float _dmgReduction;
 
+    public event Action OnDeath;
+
+    private void OnEnable()
+    {
+        OnDeath += Death;
+    }
+
+    private void OnDisable()
+    {
+        OnDeath -= Death;
+    }
     protected void Initialize(EnemyStats stats)
     {
         _speed = stats.speed;
@@ -72,6 +84,18 @@ public abstract class EnemyBase : MonoBehaviour
         _currInvTimer = _investigateTimer;
         _currAtkTimer = _atkCD;
         _currWPIndex = 0;
+
+        SetWP("EnemyWP");
+    }
+
+    private void SetWP(string tag)
+    {
+        GameObject[] wp = GameObject.FindGameObjectsWithTag(tag);
+        if (wp.Length == 0) return;
+
+        _enemyWP = new Transform[wp.Length];
+        for(int i = 0; i < wp.Length; i++)
+            _enemyWP[i] = wp[i].transform;
     }
 
     private void Update()
@@ -132,7 +156,10 @@ public abstract class EnemyBase : MonoBehaviour
     public virtual void TakeDamage(float amt)
     {
         if (_currHealth <= 0)
+        {
+            OnDeath?.Invoke();
             _states = EnemyStates.Death;
+        }
 
         switch (_enemyStats.type)
         {
