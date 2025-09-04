@@ -13,10 +13,10 @@ public class Crafting : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            TryCraft(0); // just craft first recipe for now
-        }
+        //if (Input.GetKeyDown(KeyCode.C))
+        //{
+        //    TryCraft(0); // just craft first recipe for now
+        //}
     }
 
     public void TryCraft(int recipeIndex)
