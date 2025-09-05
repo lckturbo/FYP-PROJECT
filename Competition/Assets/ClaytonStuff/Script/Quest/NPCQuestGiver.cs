@@ -6,6 +6,7 @@ public class NPCQuestGiver : MonoBehaviour
 
     private int currentStageIndex = 0;
     private bool playerInRange = false;
+    private Quest activeQuest;
 
     private void Update()
     {
@@ -13,14 +14,38 @@ public class NPCQuestGiver : MonoBehaviour
         {
             if (!DialogueManager.Instance.IsDialogueActive)
             {
-                var stage = questDialogueData.stages[currentStageIndex];
-                DialogueManager.Instance.StartDialogue(stage.dialogue);
+                // Case: all stages finished
+                if (currentStageIndex >= questDialogueData.stages.Length)
+                {
+                    if (questDialogueData.finalDialogue != null)
+                        DialogueManager.Instance.StartDialogue(questDialogueData.finalDialogue);
+                    else
+                        Debug.Log($"{questDialogueData.npcName} has no more quests or dialogue.");
+                    return;
+                }
 
-                // If this stage has a quest and it's not already active, start it
+                var stage = questDialogueData.stages[currentStageIndex];
+
                 if (stage.questData != null)
                 {
-                    Quest quest = QuestManagerInstance().StartQuest(stage.questData);
-                    quest.OnQuestCompleted += HandleQuestCompleted;
+                    if (activeQuest == null) // Quest not started yet
+                    {
+                        DialogueManager.Instance.StartDialogue(stage.startDialogue);
+
+                        activeQuest = QuestManagerInstance().StartQuest(stage.questData);
+                        activeQuest.OnQuestCompleted += HandleQuestCompleted;
+                    }
+                    else if (!activeQuest.isCompleted) // Quest in progress
+                    {
+                        if (stage.inProgressDialogue != null)
+                            DialogueManager.Instance.StartDialogue(stage.inProgressDialogue);
+                        else
+                            Debug.Log($"No in-progress dialogue set for {questDialogueData.npcName}");
+                    }
+                }
+                else
+                {
+                    DialogueManager.Instance.StartDialogue(stage.startDialogue);
                 }
             }
             else
@@ -39,8 +64,10 @@ public class NPCQuestGiver : MonoBehaviour
     {
         Debug.Log($"{quest.questData.questName} completed for NPC {questDialogueData.npcName}");
 
-        // Move to next dialogue stage
-        if (currentStageIndex < questDialogueData.stages.Length - 1)
+        activeQuest = null;
+
+        // Move to next stage
+        if (currentStageIndex < questDialogueData.stages.Length)
             currentStageIndex++;
     }
 

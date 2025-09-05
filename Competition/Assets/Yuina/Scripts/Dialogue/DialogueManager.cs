@@ -114,4 +114,6 @@ public class DialogueManager : MonoBehaviour
         //PlayerController.Instance.SetCanMove(true);
     }
 
+
+
 }
