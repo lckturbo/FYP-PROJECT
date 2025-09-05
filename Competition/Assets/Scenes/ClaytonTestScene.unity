@@ -884,6 +884,7 @@ GameObject:
   - component: {fileID: 515027802}
   - component: {fileID: 515027801}
   - component: {fileID: 515027804}
+  - component: {fileID: 515027805}
   m_Layer: 0
   m_Name: NPC
   m_TagString: Untagged
@@ -898,7 +899,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 515027800}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3df4c984e910a41a131f1a534cb36f, type: 3}
   m_Name: 
@@ -1016,6 +1017,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 0.8828125}
   m_EdgeRadius: 0
+--- !u!114 &515027805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 515027800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb99e1c09956aa1409b58bf7773d54d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  questDialogueData: {fileID: 11400000, guid: a1630988761419e458408d9dc0739bb9, type: 2}
 --- !u!1 &521369430
 GameObject:
   m_ObjectHideFlags: 0
