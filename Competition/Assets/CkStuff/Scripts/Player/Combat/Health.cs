@@ -46,4 +46,14 @@ public class Health : MonoBehaviour
         Debug.Log(gameObject.name + " has died.");
         // TODO: trigger death animation, end turn, etc.
     }
+
+    // temp -> jas added
+    public int GetMaxHealth()
+    {
+        return stats.maxHealth;
+    }
+    public int GetCurrHealth()
+    {
+        return currentHp;
+    }
 }

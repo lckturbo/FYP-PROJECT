@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 public abstract class EnemyBase : MonoBehaviour
 {
@@ -17,14 +18,14 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected EnemyStats _enemyStats;
 
     protected Transform player;
-    protected EnemyStates _states;
+    public EnemyStates _states;
     [SerializeField] private Transform[] _enemyWP;
     private int _currWPIndex;
     private float _speed;
 
     [Header("Health")]
-    private float _currHealth;
-    private float _maxHealth;
+    private int _currHealth;
+    private int _maxHealth;
 
     [Header("Idle")]
     private float _idleTimer;
@@ -46,16 +47,13 @@ public abstract class EnemyBase : MonoBehaviour
     private float _dmgReduction;
 
     public event Action OnDeath;
+    public event Action<GameObject, EnemyBase> OnAttackPlayer;
+    protected bool inBattle;
 
-    private void OnEnable()
-    {
-        OnDeath += Death;
-    }
+    [Header("FOR TESTING ONLY")]
+    [SerializeField] private GameObject normalScene;
+    [SerializeField] private GameObject battleScene;
 
-    private void OnDisable()
-    {
-        OnDeath -= Death;
-    }
     protected void Initialize(EnemyStats stats)
     {
         _speed = stats.speed;
@@ -70,22 +68,27 @@ public abstract class EnemyBase : MonoBehaviour
         _AOERadius = stats.AOERadius;
     }
 
-    protected virtual void Start()
+    private void Awake()
     {
         if (_enemyStats == null) return;
-        if (player == null) player = GameObject.FindWithTag("Player").transform;
         Initialize(_enemyStats);
-
         _currHealth = _maxHealth;
         _states = EnemyStates.Idle;
+    }
+    protected virtual void Start()
+    {
+        if (player == null) player = GameObject.FindWithTag("Player").transform;
 
         // timers
         _currIdleTimer = _idleTimer;
         _currInvTimer = _investigateTimer;
         _currAtkTimer = _atkCD;
-        _currWPIndex = 0;
 
-        SetWP("EnemyWP");
+        if (!inBattle)
+        {
+            _currWPIndex = 0;
+            SetWP("EnemyWP");
+        }
     }
 
     private void SetWP(string tag)
@@ -94,7 +97,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (wp.Length == 0) return;
 
         _enemyWP = new Transform[wp.Length];
-        for(int i = 0; i < wp.Length; i++)
+        for (int i = 0; i < wp.Length; i++)
             _enemyWP[i] = wp[i].transform;
     }
 
@@ -109,15 +112,16 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Idle()
     {
+        // check if its in battle
         if (_currIdleTimer <= _idleTimer)
         {
-            //LookForPlayer();
             if (PlayerNearby()) return;
             _currIdleTimer -= Time.deltaTime;
 
             if (_currIdleTimer <= 0)
             {
-                _states = EnemyStates.Patrol;
+                if(!inBattle)
+                    _states = EnemyStates.Patrol;
                 _currIdleTimer = _idleTimer;
             }
         }
@@ -148,12 +152,28 @@ public abstract class EnemyBase : MonoBehaviour
     {
         float dir = player.position.x - transform.position.x;
         FaceDir(dir);
+        PlayerNearby();
+
         // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
-        // TODO: NOTIFY BATTLESYSTEM ENEMYTURN IS OVER
+        if (!inBattle)
+        {
+            OnAttackPlayer?.Invoke(player.gameObject, this);
+            inBattle = true;
+            if (battleScene != null && normalScene != null)
+            {
+                normalScene.SetActive(false);
+                battleScene.SetActive(true);
+            }
+            // CHANGE SCENE
+        }
+
+        _states = EnemyStates.Idle;
     }
 
+    protected abstract void BattleAttack();
+
     // PLAYER -> CALL TO KILL ENEMIES
-    public virtual void TakeDamage(float amt)
+    public virtual void TakeDamage(int amt)
     {
         if (_currHealth <= 0)
         {
@@ -166,10 +186,8 @@ public abstract class EnemyBase : MonoBehaviour
             case EnemyStats.EnemyTypes.Basic:
                 _currHealth -= amt;
                 break;
-            case EnemyStats.EnemyTypes.Tank:
-                _currHealth -= Mathf.RoundToInt(amt * (1f - _dmgReduction));
-                break;
-            case EnemyStats.EnemyTypes.MiniBoss:
+            default:
+                _currHealth -= Mathf.RoundToInt(amt * (1f - _dmgReduction)); // tank and boss
                 break;
         }
 
@@ -255,28 +273,55 @@ public abstract class EnemyBase : MonoBehaviour
         transform.localScale = scale;
     }
 
+    public int GetMaxHealth()
+    {
+        return _maxHealth;
+    }
+
+    public int GetCurrHealth()
+    {
+        return _currHealth;
+    }
+
+    // NORMAL -> ALL FSM
+    // BATTLE -> IDLE(waiting turn) -> ATTACK
     protected virtual void StateMachine()
     {
-        switch (_states)
+        if (inBattle)
         {
-            case EnemyStates.Idle:
-                Idle();
-                break;
-            case EnemyStates.Patrol:
-                Patrol();
-                break;
-            case EnemyStates.Attack:
-                Attack();
-                break;
-            case EnemyStates.Investigate:
-                Investigate();
-                break;
-            case EnemyStates.Chase:
-                Chase();
-                break;
-            case EnemyStates.Death:
-                Death();
-                break;
+            switch (_states)
+            {
+                case EnemyStates.Idle:
+                    Idle();
+                    break;
+                case EnemyStates.Attack:
+                    BattleAttack();
+                    break;
+            }
+        }
+        else
+        {
+            switch (_states)
+            {
+                case EnemyStates.Idle:
+                    Idle();
+                    break;
+                case EnemyStates.Patrol:
+                    Patrol();
+                    break;
+                case EnemyStates.Attack:
+                    Attack(); // trigger battle scene
+                    break;
+                case EnemyStates.Investigate:
+                    Investigate();
+                    break;
+                case EnemyStates.Chase:
+                    Chase();
+                    break;
+                case EnemyStates.Death:
+                    Death();
+                    break;
+            }
         }
     }
 

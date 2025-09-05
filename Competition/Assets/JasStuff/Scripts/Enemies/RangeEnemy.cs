@@ -23,6 +23,11 @@ public class RangeEnemy : EnemyBase
         }
     }
 
+    protected override void BattleAttack()
+    {
+        throw new System.NotImplementedException();
+    }
+
     private void Projectile()
     {
         Vector2 dir = player.position - _shootPt.position;

@@ -2,14 +2,8 @@ using UnityEngine;
 
 public class BasicEnemy : EnemyBase
 {
-    protected override void Attack()
+    protected override void BattleAttack()
     {
-        Debug.Log("(Enemy) Attack State");
-
-        PlayerNearby();
-        
-        // TODO: ANIMATIONS
-
         if (_currAtkTimer <= _atkCD)
         {
             _currAtkTimer -= Time.deltaTime;
@@ -20,7 +14,9 @@ public class BasicEnemy : EnemyBase
                 Health playerHealth = player.GetComponent<Health>();
                 if (playerHealth != null)
                     playerHealth.TakeDamage(_atkDmg);
+
                 _currAtkTimer = _atkCD;
+                _states = EnemyStates.Idle;
             }
         }
     }
