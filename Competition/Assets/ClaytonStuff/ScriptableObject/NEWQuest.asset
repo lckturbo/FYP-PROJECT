@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   npcName: JACK
   stages:
-  - dialogue: {fileID: 11400000, guid: 9956ed67e398f194e96cde0fc08b59ab, type: 2}
+  - startDialogue: {fileID: 11400000, guid: 9956ed67e398f194e96cde0fc08b59ab, type: 2}
+    inProgressDialogue: {fileID: 11400000, guid: 17538aecf7738c647b6f41f3cfb9e101, type: 2}
     questData: {fileID: 11400000, guid: f71853f72140b044f914cb78cfaae31c, type: 2}
-  - dialogue: {fileID: 11400000, guid: a8c1e868e97685d48a861aa9bf6c26f2, type: 2}
+  - startDialogue: {fileID: 11400000, guid: a8c1e868e97685d48a861aa9bf6c26f2, type: 2}
+    inProgressDialogue: {fileID: 11400000, guid: 17538aecf7738c647b6f41f3cfb9e101, type: 2}
     questData: {fileID: 11400000, guid: 17ddfd459dcaa6e48a061662a47f6bd3, type: 2}
+  finalDialogue: {fileID: 11400000, guid: 1c7f22c33ee53de48b2422beec94b8b9, type: 2}
