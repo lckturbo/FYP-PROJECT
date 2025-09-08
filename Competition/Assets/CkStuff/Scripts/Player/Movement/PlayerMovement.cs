@@ -7,15 +7,20 @@ public class PlayerMovement : MonoBehaviour
     [Header("Config")]
     [SerializeField] private MovementConfig config;
 
-    [Header("Checks")]
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private Transform wallCheckLeft;
-    [SerializeField] private Transform wallCheckRight;
-    [SerializeField] private float checkRadius = 0.2f;
-    [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private LayerMask wallLayer;
+    [Header("Checks (raycasts vs Terrain)")]
+    [SerializeField] private Transform groundCheck;      // bottom-center of player
+    [SerializeField] private Transform wallCheckLeft;    // chest/hip height
+    [SerializeField] private Transform wallCheckRight;   // chest/hip height
 
-    [Header("HUD")]
+    [SerializeField] private LayerMask terrainMask;      // your Tilemap layer
+    [SerializeField] private float groundProbe = 0.15f;  // ray length down
+    [SerializeField] private float wallProbe = 0.15f;  // ray length sideways
+    [SerializeField, Range(0f, 1f)] private float groundNormalMin = 0.6f;
+    [SerializeField, Range(0f, 1f)] private float wallNormalMin = 0.9f;
+
+    [Header("Debug/HUD")]
+    [SerializeField] private bool drawDebugRays = true;
+    [SerializeField] private float debugRayTime = 0.05f; // seconds visible
     [SerializeField] private bool showHud = true;
 
     // Components
@@ -56,6 +61,7 @@ public class PlayerMovement : MonoBehaviour
         airJumpsLeft = config.maxAirJumps;
     }
 
+    // ---------- Input System callbacks ----------
     public void OnMove(InputAction.CallbackContext ctx)
     {
         Vector2 value = ctx.ReadValue<Vector2>();
@@ -77,10 +83,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnDash(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
-        {
-            dashPressed = true;
-        }
+        if (ctx.performed) dashPressed = true;
     }
 
     void Update()
@@ -93,10 +96,7 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimer = config.coyoteTime;
             airJumpsLeft = config.maxAirJumps;
         }
-        else
-        {
-            coyoteTimer -= Time.deltaTime;
-        }
+        else coyoteTimer -= Time.deltaTime;
 
         // Jump buffer
         if (jumpPressed) jumpBufferTimer = config.jumpBufferTime;
@@ -139,13 +139,47 @@ public class PlayerMovement : MonoBehaviour
     {
         if (config == null) return;
 
-        // Collision checks
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, groundLayer);
-        isTouchingWallLeft = Physics2D.OverlapCircle(wallCheckLeft.position, checkRadius, wallLayer);
-        isTouchingWallRight = Physics2D.OverlapCircle(wallCheckRight.position, checkRadius, wallLayer);
+        // ---------- Collision checks via raycasts ----------
+        // Ground
+        RaycastHit2D gHit = Physics2D.Raycast(groundCheck.position, Vector2.down, groundProbe, terrainMask);
+        isGrounded = gHit && gHit.normal.y >= groundNormalMin;
+
+        // Walls
+        isTouchingWallLeft = false;
+        isTouchingWallRight = false;
+
+        RaycastHit2D wl = Physics2D.Raycast(wallCheckLeft.position, Vector2.left, wallProbe, terrainMask);
+        if (wl && Mathf.Abs(wl.normal.x) >= wallNormalMin && Mathf.Abs(wl.normal.y) < 0.5f)
+            isTouchingWallLeft = true;
+
+        RaycastHit2D wr = Physics2D.Raycast(wallCheckRight.position, Vector2.right, wallProbe, terrainMask);
+        if (wr && Mathf.Abs(wr.normal.x) >= wallNormalMin && Mathf.Abs(wr.normal.y) < 0.5f)
+            isTouchingWallRight = true;
+
+        // Optional: if firmly grounded, ignore wall contact (prevents corner glue)
+        if (isGrounded && rb.velocity.y <= 0.05f)
+        {
+            isTouchingWallLeft = false;
+            isTouchingWallRight = false;
+        }
+
+        // ---------- DEBUG DRAW ----------
+        if (drawDebugRays)
+        {
+            // rays
+            Debug.DrawRay(groundCheck.position, Vector2.down * groundProbe, Color.green, debugRayTime);
+            Debug.DrawRay(wallCheckLeft.position, Vector2.left * wallProbe, Color.red, debugRayTime);
+            Debug.DrawRay(wallCheckRight.position, Vector2.right * wallProbe, Color.blue, debugRayTime);
+
+            // normals (yellow) when we hit something
+            if (gHit) Debug.DrawRay(gHit.point, gHit.normal * 0.3f, Color.yellow, debugRayTime);
+            if (wl) Debug.DrawRay(wl.point, wl.normal * 0.3f, Color.yellow, debugRayTime);
+            if (wr) Debug.DrawRay(wr.point, wr.normal * 0.3f, Color.yellow, debugRayTime);
+        }
+
         bool touchingWall = isTouchingWallLeft || isTouchingWallRight;
 
-        // Dashing
+        // ---------- Dashing ----------
         if (isDashing)
         {
             rb.velocity = new Vector2(dashDir * config.dashSpeed, 0f);
@@ -154,34 +188,38 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        // Horizontal move
+        // ---------- Horizontal move ----------
         float targetX = inputX * config.moveSpeed;
         float lerp = isGrounded ? 1f : config.airControlMultiplier;
         rb.velocity = new Vector2(Mathf.Lerp(rb.velocity.x, targetX, lerp), rb.velocity.y);
 
-        // Wall slide
+        // ---------- Wall slide ----------
         wallSliding = false;
         if (config.enableWallMoves && touchingWall && !isGrounded && rb.velocity.y < 0f)
         {
             wallSliding = true;
+
             if (rb.velocity.y < -config.wallSlideSpeed)
                 rb.velocity = new Vector2(rb.velocity.x, -config.wallSlideSpeed);
 
-            rb.velocity = new Vector2(rb.velocity.x * 0.2f, rb.velocity.y); // optional slow horizontal
+            bool intoLeft = isTouchingWallLeft && rb.velocity.x < 0f;
+            bool intoRight = isTouchingWallRight && rb.velocity.x > 0f;
+            if (intoLeft || intoRight)
+                rb.velocity = new Vector2(rb.velocity.x * 0.2f, rb.velocity.y);
         }
 
-        // Prevent glue
-        bool intoLeft = isTouchingWallLeft && rb.velocity.x < 0f;
-        bool intoRight = isTouchingWallRight && rb.velocity.x > 0f;
-        if (intoLeft || intoRight)
+        // ---------- Prevent glue when pushing into wall ----------
+        bool pushLeft = isTouchingWallLeft && rb.velocity.x < 0f;
+        bool pushRight = isTouchingWallRight && rb.velocity.x > 0f;
+        if (pushLeft || pushRight)
             rb.velocity = new Vector2(0f, rb.velocity.y);
 
-        // Jumps
+        // ---------- Jumps ----------
         if (jumpBufferTimer > 0f)
         {
             if (config.enableWallMoves && touchingWall && !isGrounded)
             {
-                // Wall jump (don’t reset airJumpsLeft!)
+                // Wall jump (do NOT refill air jumps here)
                 jumpBufferTimer = 0f;
 
                 int wallDir = isTouchingWallRight ? 1 : -1;
@@ -210,32 +248,31 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // Non-play-mode gizmos: show probe lengths
     void OnDrawGizmosSelected()
     {
         if (groundCheck)
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(groundCheck.position, checkRadius);
+            Gizmos.DrawLine(groundCheck.position, groundCheck.position + Vector3.down * groundProbe);
         }
         if (wallCheckLeft)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(wallCheckLeft.position, checkRadius);
+            Gizmos.DrawLine(wallCheckLeft.position, wallCheckLeft.position + Vector3.left * wallProbe);
         }
         if (wallCheckRight)
         {
             Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(wallCheckRight.position, checkRadius);
+            Gizmos.DrawLine(wallCheckRight.position, wallCheckRight.position + Vector3.right * wallProbe);
         }
     }
 
+    // HUD
     void OnGUI()
     {
         if (!showHud) return;
-
-        GUIStyle style = new GUIStyle(GUI.skin.box);
-        style.alignment = TextAnchor.UpperLeft;
-        style.fontSize = 12;
+        GUIStyle style = new GUIStyle(GUI.skin.box) { alignment = TextAnchor.UpperLeft, fontSize = 12 };
 
         string text =
             "Vel: (" + rb.velocity.x.ToString("0.00") + ", " + rb.velocity.y.ToString("0.00") + ")\n" +

@@ -9,7 +9,7 @@ public class ProceduralNoiseTilemapGenerator : MonoBehaviour
 {
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundMap;
-    [SerializeField] private TileBase solidTile;
+    [SerializeField] private TileBase solidTile; // RuleTile recommended
 
     [Header("Map Size (tiles)")]
     [SerializeField] private int mapWidth = 120;

@@ -22,15 +22,20 @@ public class Health : MonoBehaviour
 
         if (useStatsDirectly)
         {
-            if (currentHp <= 0) currentHp = stats.maxHealth;
-            currentHp = Mathf.Min(currentHp, stats.maxHealth);
+            currentHp = stats.maxHealth;
         }
-
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int rawDamage, ElementType attackElement = ElementType.None)
     {
-        currentHp -= damage;
+        if (stats == null) return;
+
+        int effectiveDamage = Mathf.Max(1, rawDamage - stats.defense);
+
+        float elementMultiplier = GetElementMultiplier(attackElement, stats.element);
+        effectiveDamage = Mathf.RoundToInt(effectiveDamage * elementMultiplier);
+
+        currentHp -= effectiveDamage;
         currentHp = Mathf.Max(0, currentHp);
 
         Debug.Log("(Player) Current HP: " + currentHp + "/" + stats.maxHealth);
@@ -41,9 +46,24 @@ public class Health : MonoBehaviour
         }
     }
 
-    void Die()
+    private float GetElementMultiplier(ElementType attack, ElementType defense)
+    {
+        // Example
+        if (attack == ElementType.Fire && defense == ElementType.Grass) return 1.5f;
+        if (attack == ElementType.Grass && defense == ElementType.Water) return 1.5f;
+        if (attack == ElementType.Water && defense == ElementType.Fire) return 1.5f;
+
+        // Weakness
+        if (attack == ElementType.Grass && defense == ElementType.Fire) return 0.75f;
+        if (attack == ElementType.Water && defense == ElementType.Grass) return 0.75f;
+        if (attack == ElementType.Fire && defense == ElementType.Water) return 0.75f;
+
+        return 1f; // neutral
+    }
+
+    private void Die()
     {
         Debug.Log(gameObject.name + " has died.");
-        // TODO: trigger death animation, end turn, etc.
+        // TODO: trigger death animation, disable movement, end turn, etc.
     }
 }

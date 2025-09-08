@@ -4,9 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
+  - EnemyWP
   - Ground
   - Walls
-  - EnemyWP
   layers:
   - Default
   - TransparentFX
@@ -14,8 +14,8 @@ TagManager:
   - 
   - Water
   - UI
-  - Ground
-  - Walls
+  - Terrain
+  - 
   - Player
   - Enemy
   - 
@@ -44,15 +44,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Background
+  - name: 
     uniqueID: 441643865
     locked: 0
-  - name: Foreground
+  - name: Map
     uniqueID: 1576926513
     locked: 0
   - name: Player
     uniqueID: 2865968025
     locked: 0
-  - name: Ground
+  - name: 
     uniqueID: 1907916035
+    locked: 0
+  - name: 
+    uniqueID: 2776724609
     locked: 0
