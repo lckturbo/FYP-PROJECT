@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
 
     private bool canMove = true;   // ˆÚ“®‰Â”\‚©‚Ç‚¤‚©
 
+    //[SerializeField] private int cash = 10000;   // Š‹à
+
     void Awake()
     {
         if (Instance == null) Instance = this;
