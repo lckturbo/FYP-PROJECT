@@ -11,9 +11,9 @@ public class BasicEnemy : EnemyBase
             if (_currAtkTimer <= 0)
             {
                 // ATTACK PLAYER
-                Health playerHealth = player.GetComponent<Health>();
-                if (playerHealth != null)
-                    playerHealth.TakeDamage(_atkDmg);
+                //Health playerHealth = player.GetComponent<Health>();
+                //if (playerHealth != null)
+                //    playerHealth.TakeDamage(_atkDmg);
 
                 _currAtkTimer = _atkCD;
                 _states = EnemyStates.Idle;

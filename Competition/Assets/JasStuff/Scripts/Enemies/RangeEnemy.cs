@@ -17,7 +17,7 @@ public class RangeEnemy : EnemyBase
             _currAtkTimer -= Time.deltaTime;
             if (_currAtkTimer <= 0f)
             {
-                Projectile(); // TODO: TEMP -> SET IN ANIMATION EVENTS
+                //Projectile(); // TODO: TEMP -> SET IN ANIMATION EVENTS
                 _currAtkTimer = _atkCD;
             }
         }
