@@ -2514,13 +2514,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 949513fa9fd700b40b3b8223e690fac7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs:
-  - {fileID: 3952993623186678031, guid: 92beba79b6509284ebc465646e3c9e35, type: 3}
-  - {fileID: 6156245796294065881, guid: 5a15eca1b5c42a044abdaa9c3dd93408, type: 3}
-  - {fileID: 6959797460596084576, guid: 0463f68427f3e89428ff0876b4d7ea63, type: 3}
+  possibleItems:
+  - itemPrefab: {fileID: 6156245796294065881, guid: 5a15eca1b5c42a044abdaa9c3dd93408, type: 3}
+    dropChance: 0.7
+  - itemPrefab: {fileID: 3952993623186678031, guid: 92beba79b6509284ebc465646e3c9e35, type: 3}
+    dropChance: 1
+  - itemPrefab: {fileID: 6959797460596084576, guid: 0463f68427f3e89428ff0876b4d7ea63, type: 3}
+    dropChance: 0.2
   minItems: 10
   maxItems: 20
-  explosionForce: 8
+  explosionForce: 5
   delayBetweenItems: 0.2
 --- !u!212 &1436529132
 SpriteRenderer:
