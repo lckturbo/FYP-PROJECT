@@ -11,6 +11,12 @@ public abstract class Quest : MonoBehaviour
     public abstract void StartQuest();
     public abstract void CheckProgress();
 
+    //  Optional override for progress reporting
+    public virtual string GetProgressText()
+    {
+        return isCompleted ? "Completed" : "";
+    }
+
     protected void CompleteQuest()
     {
         isCompleted = true;
