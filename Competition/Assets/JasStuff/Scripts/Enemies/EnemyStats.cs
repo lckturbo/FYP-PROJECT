@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Enemy/Stats", fileName = "EnemyStats")]
-public class EnemyStats : ScriptableObject
+[CreateAssetMenu(fileName = "NewEnemyStats", menuName = "Stats/EnemyStats")]
+public class EnemyStats : BaseStats
 {
     public enum EnemyTypes
     {
@@ -14,10 +14,7 @@ public class EnemyStats : ScriptableObject
     public EnemyTypes type;
     [Header("Speed")]
     public int speed;
-    [Header("Health")]
-    public int maxHealth;
     [Header("Combat")]
-    public int atkDmg;
     public float atkCD;
     public int atkRange;
     public float dmgReduction;
