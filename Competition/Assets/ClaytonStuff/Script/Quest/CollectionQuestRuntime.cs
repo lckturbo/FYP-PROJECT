@@ -29,4 +29,11 @@ public class CollectionQuestRuntime : Quest
             CheckProgress();
         }
     }
+
+    //  Progress string
+    public override string GetProgressText()
+    {
+        var data = (CollectionQuestData)questData;
+        return $"{currentAmount}/{data.requiredAmount}";
+    }
 }

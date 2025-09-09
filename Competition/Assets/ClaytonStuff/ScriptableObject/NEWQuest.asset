@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0beaf005db39e24493d03f826224662, type: 3}
+  m_Name: NEWQuest
+  m_EditorClassIdentifier: 
+  npcName: JACK
+  stages:
+  - startDialogue: {fileID: 11400000, guid: 9956ed67e398f194e96cde0fc08b59ab, type: 2}
+    inProgressDialogue: {fileID: 11400000, guid: 17538aecf7738c647b6f41f3cfb9e101, type: 2}
+    questData: {fileID: 11400000, guid: f71853f72140b044f914cb78cfaae31c, type: 2}
+  - startDialogue: {fileID: 11400000, guid: a8c1e868e97685d48a861aa9bf6c26f2, type: 2}
+    inProgressDialogue: {fileID: 11400000, guid: 17538aecf7738c647b6f41f3cfb9e101, type: 2}
+    questData: {fileID: 11400000, guid: 17ddfd459dcaa6e48a061662a47f6bd3, type: 2}
+  finalDialogue: {fileID: 11400000, guid: 1c7f22c33ee53de48b2422beec94b8b9, type: 2}
