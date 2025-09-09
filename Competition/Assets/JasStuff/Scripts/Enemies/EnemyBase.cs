@@ -1,5 +1,7 @@
 using System;
+using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
+using UnityEngine.Events;
 
 public abstract class EnemyBase : MonoBehaviour
 {
@@ -15,16 +17,19 @@ public abstract class EnemyBase : MonoBehaviour
 
     [Header("Enemy Stats")]
     [SerializeField] protected EnemyStats _enemyStats;
-
+    [Header("Animator")]
+    [SerializeField] protected Animator _animator;
     protected Transform player;
-    protected EnemyStates _states;
+    [Header("Enemy States")]
+    public EnemyStates _states;
+    [Header("Enemy Waypoints")]
     [SerializeField] private Transform[] _enemyWP;
     private int _currWPIndex;
     private float _speed;
 
     [Header("Health")]
-    private float _currHealth;
-    private float _maxHealth;
+    private int _currHealth;
+    private int _maxHealth;
 
     [Header("Idle")]
     private float _idleTimer;
@@ -46,16 +51,13 @@ public abstract class EnemyBase : MonoBehaviour
     private float _dmgReduction;
 
     public event Action OnDeath;
+    public event Action<GameObject, EnemyBase> OnAttackPlayer;
+    protected bool inBattle;
 
-    private void OnEnable()
-    {
-        OnDeath += Death;
-    }
+    [Header("FOR TESTING ONLY")]
+    [SerializeField] private GameObject normalScene;
+    [SerializeField] private GameObject battleScene;
 
-    private void OnDisable()
-    {
-        OnDeath -= Death;
-    }
     protected void Initialize(EnemyStats stats)
     {
         _speed = stats.speed;
@@ -70,22 +72,27 @@ public abstract class EnemyBase : MonoBehaviour
         _AOERadius = stats.AOERadius;
     }
 
-    protected virtual void Start()
+    private void Awake()
     {
         if (_enemyStats == null) return;
-        if (player == null) player = GameObject.FindWithTag("Player").transform;
         Initialize(_enemyStats);
-
         _currHealth = _maxHealth;
         _states = EnemyStates.Idle;
+    }
+    protected virtual void Start()
+    {
+        if (player == null) player = GameObject.FindWithTag("Player").transform;
 
         // timers
         _currIdleTimer = _idleTimer;
         _currInvTimer = _investigateTimer;
         _currAtkTimer = _atkCD;
-        _currWPIndex = 0;
 
-        SetWP("EnemyWP");
+        if (!inBattle)
+        {
+            _currWPIndex = 0;
+            SetWP("EnemyWP");
+        }
     }
 
     private void SetWP(string tag)
@@ -94,7 +101,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (wp.Length == 0) return;
 
         _enemyWP = new Transform[wp.Length];
-        for(int i = 0; i < wp.Length; i++)
+        for (int i = 0; i < wp.Length; i++)
             _enemyWP[i] = wp[i].transform;
     }
 
@@ -109,15 +116,16 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Idle()
     {
+        _animator.Play("IdleBack");
+
         if (_currIdleTimer <= _idleTimer)
         {
-            //LookForPlayer();
             if (PlayerNearby()) return;
             _currIdleTimer -= Time.deltaTime;
-
             if (_currIdleTimer <= 0)
             {
-                _states = EnemyStates.Patrol;
+                if (!inBattle) // checks if its in battle
+                    _states = EnemyStates.Patrol;
                 _currIdleTimer = _idleTimer;
             }
         }
@@ -127,12 +135,12 @@ public abstract class EnemyBase : MonoBehaviour
         if (_enemyWP.Length == 0 || _enemyWP == null) return;
 
         Transform target = _enemyWP[_currWPIndex];
-        float dir = target.position.x - transform.position.x;
-        FaceDir(dir);
+        Vector2 dirToTarget = (target.position - transform.position).normalized;
+        FaceDir(dirToTarget);
 
         transform.position = Vector3.MoveTowards(transform.position, target.position, _speed * Time.deltaTime);
 
-        if (PlayerNearby()) return;
+        //if (PlayerNearby()) return;
 
         if (Vector3.Distance(transform.position, target.position) < 0.01f)
         {
@@ -144,36 +152,52 @@ public abstract class EnemyBase : MonoBehaviour
         }
 
     }
+
     protected virtual void Attack()
     {
-        float dir = player.position.x - transform.position.x;
-        FaceDir(dir);
+        //float dir = player.position.x - transform.position.x;
+        //FaceDir(dir);
+        PlayerNearby();
+
         // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
-        // TODO: NOTIFY BATTLESYSTEM ENEMYTURN IS OVER
+        //if (!inBattle)
+        //{
+        //    //OnAttackPlayer?.Invoke(player.gameObject, this);
+        //    inBattle = true;
+        //    if (battleScene != null && normalScene != null)
+        //    {
+        //        normalScene.SetActive(false);
+        //        battleScene.SetActive(true);
+        //    }
+        //    // CHANGE SCENE
+        //}
+
+        _states = EnemyStates.Idle;
     }
 
-    // PLAYER -> CALL TO KILL ENEMIES
-    public virtual void TakeDamage(float amt)
-    {
-        if (_currHealth <= 0)
-        {
-            OnDeath?.Invoke();
-            _states = EnemyStates.Death;
-        }
+    protected abstract void BattleAttack();
 
+    // PLAYER -> CALL TO KILL ENEMIES
+    public virtual void TakeDamage(int amt)
+    {
         switch (_enemyStats.type)
         {
             case EnemyStats.EnemyTypes.Basic:
                 _currHealth -= amt;
                 break;
-            case EnemyStats.EnemyTypes.Tank:
-                _currHealth -= Mathf.RoundToInt(amt * (1f - _dmgReduction));
-                break;
-            case EnemyStats.EnemyTypes.MiniBoss:
+            default:
+                _currHealth -= Mathf.RoundToInt(amt * (1f - _dmgReduction)); // tank and boss
                 break;
         }
 
         MsgLog(_enemyStats.type + " HP: " + _currHealth + "/" + _maxHealth);
+
+        if (_currHealth <= 0)
+        {
+            _currHealth = Mathf.Max(_currHealth, 0);
+            _states = EnemyStates.Death;
+            OnDeath?.Invoke();
+        }
     }
     protected virtual void Chase()
     {
@@ -181,18 +205,15 @@ public abstract class EnemyBase : MonoBehaviour
 
         PlayerNearby();
 
-        float dir = player.position.x - transform.position.x;
-        FaceDir(dir);
+        Vector2 dirToTarget = (player.position - transform.position).normalized;
+        FaceDir(dirToTarget);
 
-        Vector3 playerPos = player.position;
-        playerPos.y = transform.position.y;
-        transform.position = Vector3.MoveTowards(transform.position, playerPos, _speed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, player.position, _speed * Time.deltaTime);
     }
     protected virtual void Investigate()
     {
         if (_currInvTimer <= _investigateTimer)
         {
-            //LookForPlayer();
             if (PlayerNearby()) return;
             _currInvTimer -= Time.deltaTime;
             if (_currInvTimer <= 0)
@@ -211,6 +232,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual bool PlayerNearby()
     {
         if (player == null) return false;
+
         Vector2 dirToPlayer = (player.position - transform.position).normalized;
         float dist = Vector3.Distance(transform.position, player.position);
         LayerMask playerLayer = LayerMask.GetMask("Player");
@@ -218,71 +240,123 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (hit.collider != null && hit.collider.CompareTag("Player"))
         {
-            MsgLog("Player found");
-            if (dist <= _chaseRange)
+            if (dist < _chaseRange)
             {
-                if (dist <= _atkRange)
+                if (dist < _atkRange)
                     _states = EnemyStates.Attack;
                 else
                     _states = EnemyStates.Chase;
             }
             else
-            {
-                _states = EnemyStates.Investigate;
-            }
+                _states = EnemyStates.Idle;
+
             return true;
         }
         return false;
     }
 
-    protected void FaceDir(float dir)
+    protected void FaceDir(Vector2 dir)
     {
         if (player == null) return;
-
-        SpriteRenderer enemySprite = GetComponent<SpriteRenderer>();
-        Vector2 scale = transform.localScale;
-        if (dir > 0)
+        if (_animator == null)
         {
-            enemySprite.flipX = true;
-            scale.x = Mathf.Abs(scale.x);
-        }
-        else if (dir < 0)
-        {
-            enemySprite.flipX = false;
-            scale.x = -Mathf.Abs(scale.x);
+            Debug.LogError("[Enemy] Animator not found");
+            return;
         }
 
-        transform.localScale = scale;
+        Vector2 moveDir = Vector2.zero;
+
+        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+        {
+            SpriteRenderer _sprite = GetComponent<SpriteRenderer>();
+            // move horizontal
+            if (dir.x > 0)
+            {
+                moveDir.x = 1;
+                _animator.Play("WalkRight");
+                _sprite.flipX = false;
+            }
+            else
+            {
+                moveDir.x = -1;
+                _animator.Play("WalkRight");
+                _sprite.flipX = true;
+            }
+
+            MsgLog("Moving horizontal");
+        }
+        else
+        {
+            // move vertical
+            if (dir.y > 0)
+            {
+                moveDir.y = 1;
+                _animator.Play("WalkFront");
+            }
+            else
+            {
+                moveDir.y = -1;
+                _animator.Play("WalkBack");
+            }
+            MsgLog("Moving vertical");
+        }
     }
 
+    public int GetMaxHealth()
+    {
+        return _maxHealth;
+    }
+
+    public int GetCurrHealth()
+    {
+        return _currHealth;
+    }
+
+    // NORMAL -> ALL FSM
+    // BATTLE -> IDLE(waiting turn) -> ATTACK
     protected virtual void StateMachine()
     {
-        switch (_states)
+        if (inBattle)
         {
-            case EnemyStates.Idle:
-                Idle();
-                break;
-            case EnemyStates.Patrol:
-                Patrol();
-                break;
-            case EnemyStates.Attack:
-                Attack();
-                break;
-            case EnemyStates.Investigate:
-                Investigate();
-                break;
-            case EnemyStates.Chase:
-                Chase();
-                break;
-            case EnemyStates.Death:
-                Death();
-                break;
+            switch (_states)
+            {
+                case EnemyStates.Idle:
+                    Idle();
+                    break;
+                case EnemyStates.Attack:
+                    BattleAttack();
+                    break;
+                //case EnemyStates.Death:
+                //    Death();
+                //    break;
+            }
+        }
+        else
+        {
+            switch (_states)
+            {
+                case EnemyStates.Idle:
+                    Idle();
+                    break;
+                case EnemyStates.Patrol:
+                    Patrol();
+                    break;
+                case EnemyStates.Attack:
+                    Attack(); // trigger battle scene
+                    break;
+                case EnemyStates.Chase:
+                    Chase();
+                    break;
+                case EnemyStates.Death:
+                    Death();
+                    break;
+            }
         }
     }
 
     protected void MsgLog(string msg)
     {
         if (msg != null)
-            Debug.Log("(Enemy) " + msg);
+            Debug.Log("[Enemy] " + msg);
     }
 }

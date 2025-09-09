@@ -12,11 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
   m_Name: NormalEnemy
   m_EditorClassIdentifier: 
+  type: 0
   speed: 6
   maxHealth: 50
   atkDmg: 10
   atkCD: 2
   atkRange: 2
+  dmgReduction: 0
+  AOERadius: 0
   idleTimer: 2
   chaseRange: 5
   investigateTimer: 2

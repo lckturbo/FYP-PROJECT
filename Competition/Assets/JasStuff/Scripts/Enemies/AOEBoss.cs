@@ -23,6 +23,11 @@ public class AOEBoss : EnemyBase
         }
     }
 
+    protected override void BattleAttack()
+    {
+        throw new System.NotImplementedException();
+    }
+
     private IEnumerator PerformAOEWarn()
     {
         MsgLog("AOEBoss Attack");
