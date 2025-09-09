@@ -9,15 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 591913f01f8cb0d46a96ae2152cf0cbe, type: 3}
+  m_Script: {fileID: 11500000, guid: 3e4c57216b4d63f4ca7d5d4e14e2a180, type: 3}
   m_Name: Cameraman
   m_EditorClassIdentifier: 
   characterName: Cameraman
   level: 1
-  maxHealth: 100000
-  defense: 10
-  baseDamage: 20
-  attackSpeed: 1
-  critRate: 0.1
-  critMultiplier: 1.5
+  maxHealth: 100
+  defense: 20
+  baseDamage: 15
+  attackSpeed: 0.8
+  critRate: 0.05
+  critDamage: 1.4
   element: 0
+  fireRes: 1
+  waterRes: 1
+  grassRes: 1
+  darkRes: 0.9
+  lightRes: 1.1

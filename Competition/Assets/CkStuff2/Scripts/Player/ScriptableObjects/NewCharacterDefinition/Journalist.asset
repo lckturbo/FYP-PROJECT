@@ -9,15 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 591913f01f8cb0d46a96ae2152cf0cbe, type: 3}
+  m_Script: {fileID: 11500000, guid: d3c59607faf749644a62bc94330b19bf, type: 3}
   m_Name: Journalist
   m_EditorClassIdentifier: 
-  characterName: Journalist
-  level: 1
-  maxHealth: 12
-  defense: 10
-  baseDamage: 20
-  attackSpeed: 1
-  critRate: 0.1
-  critMultiplier: 1.5
-  element: 0
+  displayName: Journalist
+  portrait: {fileID: 0}
+  movement: {fileID: 11400000, guid: b24b9e7a61943e04ba078a1dde8ce25e, type: 2}
+  stats: {fileID: 11400000, guid: 1cf6d5708f0c7b64ebb7c52aab565eeb, type: 2}

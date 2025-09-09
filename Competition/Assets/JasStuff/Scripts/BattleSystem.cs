@@ -79,16 +79,16 @@ public class BattleSystem : MonoBehaviour
 
     private void SetUpHealth(GameObject player, GameObject enemy)
     {
-        playerHealth.maxValue = player.GetComponent<Health>().GetMaxHealth();
+        playerHealth.maxValue = player.GetComponent<NewHealth>().GetMaxHealth();
         playerHealth.value = playerHealth.maxValue;
-        MsgLog("Player MaxHealth: " + player.GetComponent<Health>().GetMaxHealth());
+        MsgLog("Player MaxHealth: " + player.GetComponent<NewHealth>().GetMaxHealth());
         enemyHealth.maxValue = enemy.GetComponent<EnemyBase>().GetMaxHealth();
         enemyHealth.value = enemyHealth.maxValue;
         MsgLog("Enemy MaxHealth: " + enemy.GetComponent<EnemyBase>().GetMaxHealth());
     }
     private bool CheckHealth()
     {
-        int playerCurrHealth = _player.GetComponent<Health>().GetCurrHealth();
+        int playerCurrHealth = _player.GetComponent<NewHealth>().GetCurrHealth();
         int enemyCurrHealth = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
 
         if (playerCurrHealth <= 0)
@@ -134,8 +134,8 @@ public class BattleSystem : MonoBehaviour
         while (_enemy.GetComponent<EnemyBase>()._states == EnemyBase.EnemyStates.Attack)
             yield return null;
 
-        playerHealth.value = _player.GetComponent<Health>().GetCurrHealth();
-        MsgLog("Player currHealth: " + _player.GetComponent<Health>().GetCurrHealth());
+        playerHealth.value = _player.GetComponent<NewHealth>().GetCurrHealth();
+        MsgLog("Player currHealth: " + _player.GetComponent<NewHealth>().GetCurrHealth());
         if(CheckHealth())
             PlayerTurn();
     }
