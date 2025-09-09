@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public enum ElementType { None, Fire, Water, Grass, Dark, Light }
+public enum NewElementType { None, Fire, Water, Grass, Dark, Light }
 
-[CreateAssetMenu(menuName = "Character/Stats", fileName = "CharacterStats")]
-public class CharacterStats : ScriptableObject
+[CreateAssetMenu(menuName = "NewCharacter/Stats", fileName = "NewCharacterStats")]
+public class NewCharacterStats : ScriptableObject
 {
     [Header("General")]
     public string characterName = "New Character";
@@ -15,12 +15,10 @@ public class CharacterStats : ScriptableObject
 
     [Header("Combat")]
     public int baseDamage = 20;
-
     public float attackSpeed = 1.0f;
-
     [Range(0f, 1f)] public float critRate = 0.1f;
     public float critMultiplier = 1.5f;
 
     [Header("Elemental")]
-    public ElementType element = ElementType.None;
+    public NewElementType element = NewElementType.None;
 }
