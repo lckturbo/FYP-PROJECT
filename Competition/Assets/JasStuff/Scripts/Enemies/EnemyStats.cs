@@ -14,15 +14,13 @@ public class EnemyStats : BaseStats
     public EnemyTypes type;
     [Header("Speed")]
     public int speed;
-    [Header("Combat")]
+    [Header("EnemyCombat")]
     public float atkCD;
-    public int atkRange;
+    public float atkRange;
+    [Header("BossStats")]
     public float dmgReduction;
-
-    [Header("Boss Stats")]
     public float AOERadius;
-
-    [Header("FSM stats")]
+    [Header("FSMStats")]
     public float idleTimer;
     public float chaseRange;
     public float investigateTimer;

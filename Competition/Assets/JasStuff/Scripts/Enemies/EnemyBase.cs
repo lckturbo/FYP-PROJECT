@@ -1,7 +1,5 @@
 using System;
-using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
-using UnityEngine.Events;
 
 public abstract class EnemyBase : MonoBehaviour
 {
@@ -10,6 +8,7 @@ public abstract class EnemyBase : MonoBehaviour
         Idle,
         Patrol,
         Attack,
+        BattleAttack,
         Investigate,
         Chase,
         Death
@@ -36,7 +35,7 @@ public abstract class EnemyBase : MonoBehaviour
     private float _currIdleTimer;
 
     [Header("Attack")]
-    protected int _atkRange;
+    protected float _atkRange;
     protected int _atkDmg;
     protected float _atkCD;
     protected float _currAtkTimer;
@@ -93,6 +92,12 @@ public abstract class EnemyBase : MonoBehaviour
             _currWPIndex = 0;
             SetWP("EnemyWP");
         }
+
+        //if (BattleSystem.instance != null)
+        //{
+        //    BattleSystem.instance.UnRegisterEnemy(this);
+        //    BattleSystem.instance.RegisterEnemy(this);
+        //}
     }
 
     private void SetWP(string tag)
@@ -140,7 +145,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         transform.position = Vector3.MoveTowards(transform.position, target.position, _speed * Time.deltaTime);
 
-        //if (PlayerNearby()) return;
+        if (PlayerNearby()) return;
 
         if (Vector3.Distance(transform.position, target.position) < 0.01f)
         {
@@ -157,21 +162,22 @@ public abstract class EnemyBase : MonoBehaviour
     {
         //float dir = player.position.x - transform.position.x;
         //FaceDir(dir);
-        PlayerNearby();
+        //PlayerNearby();
 
         // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
-        //if (!inBattle)
-        //{
-        //    //OnAttackPlayer?.Invoke(player.gameObject, this);
-        //    inBattle = true;
-        //    if (battleScene != null && normalScene != null)
-        //    {
-        //        normalScene.SetActive(false);
-        //        battleScene.SetActive(true);
-        //    }
-        //    // CHANGE SCENE
-        //}
+        if (!inBattle)
+        {
+            BattleSystem.instance.RegisterEnemy(this);
+            OnAttackPlayer.Invoke(player.gameObject, this);
+            inBattle = true;
 
+            if (battleScene != null && normalScene != null)
+            {
+                normalScene.SetActive(false);
+                battleScene.SetActive(true);
+            }
+            // CHANGE SCENE
+        }
         _states = EnemyStates.Idle;
     }
 
@@ -282,8 +288,6 @@ public abstract class EnemyBase : MonoBehaviour
                 _animator.Play("WalkRight");
                 _sprite.flipX = true;
             }
-
-            MsgLog("Moving horizontal");
         }
         else
         {
@@ -298,7 +302,6 @@ public abstract class EnemyBase : MonoBehaviour
                 moveDir.y = -1;
                 _animator.Play("WalkBack");
             }
-            MsgLog("Moving vertical");
         }
     }
 
@@ -316,41 +319,26 @@ public abstract class EnemyBase : MonoBehaviour
     // BATTLE -> IDLE(waiting turn) -> ATTACK
     protected virtual void StateMachine()
     {
-        if (inBattle)
+        switch (_states)
         {
-            switch (_states)
-            {
-                case EnemyStates.Idle:
-                    Idle();
-                    break;
-                case EnemyStates.Attack:
-                    BattleAttack();
-                    break;
-                //case EnemyStates.Death:
-                //    Death();
-                //    break;
-            }
-        }
-        else
-        {
-            switch (_states)
-            {
-                case EnemyStates.Idle:
-                    Idle();
-                    break;
-                case EnemyStates.Patrol:
-                    Patrol();
-                    break;
-                case EnemyStates.Attack:
-                    Attack(); // trigger battle scene
-                    break;
-                case EnemyStates.Chase:
-                    Chase();
-                    break;
-                case EnemyStates.Death:
-                    Death();
-                    break;
-            }
+            case EnemyStates.Idle:
+                Idle();
+                break;
+            case EnemyStates.Patrol:
+                Patrol();
+                break;
+            case EnemyStates.Chase:
+                Chase();
+                break;
+            case EnemyStates.Attack:
+                Attack(); // trigger battle scene
+                break;
+            case EnemyStates.BattleAttack:
+                BattleAttack();
+                break;
+            case EnemyStates.Death:
+                Death();
+                break;
         }
     }
 
