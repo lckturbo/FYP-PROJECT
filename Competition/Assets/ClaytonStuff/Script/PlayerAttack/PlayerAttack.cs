@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -15,14 +16,18 @@ public class PlayerAttack : MonoBehaviour
     [Header("Attack Offsets")]
     [SerializeField] private Vector2 rightAttackOffset = new Vector2(1f, 0f);
     [SerializeField] private Vector2 leftAttackOffset = new Vector2(-1f, 0f);
+    [SerializeField] private Vector2 upAttackOffset = new Vector2(0f, 1f);
+    [SerializeField] private Vector2 downAttackOffset = new Vector2(0f, -1f);
 
-    private PlayerMovement playerMovement;
+    private NewPlayerMovement playerMovement;
     private PlayerHeldItem heldItem;
+    private Animator animator;
 
     private void Awake()
     {
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement = GetComponent<NewPlayerMovement>();
         heldItem = GetComponent<PlayerHeldItem>();
+        animator = GetComponent<Animator>();
 
         if (attackPoint == null)
         {
@@ -34,17 +39,11 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
-        if (playerMovement != null)
-        {
-            attackPoint.localPosition = playerMovement.SRFlipX
-                ? (Vector3)leftAttackOffset
-                : (Vector3)rightAttackOffset;
-        }
+        UpdateAttackPoint();
 
         // Attack on left mouse click
-        if (Time.time >= nextAttackTime && Input.GetMouseButtonDown(0))
+        if (Time.time >= nextAttackTime && Mouse.current.leftButton.wasPressedThisFrame)
         {
-            //  Check if equipped item is a weapon
             var item = heldItem != null ? heldItem.GetEquippedItem() : null;
             if (item == null || !item.isWeapon)
             {
@@ -58,16 +57,47 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    private void UpdateAttackPoint()
+    {
+        if (animator == null) return;
+
+        float moveX = animator.GetFloat("moveX");
+        float moveY = animator.GetFloat("moveY");
+
+        Vector2 offset = Vector2.zero;
+
+        // Pick dominant axis for facing direction
+        if (Mathf.Abs(moveX) > Mathf.Abs(moveY))
+        {
+            offset = moveX > 0 ? rightAttackOffset : leftAttackOffset;
+        }
+        else if (Mathf.Abs(moveY) > 0.01f)
+        {
+            offset = moveY > 0 ? upAttackOffset : downAttackOffset;
+        }
+        else
+        {
+            // Default facing right if idle
+            offset = rightAttackOffset;
+        }
+
+        attackPoint.localPosition = offset;
+    }
+
     private void Attack()
     {
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+            attackPoint.position, attackRange, enemyLayer
+        );
 
-        foreach (Collider2D enemy in hitEnemies)
+        Debug.Log($"Attack at {attackPoint.position}, radius {attackRange}, hits {hitEnemies.Length}");
+
+        foreach (var enemy in hitEnemies)
         {
-            Debug.Log("Hit " + enemy.name);
-            //enemy.GetComponent<EnemyHealth>()?.TakeDamage(attackDamage);
+            Debug.Log($"Hit {enemy.name}, Layer: {LayerMask.LayerToName(enemy.gameObject.layer)}");
         }
     }
+
 
     private void OnDrawGizmosSelected()
     {
