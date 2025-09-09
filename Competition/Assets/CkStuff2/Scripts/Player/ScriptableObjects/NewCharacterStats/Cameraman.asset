@@ -20,9 +20,10 @@ MonoBehaviour:
   attackSpeed: 0.8
   critRate: 0.05
   critDamage: 1.4
-  element: 0
+  attackElement: 5
+  defenseElement: 5
   fireRes: 1
   waterRes: 1
-  grassRes: 1
-  darkRes: 0.9
-  lightRes: 1.1
+  grassRes: 1.25
+  darkRes: 0.75
+  lightRes: 1

@@ -11,18 +11,19 @@ public class NewCharacterStats : ScriptableObject
 
     [Header("Health & Defense")]
     public int maxHealth = 100;
-    public int defense = 10;          // flat reduction (you can switch to % later if you want)
+    public int defense = 10; // flat reduction
 
     [Header("Combat")]
     public int baseDamage = 20;
     public float attackSpeed = 1.0f;
-    [Range(0f, 1f)] public float critRate = 0.1f;     // 0.10 = 10% chance
-    public float critDamage = 1.5f;                    // 1.5 = 150% total dmg on crit
+    [Range(0f, 1f)] public float critRate = 0.1f;   // chance (0.10 = 10%)
+    public float critDamage = 1.5f;                  // damage multiplier (1.5 = 150%)
 
-    [Header("Elemental (type + resistances)")]
-    public NewElementType element = NewElementType.None;
+    [Header("Elemental")]
+    public NewElementType attackElement = NewElementType.None;   // what damage this char deals
+    public NewElementType defenseElement = NewElementType.None;  // what element defines their weakness
 
-    // 1.0 = neutral, <1 = resists (takes less), >1 = weak (takes more)
+    // Optional fine-tuning per character
     [Range(0f, 2f)] public float fireRes = 1f;
     [Range(0f, 2f)] public float waterRes = 1f;
     [Range(0f, 2f)] public float grassRes = 1f;
