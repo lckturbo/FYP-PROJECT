@@ -109,6 +109,7 @@ public class BattleSystem : MonoBehaviour
 
         // PLAYER HIT -> PARTY HIT -> PARTY HIT
         _enemy.GetComponent<EnemyBase>().TakeDamage(10);
+        enemyHealth.value = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
         // CHECK HEALTH
         if (CheckHealth())
         {
