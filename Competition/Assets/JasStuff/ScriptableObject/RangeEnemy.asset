@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
   m_Name: RangeEnemy
   m_EditorClassIdentifier: 
-  speed: 5
   maxHealth: 50
   atkDmg: 15
+  type: 0
+  enemyPrefab: {fileID: 4922165825126747598, guid: 460c63ab0bab1d24092b55b01c95bd67, type: 3}
+  speed: 5
   atkCD: 2
   atkRange: 5
+  dmgReduction: 0
+  AOERadius: 0
   idleTimer: 2
   chaseRange: 8
   investigateTimer: 2

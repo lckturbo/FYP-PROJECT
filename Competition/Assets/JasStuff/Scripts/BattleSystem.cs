@@ -54,8 +54,8 @@ public class BattleSystem : MonoBehaviour
     public void HandleBattleTransition(GameObject player, EnemyBase enemy)
     {
         MsgLog("HandleBattleTransition");
-        if (_player == null) _player = player;
-        if (_enemy == null) _enemy = enemy.gameObject;
+        if (!_player) _player = player;
+        if (!_enemy) _enemy = enemy.gameObject;
         battleState = BattleState.START;
         SetupBattle();
     }
@@ -68,7 +68,7 @@ public class BattleSystem : MonoBehaviour
         // FOR BATTLE MODE
         _player.GetComponent<NewPlayerMovement>().enabled = false;
 
-        if (_player != null && _enemy != null)
+        if (_player && _enemy)
             SetUpHealth(_player, _enemy);
 
         // PLAYER TURN FIRST
@@ -157,7 +157,7 @@ public class BattleSystem : MonoBehaviour
         Time.timeScale = 0;
         MsgLog("Player win");
         // game scene
-        if (normalScene != null && battleScene != null)
+        if (normalScene && battleScene)
         {
             Destroy(_enemy);
             Destroy(_player);
@@ -178,7 +178,6 @@ public class BattleSystem : MonoBehaviour
 
     private void MsgLog(string msg)
     {
-        if (msg != null)
-            Debug.Log("[BattleSystem] " + msg);
+        Debug.Log("[BattleSystem] " + msg);
     }
 }
