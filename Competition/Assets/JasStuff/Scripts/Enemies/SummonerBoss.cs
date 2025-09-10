@@ -21,14 +21,14 @@ public class SummonerBoss : EnemyBase
             GameObject e = Instantiate(_enemiesPrefab[eCount], _summonPts[sCount].position, Quaternion.identity);
             _activeEnemies.Add(e);
 
-            if (e.TryGetComponent<EnemyBase>(out EnemyBase minions))
-            {
-                minions.OnDeath += () =>
-                {
-                    _activeEnemies.Remove(e);
-                    MsgLog("Minions died, active enemies: " + _activeEnemies.Count);
-                };
-            }
+            //if (e.TryGetComponent<EnemyBase>(out EnemyBase minions))
+            //{
+            //    minions.OnDeath += () =>
+            //    {
+            //        _activeEnemies.Remove(e);
+            //        MsgLog("Minions died, active enemies: " + _activeEnemies.Count);
+            //    };
+            //}
 
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class EnemyBase : MonoBehaviour
@@ -21,14 +22,18 @@ public abstract class EnemyBase : MonoBehaviour
     protected Transform player;
     [Header("Enemy States")]
     public EnemyStates _states;
-    [Header("Enemy Waypoints")]
-    [SerializeField] private Transform[] _enemyWP;
-    private int _currWPIndex;
+
+    // WAYPOINTS //
+    private Waypoints _currWP;
+    //[SerializeField] private Transform[] _enemyWP;
+    //private int _currWPIndex;
     private float _speed;
 
     [Header("Health")]
     private int _currHealth;
+    public int GetCurrHealth() => _currHealth;
     private int _maxHealth;
+    public int GetMaxHealth() => _maxHealth;
 
     [Header("Idle")]
     private float _idleTimer;
@@ -48,8 +53,11 @@ public abstract class EnemyBase : MonoBehaviour
     private float _currInvTimer;
     // FOR TANKS //
     private float _dmgReduction;
+    // FOR DEATH //
+    [SerializeField] private float _deathTime;
+    public float GetDeathTime() => _deathTime;
 
-    public event Action OnDeath;
+    public event Action<GameObject, float> OnDeath;
     public event Action<GameObject, EnemyBase> OnAttackPlayer;
     protected bool inBattle;
 
@@ -73,14 +81,14 @@ public abstract class EnemyBase : MonoBehaviour
 
     private void Awake()
     {
-        if (_enemyStats == null) return;
+        if (!_enemyStats) return;
         Initialize(_enemyStats);
         _currHealth = _maxHealth;
         _states = EnemyStates.Idle;
     }
     protected virtual void Start()
     {
-        if (player == null) player = GameObject.FindWithTag("Player").transform;
+        if (!player) player = GameObject.FindWithTag("Player").transform;
 
         // timers
         _currIdleTimer = _idleTimer;
@@ -89,25 +97,12 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (!inBattle)
         {
-            _currWPIndex = 0;
-            SetWP("EnemyWP");
+            Waypoints[] allWayPoints = FindObjectsOfType<Waypoints>();
+            if (allWayPoints.Length > 0)
+                _currWP = allWayPoints[UnityEngine.Random.Range(0, allWayPoints.Length)];
+            //_currWPIndex = 0;
+            //SetWP("EnemyWP");
         }
-
-        //if (BattleSystem.instance != null)
-        //{
-        //    BattleSystem.instance.UnRegisterEnemy(this);
-        //    BattleSystem.instance.RegisterEnemy(this);
-        //}
-    }
-
-    private void SetWP(string tag)
-    {
-        GameObject[] wp = GameObject.FindGameObjectsWithTag(tag);
-        if (wp.Length == 0) return;
-
-        _enemyWP = new Transform[wp.Length];
-        for (int i = 0; i < wp.Length; i++)
-            _enemyWP[i] = wp[i].transform;
     }
 
     private void Update()
@@ -137,9 +132,9 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Patrol()
     {
-        if (_enemyWP.Length == 0 || _enemyWP == null) return;
+        if (!_currWP || _currWP.nearestWaypoints.Count == 0) return;
 
-        Transform target = _enemyWP[_currWPIndex];
+        Transform target = _currWP.transform;
         Vector2 dirToTarget = (target.position - transform.position).normalized;
         FaceDir(dirToTarget);
 
@@ -147,17 +142,24 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (PlayerNearby()) return;
 
-        if (Vector3.Distance(transform.position, target.position) < 0.01f)
+        if (Vector2.Distance(transform.position, target.position) < 0.01f)
         {
-            _currWPIndex++;
+            _currWP.SetOccupied(false);
+
+            List<Waypoints> allWaypoints = _currWP.nearestWaypoints.FindAll(wp => !wp.isOccupied());
+            if (allWaypoints.Count > 0)
+            {
+                _currWP = allWaypoints[UnityEngine.Random.Range(0, allWaypoints.Count)];
+                _currWP.SetOccupied(true);
+            }
             _states = EnemyStates.Idle;
-
-            if (_currWPIndex >= _enemyWP.Length)
-                _currWPIndex = 0;
         }
-
     }
-
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(transform.position, _currWP.transform.position);
+    }
     protected virtual void Attack()
     {
         //float dir = player.position.x - transform.position.x;
@@ -171,7 +173,7 @@ public abstract class EnemyBase : MonoBehaviour
             OnAttackPlayer.Invoke(player.gameObject, this);
             inBattle = true;
 
-            if (battleScene != null && normalScene != null)
+            if (battleScene && normalScene)
             {
                 normalScene.SetActive(false);
                 battleScene.SetActive(true);
@@ -202,7 +204,6 @@ public abstract class EnemyBase : MonoBehaviour
         {
             _currHealth = Mathf.Max(_currHealth, 0);
             _states = EnemyStates.Death;
-            OnDeath?.Invoke();
         }
     }
     protected virtual void Chase()
@@ -232,12 +233,12 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Death()
     {
         // TODO: ANIMATION
-        Destroy(gameObject, 2f);
-        // TODO: RESPAWN NEW ENEMIES
+        OnDeath?.Invoke(this.gameObject, _deathTime);
+        Destroy(gameObject, _deathTime);
     }
     protected virtual bool PlayerNearby()
     {
-        if (player == null) return false;
+        if (!player) return false;
 
         Vector2 dirToPlayer = (player.position - transform.position).normalized;
         float dist = Vector3.Distance(transform.position, player.position);
@@ -263,8 +264,8 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected void FaceDir(Vector2 dir)
     {
-        if (player == null) return;
-        if (_animator == null)
+        if (!player) return;
+        if (!_animator)
         {
             Debug.LogError("[Enemy] Animator not found");
             return;
@@ -305,16 +306,6 @@ public abstract class EnemyBase : MonoBehaviour
         }
     }
 
-    public int GetMaxHealth()
-    {
-        return _maxHealth;
-    }
-
-    public int GetCurrHealth()
-    {
-        return _currHealth;
-    }
-
     // NORMAL -> ALL FSM
     // BATTLE -> IDLE(waiting turn) -> ATTACK
     protected virtual void StateMachine()
@@ -344,7 +335,6 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected void MsgLog(string msg)
     {
-        if (msg != null)
-            Debug.Log("[Enemy] " + msg);
+        Debug.Log("[Enemy] " + msg);
     }
 }
