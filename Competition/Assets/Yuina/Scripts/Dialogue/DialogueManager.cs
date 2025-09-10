@@ -39,7 +39,7 @@ public class DialogueManager : MonoBehaviour
     public void StartDialogue(DialogueData dialogueData)
     {
         dialogueUI.SetActive(true);
-        PlayerController.Instance.SetCanMove(false);
+        //PlayerController.Instance.SetCanMove(false);
 
         linesQueue.Clear();
         foreach (var line in dialogueData.lines)
@@ -111,7 +111,9 @@ public class DialogueManager : MonoBehaviour
     private void EndDialogue()
     {
         dialogueUI.SetActive(false);
-        PlayerController.Instance.SetCanMove(true);
+        //PlayerController.Instance.SetCanMove(true);
     }
+
+
 
 }

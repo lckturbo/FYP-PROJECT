@@ -204,7 +204,16 @@ public class InventoryUIManager : MonoBehaviour
             var highlight = mainSlots[i].transform.Find("Highlight").gameObject;
             highlight.SetActive(i == index);
         }
+
+        // === NEW: Tell player to display item ===
+        if (index >= 0 && index < inventoryManager.playerInventory.mainInventory.Count)
+        {
+            var slot = inventoryManager.playerInventory.mainInventory[index];
+            var heldItem = FindObjectOfType<PlayerHeldItem>();
+            if (heldItem != null) heldItem.DisplayItem(slot.item);
+        }
     }
+
 
     public void RefreshUI()
     {

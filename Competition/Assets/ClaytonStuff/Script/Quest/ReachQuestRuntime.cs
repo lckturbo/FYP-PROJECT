@@ -32,9 +32,16 @@ public class ReachQuestRuntime : Quest
             CompleteQuest();
         }
     }
+
     public void SetTarget(Transform target)
     {
         this.target = target;
     }
 
+    //  Show target name in quest UI
+    public override string GetProgressText()
+    {
+        if (isCompleted) return "Reached!";
+        return target != null ? $"Go to {target.name}" : "Target missing";
+    }
 }

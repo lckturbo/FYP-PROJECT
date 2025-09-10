@@ -47,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
     private float dashTimer;
     private float dashCooldownTimer;
     private int dashDir = 1;
+    public bool SRFlipX => sr != null && sr.flipX;
 
     void Awake()
     {
