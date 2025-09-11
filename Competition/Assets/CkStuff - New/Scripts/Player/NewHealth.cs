@@ -37,7 +37,7 @@ public class NewHealth : MonoBehaviour
         if (attacker != null && Random.value < Mathf.Clamp01(attacker.critRate))
         {
             dmg *= attacker.critDamage;
-            Debug.Log(attacker.characterName + " landed a CRIT!");
+            //Debug.Log(attacker.characterName + " landed a CRIT!");
         }
 
         // --- Step 4: Defense

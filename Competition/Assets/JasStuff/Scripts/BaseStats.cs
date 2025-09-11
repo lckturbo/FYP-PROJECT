@@ -5,20 +5,18 @@ public enum NewElementType { None, Fire, Water, Grass, Dark, Light }
 [CreateAssetMenu(fileName = "NewBaseStats", menuName = "Stats/BaseStats")]
 public class BaseStats : ScriptableObject
 {
-    [Header("General")]
-    public string characterName = "New Entity";
-    public int level;
-
     [Header("Movement")]
-    public float walkSpeed;
+    public float Speed;
 
     [Header("Health & Defense")]
     public int maxHealth; //your current one @jas
-    public int defense;
+    public float attackreduction;
 
     [Header("Combat")]
     public int atkDmg; //your current one @jas
-    public float attackSpeed;
+
+    public float actionvaluespeed;
+
     [Range(0f, 1f)] public float critRate;
     public float critDamage;
 

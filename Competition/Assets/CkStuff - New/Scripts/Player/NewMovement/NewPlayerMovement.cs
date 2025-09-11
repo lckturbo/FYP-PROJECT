@@ -51,7 +51,7 @@ public class NewPlayerMovement : MonoBehaviour
         stats = newStats;
 
         if (!useStatsDirectly && stats != null)
-            cachedWalkSpeed = stats.walkSpeed;
+            cachedWalkSpeed = stats.Speed;
     }
 
     void Update()
@@ -95,6 +95,6 @@ public class NewPlayerMovement : MonoBehaviour
         if (stats == null)
             return cachedWalkSpeed;
 
-        return useStatsDirectly ? stats.walkSpeed : cachedWalkSpeed;
+        return useStatsDirectly ? stats.Speed : cachedWalkSpeed;
     }
 }
