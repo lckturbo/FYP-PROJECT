@@ -54,8 +54,8 @@ public class AOEBoss : EnemyBase
         foreach (Collider2D h in hit)
         {
             MsgLog("AOE hit: " + h.gameObject.name);
-            if (h.TryGetComponent<Health>(out Health playerHealth))
-                playerHealth.TakeDamage(_atkDmg);
+            //if (h.TryGetComponent<Health>(out Health playerHealth))
+            //    playerHealth.TakeDamage(_atkDmg);
         }
     }
 }

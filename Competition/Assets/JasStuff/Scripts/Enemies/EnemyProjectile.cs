@@ -31,9 +31,9 @@ public class EnemyProjectile : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            Health playerHealth = collision.gameObject.GetComponent<Health>();
-            if (playerHealth != null)
-                playerHealth.TakeDamage(_atkDmg);
+            //Health playerHealth = collision.gameObject.GetComponent<Health>();
+            //if (playerHealth != null)
+            //    playerHealth.TakeDamage(_atkDmg);
             //Destroy(gameObject);
 
             ProjectilePool.instance.ReturnProjectile(gameObject);
