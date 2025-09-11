@@ -7,11 +7,11 @@ public class PlayerHeldItem : MonoBehaviour
 
     private GameObject currentHeld;
     private Item equippedItem;
-    private PlayerMovement playerMovement;
+    private NewPlayerMovement playerMovement;
 
     private void Awake()
     {
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement = GetComponent<NewPlayerMovement>();
     }
 
     private void Update()
@@ -19,14 +19,14 @@ public class PlayerHeldItem : MonoBehaviour
         if (currentHeld != null && playerMovement != null)
         {
             //  Flip the held item depending on facing direction
-            if (playerMovement.SRFlipX)
-            {
-                currentHeld.transform.localRotation = Quaternion.Euler(0, 180, 0); // facing left
-            }
-            else
-            {
-                currentHeld.transform.localRotation = Quaternion.identity; // facing right
-            }
+            //if (playerMovement)
+            //{
+            //    currentHeld.transform.localRotation = Quaternion.Euler(0, 180, 0); // facing left
+            //}
+            //else
+            //{
+            //    currentHeld.transform.localRotation = Quaternion.identity; // facing right
+            //}
         }
     }
 
