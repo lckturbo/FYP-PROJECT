@@ -10,6 +10,7 @@ public class BaseStats : ScriptableObject
 
     [Header("Health & Defense")]
     public int maxHealth; //your current one @jas
+
     public float attackreduction;
 
     [Header("Combat")]

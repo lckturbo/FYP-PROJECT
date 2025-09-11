@@ -4,6 +4,6 @@ using UnityEngine;
 public class NewCharacterDefinition : ScriptableObject
 {
     public string displayName = "New Character";
-    public Sprite portrait;
+    public Sprite image;
     public BaseStats stats;
 }

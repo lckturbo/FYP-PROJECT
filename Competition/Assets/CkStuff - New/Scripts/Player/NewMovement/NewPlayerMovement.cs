@@ -10,8 +10,7 @@ public class NewPlayerMovement : MonoBehaviour
     [SerializeField] private BaseStats stats;
     [SerializeField] private bool useStatsDirectly = true;
 
-    [Header("Input")]
-    [SerializeField] private string moveActionName = "Move";
+    private string moveActionName = "Move";
 
     [Header("Movement Options")]
     private bool normalizeDiagonal = true;
@@ -38,8 +37,6 @@ public class NewPlayerMovement : MonoBehaviour
         if (playerInput && playerInput.actions != null)
         {
             moveAction = playerInput.actions[moveActionName];
-            if (moveAction == null)
-                Debug.LogWarning($"[NewPlayerMovement] No action named '{moveActionName}' in PlayerInput actions.");
         }
 
         if (stats != null)

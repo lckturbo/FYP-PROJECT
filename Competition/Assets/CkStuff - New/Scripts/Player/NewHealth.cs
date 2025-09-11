@@ -41,7 +41,7 @@ public class NewHealth : MonoBehaviour
         }
 
         // --- Step 4: Defense
-        dmg -= stats.defense;
+        dmg -= stats.attackreduction;
         if (dmg < 1f) dmg = 1f;
 
         // --- Step 5: Elemental triangle (attack vs defense element)
