@@ -1433,6 +1433,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 690708550}
   m_CullTransparentMesh: 1
+--- !u!4 &731098375 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4698371525653795136, guid: cdeccd7aebcadae47ae91d6137941858, type: 3}
+  m_PrefabInstance: {fileID: 1678234564817786372}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &887610912
 GameObject:
   m_ObjectHideFlags: 0
@@ -1747,7 +1752,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0130e45409eb94a94ab679ee2a05e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
+  target: {fileID: 731098375}
   offset: {x: 0, y: 0, z: -10}
   deadZoneSize: {x: 3, y: 1.5}
   lookAheadDistance: 2
@@ -3842,6 +3847,18 @@ PrefabInstance:
     - target: {fileID: 5351547133443751539, guid: cdeccd7aebcadae47ae91d6137941858, type: 3}
       propertyPath: m_Name
       value: NewPlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 5351547133443751539, guid: cdeccd7aebcadae47ae91d6137941858, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5351547133443751539, guid: cdeccd7aebcadae47ae91d6137941858, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 8030321563690441532, guid: cdeccd7aebcadae47ae91d6137941858, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
