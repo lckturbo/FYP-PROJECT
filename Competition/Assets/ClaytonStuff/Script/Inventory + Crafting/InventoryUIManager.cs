@@ -13,7 +13,7 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;
 
     private InventoryManager inventoryManager;
-    private PlayerMovement playerMovement;
+    private NewPlayerMovement playerMovement;
     private List<GameObject> mainSlots = new List<GameObject>();
     private List<GameObject> subSlots = new List<GameObject>();
     private bool subInventoryOpen = false;
@@ -28,7 +28,7 @@ public class InventoryUIManager : MonoBehaviour
     void Start()
     {
         inventoryManager = FindObjectOfType<InventoryManager>();
-        playerMovement = FindObjectOfType<PlayerMovement>();
+        playerMovement = FindObjectOfType<NewPlayerMovement>();
 
         // Create UI slots (6 main, 60 sub)
         for (int i = 0; i < 6; i++)

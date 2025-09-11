@@ -12,6 +12,8 @@ public class EnemyStats : BaseStats
 
     [Header("EnemyType")]
     public EnemyTypes type;
+    [Header("EnemyPrefab")]
+    public GameObject enemyPrefab;
     [Header("Speed")]
     public int speed;
     [Header("EnemyCombat")]

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 751cdc46136c0114ca56c5d04e45b164, type: 3}
+  m_Name: Journalist
+  m_EditorClassIdentifier: 
+  Speed: 8
+  maxHealth: 0
+  attackreduction: 0
+  atkDmg: 0
+  actionvaluespeed: 0
+  critRate: 0
+  critDamage: 0
+  attackElement: 0
+  defenseElement: 0
+  fireRes: 0
+  waterRes: 0
+  grassRes: 0
+  darkRes: 0
+  lightRes: 0
+  characterName: Journalist
+  level: 1
+  atkCD: 0
+  atkRange: 0
