@@ -116,7 +116,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Idle()
     {
-        _animator.Play("IdleBack");
+        if (_animator) _animator.Play("IdleBack");
 
         if (_currIdleTimer <= _idleTimer)
         {
@@ -136,6 +136,15 @@ public abstract class EnemyBase : MonoBehaviour
 
         Transform target = _currWP.transform;
         Vector2 dirToTarget = (target.position - transform.position).normalized;
+        float checkDist = 1.0f;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToTarget, checkDist, LayerMask.GetMask("Enemy"));
+
+        if(hit.collider && hit.collider.gameObject != gameObject)
+        {
+            Debug.Log($"{name} sees enemy in the way: {hit.collider.name}");
+            return;
+        }
+
         FaceDir(dirToTarget);
 
         transform.position = Vector3.MoveTowards(transform.position, target.position, _speed * Time.deltaTime);
@@ -155,10 +164,14 @@ public abstract class EnemyBase : MonoBehaviour
             _states = EnemyStates.Idle;
         }
     }
+
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position, _currWP.transform.position);
+        if (_currWP)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(transform.position, _currWP.transform.position);
+        }
     }
     protected virtual void Attack()
     {
@@ -264,12 +277,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected void FaceDir(Vector2 dir)
     {
-        if (!player) return;
-        if (!_animator)
-        {
-            Debug.LogError("[Enemy] Animator not found");
-            return;
-        }
+        if (!player || !_animator) return;
 
         Vector2 moveDir = Vector2.zero;
 
