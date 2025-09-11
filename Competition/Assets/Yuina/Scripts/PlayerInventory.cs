@@ -35,10 +35,10 @@ public class PlayerInventory : MonoBehaviour
 
     public bool HasItem(ShopItem item)
     {
-        // 武器は名前とタイプで重複チェック
+        // 複数所持不可アイテムは名前とタイプで重複チェック
         foreach (var owned in ownedItems)
         {
-            if (owned.itemName == item.itemName && owned.type == ItemType.Weapon)
+            if (owned.itemName == item.itemName && owned.type == ItemType.Unique)
                 return true;
         }
         return false;

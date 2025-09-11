@@ -3,8 +3,8 @@ using UnityEngine;
 public enum ItemType
 {
     Food,
-    Weapon,
-    Armor,
+    Artifact,
+    Unique,     // Items that cannot be held in multiple quantities
     Other
 }
 

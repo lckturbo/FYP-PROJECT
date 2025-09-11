@@ -21,11 +21,7 @@ public class ShopTrigger : MonoBehaviour
         {
             if (!ShopManager.Instance) return;
 
-            if (ShopManager.Instance.IsShopActive)
-            {
-                ShopManager.Instance.CloseShop();
-            }
-            else
+            if (!ShopManager.Instance.IsShopActive)
             {
                 ShopManager.Instance.OpenShop();
             }
