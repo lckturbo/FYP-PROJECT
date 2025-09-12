@@ -4,7 +4,6 @@ using UnityEngine;
 public class NewCharacterStats : BaseStats
 {
     [Header("General")] 
-    public string characterName = "Name";
     public int level;
 
     [Header("Combat")]
