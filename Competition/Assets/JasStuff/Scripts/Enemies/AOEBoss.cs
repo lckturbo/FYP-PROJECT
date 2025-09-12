@@ -58,4 +58,8 @@ public class AOEBoss : EnemyBase
     //        //    playerHealth.TakeDamage(_atkDmg);
     //    }
     //}
+    protected override void BattleAttack()
+    {
+        throw new System.NotImplementedException();
+    }
 }
