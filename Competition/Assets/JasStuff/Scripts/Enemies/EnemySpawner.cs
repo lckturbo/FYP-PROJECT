@@ -26,7 +26,7 @@ public class EnemySpawner : MonoBehaviour
         GameObject enemy = Instantiate(randomEnemy.enemyPrefab, _spawnPoints[spawnPointsID].position, Quaternion.identity);
 
         EnemyBase _enemyBase = enemy.GetComponent<EnemyBase>();
-        _enemyBase.OnDeath += RemoveEnemyFromList;
+        //_enemyBase.OnDeath += RemoveEnemyFromList;
 
         activeEnemies.Add(enemy);
     }
@@ -49,14 +49,14 @@ public class EnemySpawner : MonoBehaviour
             SpawnEnemy();
     }
 
-    private void OnDisable()
-    {
-        foreach(GameObject e in activeEnemies)
-        {
-            if (e == null) continue;
-            EnemyBase _enemyBase = e.GetComponent<EnemyBase>();
-            if(_enemyBase != null) 
-                _enemyBase.OnDeath -= RemoveEnemyFromList;
-        }
-    }
+    //private void OnDisable()
+    //{
+    //    foreach(GameObject e in activeEnemies)
+    //    {
+    //        if (e == null) continue;
+    //        EnemyBase _enemyBase = e.GetComponent<EnemyBase>();
+    //        if(_enemyBase != null) 
+    //            _enemyBase.OnDeath -= RemoveEnemyFromList;
+    //    }
+    //}
 }
