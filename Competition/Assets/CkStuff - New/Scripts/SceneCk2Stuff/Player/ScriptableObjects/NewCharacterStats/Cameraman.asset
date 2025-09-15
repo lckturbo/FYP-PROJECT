@@ -13,20 +13,19 @@ MonoBehaviour:
   m_Name: Cameraman
   m_EditorClassIdentifier: 
   Speed: 5
-  maxHealth: 0
-  attackreduction: 0
-  atkDmg: 0
-  actionvaluespeed: 0
-  critRate: 0
-  critDamage: 0
-  attackElement: 0
-  defenseElement: 0
-  fireRes: 0
-  waterRes: 0
-  grassRes: 0
-  darkRes: 0
-  lightRes: 0
-  characterName: Cameraman
+  maxHealth: 100
+  attackreduction: 25
+  atkDmg: 10
+  actionvaluespeed: 50
+  critRate: 0.05
+  critDamage: 50
+  attackElement: 5
+  defenseElement: 4
+  fireRes: 1
+  waterRes: 2
+  grassRes: 1
+  darkRes: 0.25
+  lightRes: 0.25
   level: 1
-  atkCD: 0
-  atkRange: 0
+  atkCD: 1
+  atkRange: 2

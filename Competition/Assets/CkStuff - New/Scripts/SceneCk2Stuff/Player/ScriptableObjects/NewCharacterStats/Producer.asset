@@ -13,20 +13,19 @@ MonoBehaviour:
   m_Name: Producer
   m_EditorClassIdentifier: 
   Speed: 3
-  maxHealth: 0
-  attackreduction: 0
-  atkDmg: 0
-  actionvaluespeed: 0
-  critRate: 0
-  critDamage: 0
-  attackElement: 0
-  defenseElement: 0
-  fireRes: 0
-  waterRes: 0
-  grassRes: 0
-  darkRes: 0
-  lightRes: 0
-  characterName: Producer
+  maxHealth: 200
+  attackreduction: 90
+  atkDmg: 25
+  actionvaluespeed: 15
+  critRate: 0.05
+  critDamage: 50
+  attackElement: 1
+  defenseElement: 2
+  fireRes: 0.25
+  waterRes: 2
+  grassRes: 0.25
+  darkRes: 1
+  lightRes: 1
   level: 1
-  atkCD: 0
-  atkRange: 0
+  atkCD: 8
+  atkRange: 1
