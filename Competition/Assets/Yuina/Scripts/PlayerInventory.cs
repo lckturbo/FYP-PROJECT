@@ -5,7 +5,7 @@ public class PlayerInventory : MonoBehaviour
 {
     public static PlayerInventory Instance { get; private set; }
 
-    [SerializeField] private int startingMoney = 100;
+    [SerializeField] private int startingMoney; // InspectorÇ≈ê›íË
     public int Money { get; private set; }
 
     public List<ShopItem> ownedItems = new List<ShopItem>();
