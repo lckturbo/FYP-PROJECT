@@ -1,8 +1,6 @@
 using Pathfinding;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using static EnemyBase;
+using UnityEngine.SceneManagement;
 
 public abstract class EnemyBase : MonoBehaviour
 {
@@ -30,28 +28,20 @@ public abstract class EnemyBase : MonoBehaviour
     private int _currWP;
     private bool _reachedPath;
 
-    //[Header("Health")]
-    //private int _currHealth;
-    //public int GetCurrHealth() => _currHealth;
-    //private int _maxHealth;
-    //public int GetMaxHealth() => _maxHealth;
+    [Header("Health")]
+    private int _currHealth;
+    public int GetCurrHealth() => _currHealth;
+    private int _maxHealth;
+    public int GetMaxHealth() => _maxHealth;
 
     //[Header("Idle")]
     private float _idleTimer;
     private float _currIdleTimer;
-
-    //[Header("Attack")]
-    //protected float _atkRange;
+    private float _chaseRange;
+    protected float _atkRange;
     //protected int _atkDmg;
-    //protected float _atkCD;
-    //protected float _currAtkTimer;
     //protected float _AOERadius;
 
-    //// CHASE //
-    //private float _chaseRange;
-    //// INVESTIGATE //
-    //private float _investigateTimer;
-    //private float _currInvTimer;
     //// FOR TANKS //
     //private float _dmgReduction;
     //// FOR DEATH //
@@ -69,13 +59,12 @@ public abstract class EnemyBase : MonoBehaviour
     protected void Initialize(EnemyStats stats)
     {
         _speed = stats.speed;
-        //_maxHealth = stats.maxHealth;
-        //_atkRange = stats.atkRange;
+        _maxHealth = stats.maxHealth;
+        _atkRange = stats.atkRange;
         //_atkDmg = stats.atkDmg;
         //_atkCD = stats.atkCD;
         _idleTimer = stats.idleTimer;
-        //_chaseRange = stats.chaseRange;
-        //_investigateTimer = stats.investigateTimer;
+        _chaseRange = stats.chaseRange;
         //_dmgReduction = stats.dmgReduction;
         //_AOERadius = stats.AOERadius;
     }
@@ -90,6 +79,8 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Start()
     {
         if (!_player) _player = GameObject.FindWithTag("Player").transform;
+
+        _currIdleTimer = _idleTimer;
     }
     private void Update()
     {
@@ -97,46 +88,103 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Idle()
     {
+        _aiPath.canMove = false;
         _rb.velocity = Vector2.zero;
+        if (CanSeePlayer())
+        {
+            _enemyStates = EnemyStates.Chase;
+            return;
+        }
 
         _currIdleTimer -= Time.deltaTime;
-        if(_currIdleTimer <= 0)
+        if (_currIdleTimer <= 0)
         {
             _enemyStates = EnemyStates.Patrol;
-            StartPath();
             _currIdleTimer = _idleTimer;
         }
     }
 
     protected virtual void Patrol()
     {
-        if (_path == null || _reachedPath || _path.vectorPath.Count == 0) return;
-        Vector2 dir = ((Vector2)_path.vectorPath[0] - _rb.position).normalized;
-        _rb.velocity = dir * _speed;
+        if (!_aiPath || !WayPointManager.instance)
+            return;
 
-        if (Vector2.Distance(_rb.position, (Vector2)_path.vectorPath[_path.vectorPath.Count - 1]) < 0.1f)
+        _aiPath.canMove = true;
+        _aiPath.destination = WayPointManager.instance.GetWayPoint(_currWP);
+
+        if (Vector2.Distance(_rb.position, _aiPath.destination) < 0.5f)
         {
             _currWP = (_currWP + 1) % WayPointManager.instance.GetTotalWayPoints();
             _enemyStates = EnemyStates.Idle;
         }
+
+        if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
     }
 
-    private void StartPath()
+    protected virtual void Chase()
     {
-        if (!WayPointManager.instance) return;
+        if (!_player) return;
+        float dist = Vector2.Distance(_rb.position, _player.position);
 
-        //_currWP %= WayPointManager.instance.GetTotalWayPoints();
-        Vector3 target = WayPointManager.instance.GetWayPoint(_currWP);
-        _seeker.StartPath(_rb.position, target, OnPathComplete);
-    }
-
-    private void OnPathComplete(Path p)
-    {
-        if (!p.error)
+        if (dist > _chaseRange)
         {
-            _path = p;
+            _aiPath.destination = _rb.position;
+            _enemyStates = EnemyStates.Idle;
+            return;
+        }
+
+        _aiPath.canMove = true;
+        _aiPath.destination = _player.position;
+
+        if (dist < _atkRange)
+        {
+            _aiPath.canMove = false;
+            _enemyStates = EnemyStates.Attack;
         }
     }
+
+    protected virtual void Attack()
+    {
+        //float dir = player.position.x - transform.position.x;
+        //FaceDir(dir);
+        //PlayerNearby();
+
+        if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
+
+        // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
+        //if (!inBattle)
+        //{
+        //    BattleSystem.instance.RegisterEnemy(this);
+        //    OnAttackPlayer.Invoke(player.gameObject, this);
+        //    inBattle = true;
+
+        //    if (battleScene && normalScene)
+        //    {
+        //        normalScene.SetActive(false);
+        //        battleScene.SetActive(true);
+        //    }
+        //    // CHANGE SCENE
+        //}
+        _enemyStates = EnemyStates.Idle;
+    }
+
+    protected abstract void BattleAttack();
+
+    protected virtual bool CanSeePlayer()
+    {
+        if (!_player) return false;
+
+        float dist = Vector2.Distance(transform.position, _player.position);
+
+        if (dist > _chaseRange)
+            return false;
+
+        Vector2 distToPlayer = (_player.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, distToPlayer, _chaseRange, LayerMask.GetMask("Player"));
+
+        return hit.collider != null && hit.collider.CompareTag("Player");
+    }
+
     // NORMAL -> ALL FSM
     // BATTLE -> IDLE(waiting turn) -> ATTACK
     protected virtual void StateMachine()
@@ -150,10 +198,10 @@ public abstract class EnemyBase : MonoBehaviour
                 Patrol();
                 break;
             case EnemyStates.Chase:
-                //Chase();
+                Chase();
                 break;
             case EnemyStates.Attack:
-                //Attack(); // trigger battle scene
+                Attack(); // trigger battle scene
                 break;
             case EnemyStates.BattleAttack:
                 //BattleAttack();
@@ -163,118 +211,6 @@ public abstract class EnemyBase : MonoBehaviour
                 break;
         }
     }
-
-    //protected virtual void Start()
-    //{
-    //    if (!player) player = GameObject.FindWithTag("Player").transform;
-
-    //    // timers
-    //    _currIdleTimer = _idleTimer;
-    //    _currInvTimer = _investigateTimer;
-    //    _currAtkTimer = _atkCD;
-
-    //    if (!inBattle)
-    //    {
-    //        Waypoints[] allWayPoints = FindObjectsOfType<Waypoints>();
-    //        if (allWayPoints.Length > 0)
-    //            _currWP = allWayPoints[UnityEngine.Random.Range(0, allWayPoints.Length)];
-    //        //_currWPIndex = 0;
-    //        //SetWP("EnemyWP");
-    //    }
-    //}
-
-    //private void Update()
-    //{
-    //    StateMachine();
-
-    //    // for testing
-    //    if (Input.GetKeyDown(KeyCode.L))
-    //        TakeDamage(10);
-    //}
-
-    //protected virtual void Idle()
-    //{
-    //    if (_animator) _animator.Play("IdleBack");
-
-    //    if (_currIdleTimer <= _idleTimer)
-    //    {
-    //        if (PlayerNearby()) return;
-    //        _currIdleTimer -= Time.deltaTime;
-    //        if (_currIdleTimer <= 0)
-    //        {
-    //            if (!inBattle) // checks if its in battle
-    //                _states = EnemyStates.Patrol;
-    //            _currIdleTimer = _idleTimer;
-    //        }
-    //    }
-    //}
-    //protected virtual void Patrol()
-    //{
-    //    if (!_currWP || _currWP.nearestWaypoints.Count == 0) return;
-
-    //    Transform target = _currWP.transform;
-    //    Vector2 dirToTarget = (target.position - transform.position).normalized;
-    //    float checkDist = 1.0f;
-    //    RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToTarget, checkDist, LayerMask.GetMask("Enemy"));
-
-    //    if(hit.collider && hit.collider.gameObject != gameObject)
-    //    {
-    //        Debug.Log($"{name} sees enemy in the way: {hit.collider.name}");
-    //        return;
-    //    }
-
-    //    FaceDir(dirToTarget);
-
-    //    transform.position = Vector3.MoveTowards(transform.position, target.position, _speed * Time.deltaTime);
-
-    //    if (PlayerNearby()) return;
-
-    //    if (Vector2.Distance(transform.position, target.position) < 0.01f)
-    //    {
-    //        _currWP.SetOccupied(false);
-
-    //        List<Waypoints> allWaypoints = _currWP.nearestWaypoints.FindAll(wp => !wp.isOccupied());
-    //        if (allWaypoints.Count > 0)
-    //        {
-    //            _currWP = allWaypoints[UnityEngine.Random.Range(0, allWaypoints.Count)];
-    //            _currWP.SetOccupied(true);
-    //        }
-    //        _states = EnemyStates.Idle;
-    //    }
-    //}
-
-    //private void OnDrawGizmosSelected()
-    //{
-    //    if (_currWP)
-    //    {
-    //        Gizmos.color = Color.yellow;
-    //        Gizmos.DrawLine(transform.position, _currWP.transform.position);
-    //    }
-    //}
-    //protected virtual void Attack()
-    //{
-    //    //float dir = player.position.x - transform.position.x;
-    //    //FaceDir(dir);
-    //    //PlayerNearby();
-
-    //    // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
-    //    if (!inBattle)
-    //    {
-    //        BattleSystem.instance.RegisterEnemy(this);
-    //        OnAttackPlayer.Invoke(player.gameObject, this);
-    //        inBattle = true;
-
-    //        if (battleScene && normalScene)
-    //        {
-    //            normalScene.SetActive(false);
-    //            battleScene.SetActive(true);
-    //        }
-    //        // CHANGE SCENE
-    //    }
-    //    _states = EnemyStates.Idle;
-    //}
-
-    //protected abstract void BattleAttack();
 
     //// PLAYER -> CALL TO KILL ENEMIES
     //public virtual void TakeDamage(int amt)
@@ -327,31 +263,6 @@ public abstract class EnemyBase : MonoBehaviour
     //    OnDeath?.Invoke(this.gameObject, _deathTime);
     //    Destroy(gameObject, _deathTime);
     //}
-    //protected virtual bool PlayerNearby()
-    //{
-    //    if (!player) return false;
-
-    //    Vector2 dirToPlayer = (player.position - transform.position).normalized;
-    //    float dist = Vector3.Distance(transform.position, player.position);
-    //    LayerMask playerLayer = LayerMask.GetMask("Player");
-    //    RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToPlayer, _chaseRange, playerLayer);
-
-    //    if (hit.collider != null && hit.collider.CompareTag("Player"))
-    //    {
-    //        if (dist < _chaseRange)
-    //        {
-    //            if (dist < _atkRange)
-    //                _states = EnemyStates.Attack;
-    //            else
-    //                _states = EnemyStates.Chase;
-    //        }
-    //        else
-    //            _states = EnemyStates.Idle;
-
-    //        return true;
-    //    }
-    //    return false;
-    //}
 
     //protected void FaceDir(Vector2 dir)
     //{
@@ -390,10 +301,5 @@ public abstract class EnemyBase : MonoBehaviour
     //            _animator.Play("WalkBack");
     //        }
     //    }
-    //}
-
-    //protected void MsgLog(string msg)
-    //{
-    //    Debug.Log("[Enemy] " + msg);
     //}
 }

@@ -20,4 +20,8 @@ public class BasicEnemy : EnemyBase
     //        }
     //    }
     //}
+    protected override void BattleAttack()
+    {
+        throw new System.NotImplementedException();
+    }
 }
