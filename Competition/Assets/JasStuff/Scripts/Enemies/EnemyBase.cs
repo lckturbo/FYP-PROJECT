@@ -1,5 +1,6 @@
 using Pathfinding;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public abstract class EnemyBase : MonoBehaviour
 {
@@ -27,11 +28,11 @@ public abstract class EnemyBase : MonoBehaviour
     private int _currWP;
     private bool _reachedPath;
 
-    //[Header("Health")]
-    //private int _currHealth;
-    //public int GetCurrHealth() => _currHealth;
-    //private int _maxHealth;
-    //public int GetMaxHealth() => _maxHealth;
+    [Header("Health")]
+    private int _currHealth;
+    public int GetCurrHealth() => _currHealth;
+    private int _maxHealth;
+    public int GetMaxHealth() => _maxHealth;
 
     //[Header("Idle")]
     private float _idleTimer;
@@ -41,9 +42,6 @@ public abstract class EnemyBase : MonoBehaviour
     //protected int _atkDmg;
     //protected float _AOERadius;
 
-    //// INVESTIGATE //
-    //private float _investigateTimer;
-    //private float _currInvTimer;
     //// FOR TANKS //
     //private float _dmgReduction;
     //// FOR DEATH //
@@ -61,13 +59,12 @@ public abstract class EnemyBase : MonoBehaviour
     protected void Initialize(EnemyStats stats)
     {
         _speed = stats.speed;
-        //_maxHealth = stats.maxHealth;
+        _maxHealth = stats.maxHealth;
         _atkRange = stats.atkRange;
         //_atkDmg = stats.atkDmg;
         //_atkCD = stats.atkCD;
         _idleTimer = stats.idleTimer;
         _chaseRange = stats.chaseRange;
-        //_investigateTimer = stats.investigateTimer;
         //_dmgReduction = stats.dmgReduction;
         //_AOERadius = stats.AOERadius;
     }
@@ -91,73 +88,58 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Idle()
     {
+        _aiPath.canMove = false;
         _rb.velocity = Vector2.zero;
-        //_path = null;
-
-        if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
+        if (CanSeePlayer())
+        {
+            _enemyStates = EnemyStates.Chase;
+            return;
+        }
 
         _currIdleTimer -= Time.deltaTime;
         if (_currIdleTimer <= 0)
         {
             _enemyStates = EnemyStates.Patrol;
-            StartPath();
             _currIdleTimer = _idleTimer;
         }
     }
 
     protected virtual void Patrol()
     {
-        if (_path == null || _reachedPath || _path.vectorPath.Count == 0) 
+        if (!_aiPath || !WayPointManager.instance)
             return;
-        Vector2 dir = ((Vector2)_path.vectorPath[0] - _rb.position).normalized;
-        _rb.velocity = dir * _speed;
 
-        //PlayerNearby();
-        if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
-        if (Vector2.Distance(_rb.position, (Vector2)_path.vectorPath[_path.vectorPath.Count - 1]) < 0.5f)
+        _aiPath.canMove = true;
+        _aiPath.destination = WayPointManager.instance.GetWayPoint(_currWP);
+
+        if (Vector2.Distance(_rb.position, _aiPath.destination) < 0.5f)
         {
             _currWP = (_currWP + 1) % WayPointManager.instance.GetTotalWayPoints();
             _enemyStates = EnemyStates.Idle;
         }
+
+        if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
     }
 
     protected virtual void Chase()
     {
         if (!_player) return;
-
         float dist = Vector2.Distance(_rb.position, _player.position);
 
-        if (dist > _chaseRange || !CanSeePlayer())
+        if (dist > _chaseRange)
         {
+            _aiPath.destination = _rb.position;
             _enemyStates = EnemyStates.Idle;
             return;
         }
 
-        _seeker.StartPath(_rb.position, _player.position, OnPathComplete);
+        _aiPath.canMove = true;
+        _aiPath.destination = _player.position;
 
-        if (_path != null && _path.vectorPath.Count > 0)
+        if (dist < _atkRange)
         {
-            Vector2 target = (Vector2)_path.vectorPath[0];
-            Vector2 dir = (target - _rb.position).normalized;
-            //_rb.velocity = dir * _speed;
-            if (Vector2.Distance(_rb.position, target) < 0.2f)
-                _path.vectorPath.RemoveAt(0);
-        }
-    }
-
-    private void StartPath()
-    {
-        if (!WayPointManager.instance) return;
-
-        Vector3 target = WayPointManager.instance.GetWayPoint(_currWP);
-        _seeker.StartPath(_rb.position, target, OnPathComplete);
-    }
-
-    private void OnPathComplete(Path p)
-    {
-        if (!p.error)
-        {
-            _path = p;
+            _aiPath.canMove = false;
+            _enemyStates = EnemyStates.Attack;
         }
     }
 
@@ -166,6 +148,8 @@ public abstract class EnemyBase : MonoBehaviour
         //float dir = player.position.x - transform.position.x;
         //FaceDir(dir);
         //PlayerNearby();
+
+        if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
 
         // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
         //if (!inBattle)
@@ -186,41 +170,17 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected abstract void BattleAttack();
 
-    //protected virtual bool PlayerNearby()
-    //{
-    //    if (!_player) return false;
-
-    //    Vector2 dirTo_player = (_player.position - transform.position).normalized;
-    //    float dist = Vector3.Distance(transform.position, _player.position);
-    //    LayerMask _playerLayer = LayerMask.GetMask("Player");
-    //    RaycastHit2D hit = Physics2D.Raycast(transform.position, dirTo_player, _chaseRange, _playerLayer);
-
-    //    if (hit.collider != null && hit.collider.CompareTag("Player"))
-    //    {
-    //        if (dist < _chaseRange)
-    //        {
-    //            Debug.Log("[Enemy] Chasing");
-    //            if (dist < _atkRange)
-    //                _enemyStates = EnemyStates.Attack;
-    //            else
-    //                _enemyStates = EnemyStates.Chase;
-    //        }
-    //        return true;
-    //    }
-
-    //    _enemyStates = EnemyStates.Idle;
-    //    return false;
-    //}
-
     protected virtual bool CanSeePlayer()
     {
         if (!_player) return false;
 
         float dist = Vector2.Distance(transform.position, _player.position);
-        if (dist > _chaseRange) return false;
 
-        Vector2 dirToPlayer = (_player.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToPlayer, _chaseRange);
+        if (dist > _chaseRange)
+            return false;
+
+        Vector2 distToPlayer = (_player.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, distToPlayer, _chaseRange, LayerMask.GetMask("Player"));
 
         return hit.collider != null && hit.collider.CompareTag("Player");
     }
@@ -251,43 +211,6 @@ public abstract class EnemyBase : MonoBehaviour
                 break;
         }
     }
-
-    //protected virtual void Start()
-    //{
-    //    if (!player) player = GameObject.FindWithTag("Player").transform;
-
-    //    // timers
-    //    _currIdleTimer = _idleTimer;
-    //    _currInvTimer = _investigateTimer;
-    //    _currAtkTimer = _atkCD;
-
-    //    if (!inBattle)
-    //    {
-    //        Waypoints[] allWayPoints = FindObjectsOfType<Waypoints>();
-    //        if (allWayPoints.Length > 0)
-    //            _currWP = allWayPoints[UnityEngine.Random.Range(0, allWayPoints.Length)];
-    //        //_currWPIndex = 0;
-    //        //SetWP("EnemyWP");
-    //    }
-    //}
-
-    //private void Update()
-    //{
-    //    StateMachine();
-
-    //    // for testing
-    //    if (Input.GetKeyDown(KeyCode.L))
-    //        TakeDamage(10);
-    //}
-
-    //private void OnDrawGizmosSelected()
-    //{
-    //    if (_currWP)
-    //    {
-    //        Gizmos.color = Color.yellow;
-    //        Gizmos.DrawLine(transform.position, _currWP.transform.position);
-    //    }
-    //}
 
     //// PLAYER -> CALL TO KILL ENEMIES
     //public virtual void TakeDamage(int amt)
@@ -378,10 +301,5 @@ public abstract class EnemyBase : MonoBehaviour
     //            _animator.Play("WalkBack");
     //        }
     //    }
-    //}
-
-    //protected void MsgLog(string msg)
-    //{
-    //    Debug.Log("[Enemy] " + msg);
     //}
 }
