@@ -18,6 +18,7 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected EnemyStates _enemyStates;
     [SerializeField] protected EnemyStats _enemyStats;
     protected Transform _player;
+    [SerializeField] protected Animator _animator;
 
     [Header("Enemy Components")]
     [SerializeField] protected Seeker _seeker;
@@ -34,13 +35,15 @@ public abstract class EnemyBase : MonoBehaviour
     private int _maxHealth;
     public int GetMaxHealth() => _maxHealth;
 
-    //[Header("Idle")]
     private float _idleTimer;
     private float _currIdleTimer;
     private float _chaseRange;
     protected float _atkRange;
-    //protected int _atkDmg;
+    protected int _atkDmg;
     //protected float _AOERadius;
+
+    [SerializeField] private float avoidanceRadius;
+    [SerializeField] private float avoidanceStrength;
 
     //// FOR TANKS //
     //private float _dmgReduction;
@@ -52,16 +55,12 @@ public abstract class EnemyBase : MonoBehaviour
     //public event Action<GameObject, EnemyBase> OnAttackPlayer;
     //protected bool inBattle;
 
-    //[Header("FOR TESTING ONLY")]
-    //[SerializeField] private GameObject normalScene;
-    //[SerializeField] private GameObject battleScene;
-
     protected void Initialize(EnemyStats stats)
     {
         _speed = stats.speed;
         _maxHealth = stats.maxHealth;
         _atkRange = stats.atkRange;
-        //_atkDmg = stats.atkDmg;
+        _atkDmg = stats.atkDmg;
         //_atkCD = stats.atkCD;
         _idleTimer = stats.idleTimer;
         _chaseRange = stats.chaseRange;
@@ -79,6 +78,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Start()
     {
         if (!_player) _player = GameObject.FindWithTag("Player").transform;
+        if(!_animator) _animator = GetComponent<Animator>();
 
         _currIdleTimer = _idleTimer;
     }
@@ -109,16 +109,47 @@ public abstract class EnemyBase : MonoBehaviour
         if (!_aiPath || !WayPointManager.instance)
             return;
 
+        //Vector2 waypoint = WayPointManager.instance.GetWayPoint(_currWP);
+        //Vector2 avoidance = GetAvoidanceVector();
+        //Vector2 finalDestination = waypoint + avoidance * 0.5f;
+
+        //_aiPath.canMove = true;
+        //_aiPath.destination = finalDestination;
+
+        //FaceDir((finalDestination - (Vector2)transform.position).normalized);
+
+        Vector2 waypoint = WayPointManager.instance.GetWayPoint(_currWP);
+
+        Vector2 dir = (_aiPath.steeringTarget - transform.position).normalized;
+        FaceDir(dir);
+
         _aiPath.canMove = true;
         _aiPath.destination = WayPointManager.instance.GetWayPoint(_currWP);
 
         if (Vector2.Distance(_rb.position, _aiPath.destination) < 0.5f)
         {
-            _currWP = (_currWP + 1) % WayPointManager.instance.GetTotalWayPoints();
+            _currWP = Random.Range(0, WayPointManager.instance.GetTotalWayPoints());
             _enemyStates = EnemyStates.Idle;
         }
 
         if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
+    }
+
+    private Vector2 GetAvoidanceVector()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, avoidanceRadius, LayerMask.GetMask("Enemy"));
+        Vector2 avoidance = Vector2.zero;
+
+        foreach (var hit in hits)
+        {
+            if (hit.gameObject == gameObject) continue;
+            Vector2 dir = (Vector2)(transform.position - hit.transform.position);
+            float dist = dir.magnitude;
+            if (dist > 0)
+                avoidance += dir.normalized / dist;
+        }
+
+        return avoidance * avoidanceStrength;
     }
 
     protected virtual void Chase()
@@ -233,30 +264,6 @@ public abstract class EnemyBase : MonoBehaviour
     //        _states = EnemyStates.Death;
     //    }
     //}
-    //protected virtual void Chase()
-    //{
-    //    if (player == null) return;
-
-    //    PlayerNearby();
-
-    //    Vector2 dirToTarget = (player.position - transform.position).normalized;
-    //    FaceDir(dirToTarget);
-
-    //    transform.position = Vector3.MoveTowards(transform.position, player.position, _speed * Time.deltaTime);
-    //}
-    //protected virtual void Investigate()
-    //{
-    //    if (_currInvTimer <= _investigateTimer)
-    //    {
-    //        if (PlayerNearby()) return;
-    //        _currInvTimer -= Time.deltaTime;
-    //        if (_currInvTimer <= 0)
-    //        {
-    //            _states = EnemyStates.Idle;
-    //            _currInvTimer = _investigateTimer;
-    //        }
-    //    }
-    //}
     //protected virtual void Death()
     //{
     //    // TODO: ANIMATION
@@ -264,42 +271,42 @@ public abstract class EnemyBase : MonoBehaviour
     //    Destroy(gameObject, _deathTime);
     //}
 
-    //protected void FaceDir(Vector2 dir)
-    //{
-    //    if (!player || !_animator) return;
+    protected void FaceDir(Vector2 dir)
+    {
+        if (!_player || !_animator) return;
 
-    //    Vector2 moveDir = Vector2.zero;
+        Vector2 moveDir = Vector2.zero;
 
-    //    if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
-    //    {
-    //        SpriteRenderer _sprite = GetComponent<SpriteRenderer>();
-    //        // move horizontal
-    //        if (dir.x > 0)
-    //        {
-    //            moveDir.x = 1;
-    //            _animator.Play("WalkRight");
-    //            _sprite.flipX = false;
-    //        }
-    //        else
-    //        {
-    //            moveDir.x = -1;
-    //            _animator.Play("WalkRight");
-    //            _sprite.flipX = true;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        // move vertical
-    //        if (dir.y > 0)
-    //        {
-    //            moveDir.y = 1;
-    //            _animator.Play("WalkFront");
-    //        }
-    //        else
-    //        {
-    //            moveDir.y = -1;
-    //            _animator.Play("WalkBack");
-    //        }
-    //    }
-    //}
+        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+        {
+            SpriteRenderer _sprite = GetComponent<SpriteRenderer>();
+            // move horizontal
+            if (dir.x > 0)
+            {
+                moveDir.x = 1;
+                _animator.Play("WalkRight");
+                _sprite.flipX = false;
+            }
+            else
+            {
+                moveDir.x = -1;
+                _animator.Play("WalkRight");
+                _sprite.flipX = true;
+            }
+        }
+        else
+        {
+            // move vertical
+            if (dir.y > 0)
+            {
+                moveDir.y = 1;
+                _animator.Play("WalkFront");
+            }
+            else
+            {
+                moveDir.y = -1;
+                _animator.Play("WalkBack");
+            }
+        }
+    }
 }

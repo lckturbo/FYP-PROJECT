@@ -41,6 +41,8 @@ public class BattleSystem : MonoBehaviour
             instance = this;
         else
             Destroy(gameObject);
+
+        DontDestroyOnLoad(gameObject);
     }
 
     //public void RegisterEnemy(EnemyBase enemy)
