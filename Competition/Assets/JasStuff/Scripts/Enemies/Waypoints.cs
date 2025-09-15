@@ -4,6 +4,9 @@ using UnityEngine.TextCore.LowLevel;
 
 public class Waypoints : MonoBehaviour
 {
+    // check if its occupied
+    // check nearest waypoint
+    
     private bool occupied;
     public void SetOccupied(bool v) { occupied = v; }
     public bool isOccupied() => occupied;

@@ -43,14 +43,14 @@ public class BattleSystem : MonoBehaviour
             Destroy(gameObject);
     }
 
-    public void RegisterEnemy(EnemyBase enemy)
-    {
-        enemy.OnAttackPlayer += HandleBattleTransition;
-    }
-    public void UnRegisterEnemy(EnemyBase enemy)
-    {
-        enemy.OnAttackPlayer -= HandleBattleTransition;
-    }
+    //public void RegisterEnemy(EnemyBase enemy)
+    //{
+    //    enemy.OnAttackPlayer += HandleBattleTransition;
+    //}
+    //public void UnRegisterEnemy(EnemyBase enemy)
+    //{
+    //    enemy.OnAttackPlayer -= HandleBattleTransition;
+    //}
     public void HandleBattleTransition(GameObject player, EnemyBase enemy)
     {
         MsgLog("HandleBattleTransition");
@@ -81,64 +81,64 @@ public class BattleSystem : MonoBehaviour
         //playerHealth.maxValue = player.GetComponent<Health>().GetMaxHealth();
         //playerHealth.value = playerHealth.maxValue;
         //MsgLog("Player MaxHealth: " + player.GetComponent<Health>().GetMaxHealth());
-        enemyHealth.maxValue = enemy.GetComponent<EnemyBase>().GetMaxHealth();
-        enemyHealth.value = enemyHealth.maxValue;
-        MsgLog("Enemy MaxHealth: " + enemy.GetComponent<EnemyBase>().GetMaxHealth());
+        //enemyHealth.maxValue = enemy.GetComponent<EnemyBase>().GetMaxHealth();
+        //enemyHealth.value = enemyHealth.maxValue;
+        //MsgLog("Enemy MaxHealth: " + enemy.GetComponent<EnemyBase>().GetMaxHealth());
     }
     private bool CheckHealth()
     {
         //int playerCurrHealth = _player.GetComponent<Health>().GetCurrHealth();
-        int enemyCurrHealth = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
+        //int enemyCurrHealth = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
 
         //if (playerCurrHealth <= 0)
         //{
         //    BattleLose();
         //    return false;
         //}
-        if (enemyCurrHealth <= 0)
-        {
-            BattleWin();
-            return false;
-        }
+        //if (enemyCurrHealth <= 0)
+        //{
+        //    BattleWin();
+        //    return false;
+        //}
         return true;
     }
     private void PlayerTurn()
     {
-        battleState = BattleState.PLAYERTURN;
-        turnText.text = "PLAYER TURN";
+        //battleState = BattleState.PLAYERTURN;
+        //turnText.text = "PLAYER TURN";
 
-        // PLAYER HIT -> PARTY HIT -> PARTY HIT
-        _enemy.GetComponent<EnemyBase>().TakeDamage(10);
-        enemyHealth.value = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
-        // CHECK HEALTH
-        if (CheckHealth())
-        {
-            // ENEMY TURN
-            //EnemyTurn();
-            StartCoroutine(WaitTurn("Player"));
-        }
+        //// PLAYER HIT -> PARTY HIT -> PARTY HIT
+        //_enemy.GetComponent<EnemyBase>().TakeDamage(10);
+        //enemyHealth.value = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
+        //// CHECK HEALTH
+        //if (CheckHealth())
+        //{
+        //    // ENEMY TURN
+        //    //EnemyTurn();
+        //    StartCoroutine(WaitTurn("Player"));
+        //}
     }
 
     private void EnemyTurn()
     {
-        battleState = BattleState.ENEMYTURN;
-        turnText.text = "ENEMY TURN";
+        //battleState = BattleState.ENEMYTURN;
+        //turnText.text = "ENEMY TURN";
 
-        // ENEMY HIT -> PLAYER TURN
-        _enemy.GetComponent<EnemyBase>()._states = EnemyBase.EnemyStates.BattleAttack;
-        StartCoroutine(EnemyTurnCoroutine());
+        //// ENEMY HIT -> PLAYER TURN
+        //_enemy.GetComponent<EnemyBase>()._states = EnemyBase.EnemyStates.BattleAttack;
+        //StartCoroutine(EnemyTurnCoroutine());
     }
 
-    private IEnumerator EnemyTurnCoroutine()
-    {
-        while (_enemy.GetComponent<EnemyBase>()._states == EnemyBase.EnemyStates.Attack)
-            yield return null;
+    //private IEnumerator EnemyTurnCoroutine()
+    //{
+    //    while (_enemy.GetComponent<EnemyBase>()._states == EnemyBase.EnemyStates.Attack)
+    //        yield return null;
 
-        //playerHealth.value = _player.GetComponent<Health>().GetCurrHealth();
-        //MsgLog("Player currHealth: " + _player.GetComponent<Health>().GetCurrHealth());
-        if (CheckHealth())
-            StartCoroutine(WaitTurn("Enemy"));
-    }
+    //    //playerHealth.value = _player.GetComponent<Health>().GetCurrHealth();
+    //    //MsgLog("Player currHealth: " + _player.GetComponent<Health>().GetCurrHealth());
+    //    if (CheckHealth())
+    //        StartCoroutine(WaitTurn("Enemy"));
+    //}
 
     private IEnumerator WaitTurn(string n)
     {
@@ -151,28 +151,28 @@ public class BattleSystem : MonoBehaviour
 
     private void BattleWin()
     {
-        UnRegisterEnemy(_enemy.GetComponent<EnemyBase>());
-        battleState = BattleState.BATTLEWIN;
-        turnText.text = "Battle Win";
-        Time.timeScale = 0;
-        MsgLog("Player win");
-        // game scene
-        if (normalScene && battleScene)
-        {
-            Destroy(_enemy);
-            Destroy(_player);
-            normalScene.SetActive(true);
-            battleScene.SetActive(false);
-        }
+        //UnRegisterEnemy(_enemy.GetComponent<EnemyBase>());
+        //battleState = BattleState.BATTLEWIN;
+        //turnText.text = "Battle Win";
+        //Time.timeScale = 0;
+        //MsgLog("Player win");
+        //// game scene
+        //if (normalScene && battleScene)
+        //{
+        //    Destroy(_enemy);
+        //    Destroy(_player);
+        //    normalScene.SetActive(true);
+        //    battleScene.SetActive(false);
+        //}
     }
 
     private void BattleLose()
     {
-        UnRegisterEnemy(_enemy.GetComponent<EnemyBase>());
-        battleState = BattleState.BATTLELOSE;
-        turnText.text = "Battle Lose";
-        Time.timeScale = 0;
-        MsgLog("Player lost");
+        //UnRegisterEnemy(_enemy.GetComponent<EnemyBase>());
+        //battleState = BattleState.BATTLELOSE;
+        //turnText.text = "Battle Lose";
+        //Time.timeScale = 0;
+        //MsgLog("Player lost");
         // lose scene
     }
 
