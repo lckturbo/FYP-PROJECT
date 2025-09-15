@@ -16,7 +16,7 @@ public class NewCharacterDefinition : ScriptableObject
 
     [Header("Gameplay")]
     public NewCharacterStats stats;
-    public UnitType unitType = UnitType.Melee;
+    //public UnitType unitType = UnitType.Melee;
 
     [Header("Prefab")]
     public GameObject playerPrefab;

@@ -11,7 +11,7 @@ public class BaseStats : ScriptableObject
     [Header("Health & Defense")]
     public int maxHealth; //your current one @jas
 
-    public float attackreduction;
+    public float attackreduction; //aka flat defense
 
     [Header("Combat")]
     public int atkDmg; //your current one @jas
