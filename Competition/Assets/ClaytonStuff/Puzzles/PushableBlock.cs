@@ -14,10 +14,13 @@ public class PushableBlock : MonoBehaviour
 
     private bool isMoving = false;
     private Rigidbody2D rb;
+    private Collider2D col;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        col = GetComponent<Collider2D>();
+
         // block should use Kinematic so we control it (or Dynamic if you prefer physics).
         rb.bodyType = RigidbodyType2D.Kinematic;
     }
@@ -30,24 +33,29 @@ public class PushableBlock : MonoBehaviour
     {
         if (isMoving) return false;
 
-        // convert direction to one of the 4 cardinal directions (prefers axis with larger absolute)
         Vector2 dir = GetCardinal(direction);
         if (dir == Vector2.zero) return false;
 
-        Vector2 origin = (Vector2)transform.position;
-        Vector2 target = origin + dir * gridSize;
-
-        // check for obstacles at target position
-        // use a small box sized to the collider bounds
-        Collider2D col = GetComponent<Collider2D>();
+        // bounds of the block
         Bounds b = col.bounds;
         Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
 
-        Collider2D hit = Physics2D.OverlapBox(target, size, 0f, obstacleMask);
-        if (hit != null)
+        // cast forward 1 grid cell
+        RaycastHit2D hit = Physics2D.BoxCast(rb.position, size, 0f, dir, gridSize, obstacleMask);
+
+        Vector2 target;
+        if (hit.collider != null)
         {
-            // something blocking the target cell
-            return false;
+            // something in the way, stop just before it
+            float distance = hit.distance - checkPadding;  // apply padding
+            if (distance <= 0f) return false; // already flush, can't move
+
+            target = rb.position + dir * distance;
+        }
+        else
+        {
+            // free space, move exactly 1 grid cell
+            target = rb.position + dir * gridSize;
         }
 
         StartCoroutine(MoveTo(target));
@@ -57,7 +65,6 @@ public class PushableBlock : MonoBehaviour
     private IEnumerator MoveTo(Vector2 target)
     {
         isMoving = true;
-        // Smooth linear movement
         while ((Vector2)transform.position != target)
         {
             Vector2 newPos = Vector2.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
@@ -65,7 +72,7 @@ public class PushableBlock : MonoBehaviour
             yield return null;
         }
 
-        rb.MovePosition(target); // ensure exact
+        rb.MovePosition(target); // snap to exact
         isMoving = false;
     }
 
@@ -78,14 +85,13 @@ public class PushableBlock : MonoBehaviour
         return Vector2.zero;
     }
 
-    // Gizmo to visualize the target test box
+    // Debug draw
     private void OnDrawGizmosSelected()
     {
-        Collider2D col = GetComponent<Collider2D>();
+        if (col == null) col = GetComponent<Collider2D>();
         if (col == null) return;
-        Gizmos.color = Color.cyan;
-        Vector2 size = col.bounds.size;
-        Vector2 pos = transform.position;
-        Gizmos.DrawWireCube(pos, size);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(transform.position, col.bounds.size);
     }
 }
