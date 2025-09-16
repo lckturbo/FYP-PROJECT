@@ -21,7 +21,7 @@ public class PushableBlock : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
 
-        // block should use Kinematic so we control it (or Dynamic if you prefer physics).
+        // block should use Kinematic so we control it
         rb.bodyType = RigidbodyType2D.Kinematic;
     }
 
@@ -46,11 +46,24 @@ public class PushableBlock : MonoBehaviour
         Vector2 target;
         if (hit.collider != null)
         {
-            // something in the way, stop just before it
-            float distance = hit.distance - checkPadding;  // apply padding
-            if (distance <= 0f) return false; // already flush, can't move
+            // check if it's another pushable block
+            PushableBlock otherBlock = hit.collider.GetComponent<PushableBlock>();
+            if (otherBlock != null)
+            {
+                // try to push that block forward
+                bool pushed = otherBlock.TryPush(dir);
+                if (!pushed) return false; // other block couldn't move, so we can't either
 
-            target = rb.position + dir * distance;
+                // if the other block can move, we also move forward 1 cell
+                target = rb.position + dir * gridSize;
+            }
+            else
+            {
+                // obstacle that cannot move, stop just before it
+                float distance = hit.distance - checkPadding;
+                if (distance <= 0f) return false;
+                target = rb.position + dir * distance;
+            }
         }
         else
         {
