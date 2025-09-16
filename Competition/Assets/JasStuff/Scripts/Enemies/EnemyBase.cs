@@ -21,6 +21,7 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected Animator _animator;
 
     [Header("Enemy Components")]
+    [SerializeField] protected NewHealth _health;
     [SerializeField] protected Seeker _seeker;
     [SerializeField] protected Rigidbody2D _rb;
     [SerializeField] protected AIPath _aiPath;
@@ -29,11 +30,11 @@ public abstract class EnemyBase : MonoBehaviour
     private int _currWP;
     private bool _reachedPath;
 
-    [Header("Health")]
-    private int _currHealth;
-    public int GetCurrHealth() => _currHealth;
-    private int _maxHealth;
-    public int GetMaxHealth() => _maxHealth;
+    //[Header("Health")]
+    //private int _currHealth;
+    //public int GetCurrHealth() => _currHealth;
+    //private int _maxHealth;
+    //public int GetMaxHealth() => _maxHealth;
 
     private float _idleTimer;
     private float _currIdleTimer;
@@ -42,7 +43,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected int _atkDmg;
     //protected float _AOERadius;
 
-    [SerializeField] private float detectionDist; 
+    [SerializeField] private float detectionDist;
     [SerializeField] private float sideOffSet; // left/right raycast
     [SerializeField] private float avoidanceStrength;
 
@@ -59,7 +60,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected void Initialize(EnemyStats stats)
     {
         _speed = stats.Speed;
-        _maxHealth = stats.maxHealth;
+        //_maxHealth = stats.maxHealth;
         _atkRange = stats.atkRange;
         _atkDmg = stats.atkDmg;
         _idleTimer = stats.idleTimer;
@@ -78,13 +79,18 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Start()
     {
         if (!_player) _player = GameObject.FindWithTag("Player").transform;
-        if(!_animator) _animator = GetComponent<Animator>();
+        if (!_animator) _animator = GetComponent<Animator>();
+        if (!_health) _health = GetComponent<NewHealth>();
+        _health.ApplyStats(_enemyStats);
 
         _currIdleTimer = _idleTimer;
     }
     private void Update()
     {
         StateMachine();
+
+        if (Input.GetKeyDown(KeyCode.L))
+            _health.TakeDamage(10, _enemyStats);
     }
     protected virtual void Idle()
     {
@@ -138,7 +144,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         // forward
         RaycastHit2D hit = Physics2D.Raycast(transform.position, _aiPath.desiredVelocity.normalized, detectionDist, enemyLayer);
-        if(hit && hit.collider.gameObject != gameObject && hit.fraction < minF)
+        if (hit && hit.collider.gameObject != gameObject && hit.fraction < minF)
         {
             closestHit = hit;
             minF = hit.fraction;
@@ -153,7 +159,7 @@ public abstract class EnemyBase : MonoBehaviour
             minF = leftHit.fraction;
         }
         RaycastHit2D rightHit = Physics2D.Raycast((Vector2)transform.position + perp, _aiPath.desiredVelocity.normalized, detectionDist, enemyLayer);
-        if(rightHit && rightHit.collider.gameObject != gameObject && rightHit.fraction < minF)
+        if (rightHit && rightHit.collider.gameObject != gameObject && rightHit.fraction < minF)
         {
             closestHit = rightHit;
             minF = rightHit.fraction;
@@ -284,33 +290,25 @@ public abstract class EnemyBase : MonoBehaviour
         }
     }
 
-    //// PLAYER -> CALL TO KILL ENEMIES
+    // PLAYER -> CALL TO KILL ENEMIES
     //public virtual void TakeDamage(int amt)
     //{
-    //    switch (_enemyStats.type)
-    //    {
-    //        case EnemyStats.EnemyTypes.Basic:
-    //            _currHealth -= amt;
-    //            break;
-    //        default:
-    //            _currHealth -= Mathf.RoundToInt(amt * (1f - _dmgReduction)); // tank and boss
-    //            break;
-    //    }
+    //    _health.TakeDamage(_health.GetCurrHealth(), _enemyStats);
 
-    //    MsgLog(_enemyStats.type + " HP: " + _currHealth + "/" + _maxHealth);
+    //    //MsgLog(_enemyStats.type + " HP: " + _currHealth + "/" + _maxHealth);
 
-    //    if (_currHealth <= 0)
-    //    {
-    //        _currHealth = Mathf.Max(_currHealth, 0);
-    //        _states = EnemyStates.Death;
-    //    }
+    //    //if (_currHealth <= 0)
+    //    //{
+    //    //    _currHealth = Mathf.Max(_currHealth, 0);
+    //    //    _states = EnemyStates.Death;
+    //    //}
     //}
-    //protected virtual void Death()
-    //{
-    //    // TODO: ANIMATION
-    //    OnDeath?.Invoke(this.gameObject, _deathTime);
-    //    Destroy(gameObject, _deathTime);
-    //}
+    protected virtual void Death()
+    {
+        // TODO: ANIMATION
+        //OnDeath?.Invoke(this.gameObject, _deathTime);
+        //Destroy(gameObject, _deathTime);
+    }
 
     protected void FaceDir(Vector2 dir)
     {
