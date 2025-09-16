@@ -1,4 +1,4 @@
-using Pathfinding;
+﻿using Pathfinding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -24,7 +24,7 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected Seeker _seeker;
     [SerializeField] protected Rigidbody2D _rb;
     [SerializeField] protected AIPath _aiPath;
-    [SerializeField] protected float _speed;
+    protected float _speed;
     private Path _path;
     private int _currWP;
     private bool _reachedPath;
@@ -42,7 +42,8 @@ public abstract class EnemyBase : MonoBehaviour
     protected int _atkDmg;
     //protected float _AOERadius;
 
-    [SerializeField] private float avoidanceRadius;
+    [SerializeField] private float detectionDist; 
+    [SerializeField] private float sideOffSet; // left/right raycast
     [SerializeField] private float avoidanceStrength;
 
     //// FOR TANKS //
@@ -57,11 +58,10 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected void Initialize(EnemyStats stats)
     {
-        _speed = stats.speed;
+        _speed = stats.Speed;
         _maxHealth = stats.maxHealth;
         _atkRange = stats.atkRange;
         _atkDmg = stats.atkDmg;
-        //_atkCD = stats.atkCD;
         _idleTimer = stats.idleTimer;
         _chaseRange = stats.chaseRange;
         //_dmgReduction = stats.dmgReduction;
@@ -88,6 +88,7 @@ public abstract class EnemyBase : MonoBehaviour
     }
     protected virtual void Idle()
     {
+        if (_animator) _animator.Play("IdleBack");
         _aiPath.canMove = false;
         _rb.velocity = Vector2.zero;
         if (CanSeePlayer())
@@ -99,6 +100,7 @@ public abstract class EnemyBase : MonoBehaviour
         _currIdleTimer -= Time.deltaTime;
         if (_currIdleTimer <= 0)
         {
+            _currWP = Random.Range(0, WayPointManager.instance.GetTotalWayPoints());
             _enemyStates = EnemyStates.Patrol;
             _currIdleTimer = _idleTimer;
         }
@@ -109,47 +111,86 @@ public abstract class EnemyBase : MonoBehaviour
         if (!_aiPath || !WayPointManager.instance)
             return;
 
-        //Vector2 waypoint = WayPointManager.instance.GetWayPoint(_currWP);
-        //Vector2 avoidance = GetAvoidanceVector();
-        //Vector2 finalDestination = waypoint + avoidance * 0.5f;
-
-        //_aiPath.canMove = true;
-        //_aiPath.destination = finalDestination;
-
-        //FaceDir((finalDestination - (Vector2)transform.position).normalized);
-
         Vector2 waypoint = WayPointManager.instance.GetWayPoint(_currWP);
+        Vector2 avoidance = SteeringAvoidance() + Separation();
+        Vector2 final = waypoint + avoidance;
+        _aiPath.canMove = true;
+        _aiPath.destination = final;
 
-        Vector2 dir = (_aiPath.steeringTarget - transform.position).normalized;
+        Vector2 dir = ((Vector2)_aiPath.steeringTarget - (Vector2)transform.position).normalized;
         FaceDir(dir);
 
-        _aiPath.canMove = true;
-        _aiPath.destination = WayPointManager.instance.GetWayPoint(_currWP);
-
-        if (Vector2.Distance(_rb.position, _aiPath.destination) < 0.5f)
-        {
-            _currWP = Random.Range(0, WayPointManager.instance.GetTotalWayPoints());
+        if (_aiPath.reachedEndOfPath || _aiPath.remainingDistance < 0.5f)
             _enemyStates = EnemyStates.Idle;
-        }
+        else if (_aiPath.velocity.sqrMagnitude < 0.1f)
+            _aiPath.SearchPath();
 
         if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
     }
 
-    private Vector2 GetAvoidanceVector()
+    private Vector2 SteeringAvoidance()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, avoidanceRadius, LayerMask.GetMask("Enemy"));
-        Vector2 avoidance = Vector2.zero;
+        if (_aiPath.velocity.sqrMagnitude <= 0.01f) return Vector2.zero;
+
+        LayerMask enemyLayer = LayerMask.GetMask("Enemy");
+        RaycastHit2D closestHit = new RaycastHit2D();
+        float minF = float.MaxValue;
+
+        // forward
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, _aiPath.desiredVelocity.normalized, detectionDist, enemyLayer);
+        if(hit && hit.collider.gameObject != gameObject && hit.fraction < minF)
+        {
+            closestHit = hit;
+            minF = hit.fraction;
+        }
+
+        // sides
+        Vector2 perp = new Vector2(_aiPath.desiredVelocity.y, -_aiPath.desiredVelocity.x).normalized * sideOffSet;
+        RaycastHit2D leftHit = Physics2D.Raycast((Vector2)transform.position - perp, _aiPath.desiredVelocity.normalized, detectionDist, enemyLayer);
+        if (leftHit && leftHit.collider.gameObject != gameObject && leftHit.fraction < minF)
+        {
+            closestHit = leftHit;
+            minF = leftHit.fraction;
+        }
+        RaycastHit2D rightHit = Physics2D.Raycast((Vector2)transform.position + perp, _aiPath.desiredVelocity.normalized, detectionDist, enemyLayer);
+        if(rightHit && rightHit.collider.gameObject != gameObject && rightHit.fraction < minF)
+        {
+            closestHit = rightHit;
+            minF = rightHit.fraction;
+        }
+
+        if (!closestHit.collider) return Vector2.zero;
+
+        // steer left or right
+        Vector2 toOther = (Vector2)closestHit.collider.transform.position - (Vector2)transform.position;
+        float cross = _aiPath.desiredVelocity.x * -toOther.y + _aiPath.desiredVelocity.y * toOther.x;
+        bool steerLeft = cross > 0;
+
+        Vector2 result = steerLeft
+            ? new Vector2(-toOther.y, toOther.x)
+            : new Vector2(toOther.y, -toOther.x);
+
+        result.Normalize();
+        result *= avoidanceStrength;
+
+        return result / Mathf.Max(0.1f, minF);
+    }
+
+    private Vector2 Separation()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.6f, LayerMask.GetMask("Enemy"));
+        Vector2 force = Vector2.zero;
 
         foreach (var hit in hits)
         {
             if (hit.gameObject == gameObject) continue;
-            Vector2 dir = (Vector2)(transform.position - hit.transform.position);
-            float dist = dir.magnitude;
+            Vector2 diff = (Vector2)transform.position - (Vector2)hit.transform.position;
+            float dist = diff.magnitude;
             if (dist > 0)
-                avoidance += dir.normalized / dist;
+                force += diff.normalized / dist;
         }
 
-        return avoidance * avoidanceStrength;
+        return force * avoidanceStrength;
     }
 
     protected virtual void Chase()

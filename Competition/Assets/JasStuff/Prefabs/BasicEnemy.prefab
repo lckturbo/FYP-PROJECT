@@ -201,9 +201,9 @@ MonoBehaviour:
   _seeker: {fileID: 2058426006471302486}
   _rb: {fileID: 6888525527434365120}
   _aiPath: {fileID: 8907702388655403980}
-  _speed: 0
-  avoidanceRadius: 2
-  avoidanceStrength: 2
+  detectionDist: 3
+  sideOffSet: 2
+  avoidanceStrength: 10
 --- !u!114 &2058426006471302486
 MonoBehaviour:
   m_ObjectHideFlags: 0
