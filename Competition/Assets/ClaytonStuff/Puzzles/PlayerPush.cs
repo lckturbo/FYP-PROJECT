@@ -91,6 +91,7 @@ public class PlayerPush : MonoBehaviour
 
         Debug.Log($"Pushing block {pushable.name} in {dir}");
         pushable.TryPush(dir);
+
     }
 
 

@@ -5,12 +5,12 @@ using UnityEngine;
 public class PushableBlock : MonoBehaviour
 {
     [Header("Movement")]
-    public float gridSize = 1f;            // size of one step / cell
-    public float moveSpeed = 6f;           // higher = faster (units/sec)
-    public LayerMask obstacleMask;         // layers that block movement (walls, other blocks)
+    public float gridSize = 1f;
+    public float moveSpeed = 6f;
+    public LayerMask obstacleMask;
 
     [Header("Safety")]
-    public float checkPadding = 0.05f;     // small padding for overlap checks
+    public float checkPadding = 0.05f;
 
     private bool isMoving = false;
     private Rigidbody2D rb;
@@ -21,14 +21,12 @@ public class PushableBlock : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
 
-        // block should use Kinematic so we control it
-        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = 0f;
+        rb.freezeRotation = true;
+        rb.drag = 1000f; // prevent sliding
     }
 
-    /// <summary>
-    /// Attempt to push the block in cardinal direction (Vector2.up/right/left/down).
-    /// Returns true if push started.
-    /// </summary>
     public bool TryPush(Vector2 direction)
     {
         if (isMoving) return false;
@@ -36,56 +34,74 @@ public class PushableBlock : MonoBehaviour
         Vector2 dir = GetCardinal(direction);
         if (dir == Vector2.zero) return false;
 
-        // bounds of the block
-        Bounds b = col.bounds;
+        if (!CanPushChain(this, dir)) return false;
+
+        DoPushChain(this, dir);
+        return true;
+    }
+
+    private bool CanPushChain(PushableBlock block, Vector2 dir)
+    {
+        Bounds b = block.col.bounds;
         Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
 
-        // cast forward 1 grid cell
-        RaycastHit2D hit = Physics2D.BoxCast(rb.position, size, 0f, dir, gridSize, obstacleMask);
+        RaycastHit2D hit = Physics2D.BoxCast(block.rb.position, size, 0f, dir, gridSize, obstacleMask);
+        if (!hit.collider) return true;
 
-        Vector2 target;
-        if (hit.collider != null)
-        {
-            // check if it's another pushable block
-            PushableBlock otherBlock = hit.collider.GetComponent<PushableBlock>();
-            if (otherBlock != null)
-            {
-                // try to push that block forward
-                bool pushed = otherBlock.TryPush(dir);
-                if (!pushed) return false; // other block couldn't move, so we can't either
+        PushableBlock other = hit.collider.GetComponent<PushableBlock>();
+        return other != null && CanPushChain(other, dir);
+    }
 
-                // if the other block can move, we also move forward 1 cell
-                target = rb.position + dir * gridSize;
-            }
-            else
-            {
-                // obstacle that cannot move, stop just before it
-                float distance = hit.distance - checkPadding;
-                if (distance <= 0f) return false;
-                target = rb.position + dir * distance;
-            }
-        }
-        else
+    private void DoPushChain(PushableBlock block, Vector2 dir)
+    {
+        Bounds b = block.col.bounds;
+        Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
+
+        RaycastHit2D hit = Physics2D.BoxCast(block.rb.position, size, 0f, dir, gridSize, obstacleMask);
+        if (hit.collider)
         {
-            // free space, move exactly 1 grid cell
-            target = rb.position + dir * gridSize;
+            PushableBlock other = hit.collider.GetComponent<PushableBlock>();
+            if (other != null)
+                DoPushChain(other, dir);
         }
 
-        StartCoroutine(MoveTo(target));
-        return true;
+        Vector2 target = block.rb.position + dir * gridSize;
+        block.StartCoroutine(block.MoveTo(target));
     }
 
     private IEnumerator MoveTo(Vector2 target)
     {
         isMoving = true;
+
+        rb.isKinematic = true;
+
+        // Lock axis movement to cardinal direction only
+        Vector2 start = transform.position;
+        bool moveX = Mathf.Abs(target.x - start.x) > 0.01f;
+        bool moveY = Mathf.Abs(target.y - start.y) > 0.01f;
+
         while ((Vector2)transform.position != target)
         {
-            Vector2 newPos = Vector2.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
-            rb.MovePosition(newPos);
+            Vector2 pos = transform.position;
+
+            if (moveX)
+                pos.x = Mathf.MoveTowards(pos.x, target.x, moveSpeed * Time.deltaTime);
+            if (moveY)
+                pos.y = Mathf.MoveTowards(pos.y, target.y, moveSpeed * Time.deltaTime);
+
+            transform.position = pos;
+
             yield return null;
         }
 
-        rb.MovePosition(target); // snap to exact
+        // Snap to grid to avoid drift
+        rb.position = new Vector2(
+            Mathf.Round(transform.position.x / gridSize) * gridSize,
+            Mathf.Round(transform.position.y / gridSize) * gridSize
+        );
+
+        rb.isKinematic = false;
+        rb.velocity = Vector2.zero;
         isMoving = false;
     }
 
@@ -98,13 +114,20 @@ public class PushableBlock : MonoBehaviour
         return Vector2.zero;
     }
 
-    // Debug draw
-    private void OnDrawGizmosSelected()
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (col == null) col = GetComponent<Collider2D>();
-        if (col == null) return;
+        if (isMoving)
+        {
+            StopAllCoroutines();
+            rb.velocity = Vector2.zero;
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(transform.position, col.bounds.size);
+            // Snap to grid immediately on collision
+            rb.position = new Vector2(
+                Mathf.Round(rb.position.x / gridSize) * gridSize,
+                Mathf.Round(rb.position.y / gridSize) * gridSize
+            );
+
+            isMoving = false;
+        }
     }
 }
