@@ -54,10 +54,18 @@ public class PushableBlock : MonoBehaviour
 
     private void DoPushChain(PushableBlock block, Vector2 dir)
     {
+        // Snap this block to grid before pushing
+        Vector2 alignedPos = new Vector2(
+            Mathf.Round(block.rb.position.x / gridSize) * gridSize,
+            Mathf.Round(block.rb.position.y / gridSize) * gridSize
+        );
+        block.rb.position = alignedPos;
+
+        // Check for another block in direction
         Bounds b = block.col.bounds;
         Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
-
         RaycastHit2D hit = Physics2D.BoxCast(block.rb.position, size, 0f, dir, gridSize, obstacleMask);
+
         if (hit.collider)
         {
             PushableBlock other = hit.collider.GetComponent<PushableBlock>();
@@ -65,6 +73,7 @@ public class PushableBlock : MonoBehaviour
                 DoPushChain(other, dir);
         }
 
+        // Move this block along the axis
         Vector2 target = block.rb.position + dir * gridSize;
         block.StartCoroutine(block.MoveTo(target));
     }
@@ -75,7 +84,6 @@ public class PushableBlock : MonoBehaviour
 
         rb.isKinematic = true;
 
-        // Lock axis movement to cardinal direction only
         Vector2 start = transform.position;
         bool moveX = Mathf.Abs(target.x - start.x) > 0.01f;
         bool moveY = Mathf.Abs(target.y - start.y) > 0.01f;
@@ -90,12 +98,11 @@ public class PushableBlock : MonoBehaviour
                 pos.y = Mathf.MoveTowards(pos.y, target.y, moveSpeed * Time.deltaTime);
 
             transform.position = pos;
-
             yield return null;
         }
 
-        // Snap to grid to avoid drift
-        rb.position = new Vector2(
+        // Snap to grid exactly
+        transform.position = new Vector2(
             Mathf.Round(transform.position.x / gridSize) * gridSize,
             Mathf.Round(transform.position.y / gridSize) * gridSize
         );
