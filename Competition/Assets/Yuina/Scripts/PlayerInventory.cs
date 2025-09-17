@@ -5,10 +5,10 @@ public class PlayerInventory : MonoBehaviour
 {
     public static PlayerInventory Instance { get; private set; }
 
-    [SerializeField] private int startingMoney; // Inspectorで設定
+    [SerializeField] private int startingMoney;
     public int Money { get; private set; }
 
-    public List<ShopItem> ownedItems = new List<ShopItem>();
+    public List<ShopItem> ownedItems = new();
 
     void Awake()
     {
@@ -33,9 +33,9 @@ public class PlayerInventory : MonoBehaviour
         ownedItems.Add(item);
     }
 
+    // Duplicate Check for Items with Multiple Possession Restrictions
     public bool HasItem(ShopItem item)
     {
-        // 複数所持不可アイテムは名前とタイプで重複チェック
         foreach (var owned in ownedItems)
         {
             if (owned.itemName == item.itemName && owned.type == ItemType.Unique)

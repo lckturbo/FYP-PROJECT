@@ -10,7 +10,6 @@ public class PurchasePanel : MonoBehaviour
     private InputAction moveAction;
     private InputSystem_Actions iSystemActions;
 
-
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI itemNameText;
     [SerializeField] private TextMeshProUGUI priceText;
@@ -19,15 +18,14 @@ public class PurchasePanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
 
     [Header("Repeat Settings")]
-    [SerializeField] private float repeatDelay = 0.3f;   // 長押し開始までの遅延
-    [SerializeField] private float repeatRate = 0.1f;    // 長押し中の変化速度
+    [SerializeField] private float repeatDelay = 0.3f;   // Delay until long press begins
+    [SerializeField] private float repeatRate = 0.1f;    // Change rate during long press
 
     private ShopItem currentItem;
     private int quantity = 1;
     private float nextChangeTime;
-    private Vector2 navInput;
 
-    public bool IsPurchasePanelActive => gameObject.activeSelf; // 作ってみた。使える？
+    public bool IsPurchasePanelActive => gameObject.activeSelf;
 
 
     private void Awake()
@@ -65,7 +63,7 @@ public class PurchasePanel : MonoBehaviour
     }
 
     // ===============================
-    // 数量変更
+    // Quantity Change
     // ===============================
     private void OnEnable()
     {
@@ -82,12 +80,12 @@ public class PurchasePanel : MonoBehaviour
         }
 
 
-        // Moveの入力を取得
+        // Retrieve the movement key input from the Input System
         Vector2 input = moveAction.ReadValue<Vector2>();
 
         if (input == Vector2.zero) return;
 
-        // リピート判定
+        // Repeat Determination
         if (Time.time >= nextChangeTime)
         {
             int change = 0;
@@ -105,7 +103,7 @@ public class PurchasePanel : MonoBehaviour
             }
         }
 
-        // 長押し開始までの猶予
+        // Grace period before long press begins
         if (input != Vector2.zero && nextChangeTime == 0f)
         {
             nextChangeTime = Time.time + repeatDelay;
@@ -143,14 +141,9 @@ public class PurchasePanel : MonoBehaviour
     {
         if (currentItem != null)
         {
-            // ShopManager に購入確定を通知
+            // Notify ShopManager of the purchase confirmation.
             ShopManager.Instance.PurchaseItem(currentItem, quantity);
         }
-        Close();
-    }
-
-    public void OnCancel()
-    {
         Close();
     }
 }
