@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
-using ISystem_Actions;  // Namespace for using InputSystem_Actions
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
@@ -11,6 +10,7 @@ public class CartEntry
 {
     public ShopItem item;
     public int quantity;
+
 
     public CartEntry(ShopItem item, int quantity)
     {
@@ -21,39 +21,32 @@ public class CartEntry
 
 public class ShopManager : MonoBehaviour
 {
-    private InputSystem_Actions iSystemActions;
-
     public static ShopManager Instance { get; private set; }
 
     [Header("UI Elements")]
-    [SerializeField] private GameObject shopUI;             // ショップ全体のUI
-    [SerializeField] private RectTransform contentTransform; // Content (ScrollViewの中身)
-    [SerializeField] private GameObject itemButtonPrefab;    // アイテムボタンPrefab
-    [SerializeField] private TextMeshProUGUI moneyText;      // 所持金表示
-    [SerializeField] private TextMeshProUGUI messageText;    // メッセージ表示
-
-    [Header("Shop Items")]
-    [SerializeField] private ShopItem[] shopItems;           // 販売アイテム一覧
-
+    [SerializeField] private GameObject shopUI;
+    [SerializeField] private RectTransform contentTransform;
+    [SerializeField] private GameObject itemButtonPrefab;
+    [SerializeField] private TextMeshProUGUI moneyText;
+    [SerializeField] private TextMeshProUGUI messageText;
     [SerializeField] private ScrollRect scrollRect;
 
+    [Header("Shop Items")]
+    [SerializeField] private ShopItem[] shopItems;
+
     [Header("Panels")]
-    [SerializeField] private PurchasePanel purchasePanel;   // 数量選択パネル
+    [SerializeField] private PurchasePanel purchasePanel;
 
     private bool isOpen = false;
-
-    // カート関連
     private List<CartEntry> cart = new();
-    //private ShopItem currentItem = null;
-    //private int currentQuantity = 0;
 
-    public bool IsShopActive => shopUI.activeSelf;
+    // Reference the PlayerInput from NewPlayerMovement
+    private PlayerInput playerInput;
+    private InputAction cancelAction;
+    public bool IsShopActive => isOpen;
 
     private void Awake()
     {
-        iSystemActions = new InputSystem_Actions();
-        iSystemActions.UI.Enable();
-
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
@@ -63,6 +56,14 @@ public class ShopManager : MonoBehaviour
         if (purchasePanel != null)
             purchasePanel.gameObject.SetActive(false);
 
+        // Get PlayerInput from the player
+        NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerInput = playerMovement.GetComponent<PlayerInput>();
+            if (playerInput != null)
+                cancelAction = playerInput.actions["Interaction"]; // assumes you have a "Cancel" action
+        }
     }
 
     private void Start()
@@ -74,34 +75,28 @@ public class ShopManager : MonoBehaviour
 
     private void Update()
     {
-        if (!isOpen) return;
+        if (!isOpen) return; // only run update logic when shop is open
 
-        // Cancelに該当するキーでショップを閉じる
-        if (iSystemActions.UI.Cancel.WasPressedThisFrame())
+        if (cancelAction != null && cancelAction.WasPressedThisFrame())
         {
             if (purchasePanel != null && purchasePanel.IsPurchasePanelActive)
             {
-                // PurchasePanelが開いていればそっちを閉じる
                 purchasePanel.Close();
-                return; // ショップは閉じない
+                return;
             }
             else
             {
-                // 通常時はショップ全体を閉じる
                 CloseShop();
                 return;
             }
         }
 
-        // カーソル操作制御
         if (purchasePanel != null && purchasePanel.IsPurchasePanelActive)
         {
-            // PurchasePanelが開いている間はカーソル移動を無効化
             EventSystem.current.sendNavigationEvents = false;
         }
         else
         {
-            // 通常時は有効化
             EventSystem.current.sendNavigationEvents = true;
 
             GameObject selected = EventSystem.current.currentSelectedGameObject;
@@ -111,6 +106,7 @@ public class ShopManager : MonoBehaviour
             }
         }
     }
+
 
     /// <summary>
     /// アイテムボタンを生成
@@ -131,11 +127,11 @@ public class ShopManager : MonoBehaviour
             // 全Graphicを強制ON
             Graphic[] graphics = buttonObj.GetComponentsInChildren<Graphic>(true);
             foreach (var g in graphics) g.enabled = true;
-            
+
             // 全Buttonを強制ON
             Button[] buttons = buttonObj.GetComponentsInChildren<Button>(true);
             foreach (var b in buttons) b.enabled = true;
-            
+
             // アイコン、名前、値段を取得して反映
             Transform iconTrans = buttonObj.transform.Find("Image");
             Transform nameTrans = buttonObj.transform.Find("Name");
@@ -278,7 +274,7 @@ public class ShopManager : MonoBehaviour
         }
 
         // 同一のユニークアイテムを2つ以上買おうとしていないか確認
-        if(item.type == ItemType.Unique && quantity > 1)
+        if (item.type == ItemType.Unique && quantity > 1)
         {
             ShowMessage("You cannot purchase more than two Unique Items!");
             return;
@@ -310,7 +306,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     private void UpdateMoneyUI()
     {
-        moneyText.text = $"Money: {PlayerInventory.Instance.Money} G";
+        //moneyText.text = $"Money: {PlayerInventory.Instance.Money} G";
     }
 
     /// <summary>
@@ -333,12 +329,14 @@ public class ShopManager : MonoBehaviour
     public void OpenShop()
     {
         if (shopUI != null)
+        {
             shopUI.SetActive(true);
 
+        }
         isOpen = true;
         UpdateMoneyUI();
         ClearMessage();
-        PlayerController.Instance.SetCanMove(false); // プレイヤー停止
+
     }
 
     /// <summary>
@@ -351,7 +349,15 @@ public class ShopManager : MonoBehaviour
 
         isOpen = false;
         ClearMessage();
-        PlayerController.Instance.SetCanMove(true); // プレイヤー再開
     }
+
+    public void ToggleShop()
+    {
+        if (isOpen)
+            CloseShop();
+        else
+            OpenShop();
+    }
+
 
 }

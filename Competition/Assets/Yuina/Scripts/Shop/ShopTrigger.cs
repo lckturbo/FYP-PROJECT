@@ -1,29 +1,39 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using ISystem_Actions;  // Namespace for using InputSystem_Actions
-
 
 public class ShopTrigger : MonoBehaviour
 {
     private bool playerInRange = false;
 
-    private InputSystem_Actions iSystemActions;
+    private PlayerInput playerInput;
+    private InputAction interactAction;
 
     void Awake()
     {
-        iSystemActions = new InputSystem_Actions();
-        iSystemActions.Player.Enable();
+        // Get PlayerInput from NewPlayerMovement
+        NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerInput = playerMovement.GetComponent<PlayerInput>();
+            if (playerInput != null)
+            {
+                //Debug.Log("Interact");
+                interactAction = playerInput.actions["Interaction"];
+                interactAction.Enable();
+            }
+        }
     }
 
     void Update()
     {
-        if (playerInRange && iSystemActions.Player.Interact.WasPressedThisFrame())
+        if (playerInRange && interactAction != null && interactAction.WasPressedThisFrame())
         {
             if (!ShopManager.Instance) return;
 
             if (!ShopManager.Instance.IsShopActive)
             {
-                ShopManager.Instance.OpenShop();
+                Debug.Log("interaction");
+                ShopManager.Instance.ToggleShop();
             }
         }
     }
