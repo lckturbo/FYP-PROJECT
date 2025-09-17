@@ -1,6 +1,5 @@
 ﻿using Pathfinding;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public abstract class EnemyBase : MonoBehaviour
 {
@@ -10,8 +9,8 @@ public abstract class EnemyBase : MonoBehaviour
         Patrol,
         Attack,
         BattleAttack,
-        Chase,
-        Death
+        Chase
+        //Death
     }
 
     [Header("Enemy States")]
@@ -25,55 +24,25 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected Seeker _seeker;
     [SerializeField] protected Rigidbody2D _rb;
     [SerializeField] protected AIPath _aiPath;
-    protected float _speed;
     private Path _path;
     private int _currWP;
     private bool _reachedPath;
-
-    //[Header("Health")]
-    //private int _currHealth;
-    //public int GetCurrHealth() => _currHealth;
-    //private int _maxHealth;
-    //public int GetMaxHealth() => _maxHealth;
-
-    private float _idleTimer;
     private float _currIdleTimer;
-    private float _chaseRange;
-    protected float _atkRange;
-    protected int _atkDmg;
-    //protected float _AOERadius;
+    private Waypoints _targetwp;
 
     [SerializeField] private float detectionDist;
     [SerializeField] private float sideOffSet; // left/right raycast
     [SerializeField] private float avoidanceStrength;
 
-    //// FOR TANKS //
-    //private float _dmgReduction;
-    //// FOR DEATH //
-    //[SerializeField] private float _deathTime;
-    //public float GetDeathTime() => _deathTime;
-
     //public event Action<GameObject, float> OnDeath;
     //public event Action<GameObject, EnemyBase> OnAttackPlayer;
     //protected bool inBattle;
 
-    protected void Initialize(EnemyStats stats)
-    {
-        _speed = stats.Speed;
-        //_maxHealth = stats.maxHealth;
-        _atkRange = stats.atkRange;
-        _atkDmg = stats.atkDmg;
-        _idleTimer = stats.idleTimer;
-        _chaseRange = stats.chaseRange;
-        //_dmgReduction = stats.dmgReduction;
-        //_AOERadius = stats.AOERadius;
-    }
     private void Awake()
     {
         if (!_enemyStats || !_aiPath || !_rb || !_seeker) return;
-        Initialize(_enemyStats);
         _enemyStates = EnemyStates.Idle;
-        _aiPath.maxSpeed = _speed;
+        _aiPath.maxSpeed = _enemyStats.Speed;
     }
 
     protected virtual void Start()
@@ -83,7 +52,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (!_health) _health = GetComponent<NewHealth>();
         _health.ApplyStats(_enemyStats);
 
-        _currIdleTimer = _idleTimer;
+        _currIdleTimer = _enemyStats.idleTimer;
     }
     private void Update()
     {
@@ -103,21 +72,26 @@ public abstract class EnemyBase : MonoBehaviour
             return;
         }
 
-        _currIdleTimer -= Time.deltaTime;
-        if (_currIdleTimer <= 0)
+        if (!_targetwp || !_targetwp.isOccupied())
         {
-            _currWP = Random.Range(0, WayPointManager.instance.GetTotalWayPoints());
+            _targetwp = WayPointManager.instance.GetFreeWayPoint();
+            if (_targetwp) _targetwp.SetOccupied(true);
+        }
+
+        _currIdleTimer -= Time.deltaTime;
+        if (_currIdleTimer <= 0 && _targetwp)
+        {
             _enemyStates = EnemyStates.Patrol;
-            _currIdleTimer = _idleTimer;
+            _currIdleTimer = _enemyStats.idleTimer;
         }
     }
 
     protected virtual void Patrol()
     {
-        if (!_aiPath || !WayPointManager.instance)
+        if (!_aiPath || !WayPointManager.instance || !_targetwp)
             return;
 
-        Vector2 waypoint = WayPointManager.instance.GetWayPoint(_currWP);
+        Vector2 waypoint = _targetwp.transform.position;
         Vector2 avoidance = SteeringAvoidance() + Separation();
         Vector2 final = waypoint + avoidance;
         _aiPath.canMove = true;
@@ -127,7 +101,20 @@ public abstract class EnemyBase : MonoBehaviour
         FaceDir(dir);
 
         if (_aiPath.reachedEndOfPath || _aiPath.remainingDistance < 0.5f)
+        {
+            _targetwp.SetOccupied(false);
+
+            foreach(var neighbor in _targetwp.nearestWaypoints)
+            {
+                if(!neighbor.isOccupied())
+                {
+                    _targetwp = neighbor;
+                    _targetwp.SetOccupied(true);
+                    break;
+                }
+            }
             _enemyStates = EnemyStates.Idle;
+        }
         else if (_aiPath.velocity.sqrMagnitude < 0.1f)
             _aiPath.SearchPath();
 
@@ -204,7 +191,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (!_player) return;
         float dist = Vector2.Distance(_rb.position, _player.position);
 
-        if (dist > _chaseRange)
+        if (dist > _enemyStats.chaseRange)
         {
             _aiPath.destination = _rb.position;
             _enemyStates = EnemyStates.Idle;
@@ -214,7 +201,7 @@ public abstract class EnemyBase : MonoBehaviour
         _aiPath.canMove = true;
         _aiPath.destination = _player.position;
 
-        if (dist < _atkRange)
+        if (dist < _enemyStats.atkRange)
         {
             _aiPath.canMove = false;
             _enemyStates = EnemyStates.Attack;
@@ -229,7 +216,8 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
 
-        // TODO: TRANSITION TO BATTLE SCENE ONCE !! SUCCESSFULLY HIT PLAYER !!
+        // TODO: play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
+        GameManager.instance.ChangeScene("jasBattle");
         //if (!inBattle)
         //{
         //    BattleSystem.instance.RegisterEnemy(this);
@@ -254,11 +242,11 @@ public abstract class EnemyBase : MonoBehaviour
 
         float dist = Vector2.Distance(transform.position, _player.position);
 
-        if (dist > _chaseRange)
+        if (dist > _enemyStats.chaseRange)
             return false;
 
         Vector2 distToPlayer = (_player.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, distToPlayer, _chaseRange, LayerMask.GetMask("Player"));
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, distToPlayer, _enemyStats.chaseRange, LayerMask.GetMask("Player"));
 
         return hit.collider != null && hit.collider.CompareTag("Player");
     }
@@ -284,31 +272,17 @@ public abstract class EnemyBase : MonoBehaviour
             case EnemyStates.BattleAttack:
                 //BattleAttack();
                 break;
-            case EnemyStates.Death:
-                //Death();
-                break;
+            //case EnemyStates.Death:
+            //    //Death();
+            //    break;
         }
     }
-
-    // PLAYER -> CALL TO KILL ENEMIES
-    //public virtual void TakeDamage(int amt)
+    //protected virtual void Death()
     //{
-    //    _health.TakeDamage(_health.GetCurrHealth(), _enemyStats);
-
-    //    //MsgLog(_enemyStats.type + " HP: " + _currHealth + "/" + _maxHealth);
-
-    //    //if (_currHealth <= 0)
-    //    //{
-    //    //    _currHealth = Mathf.Max(_currHealth, 0);
-    //    //    _states = EnemyStates.Death;
-    //    //}
+    //    // TODO: ANIMATION
+    //    //OnDeath?.Invoke(this.gameObject, _deathTime);
+    //    //Destroy(gameObject, _deathTime);
     //}
-    protected virtual void Death()
-    {
-        // TODO: ANIMATION
-        //OnDeath?.Invoke(this.gameObject, _deathTime);
-        //Destroy(gameObject, _deathTime);
-    }
 
     protected void FaceDir(Vector2 dir)
     {

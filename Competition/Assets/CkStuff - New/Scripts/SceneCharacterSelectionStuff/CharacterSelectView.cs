@@ -131,7 +131,8 @@ public class CharacterSelectView : MonoBehaviour
 
     private void Confirm()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("SceneCk2");
+        // UnityEngine.SceneManagement.SceneManager.LoadScene("SceneCk2");
+        GameManager.instance.ChangeScene("SceneCk2");
     }
 
     public int GetCurrentIndex() => currentIndex;

@@ -32,7 +32,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4249954731921599678}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5.48, y: 3.08, z: 0.09289829}
   m_LocalScale: {x: 5, y: 5, z: 0}
   m_ConstrainProportionsScale: 0
@@ -203,7 +203,7 @@ MonoBehaviour:
   _seeker: {fileID: 2058426006471302486}
   _rb: {fileID: 6888525527434365120}
   _aiPath: {fileID: 8907702388655403980}
-  detectionDist: 3
+  detectionDist: 5
   sideOffSet: 3
   avoidanceStrength: 5
 --- !u!114 &2058426006471302486

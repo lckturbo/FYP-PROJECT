@@ -59,6 +59,7 @@ public class CharacterSelectUI : MonoBehaviour
         selectedStore.Set(def, currentIndex);
 
         // Load your gameplay scene
-        SceneManager.LoadScene("SceneCk");
+        //SceneManager.LoadScene("SceneCk");
+        GameManager.instance.ChangeScene("SceneCk");
     }
 }

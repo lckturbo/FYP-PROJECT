@@ -19,8 +19,9 @@ public class Waypoints : MonoBehaviour
         FindNearestWayPoint();
     }
 
-    private void FindNearestWayPoint()
+    public void FindNearestWayPoint()
     {
+        // find nearest waypoint to this waypoint
         Waypoints[] allWayPoints = FindObjectsOfType<Waypoints>();
         List<Waypoints> connections = new List<Waypoints>();
 
