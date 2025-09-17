@@ -15,9 +15,6 @@ public class BattleSystem : MonoBehaviour
 {
     public static BattleSystem instance;
     public BattleState battleState;
-    [Header("Prefabs")]
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private GameObject enemyPrefab;
 
     [Header("SpawnPoints")]
     [SerializeField] private Transform playerSpawnPt;
@@ -31,16 +28,14 @@ public class BattleSystem : MonoBehaviour
     private GameObject _player;
     private GameObject _enemy;
 
-    [Header("FOR TESTING ONLY")]
-    [SerializeField] private GameObject normalScene;
-    [SerializeField] private GameObject battleScene;
-
     private void Awake()
     {
         if (instance == null)
             instance = this;
         else
             Destroy(gameObject);
+
+        DontDestroyOnLoad(gameObject);
     }
 
     //public void RegisterEnemy(EnemyBase enemy)
@@ -53,37 +48,34 @@ public class BattleSystem : MonoBehaviour
     //}
     public void HandleBattleTransition(GameObject player, EnemyBase enemy)
     {
-        MsgLog("HandleBattleTransition");
         if (!_player) _player = player;
         if (!_enemy) _enemy = enemy.gameObject;
         battleState = BattleState.START;
-        SetupBattle();
+        //SetupBattle();
     }
 
-    private void SetupBattle()
-    {
-        _player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
-        _enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);
+    //private void SetupBattle()
+    //{
+    //    //_player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
+    //    //_enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);
 
-        // FOR BATTLE MODE
-        _player.GetComponent<NewPlayerMovement>().enabled = false;
+    //    // FOR BATTLE MODE
+    //    _player.GetComponent<NewPlayerMovement>().enabled = false;
 
-        if (_player && _enemy)
-            SetUpHealth(_player, _enemy);
+    //    if (_player && _enemy)
+    //        SetUpHealth(_player, _enemy);
 
-        // PLAYER TURN FIRST
-        PlayerTurn();
-        //EnemyTurn();
-    }
+    //    // PLAYER TURN FIRST
+    //    PlayerTurn();
+    //    //EnemyTurn();
+    //}
 
     private void SetUpHealth(GameObject player, GameObject enemy)
     {
         //playerHealth.maxValue = player.GetComponent<Health>().GetMaxHealth();
         //playerHealth.value = playerHealth.maxValue;
-        //MsgLog("Player MaxHealth: " + player.GetComponent<Health>().GetMaxHealth());
         //enemyHealth.maxValue = enemy.GetComponent<EnemyBase>().GetMaxHealth();
         //enemyHealth.value = enemyHealth.maxValue;
-        //MsgLog("Enemy MaxHealth: " + enemy.GetComponent<EnemyBase>().GetMaxHealth());
     }
     private bool CheckHealth()
     {
@@ -174,10 +166,5 @@ public class BattleSystem : MonoBehaviour
         //Time.timeScale = 0;
         //MsgLog("Player lost");
         // lose scene
-    }
-
-    private void MsgLog(string msg)
-    {
-        Debug.Log("[BattleSystem] " + msg);
     }
 }

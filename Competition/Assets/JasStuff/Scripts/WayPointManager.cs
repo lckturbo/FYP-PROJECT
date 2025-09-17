@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class WayPointManager : MonoBehaviour
 {
@@ -14,8 +13,10 @@ public class WayPointManager : MonoBehaviour
 
     private void Awake()
     {
-        if (!instance) instance = this;
-        else Destroy(gameObject);
+        if (!instance)
+            instance = this;
+        else
+            Destroy(gameObject);
     }
     private void Start()
     {
@@ -26,7 +27,7 @@ public class WayPointManager : MonoBehaviour
 
     private void SpawnWayPoints()
     {
-        foreach(Vector2 pos in _spawnPositions)
+        foreach (Vector2 pos in _spawnPositions)
         {
             GameObject wp = Instantiate(_waypointPrefab, pos, Quaternion.identity, _spawnParent);
             _waypoints.Add(wp);
@@ -44,5 +45,20 @@ public class WayPointManager : MonoBehaviour
             return _waypoints[index].transform.position;
 
         return Vector3.zero;
+    }
+
+    public Waypoints GetFreeWayPoint()
+    {
+        List<Waypoints> free = new List<Waypoints>();
+        foreach (GameObject go in _waypoints)
+        {
+            Waypoints wp = go.GetComponent<Waypoints>();
+            if (wp != null && !wp.isOccupied())
+                free.Add(wp);
+        }
+
+        if (free.Count == 0) return null;
+
+        return free[Random.Range(0, free.Count)];
     }
 }

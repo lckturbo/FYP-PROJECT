@@ -58,7 +58,8 @@ public class CharacterSelectUI : MonoBehaviour
         var def = roster[currentIndex];
         selectedStore.Set(def, currentIndex);
 
-        //SceneManager.LoadScene("SceneCk2");
-        SceneManager.LoadScene("SampleScene");
+        // Load your gameplay scene
+        //SceneManager.LoadScene("SceneCk");
+        GameManager.instance.ChangeScene("SceneCk");
     }
 }
