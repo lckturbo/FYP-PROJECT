@@ -25,8 +25,8 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private Slider enemyHealth;
     [SerializeField] private TMP_Text turnText;
 
-    private GameObject _player;
-    private GameObject _enemy;
+    //private GameObject _player;
+    //private GameObject _enemy;
 
     private void Awake()
     {
@@ -46,10 +46,11 @@ public class BattleSystem : MonoBehaviour
     {
         enemy.OnAttackPlayer -= HandleBattleTransition;
     }
-    public void HandleBattleTransition(GameObject player, EnemyBase enemy)
+    public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)
     {
-        if (!_player) _player = player;
-        if (!_enemy) _enemy = enemy.gameObject;
+        //if (!_player) _player = player;
+        //PlayerParty.instance.SetUpParty(player,);
+        //if (!_enemy) _enemy = enemy.gameObject;
         battleState = BattleState.START;
         SetupBattle();
     }

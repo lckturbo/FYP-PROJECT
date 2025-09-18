@@ -17,6 +17,7 @@ public abstract class EnemyBase : MonoBehaviour
     [Header("Enemy States")]
     [SerializeField] protected EnemyStates _enemyStates;
     [SerializeField] protected EnemyStats _enemyStats;
+    public EnemyStats GetEnemyStats() => _enemyStats; 
     protected Transform _player;
     [SerializeField] protected Animator _animator;
 
@@ -36,7 +37,7 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] private float avoidanceStrength;
 
     //public event Action<GameObject, float> OnDeath;
-    public event Action<GameObject, EnemyBase> OnAttackPlayer;
+    public event Action<GameObject, EnemyParty> OnAttackPlayer;
     protected bool inBattle;
 
     private void Awake()
@@ -221,7 +222,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (!inBattle)
         {
             BattleSystem.instance.RegisterEnemy(this);
-            OnAttackPlayer.Invoke(_player.gameObject, this);
+            OnAttackPlayer.Invoke(_player.gameObject, GetComponent<EnemyParty>());
             inBattle = true;
 
             //if (battleScene && normalScene)

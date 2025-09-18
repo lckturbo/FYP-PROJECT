@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 2058426006471302486}
   - component: {fileID: 8907702388655403980}
   - component: {fileID: 7315046046240021036}
+  - component: {fileID: 6191435852665564058}
   m_Layer: 9
   m_Name: BasicEnemy
   m_TagString: Untagged
@@ -290,3 +291,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
   useStatsDirectly: 1
+--- !u!114 &6191435852665564058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4249954731921599678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4152ecfcdd2fb0c45b0dde62395e3ad1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _enemyPrefab: {fileID: 0}
