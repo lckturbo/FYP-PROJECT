@@ -17,8 +17,8 @@ public class BattleSystem : MonoBehaviour
     public BattleState battleState;
 
     [Header("SpawnPoints")]
-    [SerializeField] private Transform playerSpawnPt;
-    [SerializeField] private Transform enemySpawnPt;
+    //[SerializeField] private Transform playerSpawnPt;
+    //[SerializeField] private Transform enemySpawnPt;
 
     [Header("UI")]
     [SerializeField] private Slider playerHealth;
@@ -38,37 +38,37 @@ public class BattleSystem : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    //public void RegisterEnemy(EnemyBase enemy)
-    //{
-    //    enemy.OnAttackPlayer += HandleBattleTransition;
-    //}
-    //public void UnRegisterEnemy(EnemyBase enemy)
-    //{
-    //    enemy.OnAttackPlayer -= HandleBattleTransition;
-    //}
+    public void RegisterEnemy(EnemyBase enemy)
+    {
+        enemy.OnAttackPlayer += HandleBattleTransition;
+    }
+    public void UnRegisterEnemy(EnemyBase enemy)
+    {
+        enemy.OnAttackPlayer -= HandleBattleTransition;
+    }
     public void HandleBattleTransition(GameObject player, EnemyBase enemy)
     {
         if (!_player) _player = player;
         if (!_enemy) _enemy = enemy.gameObject;
         battleState = BattleState.START;
-        //SetupBattle();
+        SetupBattle();
     }
 
-    //private void SetupBattle()
-    //{
-    //    //_player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
-    //    //_enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);
+    private void SetupBattle()
+    {
+        //    //_player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
+        //    //_enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);
 
-    //    // FOR BATTLE MODE
-    //    _player.GetComponent<NewPlayerMovement>().enabled = false;
+        //    // FOR BATTLE MODE
+        //    _player.GetComponent<NewPlayerMovement>().enabled = false;
 
-    //    if (_player && _enemy)
-    //        SetUpHealth(_player, _enemy);
+        //    if (_player && _enemy)
+        //        SetUpHealth(_player, _enemy);
 
-    //    // PLAYER TURN FIRST
-    //    PlayerTurn();
-    //    //EnemyTurn();
-    //}
+        //    // PLAYER TURN FIRST
+        //    PlayerTurn();
+        //    //EnemyTurn();
+    }
 
     private void SetUpHealth(GameObject player, GameObject enemy)
     {

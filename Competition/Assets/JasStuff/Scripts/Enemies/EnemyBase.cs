@@ -1,4 +1,5 @@
 ﻿using Pathfinding;
+using System;
 using UnityEngine;
 
 public abstract class EnemyBase : MonoBehaviour
@@ -35,8 +36,8 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] private float avoidanceStrength;
 
     //public event Action<GameObject, float> OnDeath;
-    //public event Action<GameObject, EnemyBase> OnAttackPlayer;
-    //protected bool inBattle;
+    public event Action<GameObject, EnemyBase> OnAttackPlayer;
+    protected bool inBattle;
 
     private void Awake()
     {
@@ -217,20 +218,20 @@ public abstract class EnemyBase : MonoBehaviour
         if (CanSeePlayer()) _enemyStates = EnemyStates.Chase;
 
         // TODO: play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
-        GameManager.instance.ChangeScene("jasBattle");
-        //if (!inBattle)
-        //{
-        //    BattleSystem.instance.RegisterEnemy(this);
-        //    OnAttackPlayer.Invoke(player.gameObject, this);
-        //    inBattle = true;
+        if (!inBattle)
+        {
+            BattleSystem.instance.RegisterEnemy(this);
+            OnAttackPlayer.Invoke(_player.gameObject, this);
+            inBattle = true;
 
-        //    if (battleScene && normalScene)
-        //    {
-        //        normalScene.SetActive(false);
-        //        battleScene.SetActive(true);
-        //    }
-        //    // CHANGE SCENE
-        //}
+            //if (battleScene && normalScene)
+            //{
+            //    normalScene.SetActive(false);
+            //    battleScene.SetActive(true);
+            //}
+            // CHANGE SCENE
+            GameManager.instance.ChangeScene("jasBattle");
+        }
         _enemyStates = EnemyStates.Idle;
     }
 
