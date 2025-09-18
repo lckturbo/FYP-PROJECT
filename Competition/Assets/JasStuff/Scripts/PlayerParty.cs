@@ -31,6 +31,11 @@ public class PlayerParty : MonoBehaviour
         }
     }
 
+    public GameObject GetLeader()
+    {
+        return _leader.playerPrefab;
+    }
+
     public List<NewCharacterDefinition> GetFullParty()
     {
         List<NewCharacterDefinition> full = new List<NewCharacterDefinition>();

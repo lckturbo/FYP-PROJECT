@@ -17,8 +17,9 @@ public class BattleSystem : MonoBehaviour
     public BattleState battleState;
 
     [Header("SpawnPoints")]
-    //[SerializeField] private Transform playerSpawnPt;
-    //[SerializeField] private Transform enemySpawnPt;
+    [SerializeField] private Transform leaderSpawnPt;
+    [SerializeField] private Transform[] allySpawnPt;
+    [SerializeField] private Transform[] enemySpawnPt;
 
     [Header("UI")]
     [SerializeField] private Slider playerHealth;
@@ -48,15 +49,22 @@ public class BattleSystem : MonoBehaviour
     }
     public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)
     {
-        //if (!_player) _player = player;
-        //PlayerParty.instance.SetUpParty(player,);
-        //if (!_enemy) _enemy = enemy.gameObject;
+        PlayerParty.instance.GetFullParty();
+
         battleState = BattleState.START;
         SetupBattle();
     }
 
     private void SetupBattle()
     {
+        for (int i = 0; i <= enemySpawnPt.Length; i++)
+            enemySpawnPt[i] = GameObject.FindWithTag("EnemySpawnPt").transform;
+
+        for (int i = 0; i <= allySpawnPt.Length; i++)
+            allySpawnPt[i] = GameObject.FindWithTag("AllySpawnPt").transform;
+
+        GameObject leader = Instantiate(PlayerParty.instance.GetLeader(), leaderSpawnPt.position, Quaternion.identity);
+
         //    //_player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
         //    //_enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);
 

@@ -2955,7 +2955,7 @@ GameObject:
   - component: {fileID: 412521073}
   m_Layer: 0
   m_Name: P2
-  m_TagString: Untagged
+  m_TagString: AllySpawnPt
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3021,7 +3021,7 @@ Transform:
   m_GameObject: {fileID: 412521072}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.406712, y: -4.399267, z: -0.017792305}
+  m_LocalPosition: {x: 0.406712, y: -4.399267, z: -0.48}
   m_LocalScale: {x: 1.5, y: 1.5, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3150,11 +3150,65 @@ Transform:
   m_GameObject: {fileID: 460841442}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.3132881, y: -3.3592675, z: -0.017792305}
+  m_LocalPosition: {x: -1.3132881, y: -3.3592675, z: -0.48}
   m_LocalScale: {x: 1.5, y: 1.5, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1529893085}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &579761201
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 579761203}
+  - component: {fileID: 579761202}
+  m_Layer: 0
+  m_Name: BattleSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &579761202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579761201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8430c9b47116ad746a24daff54a8ef67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  battleState: 0
+  leaderSpawnPt: {fileID: 0}
+  allySpawnPt: []
+  enemySpawnPt:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  playerHealth: {fileID: 0}
+  enemyHealth: {fileID: 0}
+  turnText: {fileID: 0}
+--- !u!4 &579761203
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579761201}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.866199, y: 0.13994697, z: -0.022665642}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1496925486
 GameObject:
@@ -3260,7 +3314,7 @@ GameObject:
   - component: {fileID: 1509884600}
   m_Layer: 0
   m_Name: P1
-  m_TagString: Untagged
+  m_TagString: AllySpawnPt
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3326,7 +3380,7 @@ Transform:
   m_GameObject: {fileID: 1509884599}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.0432878, y: -4.399267, z: -0.017792305}
+  m_LocalPosition: {x: -3.0432878, y: -4.399267, z: -0.48}
   m_LocalScale: {x: 1.5, y: 1.5, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3542,3 +3596,4 @@ SceneRoots:
   - {fileID: 460471324}
   - {fileID: 1529893085}
   - {fileID: 232738314}
+  - {fileID: 579761203}
