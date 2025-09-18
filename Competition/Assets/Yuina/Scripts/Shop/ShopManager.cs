@@ -336,7 +336,7 @@ public class ShopManager : MonoBehaviour
 
     private IEnumerator FadeMessageOut()
     {
-        yield return new WaitForSeconds(2f); // wait 2 seconds before fading
+        yield return new WaitForSeconds(1.5f); // wait 2 seconds before fading
 
         float duration = 1f; // fade duration
         float elapsed = 0f;
