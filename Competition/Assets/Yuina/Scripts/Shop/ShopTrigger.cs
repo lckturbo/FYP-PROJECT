@@ -17,7 +17,6 @@ public class ShopTrigger : MonoBehaviour
             playerInput = playerMovement.GetComponent<PlayerInput>();
             if (playerInput != null)
             {
-                //Debug.Log("Interact");
                 interactAction = playerInput.actions["Interaction"];
                 interactAction.Enable();
             }
@@ -30,11 +29,9 @@ public class ShopTrigger : MonoBehaviour
         {
             if (!ShopManager.Instance) return;
 
-            if (!ShopManager.Instance.IsShopActive)
-            {
-                Debug.Log("interaction");
-                ShopManager.Instance.ToggleShop();
-            }
+            //  Always toggle when in range
+            Debug.Log("Toggling Shop");
+            ShopManager.Instance.ToggleShop();
         }
     }
 
@@ -51,6 +48,12 @@ public class ShopTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = false;
+
+            //  Auto close when leaving range
+            if (ShopManager.Instance && ShopManager.Instance.IsShopActive)
+            {
+                ShopManager.Instance.CloseShop();
+            }
         }
     }
 }

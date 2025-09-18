@@ -75,6 +75,7 @@ public class ShopManager : MonoBehaviour
 
     private void Update()
     {
+
         if (!isOpen) return; // only run update logic when shop is open
 
         if (cancelAction != null && cancelAction.WasPressedThisFrame())
@@ -86,7 +87,7 @@ public class ShopManager : MonoBehaviour
             }
             else
             {
-                CloseShop();
+                //ToggleShop();
                 return;
             }
         }
