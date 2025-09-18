@@ -20,8 +20,8 @@ public class PlayerParty : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public List<GameObject> GetAllMembers()
-    {
-        List<GameObject> result = new List<GameObject>();
-    }
+    //public List<GameObject> GetAllMembers()
+    //{
+    //    List<GameObject> result = new List<GameObject>();
+    //}
 }
