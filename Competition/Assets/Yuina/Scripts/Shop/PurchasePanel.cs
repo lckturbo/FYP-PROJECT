@@ -16,7 +16,7 @@ public class PurchasePanel : MonoBehaviour
     [SerializeField] private float repeatDelay = 0.3f;
     [SerializeField] private float repeatRate = 0.1f;
 
-    private ShopItem currentItem;
+    private Item currentItem;
     private int quantity = 1;
     private float nextChangeTime;
 
@@ -49,7 +49,7 @@ public class PurchasePanel : MonoBehaviour
     // ===============================
     // Open / Close
     // ===============================
-    public void Open(ShopItem item)
+    public void Open(Item item)
     {
         currentItem = item;
         quantity = 1;

@@ -5,6 +5,13 @@ public enum ItemCategory
     Main,
     Sub
 }
+public enum ItemTypes
+{
+    Food,
+    Artifact,
+    Unique,     // Items that cannot be held in multiple quantities
+    Other
+}
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class Item : ScriptableObject
@@ -20,4 +27,10 @@ public class Item : ScriptableObject
 
     [Header("Combat")]
     public bool isWeapon; //  Only true items can attack
+
+    [Header("Category")]    // 分類
+    public ItemTypes type;             // アイテムタイプ
+
+    [TextArea] public string description; // 説明文
+    public int price;                 // 値段
 }

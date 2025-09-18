@@ -1,18 +1,19 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using UnityEngine.InputSystem;
-using UnityEngine.EventSystems;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class CartEntry
 {
-    public ShopItem item;
+    public Item item;
     public int quantity;
 
 
-    public CartEntry(ShopItem item, int quantity)
+    public CartEntry(Item item, int quantity)
     {
         this.item = item;
         this.quantity = quantity;
@@ -32,7 +33,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private ScrollRect scrollRect;
 
     [Header("Shop Items")]
-    [SerializeField] private ShopItem[] shopItems;
+    [SerializeField] private Item[] shopItems;
 
     [Header("Panels")]
     [SerializeField] private PurchasePanel purchasePanel;
@@ -40,10 +41,15 @@ public class ShopManager : MonoBehaviour
     private bool isOpen = false;
     private List<CartEntry> cart = new();
 
-    // Reference the PlayerInput from NewPlayerMovement
     private PlayerInput playerInput;
     private InputAction cancelAction;
     public bool IsShopActive => isOpen;
+
+    // Reference to Inventory
+    private Inventory playerInventory;
+    private InventoryUIManager inventoryUIManager;
+
+    private Coroutine messageRoutine;
 
     private void Awake()
     {
@@ -56,13 +62,16 @@ public class ShopManager : MonoBehaviour
         if (purchasePanel != null)
             purchasePanel.gameObject.SetActive(false);
 
-        // Get PlayerInput from the player
+        // Get PlayerInput & Inventory
         NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
         if (playerMovement != null)
         {
             playerInput = playerMovement.GetComponent<PlayerInput>();
+            playerInventory = playerMovement.GetComponent<Inventory>(); //  attach Inventory to player
+            inventoryUIManager = playerMovement.GetComponent<InventoryUIManager>();
+
             if (playerInput != null)
-                cancelAction = playerInput.actions["Interaction"]; // assumes you have a "Cancel" action
+                cancelAction = playerInput.actions["Interaction"];
         }
     }
 
@@ -164,6 +173,8 @@ public class ShopManager : MonoBehaviour
             if (buttonComp != null)
             {
                 buttonComp.onClick.AddListener(() => BuyItem(item));
+                buttonComp.onClick.AddListener(() => PurchaseItem(item, 1));
+
             }
         }
     }
@@ -208,10 +219,10 @@ public class ShopManager : MonoBehaviour
     /// <summary>
     /// アイテム購入処理
     /// </summary>
-    public void BuyItem(ShopItem item)
+    public void BuyItem(Item item)
     {
         // 複数所持不可アイテムは所持済みなら購入不可
-        if (item.type == ItemType.Unique && PlayerInventory.Instance.HasItem(item))
+        if (item.type == ItemTypes.Unique /*&& PlayerInventory.Instance.HasItem(item)*/)
         {
             ShowMessage("You already have this Unique Item!");
             return;
@@ -228,9 +239,7 @@ public class ShopManager : MonoBehaviour
     {
         int totalCost = 0;
         foreach (var entry in cart)
-        {
             totalCost += entry.item.price * entry.quantity;
-        }
 
         if (totalCost == 0)
         {
@@ -238,21 +247,22 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        if (PlayerInventory.Instance.Money < totalCost)
+        if (playerInventory == null)
+        {
+            Debug.LogError("No player inventory found!");
+            return;
+        }
+
+        if (playerInventory.Money < totalCost)
         {
             ShowMessage("Not enough money!");
             return;
         }
 
-        if (PlayerInventory.Instance.TrySpendMoney(totalCost))
+        if (playerInventory.TrySpendMoney(totalCost))
         {
             foreach (var entry in cart)
-            {
-                for (int i = 0; i < entry.quantity; i++)
-                {
-                    PlayerInventory.Instance.AddItem(entry.item);
-                }
-            }
+                playerInventory.AddItem(entry.item, entry.quantity);
 
             ShowMessage("Purchase successful!");
             UpdateMoneyUI();
@@ -263,51 +273,44 @@ public class ShopManager : MonoBehaviour
     /// <summary>
     /// 実際の購入処理（PurchasePanelから呼ばれる）
     /// </summary>
-    public void PurchaseItem(ShopItem item, int quantity)
+    public void PurchaseItem(Item item, int quantity)
     {
         int totalCost = item.price * quantity;
 
-        // ユニークアイテムチェック
-        if (item.type == ItemType.Unique && PlayerInventory.Instance.HasItem(item))
+        if (item.type == ItemTypes.Unique && playerInventory.HasItem(item))
         {
-            ShowMessage("You already have this Unique Item!");
+            ShowMessage("You already own this Unique Item!");
             return;
         }
 
-        // 同一のユニークアイテムを2つ以上買おうとしていないか確認
-        if (item.type == ItemType.Unique && quantity > 1)
+        if (item.type == ItemTypes.Unique && quantity > 1)
         {
-            ShowMessage("You cannot purchase more than two Unique Items!");
+            ShowMessage("You cannot purchase more than one Unique Item!");
             return;
         }
 
-        // お金足りるか確認
-        if (PlayerInventory.Instance.Money < totalCost)
+        if (playerInventory.Money < totalCost)
         {
             ShowMessage("Not enough money!");
             return;
         }
 
-        // 支払い
-        if (PlayerInventory.Instance.TrySpendMoney(totalCost))
+        if (playerInventory.TrySpendMoney(totalCost))
         {
-            for (int i = 0; i < quantity; i++)
-            {
-                PlayerInventory.Instance.AddItem(item);
-            }
-
+            playerInventory.AddItem(item, quantity);
             ShowMessage($"Purchased {quantity} x {item.itemName}!");
             UpdateMoneyUI();
+
+            // Refresh Inventory UI
+            var ui = FindObjectOfType<InventoryUIManager>();
+            if (ui != null) ui.RefreshUI();
         }
     }
 
-
-    /// <summary>
-    /// 所持金UI更新
-    /// </summary>
     private void UpdateMoneyUI()
     {
-        //moneyText.text = $"Money: {PlayerInventory.Instance.Money} G";
+        if (playerInventory != null && moneyText != null)
+            moneyText.text = $"Money: {playerInventory.Money} G";
     }
 
     /// <summary>
@@ -316,12 +319,43 @@ public class ShopManager : MonoBehaviour
     private void ShowMessage(string msg)
     {
         messageText.text = msg;
+
+        // stop old fade coroutine if one is running
+        if (messageRoutine != null)
+            StopCoroutine(messageRoutine);
+
+        messageRoutine = StartCoroutine(FadeMessageOut());
+
     }
 
     private void ClearMessage()
     {
         if (messageText != null)
             messageText.text = "";
+    }
+
+    private IEnumerator FadeMessageOut()
+    {
+        yield return new WaitForSeconds(2f); // wait 2 seconds before fading
+
+        float duration = 1f; // fade duration
+        float elapsed = 0f;
+
+        Color startColor = messageText.color;
+        Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            messageText.color = Color.Lerp(startColor, endColor, elapsed / duration);
+            yield return null;
+        }
+
+        messageText.text = ""; // clear text fully after fade
+        messageText.color = new Color(startColor.r, startColor.g, startColor.b, 1f); // reset alpha for next time
+
+        if (purchasePanel != null)
+            purchasePanel.gameObject.SetActive(false);
     }
 
     /// <summary>
