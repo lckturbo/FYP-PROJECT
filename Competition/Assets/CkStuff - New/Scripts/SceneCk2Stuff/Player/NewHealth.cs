@@ -7,13 +7,14 @@ public class NewHealth : MonoBehaviour
     [SerializeField] private bool useStatsDirectly = true;
 
     private int currentHp;
+    public int GetCurrHealth() => currentHp;
+    public int GetMaxHealth() => stats.maxHealth;
 
     void Awake()
     {
         if (stats != null)
             ApplyStats(stats);
     }
-
     public void ApplyStats(BaseStats newStats)
     {
         stats = newStats;
@@ -82,16 +83,7 @@ public class NewHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log(gameObject.name + " has died.");
+        Destroy(gameObject, 1f);
         // TODO: death anim, disable movement, signal game state, etc.
-    }
-
-    // temp -> jas added
-    public int GetMaxHealth()
-    {
-        return stats.maxHealth;
-    }
-    public int GetCurrHealth()
-    {
-        return currentHp;
     }
 }

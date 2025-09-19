@@ -12,15 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
   m_Name: NormalEnemy
   m_EditorClassIdentifier: 
+  Speed: 2
   maxHealth: 50
+  attackreduction: 0
   atkDmg: 10
+  actionvaluespeed: 0
+  critRate: 0
+  critDamage: 0
+  attackElement: 0
+  defenseElement: 0
+  fireRes: 0
+  waterRes: 0
+  grassRes: 0
+  darkRes: 0
+  lightRes: 0
   type: 0
-  enemyPrefab: {fileID: 4767487874571805849, guid: 658580b7df430b8458b7ac04decc8acf, type: 3}
-  speed: 6
-  atkCD: 2
-  atkRange: 1.5
-  dmgReduction: 0
+  enemyPrefab: {fileID: 4249954731921599678, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
+  atkRange: 2
   AOERadius: 0
   idleTimer: 2
-  chaseRange: 3
-  investigateTimer: 2
+  chaseRange: 6

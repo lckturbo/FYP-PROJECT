@@ -14,16 +14,11 @@ public class EnemyStats : BaseStats
     public EnemyTypes type;
     [Header("EnemyPrefab")]
     public GameObject enemyPrefab;
-    [Header("Speed")]
-    public int speed;
     [Header("EnemyCombat")]
-    public float atkCD;
     public float atkRange;
     [Header("BossStats")]
-    public float dmgReduction;
     public float AOERadius;
     [Header("FSMStats")]
     public float idleTimer;
     public float chaseRange;
-    public float investigateTimer;
 }

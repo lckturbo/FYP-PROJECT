@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.LowLevel;
 
 public class Waypoints : MonoBehaviour
 {
-    // check if its occupied
+    // check if its occupied -> if occupied find another available
     // check nearest waypoint
     
     private bool occupied;
@@ -20,8 +19,9 @@ public class Waypoints : MonoBehaviour
         FindNearestWayPoint();
     }
 
-    private void FindNearestWayPoint()
+    public void FindNearestWayPoint()
     {
+        // find nearest waypoint to this waypoint
         Waypoints[] allWayPoints = FindObjectsOfType<Waypoints>();
         List<Waypoints> connections = new List<Waypoints>();
 
