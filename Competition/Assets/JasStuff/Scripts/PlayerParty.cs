@@ -6,8 +6,8 @@ public class PlayerParty : MonoBehaviour
     public static PlayerParty instance;
 
     [Header("Party Members")]
-    [SerializeField] private NewCharacterDefinition _leader; // selected from character selection
-    [SerializeField] private List<NewCharacterDefinition> _partyMembers;
+    [SerializeField] private NewCharacterDefinition leader; // selected from character selection
+    [SerializeField] private List<NewCharacterDefinition> partyMembers;
 
     private void Awake()
     {
@@ -21,26 +21,26 @@ public class PlayerParty : MonoBehaviour
 
     public void SetupParty(NewCharacterDefinition leader, List<NewCharacterDefinition> partyMembers)
     {
-        _leader = leader;
-        _partyMembers = new List<NewCharacterDefinition>();
+        this.leader = leader;
 
-        foreach(var def in partyMembers)
+        foreach (var def in partyMembers)
         {
             if (def == leader) continue;
-            _partyMembers.Add(def);
+            if (!this.partyMembers.Contains(def))
+                this.partyMembers.Add(def);
         }
     }
 
-    public GameObject GetLeader()
+    public NewCharacterDefinition GetLeader()
     {
-        return _leader.playerPrefab;
+        return leader;
     }
 
     public List<NewCharacterDefinition> GetFullParty()
     {
         List<NewCharacterDefinition> full = new List<NewCharacterDefinition>();
-        full.Add(_leader);
-        full.AddRange(_partyMembers);
+        full.Add(leader);
+        full.AddRange(partyMembers);
         return full;
     }
 }

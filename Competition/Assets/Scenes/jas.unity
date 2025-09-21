@@ -5051,57 +5051,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 574135864595883451, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
   m_PrefabInstance: {fileID: 1577774762}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1611275124
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1611275125}
-  - component: {fileID: 1611275126}
-  m_Layer: 0
-  m_Name: BattleSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1611275125
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611275124}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.442239, y: -2.0683799, z: 0.00026050955}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1611275126
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611275124}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8430c9b47116ad746a24daff54a8ef67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  battleState: 0
-  leaderSpawnPt: {fileID: 0}
-  allySpawnPt: []
-  enemySpawnPt: []
-  playerHealth: {fileID: 0}
-  enemyHealth: {fileID: 0}
-  turnText: {fileID: 0}
 --- !u!1 &1670984806
 GameObject:
   m_ObjectHideFlags: 0
@@ -5502,5 +5451,4 @@ SceneRoots:
   - {fileID: 1670984809}
   - {fileID: 1702972291}
   - {fileID: 919221797}
-  - {fileID: 1611275125}
   - {fileID: 1243777685}

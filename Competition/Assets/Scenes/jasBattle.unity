@@ -3186,12 +3186,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battleState: 0
-  leaderSpawnPt: {fileID: 0}
-  allySpawnPt: []
+  leaderSpawnPt: {fileID: 460841444}
+  allySpawnPt:
+  - {fileID: 1509884601}
+  - {fileID: 412521074}
   enemySpawnPt:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 279323887}
+  - {fileID: 1874470904}
+  - {fileID: 1613728790}
   playerHealth: {fileID: 0}
   enemyHealth: {fileID: 0}
   turnText: {fileID: 0}

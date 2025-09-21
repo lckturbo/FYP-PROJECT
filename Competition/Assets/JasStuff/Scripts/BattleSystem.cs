@@ -1,6 +1,9 @@
+using Pathfinding;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public enum BattleState
@@ -13,7 +16,6 @@ public enum BattleState
 }
 public class BattleSystem : MonoBehaviour
 {
-    public static BattleSystem instance;
     public BattleState battleState;
 
     [Header("SpawnPoints")]
@@ -21,67 +23,60 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
 
-    [Header("UI")]
-    [SerializeField] private Slider playerHealth;
-    [SerializeField] private Slider enemyHealth;
-    [SerializeField] private TMP_Text turnText;
+    //[Header("UI")]
+    //[SerializeField] private Slider playerHealth;
+    //[SerializeField] private Slider enemyHealth;
+    //[SerializeField] private TMP_Text turnText;
 
-    //private GameObject _player;
-    //private GameObject _enemy;
+    private GameObject playerLeader;
+    private List<GameObject> playerAllies = new List<GameObject>();
+    private List<GameObject> enemies = new List<GameObject>();
 
-    private void Awake()
+    private void Start()
     {
-        if (!instance)
-            instance = this;
-        else
-            Destroy(gameObject);
-
-        DontDestroyOnLoad(gameObject);
-    }
-
-    public void RegisterEnemy(EnemyBase enemy)
-    {
-        enemy.OnAttackPlayer += HandleBattleTransition;
-    }
-    public void UnRegisterEnemy(EnemyBase enemy)
-    {
-        enemy.OnAttackPlayer -= HandleBattleTransition;
-    }
-    public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)
-    {
-        PlayerParty.instance.GetFullParty();
-
-        battleState = BattleState.START;
         SetupBattle();
     }
-
     private void SetupBattle()
     {
-        //for (int i = 0; i <= enemySpawnPt.Length; i++)
-        //    enemySpawnPt[i] = GameObject.FindWithTag("EnemySpawnPt").transform;
+        List<NewCharacterDefinition> fullParty = PlayerParty.instance.GetFullParty();
+        if (fullParty == null || fullParty.Count < 1) return;
 
-        //for (int i = 0; i <= allySpawnPt.Length; i++)
-        //    allySpawnPt[i] = GameObject.FindWithTag("AllySpawnPt").transform;
+        // spawn player "leader"
+        NewCharacterDefinition leader = PlayerParty.instance.GetLeader();
+        playerLeader = Instantiate(leader.playerPrefab, leaderSpawnPt.position, Quaternion.identity);
+        playerLeader.name = "Leader_" + leader.name;
+        playerLeader.GetComponent<PlayerInput>().enabled = false;
 
-        //GameObject leader = Instantiate(PlayerParty.instance.GetLeader(), leaderSpawnPt.position, Quaternion.identity);
+        // spawn player "allies"
+        for (int i = 1; i < fullParty.Count && (i - 1) < allySpawnPt.Length; i++)
+        {
+            NewCharacterDefinition allies = fullParty[i];
+            GameObject ally = Instantiate(allies.playerPrefab, allySpawnPt[i - 1].position, Quaternion.identity);
+            ally.name = "Ally_" + allies.name;
+            ally.GetComponent<PlayerInput>().enabled = false;
+            playerAllies.Add(ally);
+        }
 
-        //    //_player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
-        //    //_enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);
+        // spawn enemies
+        List<GameObject> enemies = BattleManager.instance.enemypartyRef.GetEnemies();
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            GameObject enemy = Instantiate(enemies[i], enemySpawnPt[i].position, Quaternion.identity);
+            enemy.name = "Enemy_" + i;
+            this.enemies.Add(enemy);
+            enemy.GetComponent<AIPath>().enabled = false;
+            enemy.GetComponent<Seeker>().enabled = false;
+        }
 
-        //    // FOR BATTLE MODE
-        //    _player.GetComponent<NewPlayerMovement>().enabled = false;
+        if (playerLeader && this.enemies.Count > 0)
+            SetUpHealth(playerLeader, this.enemies[0]);
 
-        //    if (_player && _enemy)
-        //        SetUpHealth(_player, _enemy);
-
-        //    // PLAYER TURN FIRST
-        //    PlayerTurn();
-        //    //EnemyTurn();
+        // start battle
     }
 
     private void SetUpHealth(GameObject player, GameObject enemy)
     {
-        //playerHealth.maxValue = player.GetComponent<Health>().GetMaxHealth();
+        //playerHealth.maxValue = player.GetComponent<NewHealth>().GetMaxHealth();
         //playerHealth.value = playerHealth.maxValue;
         //enemyHealth.maxValue = enemy.GetComponent<EnemyBase>().GetMaxHealth();
         //enemyHealth.value = enemyHealth.maxValue;
