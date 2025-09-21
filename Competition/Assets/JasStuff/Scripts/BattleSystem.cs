@@ -31,7 +31,7 @@ public class BattleSystem : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
+        if (!instance)
             instance = this;
         else
             Destroy(gameObject);
@@ -57,13 +57,13 @@ public class BattleSystem : MonoBehaviour
 
     private void SetupBattle()
     {
-        for (int i = 0; i <= enemySpawnPt.Length; i++)
-            enemySpawnPt[i] = GameObject.FindWithTag("EnemySpawnPt").transform;
+        //for (int i = 0; i <= enemySpawnPt.Length; i++)
+        //    enemySpawnPt[i] = GameObject.FindWithTag("EnemySpawnPt").transform;
 
-        for (int i = 0; i <= allySpawnPt.Length; i++)
-            allySpawnPt[i] = GameObject.FindWithTag("AllySpawnPt").transform;
+        //for (int i = 0; i <= allySpawnPt.Length; i++)
+        //    allySpawnPt[i] = GameObject.FindWithTag("AllySpawnPt").transform;
 
-        GameObject leader = Instantiate(PlayerParty.instance.GetLeader(), leaderSpawnPt.position, Quaternion.identity);
+        //GameObject leader = Instantiate(PlayerParty.instance.GetLeader(), leaderSpawnPt.position, Quaternion.identity);
 
         //    //_player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
         //    //_enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);

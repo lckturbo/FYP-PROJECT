@@ -17,7 +17,7 @@ public abstract class EnemyBase : MonoBehaviour
     [Header("Enemy States")]
     [SerializeField] protected EnemyStates _enemyStates;
     [SerializeField] protected EnemyStats _enemyStats;
-    public EnemyStats GetEnemyStats() => _enemyStats; 
+    public EnemyStats GetEnemyStats() => _enemyStats;
     protected Transform _player;
     [SerializeField] protected Animator _animator;
 
@@ -106,9 +106,9 @@ public abstract class EnemyBase : MonoBehaviour
         {
             _targetwp.SetOccupied(false);
 
-            foreach(var neighbor in _targetwp.nearestWaypoints)
+            foreach (var neighbor in _targetwp.nearestWaypoints)
             {
-                if(!neighbor.isOccupied())
+                if (!neighbor.isOccupied())
                 {
                     _targetwp = neighbor;
                     _targetwp.SetOccupied(true);
@@ -274,9 +274,9 @@ public abstract class EnemyBase : MonoBehaviour
             case EnemyStates.BattleAttack:
                 //BattleAttack();
                 break;
-            //case EnemyStates.Death:
-            //    //Death();
-            //    break;
+                //case EnemyStates.Death:
+                //    //Death();
+                //    break;
         }
     }
     //protected virtual void Death()
