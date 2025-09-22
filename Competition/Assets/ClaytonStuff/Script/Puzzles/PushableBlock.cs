@@ -31,8 +31,12 @@ public class PushableBlock : MonoBehaviour
     {
         if (isMoving) return false;
 
+        // Only accept clean cardinal input
         Vector2 dir = GetCardinal(direction);
         if (dir == Vector2.zero) return false;
+
+        // Snap this block to the grid before checking
+        SnapToGrid();
 
         if (!CanPushChain(this, dir)) return false;
 
@@ -45,6 +49,7 @@ public class PushableBlock : MonoBehaviour
         Bounds b = block.col.bounds;
         Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
 
+        // Check one grid step in that direction
         RaycastHit2D hit = Physics2D.BoxCast(block.rb.position, size, 0f, dir, gridSize, obstacleMask);
         if (!hit.collider) return true;
 
@@ -54,14 +59,9 @@ public class PushableBlock : MonoBehaviour
 
     private void DoPushChain(PushableBlock block, Vector2 dir)
     {
-        // Snap this block to grid before pushing
-        Vector2 alignedPos = new Vector2(
-            Mathf.Round(block.rb.position.x / gridSize) * gridSize,
-            Mathf.Round(block.rb.position.y / gridSize) * gridSize
-        );
-        block.rb.position = alignedPos;
+        block.SnapToGrid();
 
-        // Check for another block in direction
+        // Chain push next block if needed
         Bounds b = block.col.bounds;
         Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
         RaycastHit2D hit = Physics2D.BoxCast(block.rb.position, size, 0f, dir, gridSize, obstacleMask);
@@ -73,7 +73,7 @@ public class PushableBlock : MonoBehaviour
                 DoPushChain(other, dir);
         }
 
-        // Move this block along the axis
+        // Push this block
         Vector2 target = block.rb.position + dir * gridSize;
         block.StartCoroutine(block.MoveTo(target));
     }
@@ -81,32 +81,17 @@ public class PushableBlock : MonoBehaviour
     private IEnumerator MoveTo(Vector2 target)
     {
         isMoving = true;
-
         rb.isKinematic = true;
 
-        Vector2 start = transform.position;
-        bool moveX = Mathf.Abs(target.x - start.x) > 0.01f;
-        bool moveY = Mathf.Abs(target.y - start.y) > 0.01f;
+        Vector2 start = rb.position;
 
-        while ((Vector2)transform.position != target)
+        while ((rb.position - target).sqrMagnitude > 0.001f)
         {
-            Vector2 pos = transform.position;
-
-            if (moveX)
-                pos.x = Mathf.MoveTowards(pos.x, target.x, moveSpeed * Time.deltaTime);
-            if (moveY)
-                pos.y = Mathf.MoveTowards(pos.y, target.y, moveSpeed * Time.deltaTime);
-
-            transform.position = pos;
+            rb.position = Vector2.MoveTowards(rb.position, target, moveSpeed * Time.deltaTime);
             yield return null;
         }
 
-        // Snap to grid exactly
-        transform.position = new Vector2(
-            Mathf.Round(transform.position.x / gridSize) * gridSize,
-            Mathf.Round(transform.position.y / gridSize) * gridSize
-        );
-
+        rb.position = target; // Snap exactly
         rb.isKinematic = false;
         rb.velocity = Vector2.zero;
         isMoving = false;
@@ -114,11 +99,21 @@ public class PushableBlock : MonoBehaviour
 
     private Vector2 GetCardinal(Vector2 dir)
     {
+        // Pick the dominant axis, ignore diagonal slop
         if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
             return dir.x > 0 ? Vector2.right : Vector2.left;
-        else if (Mathf.Abs(dir.y) > 0.01f)
+        else if (Mathf.Abs(dir.y) > 0)
             return dir.y > 0 ? Vector2.up : Vector2.down;
+
         return Vector2.zero;
+    }
+
+    private void SnapToGrid()
+    {
+        rb.position = new Vector2(
+            Mathf.Round(rb.position.x / gridSize) * gridSize,
+            Mathf.Round(rb.position.y / gridSize) * gridSize
+        );
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -127,13 +122,7 @@ public class PushableBlock : MonoBehaviour
         {
             StopAllCoroutines();
             rb.velocity = Vector2.zero;
-
-            // Snap to grid immediately on collision
-            rb.position = new Vector2(
-                Mathf.Round(rb.position.x / gridSize) * gridSize,
-                Mathf.Round(rb.position.y / gridSize) * gridSize
-            );
-
+            SnapToGrid();
             isMoving = false;
         }
     }
