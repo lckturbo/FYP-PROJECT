@@ -1,6 +1,9 @@
+using Pathfinding;
 using System.Collections;
-using TMPro;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public enum BattleState
@@ -13,70 +16,94 @@ public enum BattleState
 }
 public class BattleSystem : MonoBehaviour
 {
-    public static BattleSystem instance;
     public BattleState battleState;
 
     [Header("SpawnPoints")]
-    //[SerializeField] private Transform playerSpawnPt;
-    //[SerializeField] private Transform enemySpawnPt;
+    //[SerializeField] private Transform leaderSpawnPt;
+    [SerializeField] private Transform[] allySpawnPt;
+    [SerializeField] private Transform[] enemySpawnPt;
 
     [Header("UI")]
-    [SerializeField] private Slider playerHealth;
-    [SerializeField] private Slider enemyHealth;
-    [SerializeField] private TMP_Text turnText;
+    [SerializeField] private Slider[] playerHealth;
+    [SerializeField] private Slider[] enemyHealth;
 
-    //private GameObject _player;
-    //private GameObject _enemy;
+    private GameObject playerLeader;
+    private List<GameObject> playerAllies = new List<GameObject>();
+    private List<GameObject> enemies = new List<GameObject>();
 
-    private void Awake()
+    private void Start()
     {
-        if (instance == null)
-            instance = this;
-        else
-            Destroy(gameObject);
-
-        DontDestroyOnLoad(gameObject);
-    }
-
-    public void RegisterEnemy(EnemyBase enemy)
-    {
-        enemy.OnAttackPlayer += HandleBattleTransition;
-    }
-    public void UnRegisterEnemy(EnemyBase enemy)
-    {
-        enemy.OnAttackPlayer -= HandleBattleTransition;
-    }
-    public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)
-    {
-        //if (!_player) _player = player;
-        //PlayerParty.instance.SetUpParty(player,);
-        //if (!_enemy) _enemy = enemy.gameObject;
-        battleState = BattleState.START;
         SetupBattle();
     }
-
     private void SetupBattle()
     {
-        //    //_player = Instantiate(playerPrefab, playerSpawnPt.position, Quaternion.identity);
-        //    //_enemy = Instantiate(enemyPrefab, enemySpawnPt.position, Quaternion.identity);
+        List<NewCharacterDefinition> fullParty = PlayerParty.instance.GetFullParty();
+        NewCharacterDefinition leader = PlayerParty.instance.GetLeader();
+        if (fullParty == null || fullParty.Count < 1 || leader == null) return;
 
-        //    // FOR BATTLE MODE
-        //    _player.GetComponent<NewPlayerMovement>().enabled = false;
+        // leader
+        GameObject leaderObj = Instantiate(leader.playerPrefab, allySpawnPt[0].position, Quaternion.identity);
+        playerLeader = leaderObj;
+        leaderObj.name = "Leader_" + leader.name;
+        leaderObj.GetComponent<PlayerInput>().enabled = false;
 
-        //    if (_player && _enemy)
-        //        SetUpHealth(_player, _enemy);
+        // allies
+        for (int i = 0; i < fullParty.Count; i++)
+        {
+            NewCharacterDefinition member = fullParty[i];
+            if (member == leader) continue; 
 
-        //    // PLAYER TURN FIRST
-        //    PlayerTurn();
-        //    //EnemyTurn();
+            int allyIndex = playerAllies.Count + 1;
+            if (allyIndex < allySpawnPt.Length)
+            {
+                GameObject allyObj = Instantiate(member.playerPrefab, allySpawnPt[allyIndex].position, Quaternion.identity);
+                allyObj.name = "Ally_" + member.name;
+                allyObj.GetComponent<PlayerInput>().enabled = false;
+                playerAllies.Add(allyObj);
+            }
+        }
+
+        // spawn enemies
+        List<GameObject> enemies = BattleManager.instance.enemypartyRef.GetEnemies();
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            GameObject enemy = Instantiate(enemies[i], enemySpawnPt[i].position, Quaternion.identity);
+            enemy.name = "Enemy_" + i;
+            this.enemies.Add(enemy);
+            enemy.GetComponent<AIPath>().enabled = false;
+            enemy.GetComponent<Seeker>().enabled = false;
+        }
+
+        SetUpHealth();
+        // start battle
+        PlayerTurn();
     }
 
-    private void SetUpHealth(GameObject player, GameObject enemy)
+    private void SetUpHealth()
     {
-        //playerHealth.maxValue = player.GetComponent<Health>().GetMaxHealth();
-        //playerHealth.value = playerHealth.maxValue;
-        //enemyHealth.maxValue = enemy.GetComponent<EnemyBase>().GetMaxHealth();
-        //enemyHealth.value = enemyHealth.maxValue;
+        List<GameObject> allPlayers = new List<GameObject>();
+        allPlayers.Add(playerLeader);
+        allPlayers.AddRange(playerAllies);
+
+        for (int i = 0; i <= allPlayers.Count && i <playerHealth.Length; i++)
+        {
+            NewHealth health = allPlayers[i].GetComponent<NewHealth>();
+            if (health)
+            {
+                playerHealth[i].maxValue = health.GetMaxHealth();
+                playerHealth[i].value = health.GetCurrHealth(); 
+            }
+        }
+
+        for (int i = 0; i <= enemies.Count && i < enemyHealth.Length; i++)
+        {
+            NewHealth health = allPlayers[i].GetComponent<NewHealth>();
+            if (health)
+            {
+                enemyHealth[i].maxValue = health.GetMaxHealth();
+                enemyHealth[i].value = health.GetCurrHealth();
+            }
+        }
     }
     private bool CheckHealth()
     {
