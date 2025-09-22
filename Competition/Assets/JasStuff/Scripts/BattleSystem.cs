@@ -1,7 +1,7 @@
 using Pathfinding;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -19,14 +19,13 @@ public class BattleSystem : MonoBehaviour
     public BattleState battleState;
 
     [Header("SpawnPoints")]
-    [SerializeField] private Transform leaderSpawnPt;
+    //[SerializeField] private Transform leaderSpawnPt;
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
 
-    //[Header("UI")]
-    //[SerializeField] private Slider playerHealth;
-    //[SerializeField] private Slider enemyHealth;
-    //[SerializeField] private TMP_Text turnText;
+    [Header("UI")]
+    [SerializeField] private Slider[] playerHealth;
+    [SerializeField] private Slider[] enemyHealth;
 
     private GameObject playerLeader;
     private List<GameObject> playerAllies = new List<GameObject>();
@@ -39,22 +38,29 @@ public class BattleSystem : MonoBehaviour
     private void SetupBattle()
     {
         List<NewCharacterDefinition> fullParty = PlayerParty.instance.GetFullParty();
-        if (fullParty == null || fullParty.Count < 1) return;
-
-        // spawn player "leader"
         NewCharacterDefinition leader = PlayerParty.instance.GetLeader();
-        playerLeader = Instantiate(leader.playerPrefab, leaderSpawnPt.position, Quaternion.identity);
-        playerLeader.name = "Leader_" + leader.name;
-        playerLeader.GetComponent<PlayerInput>().enabled = false;
+        if (fullParty == null || fullParty.Count < 1 || leader == null) return;
 
-        // spawn player "allies"
-        for (int i = 1; i < fullParty.Count && (i - 1) < allySpawnPt.Length; i++)
+        // leader
+        GameObject leaderObj = Instantiate(leader.playerPrefab, allySpawnPt[0].position, Quaternion.identity);
+        playerLeader = leaderObj;
+        leaderObj.name = "Leader_" + leader.name;
+        leaderObj.GetComponent<PlayerInput>().enabled = false;
+
+        // allies
+        for (int i = 0; i < fullParty.Count; i++)
         {
-            NewCharacterDefinition allies = fullParty[i];
-            GameObject ally = Instantiate(allies.playerPrefab, allySpawnPt[i - 1].position, Quaternion.identity);
-            ally.name = "Ally_" + allies.name;
-            ally.GetComponent<PlayerInput>().enabled = false;
-            playerAllies.Add(ally);
+            NewCharacterDefinition member = fullParty[i];
+            if (member == leader) continue; 
+
+            int allyIndex = playerAllies.Count + 1;
+            if (allyIndex < allySpawnPt.Length)
+            {
+                GameObject allyObj = Instantiate(member.playerPrefab, allySpawnPt[allyIndex].position, Quaternion.identity);
+                allyObj.name = "Ally_" + member.name;
+                allyObj.GetComponent<PlayerInput>().enabled = false;
+                playerAllies.Add(allyObj);
+            }
         }
 
         // spawn enemies
@@ -68,18 +74,36 @@ public class BattleSystem : MonoBehaviour
             enemy.GetComponent<Seeker>().enabled = false;
         }
 
-        if (playerLeader && this.enemies.Count > 0)
-            SetUpHealth(playerLeader, this.enemies[0]);
-
+        SetUpHealth();
         // start battle
+        PlayerTurn();
     }
 
-    private void SetUpHealth(GameObject player, GameObject enemy)
+    private void SetUpHealth()
     {
-        //playerHealth.maxValue = player.GetComponent<NewHealth>().GetMaxHealth();
-        //playerHealth.value = playerHealth.maxValue;
-        //enemyHealth.maxValue = enemy.GetComponent<EnemyBase>().GetMaxHealth();
-        //enemyHealth.value = enemyHealth.maxValue;
+        List<GameObject> allPlayers = new List<GameObject>();
+        allPlayers.Add(playerLeader);
+        allPlayers.AddRange(playerAllies);
+
+        for (int i = 0; i <= allPlayers.Count && i <playerHealth.Length; i++)
+        {
+            NewHealth health = allPlayers[i].GetComponent<NewHealth>();
+            if (health)
+            {
+                playerHealth[i].maxValue = health.GetMaxHealth();
+                playerHealth[i].value = health.GetCurrHealth(); 
+            }
+        }
+
+        for (int i = 0; i <= enemies.Count && i < enemyHealth.Length; i++)
+        {
+            NewHealth health = allPlayers[i].GetComponent<NewHealth>();
+            if (health)
+            {
+                enemyHealth[i].maxValue = health.GetMaxHealth();
+                enemyHealth[i].value = health.GetCurrHealth();
+            }
+        }
     }
     private bool CheckHealth()
     {
