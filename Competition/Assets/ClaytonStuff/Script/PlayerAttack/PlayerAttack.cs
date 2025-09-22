@@ -13,6 +13,9 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private float attackRate = 1f;
     private float nextAttackTime = 0f;
 
+    [Header("References")]
+    [SerializeField] private ObjectPool arrowPool; // assign pool with Arrow prefab
+
     [Header("Attack Offsets")]
     [SerializeField] private Vector2 rightAttackOffset = new Vector2(1f, 0f);
     [SerializeField] private Vector2 leftAttackOffset = new Vector2(-1f, 0f);
@@ -41,19 +44,49 @@ public class PlayerAttack : MonoBehaviour
     {
         UpdateAttackPoint();
 
-        // Attack on left mouse click
         if (Time.time >= nextAttackTime && Mouse.current.leftButton.wasPressedThisFrame)
         {
             var item = heldItem != null ? heldItem.GetEquippedItem() : null;
-            if (item == null || !item.isWeapon)
-            {
-                Debug.Log("No weapon equipped!");
-                return;
-            }
+            if (item == null || !item.isWeapon) return;
 
-            Attack();
-            Debug.Log("Attack triggered with: " + item.itemName);
+            if (item.isBow)
+            {
+                FireArrow();
+                Debug.Log("arrow fired");
+            }
+            else
+                AttackMelee();
+
             nextAttackTime = Time.time + 1f / attackRate;
+        }
+    }
+
+    private void FireArrow()
+    {
+        if (arrowPool == null)
+        {
+            Debug.LogWarning("No arrow pool assigned!");
+            return;
+        }
+
+        GameObject arrowObj = arrowPool.Get();
+        arrowObj.transform.position = attackPoint.position;
+
+        // Get facing direction
+        Vector2 dir = (attackPoint.position - transform.position).normalized;
+        arrowObj.GetComponent<Arrow>().Fire(dir);
+    }
+
+    private void AttackMelee()
+    {
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+            attackPoint.position, attackRange, enemyLayer
+        );
+
+        foreach (var enemy in hitEnemies)
+        {
+            Debug.Log($"Hit {enemy.name}, dealt {attackDamage}");
+            // TODO: Apply melee damage
         }
     }
 
@@ -66,38 +99,15 @@ public class PlayerAttack : MonoBehaviour
 
         Vector2 offset = Vector2.zero;
 
-        // Pick dominant axis for facing direction
         if (Mathf.Abs(moveX) > Mathf.Abs(moveY))
-        {
             offset = moveX > 0 ? rightAttackOffset : leftAttackOffset;
-        }
         else if (Mathf.Abs(moveY) > 0.01f)
-        {
             offset = moveY > 0 ? upAttackOffset : downAttackOffset;
-        }
         else
-        {
-            // Default facing right if idle
             offset = rightAttackOffset;
-        }
 
         attackPoint.localPosition = offset;
     }
-
-    private void Attack()
-    {
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
-            attackPoint.position, attackRange, enemyLayer
-        );
-
-        Debug.Log($"Attack at {attackPoint.position}, radius {attackRange}, hits {hitEnemies.Length}");
-
-        foreach (var enemy in hitEnemies)
-        {
-            Debug.Log($"Hit {enemy.name}, Layer: {LayerMask.LayerToName(enemy.gameObject.layer)}");
-        }
-    }
-
 
     private void OnDrawGizmosSelected()
     {
