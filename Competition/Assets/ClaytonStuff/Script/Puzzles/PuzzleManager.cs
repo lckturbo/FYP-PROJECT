@@ -50,6 +50,8 @@ public class PuzzleManager : MonoBehaviour
         OnPuzzleSolved();
     }
 
+    public event System.Action OnPuzzleSolvedEvent;
+
     private void OnPuzzleSolved()
     {
         if (gate != null)
@@ -61,5 +63,7 @@ public class PuzzleManager : MonoBehaviour
         {
             Debug.LogWarning("Puzzle solved, but no gate assigned.");
         }
+
+        OnPuzzleSolvedEvent?.Invoke();
     }
 }

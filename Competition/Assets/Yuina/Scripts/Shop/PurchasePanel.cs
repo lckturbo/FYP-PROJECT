@@ -35,11 +35,11 @@ public class PurchasePanel : MonoBehaviour
             playerInput = playerMovement.GetComponent<PlayerInput>();
             if (playerInput != null)
             {
-                moveAction = playerInput.actions["Move"];
-                moveAction.Enable();
+                //moveAction = playerInput.actions["Move"];
+                //moveAction.Enable();
 
-                submitAction = playerInput.actions["Submit"];
-                submitAction.Enable();
+                //submitAction = playerInput.actions["Submit"];
+                //submitAction.Enable();
             }
         }
 
