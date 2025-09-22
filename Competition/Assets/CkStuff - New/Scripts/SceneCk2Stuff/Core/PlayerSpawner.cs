@@ -7,7 +7,6 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] private SelectedCharacter selectedStore;
     [SerializeField] private Transform spawnPoint;
 
-    // Optional: others can subscribe if they also need the player Transform
     public static System.Action<Transform> OnPlayerSpawned;
 
     private void Awake()
@@ -40,10 +39,9 @@ public class PlayerSpawner : MonoBehaviour
             go.GetComponentInChildren<NewHealth>()?.ApplyStats(stats);
         }
 
-        // ---- Hook the camera target here ----
         var camCtrl = Camera.main ? Camera.main.GetComponent<NewCameraController>() : null;
         if (!camCtrl)
-            camCtrl = FindFirstObjectByType<NewCameraController>(); // fallback if not tagged MainCamera
+            camCtrl = FindFirstObjectByType<NewCameraController>();
 
         if (camCtrl)
         {

@@ -84,6 +84,7 @@ public class NewHealth : MonoBehaviour
     {
         Debug.Log(gameObject.name + " has died.");
         Destroy(gameObject, 1f);
+
         // TODO: death anim, disable movement, signal game state, etc.
     }
 }
