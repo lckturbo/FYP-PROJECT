@@ -46,12 +46,13 @@ public class BattleSystem : MonoBehaviour
         playerLeader = leaderObj;
         leaderObj.name = "Leader_" + leader.name;
         leaderObj.GetComponent<PlayerInput>().enabled = false;
+        ApplyStatsIfPresent(leaderObj, leader.stats);          // <-- ADDED THIS
 
         // allies
         for (int i = 0; i < fullParty.Count; i++)
         {
             NewCharacterDefinition member = fullParty[i];
-            if (member == leader) continue; 
+            if (member == leader) continue;
 
             int allyIndex = playerAllies.Count + 1;
             if (allyIndex < allySpawnPt.Length)
@@ -59,6 +60,7 @@ public class BattleSystem : MonoBehaviour
                 GameObject allyObj = Instantiate(member.playerPrefab, allySpawnPt[allyIndex].position, Quaternion.identity);
                 allyObj.name = "Ally_" + member.name;
                 allyObj.GetComponent<PlayerInput>().enabled = false;
+                ApplyStatsIfPresent(allyObj, member.stats);     // <-- ADDED THIS
                 playerAllies.Add(allyObj);
             }
         }
@@ -81,30 +83,33 @@ public class BattleSystem : MonoBehaviour
 
     private void SetUpHealth()
     {
-        List<GameObject> allPlayers = new List<GameObject>();
+        // Players
+        var allPlayers = new List<GameObject>();
         allPlayers.Add(playerLeader);
         allPlayers.AddRange(playerAllies);
 
-        for (int i = 0; i <= allPlayers.Count && i <playerHealth.Length; i++)
+        for (int i = 0; i < allPlayers.Count && i < playerHealth.Length; i++)
         {
-            NewHealth health = allPlayers[i].GetComponent<NewHealth>();
-            if (health)
+            var h = allPlayers[i] ? allPlayers[i].GetComponent<NewHealth>() : null;
+            if (h)
             {
-                playerHealth[i].maxValue = health.GetMaxHealth();
-                playerHealth[i].value = health.GetCurrHealth(); 
+                playerHealth[i].maxValue = h.GetMaxHealth();
+                playerHealth[i].value = h.GetCurrHealth();
             }
         }
 
-        for (int i = 0; i <= enemies.Count && i < enemyHealth.Length; i++)
+        // Enemies
+        for (int i = 0; i < enemies.Count && i < enemyHealth.Length; i++)
         {
-            NewHealth health = allPlayers[i].GetComponent<NewHealth>();
-            if (health)
+            var h = enemies[i] ? enemies[i].GetComponent<NewHealth>() : null;
+            if (h)
             {
-                enemyHealth[i].maxValue = health.GetMaxHealth();
-                enemyHealth[i].value = health.GetCurrHealth();
+                enemyHealth[i].maxValue = h.GetMaxHealth();
+                enemyHealth[i].value = h.GetCurrHealth();
             }
         }
     }
+
     private bool CheckHealth()
     {
         //int playerCurrHealth = _player.GetComponent<Health>().GetCurrHealth();
@@ -195,4 +200,12 @@ public class BattleSystem : MonoBehaviour
         //MsgLog("Player lost");
         // lose scene
     }
+
+    private void ApplyStatsIfPresent(GameObject go, BaseStats stats)
+    {
+        if (!go || stats == null) return;
+        go.GetComponentInChildren<NewPlayerMovement>()?.ApplyStats(stats);
+        go.GetComponentInChildren<NewHealth>()?.ApplyStats(stats);
+    }
+
 }

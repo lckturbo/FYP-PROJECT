@@ -8,18 +8,18 @@ public class NewHealth : MonoBehaviour
 
     private int currentHp;
     public int GetCurrHealth() => currentHp;
-    public int GetMaxHealth() => stats.maxHealth;
+    public int GetMaxHealth() => stats ? stats.maxHealth : 1;
 
     void Awake()
     {
-        if (stats != null)
-            ApplyStats(stats);
+        if (stats != null) ApplyStats(stats);
     }
+
     public void ApplyStats(BaseStats newStats)
     {
         stats = newStats;
         if (useStatsDirectly && stats != null)
-            currentHp = stats.maxHealth; // reset to full when applied
+            currentHp = stats.maxHealth;
     }
 
     public void TakeDamage(int rawDamage, BaseStats attacker, NewElementType skillElement = NewElementType.None)
@@ -84,6 +84,7 @@ public class NewHealth : MonoBehaviour
     {
         Debug.Log(gameObject.name + " has died.");
         Destroy(gameObject, 1f);
+
         // TODO: death anim, disable movement, signal game state, etc.
     }
 }
