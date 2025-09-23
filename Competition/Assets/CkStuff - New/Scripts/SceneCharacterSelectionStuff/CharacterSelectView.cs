@@ -88,7 +88,6 @@ public class CharacterSelectView : MonoBehaviour
         if (!def || def.stats == null) return;
 
         selectedStore.Set(def, currentIndex);
-
         var allies = new List<NewCharacterDefinition>();
         allies.Add(def); // leader
         for (int i = 0; i <= roster.Length; i++)
@@ -143,7 +142,7 @@ public class CharacterSelectView : MonoBehaviour
     private void Confirm()
     {
         // UnityEngine.SceneManagement.SceneManager.LoadScene("SceneCk2");
-        GameManager.instance.ChangeScene("SceneCk2");
+        GameManager.instance.ChangeScene("jas");
     }
 
     public int GetCurrentIndex() => currentIndex;
