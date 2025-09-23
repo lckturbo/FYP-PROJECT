@@ -139,6 +139,7 @@ public class PlayerAttack : MonoBehaviour
         {
             Debug.Log($"Melee hit {enemy.name}, dealt {attackDamage}");
             // TODO: Apply damage here
+            GameManager.instance.ChangeScene("jasBattle");
         }
     }
 
