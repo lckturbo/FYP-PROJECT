@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class Arrow : MonoBehaviour
 {
     [SerializeField] private float speed = 10f;
@@ -8,6 +9,13 @@ public class Arrow : MonoBehaviour
 
     private float timer;
     private Vector2 direction;
+    private Rigidbody2D rb;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        rb.isKinematic = true; // ensures no unwanted physics forces
+    }
 
     private void OnEnable()
     {
@@ -17,17 +25,21 @@ public class Arrow : MonoBehaviour
     public void Fire(Vector2 dir)
     {
         direction = dir.normalized;
+        rb.velocity = direction * speed; // physics-based movement
         timer = lifeTime;
-        gameObject.SetActive(true);
     }
 
     private void Update()
     {
-        transform.Translate(direction * speed * Time.deltaTime);
-
         timer -= Time.deltaTime;
         if (timer <= 0f)
             gameObject.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        // Reset velocity when pooled
+        if (rb != null) rb.velocity = Vector2.zero;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

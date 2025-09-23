@@ -6,7 +6,8 @@ public class ObjectPool : MonoBehaviour
     [SerializeField] private GameObject prefab;
     [SerializeField] private int initialSize = 10;
 
-    private Queue<GameObject> pool = new Queue<GameObject>();
+    private List<GameObject> pool = new List<GameObject>();
+    private int currentIndex = 0;
 
     private void Awake()
     {
@@ -14,27 +15,27 @@ public class ObjectPool : MonoBehaviour
         {
             GameObject obj = Instantiate(prefab, transform);
             obj.SetActive(false);
-            pool.Enqueue(obj);
+            pool.Add(obj);
         }
     }
 
     public GameObject Get()
     {
-        if (pool.Count == 0)
-        {
-            GameObject obj = Instantiate(prefab, transform);
-            obj.SetActive(false);
-            pool.Enqueue(obj);
-        }
+        // Cycle through the pool like a circular buffer
+        GameObject obj = pool[currentIndex];
+        currentIndex = (currentIndex + 1) % pool.Count;
 
-        var instance = pool.Dequeue();
-        instance.SetActive(true);
-        return instance;
+        // If it's still active, recycle it (force reset)
+        if (obj.activeInHierarchy)
+            obj.SetActive(false);
+
+        obj.SetActive(true);
+        return obj;
     }
 
     public void Return(GameObject obj)
     {
         obj.SetActive(false);
-        pool.Enqueue(obj);
+        // Optional: you don’t need to enqueue again, since we’re cycling
     }
 }
