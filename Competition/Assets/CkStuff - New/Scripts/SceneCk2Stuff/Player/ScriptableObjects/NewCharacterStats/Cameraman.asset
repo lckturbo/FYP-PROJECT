@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 751cdc46136c0114ca56c5d04e45b164, type: 3}
   m_Name: Cameraman
   m_EditorClassIdentifier: 
-  Speed: 5
-  maxHealth: 100
-  attackreduction: 25
+  Speed: 3
+  maxHealth: 50
+  attackreduction: 5
   atkDmg: 10
-  actionvaluespeed: 50
-  critRate: 0.05
-  critDamage: 50
+  actionvaluespeed: 0.3
+  critRate: 0.25
+  critDamage: 25
   attackElement: 5
   defenseElement: 4
   fireRes: 1

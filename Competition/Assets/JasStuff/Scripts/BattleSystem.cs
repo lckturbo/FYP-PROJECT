@@ -6,18 +6,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public enum BattleState
-{
-    START,
-    PLAYERTURN,
-    ENEMYTURN,
-    BATTLEWIN,
-    BATTLELOSE,
-}
 public class BattleSystem : MonoBehaviour
 {
-    public BattleState battleState;
-
     [Header("SpawnPoints")]
     //[SerializeField] private Transform leaderSpawnPt;
     [SerializeField] private Transform[] allySpawnPt;
@@ -30,6 +20,9 @@ public class BattleSystem : MonoBehaviour
     private GameObject playerLeader;
     private List<GameObject> playerAllies = new List<GameObject>();
     private List<GameObject> enemies = new List<GameObject>();
+
+    [Header("TESTING")]
+    [SerializeField] private TurnEngine turnEngine;
 
     private void Start()
     {
@@ -48,6 +41,14 @@ public class BattleSystem : MonoBehaviour
         leaderObj.GetComponent<PlayerInput>().enabled = false;
         ApplyStatsIfPresent(leaderObj, leader.stats);          // <-- ADDED THIS
 
+        //TESTING
+        ApplyStatsIfPresent(leaderObj, leader.stats);
+        var cL = leaderObj.AddComponent<Combatant>();
+        cL.isPlayerTeam = true;
+        cL.isLeader = true;
+        cL.stats = leader.stats;
+        turnEngine.Register(cL);
+
         // allies
         for (int i = 0; i < fullParty.Count; i++)
         {
@@ -62,6 +63,14 @@ public class BattleSystem : MonoBehaviour
                 allyObj.GetComponent<PlayerInput>().enabled = false;
                 ApplyStatsIfPresent(allyObj, member.stats);     // <-- ADDED THIS
                 playerAllies.Add(allyObj);
+
+                //TESTING
+                ApplyStatsIfPresent(allyObj, member.stats);
+                var cA = allyObj.AddComponent<Combatant>();
+                cA.isPlayerTeam = true;
+                cA.isLeader = false;
+                cA.stats = member.stats;
+                turnEngine.Register(cA);
             }
         }
 
@@ -74,11 +83,18 @@ public class BattleSystem : MonoBehaviour
             this.enemies.Add(enemy);
             enemy.GetComponent<AIPath>().enabled = false;
             enemy.GetComponent<Seeker>().enabled = false;
+
+            //TESTING
+            var cE = enemy.AddComponent<Combatant>();
+            cE.isPlayerTeam = false;
+            cE.isLeader = false;
+            turnEngine.Register(cE);
         }
 
         SetUpHealth();
-        // start battle
-        PlayerTurn();
+
+        //TESTING
+        turnEngine.Begin();
     }
 
     private void SetUpHealth()
@@ -108,97 +124,6 @@ public class BattleSystem : MonoBehaviour
                 enemyHealth[i].value = h.GetCurrHealth();
             }
         }
-    }
-
-    private bool CheckHealth()
-    {
-        //int playerCurrHealth = _player.GetComponent<Health>().GetCurrHealth();
-        //int enemyCurrHealth = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
-
-        //if (playerCurrHealth <= 0)
-        //{
-        //    BattleLose();
-        //    return false;
-        //}
-        //if (enemyCurrHealth <= 0)
-        //{
-        //    BattleWin();
-        //    return false;
-        //}
-        return true;
-    }
-    private void PlayerTurn()
-    {
-        //battleState = BattleState.PLAYERTURN;
-        //turnText.text = "PLAYER TURN";
-
-        //// PLAYER HIT -> PARTY HIT -> PARTY HIT
-        //_enemy.GetComponent<EnemyBase>().TakeDamage(10);
-        //enemyHealth.value = _enemy.GetComponent<EnemyBase>().GetCurrHealth();
-        //// CHECK HEALTH
-        //if (CheckHealth())
-        //{
-        //    // ENEMY TURN
-        //    //EnemyTurn();
-        //    StartCoroutine(WaitTurn("Player"));
-        //}
-    }
-
-    private void EnemyTurn()
-    {
-        //battleState = BattleState.ENEMYTURN;
-        //turnText.text = "ENEMY TURN";
-
-        //// ENEMY HIT -> PLAYER TURN
-        //_enemy.GetComponent<EnemyBase>()._states = EnemyBase.EnemyStates.BattleAttack;
-        //StartCoroutine(EnemyTurnCoroutine());
-    }
-
-    //private IEnumerator EnemyTurnCoroutine()
-    //{
-    //    while (_enemy.GetComponent<EnemyBase>()._states == EnemyBase.EnemyStates.Attack)
-    //        yield return null;
-
-    //    //playerHealth.value = _player.GetComponent<Health>().GetCurrHealth();
-    //    //MsgLog("Player currHealth: " + _player.GetComponent<Health>().GetCurrHealth());
-    //    if (CheckHealth())
-    //        StartCoroutine(WaitTurn("Enemy"));
-    //}
-
-    private IEnumerator WaitTurn(string n)
-    {
-        yield return new WaitForSeconds(2);
-        if (n == "Player")
-            EnemyTurn();
-        else
-            PlayerTurn();
-    }
-
-    private void BattleWin()
-    {
-        //UnRegisterEnemy(_enemy.GetComponent<EnemyBase>());
-        //battleState = BattleState.BATTLEWIN;
-        //turnText.text = "Battle Win";
-        //Time.timeScale = 0;
-        //MsgLog("Player win");
-        //// game scene
-        //if (normalScene && battleScene)
-        //{
-        //    Destroy(_enemy);
-        //    Destroy(_player);
-        //    normalScene.SetActive(true);
-        //    battleScene.SetActive(false);
-        //}
-    }
-
-    private void BattleLose()
-    {
-        //UnRegisterEnemy(_enemy.GetComponent<EnemyBase>());
-        //battleState = BattleState.BATTLELOSE;
-        //turnText.text = "Battle Lose";
-        //Time.timeScale = 0;
-        //MsgLog("Player lost");
-        // lose scene
     }
 
     private void ApplyStatsIfPresent(GameObject go, BaseStats stats)

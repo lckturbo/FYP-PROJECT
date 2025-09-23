@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Producer
   m_EditorClassIdentifier: 
   Speed: 3
-  maxHealth: 200
-  attackreduction: 90
-  atkDmg: 25
-  actionvaluespeed: 15
-  critRate: 0.05
-  critDamage: 50
+  maxHealth: 50
+  attackreduction: 5
+  atkDmg: 10
+  actionvaluespeed: 1
+  critRate: 0.25
+  critDamage: 25
   attackElement: 1
   defenseElement: 2
   fireRes: 0.25
@@ -27,5 +27,5 @@ MonoBehaviour:
   darkRes: 1
   lightRes: 1
   level: 1
-  atkCD: 8
-  atkRange: 1
+  atkCD: 1
+  atkRange: 2
