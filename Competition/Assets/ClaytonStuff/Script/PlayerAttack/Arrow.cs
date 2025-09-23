@@ -10,6 +10,7 @@ public class Arrow : MonoBehaviour
     private float timer;
     private Vector2 direction;
     private Rigidbody2D rb;
+    
 
     private void Awake()
     {
@@ -48,6 +49,7 @@ public class Arrow : MonoBehaviour
         {
             Debug.Log($"Hit enemy {collision.name}, dealt {damage}");
             // TODO: Apply damage
+            GameManager.instance.ChangeScene("jasBattle");
             gameObject.SetActive(false);
         }
     }
