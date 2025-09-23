@@ -10,19 +10,16 @@ public class NewPlayerMovement : MonoBehaviour
     [SerializeField] private BaseStats stats;
     [SerializeField] private bool useStatsDirectly = true;
 
-    private string moveActionName = "Move";
-
-    [Header("Movement Options")]
-    private bool normalizeDiagonal = true;
-    private float deadzone = 0.1f;
+    [Header("Input Action Name")]
+    [SerializeField] private string moveActionName = "Move"; // 2D Vector action (WASD/Stick)
 
     private Rigidbody2D rb;
     private Animator animator;
     private PlayerInput playerInput;
     private InputAction moveAction;
 
-    private Vector2 inputRaw;
-    private Vector2 moveDir;
+    private Vector2 inputRaw;     // raw input
+    private Vector2 moveDir;      // snapped to 4-way only
     private float cachedWalkSpeed;
 
     void Awake()
@@ -35,9 +32,7 @@ public class NewPlayerMovement : MonoBehaviour
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         if (playerInput && playerInput.actions != null)
-        {
             moveAction = playerInput.actions[moveActionName];
-        }
 
         if (stats != null)
             ApplyStats(stats);
@@ -46,23 +41,24 @@ public class NewPlayerMovement : MonoBehaviour
     public void ApplyStats(BaseStats newStats)
     {
         stats = newStats;
-
         if (!useStatsDirectly && stats != null)
             cachedWalkSpeed = stats.Speed;
     }
 
     void Update()
     {
-        if (moveAction != null)
-            inputRaw = moveAction.ReadValue<Vector2>();
+        // read raw input from Input System
+        inputRaw = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
 
-        if (inputRaw.sqrMagnitude < deadzone * deadzone)
-            inputRaw = Vector2.zero;
+        // 4-way only: horizontal first, else vertical
+        if (inputRaw.x != 0f)
+            moveDir = new Vector2(Mathf.Sign(inputRaw.x), 0f);
+        else if (inputRaw.y != 0f)
+            moveDir = new Vector2(0f, Mathf.Sign(inputRaw.y));
+        else
+            moveDir = Vector2.zero;
 
-        moveDir = inputRaw;
-        if (normalizeDiagonal && moveDir.sqrMagnitude > 1e-4f)
-            moveDir = moveDir.normalized;
-
+        // animator
         if (moveDir != Vector2.zero)
         {
             animator.SetFloat("moveX", moveDir.x);
@@ -78,20 +74,15 @@ public class NewPlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         float speed = GetWalkSpeed();
-        if (speed <= 0f) return;
+        if (speed <= 0f || moveDir == Vector2.zero) return;
 
-        if (moveDir != Vector2.zero)
-        {
-            Vector2 next = rb.position + moveDir * (speed * Time.fixedDeltaTime);
-            rb.MovePosition(next);
-        }
+        Vector2 next = rb.position + moveDir * (speed * Time.fixedDeltaTime);
+        rb.MovePosition(next);
     }
 
     private float GetWalkSpeed()
     {
-        if (stats == null)
-            return cachedWalkSpeed;
-
+        if (stats == null) return cachedWalkSpeed;
         return useStatsDirectly ? stats.Speed : cachedWalkSpeed;
     }
 }
