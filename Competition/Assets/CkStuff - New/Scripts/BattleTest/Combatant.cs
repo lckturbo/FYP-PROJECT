@@ -5,6 +5,7 @@ public class Combatant : MonoBehaviour
 {
     public bool isPlayerTeam;
     public bool isLeader;                 // leader = player choice (unless auto)
+
     public BaseStats stats;               // assigned on spawn
     public NewHealth health;              // cached
 

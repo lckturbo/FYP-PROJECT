@@ -7,13 +7,13 @@ public class TurnEngine : MonoBehaviour
     [Tooltip("Seconds to fill ATB from 0->1 when Speed = 1")]
     [SerializeField] private float atbFillSeconds = 3f;
 
-    public bool autoBattle = false;                 // <-- toggle ON/OFF
+    public bool autoBattle = false;
 
     private readonly List<Combatant> _units = new();
     private bool _running;
 
     // Leader choice plumbing
-    public event Action<Combatant> OnLeaderTurnStart;   // UI listens
+    public event Action<Combatant> OnLeaderTurnStart;
     private bool _waitingForLeader;
     private Combatant _currentLeader;
 
@@ -53,7 +53,7 @@ public class TurnEngine : MonoBehaviour
                     {
                         _waitingForLeader = true;
                         _currentLeader = u;
-                        OnLeaderTurnStart?.Invoke(u); // show action UI
+                        OnLeaderTurnStart?.Invoke(u);
                         return;
                     }
                 }

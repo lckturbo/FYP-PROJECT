@@ -4,9 +4,9 @@ using UnityEngine.UI;
 public class BattleActionUI : MonoBehaviour
 {
     [SerializeField] private TurnEngine engine;
-    [SerializeField] private GameObject panel;   // root with buttons
+    [SerializeField] private GameObject panel;
     [SerializeField] private Button attackBtn;
-    [SerializeField] private Button skillBtn;    // placeholder; same as attack for now
+    [SerializeField] private Button skillBtn;
 
     private void Awake()
     {
@@ -35,6 +35,7 @@ public class BattleActionUI : MonoBehaviour
         engine.LeaderChooseBasicAttack();
     }
 
+    // placeholder; same as attack for now
     private void OnSkill()
     {
         if (panel) panel.SetActive(false);

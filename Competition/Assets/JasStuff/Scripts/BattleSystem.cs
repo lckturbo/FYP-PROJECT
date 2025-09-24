@@ -84,11 +84,20 @@ public class BattleSystem : MonoBehaviour
             enemy.GetComponent<AIPath>().enabled = false;
             enemy.GetComponent<Seeker>().enabled = false;
 
+            // Get the EnemyStats asset from the prefab's EnemyBase
+            var eb = enemy.GetComponent<EnemyBase>();
+            var es = eb ? eb.GetEnemyStats() : null;
+
+            // Ensure NewHealth uses those stats (HP/defense/elements on the target side)
+            var eh = enemy.GetComponentInChildren<NewHealth>();
+            if (eh && es) eh.ApplyStats(es);
+
             //TESTING
-            var cE = enemy.AddComponent<Combatant>();
+            var cE = enemy.AddComponent<Combatant>() ?? enemy.AddComponent<Combatant>(); ;
             cE.isPlayerTeam = false;
             cE.isLeader = false;
             turnEngine.Register(cE);
+            cE.stats = es;
         }
 
         SetUpHealth();

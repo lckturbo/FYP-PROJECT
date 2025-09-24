@@ -4,8 +4,8 @@ using UnityEngine.UI;
 public class AutoBattleToggle : MonoBehaviour
 {
     [SerializeField] private TurnEngine engine;
-    [SerializeField] private Toggle toggle;       // Use a Toggle
-    [SerializeField] private Text label;          // Optional text
+    [SerializeField] private Toggle toggle;
+    [SerializeField] private Text label; 
 
     private void Awake()
     {
