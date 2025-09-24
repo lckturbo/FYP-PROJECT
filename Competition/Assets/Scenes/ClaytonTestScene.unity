@@ -6958,7 +6958,7 @@ GameObject:
   - component: {fileID: 2103708502}
   m_Layer: 9
   m_Name: Enemy
-  m_TagString: Enemy
+  m_TagString: AllySpawnPt
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7230,6 +7230,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 809ab4e15286b4b40813635ef86e5215, type: 2}
   useStatsDirectly: 1
+  moveActionName: Move
 --- !u!1 &2430555882162334305
 GameObject:
   m_ObjectHideFlags: 0
