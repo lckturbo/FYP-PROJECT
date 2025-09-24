@@ -2,14 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
-using ISystem_Actions;  // Namespace for using InputSystem_Actions
-
 
 public class PurchasePanel : MonoBehaviour
 {
-    private InputAction moveAction;
-    private InputSystem_Actions iSystemActions;
-
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI itemNameText;
     [SerializeField] private TextMeshProUGUI priceText;
@@ -18,24 +13,35 @@ public class PurchasePanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
 
     [Header("Repeat Settings")]
-    [SerializeField] private float repeatDelay = 0.3f;   // Delay until long press begins
-    [SerializeField] private float repeatRate = 0.1f;    // Change rate during long press
+    [SerializeField] private float repeatDelay = 0.3f;
+    [SerializeField] private float repeatRate = 0.1f;
 
-    private ShopItem currentItem;
+    private Item currentItem;
     private int quantity = 1;
     private float nextChangeTime;
 
-    public bool IsPurchasePanelActive => gameObject.activeSelf;
+    private PlayerInput playerInput;
+    private InputAction moveAction;
+    private InputAction submitAction;
 
+    public bool IsPurchasePanelActive => gameObject.activeSelf;
 
     private void Awake()
     {
-        moveAction = InputSystem.actions.FindAction("Move");
-        moveAction.Enable();
+        // Get PlayerInput from NewPlayerMovement
+        NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerInput = playerMovement.GetComponent<PlayerInput>();
+            if (playerInput != null)
+            {
+                //moveAction = playerInput.actions["Move"];
+                //moveAction.Enable();
 
-        iSystemActions = new InputSystem_Actions();
-        iSystemActions.UI.Enable();
-
+                //submitAction = playerInput.actions["Submit"];
+                //submitAction.Enable();
+            }
+        }
 
         gameObject.SetActive(false);
     }
@@ -43,7 +49,7 @@ public class PurchasePanel : MonoBehaviour
     // ===============================
     // Open / Close
     // ===============================
-    public void Open(ShopItem item)
+    public void Open(Item item)
     {
         currentItem = item;
         quantity = 1;
@@ -63,7 +69,7 @@ public class PurchasePanel : MonoBehaviour
     }
 
     // ===============================
-    // Quantity Change
+    // Quantity Control
     // ===============================
     private void OnEnable()
     {
@@ -74,18 +80,16 @@ public class PurchasePanel : MonoBehaviour
 
     private void Update()
     {
-        if (iSystemActions.UI.Submit.WasPressedThisFrame())
+        if (submitAction != null && submitAction.WasPressedThisFrame())
         {
             OnConfirm();
         }
 
+        if (moveAction == null) return;
 
-        // Retrieve the movement key input from the Input System
         Vector2 input = moveAction.ReadValue<Vector2>();
-
         if (input == Vector2.zero) return;
 
-        // Repeat Determination
         if (Time.time >= nextChangeTime)
         {
             int change = 0;
@@ -103,13 +107,11 @@ public class PurchasePanel : MonoBehaviour
             }
         }
 
-        // Grace period before long press begins
         if (input != Vector2.zero && nextChangeTime == 0f)
         {
             nextChangeTime = Time.time + repeatDelay;
             ApplyImmediateChange(input);
         }
-
     }
 
     private void ApplyImmediateChange(Vector2 input)
@@ -141,9 +143,13 @@ public class PurchasePanel : MonoBehaviour
     {
         if (currentItem != null)
         {
-            // Notify ShopManager of the purchase confirmation.
             ShopManager.Instance.PurchaseItem(currentItem, quantity);
         }
+        Close();
+    }
+
+    public void OnCancel()
+    {
         Close();
     }
 }

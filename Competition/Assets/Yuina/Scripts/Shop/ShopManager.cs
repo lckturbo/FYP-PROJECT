@@ -1,40 +1,58 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using UnityEngine.InputSystem;
-using ISystem_Actions;  // Namespace for using InputSystem_Actions
-using UnityEngine.EventSystems;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
+
+[System.Serializable]
+public class CartEntry
+{
+    public Item item;
+    public int quantity;
+
+
+    public CartEntry(Item item, int quantity)
+    {
+        this.item = item;
+        this.quantity = quantity;
+    }
+}
 
 public class ShopManager : MonoBehaviour
 {
-    private InputSystem_Actions iSystemActions;
-
     public static ShopManager Instance { get; private set; }
 
     [Header("UI Elements")]
-    [SerializeField] private GameObject shopUI;                 // ショップ全体のUI
-    [SerializeField] private RectTransform contentTransform;    // Content (ScrollViewの中身)
-    [SerializeField] private GameObject itemButtonPrefab;       // アイテムボタンPrefab
-    [SerializeField] private TextMeshProUGUI moneyText;         // 所持金表示
-    [SerializeField] private TextMeshProUGUI messageText;       // メッセージ表示
+    [SerializeField] private GameObject shopUI;
+    [SerializeField] private RectTransform contentTransform;
+    [SerializeField] private GameObject itemButtonPrefab;
+    [SerializeField] private TextMeshProUGUI moneyText;
+    [SerializeField] private TextMeshProUGUI messageText;
     [SerializeField] private ScrollRect scrollRect;
 
     [Header("Shop Items")]
-    [SerializeField] private ShopItem[] shopItems;           // 販売アイテム一覧
+    [SerializeField] private Item[] shopItems;
 
     [Header("Panels")]
-    [SerializeField] private PurchasePanel purchasePanel;   // 数量選択パネル
+    [SerializeField] private PurchasePanel purchasePanel;
 
     private bool isOpen = false;
+    private List<CartEntry> cart = new();
 
-    public bool IsShopActive => shopUI.activeSelf;
+    private PlayerInput playerInput;
+    private InputAction cancelAction;
+    public bool IsShopActive => isOpen;
+
+    // Reference to Inventory
+    private Inventory playerInventory;
+    private InventoryUIManager inventoryUIManager;
+
+    private Coroutine messageRoutine;
 
     private void Awake()
     {
-        iSystemActions = new InputSystem_Actions();
-        iSystemActions.UI.Enable();
-
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
@@ -44,6 +62,17 @@ public class ShopManager : MonoBehaviour
         if (purchasePanel != null)
             purchasePanel.gameObject.SetActive(false);
 
+        // Get PlayerInput & Inventory
+        NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerInput = playerMovement.GetComponent<PlayerInput>();
+            playerInventory = playerMovement.GetComponent<Inventory>(); //  attach Inventory to player
+            inventoryUIManager = playerMovement.GetComponent<InventoryUIManager>();
+
+            if (playerInput != null)
+                cancelAction = playerInput.actions["Interaction"];
+        }
     }
 
     private void Start()
@@ -55,37 +84,31 @@ public class ShopManager : MonoBehaviour
 
     private void Update()
     {
-        if (!isOpen) return;
 
-        // Close the shop using the key corresponding to Cancel
-        if (iSystemActions.UI.Cancel.WasPressedThisFrame())
+        if (!isOpen) return; // only run update logic when shop is open
+
+        if (cancelAction != null && cancelAction.WasPressedThisFrame())
         {
             if (purchasePanel != null && purchasePanel.IsPurchasePanelActive)
             {
-                // If the PurchasePanel is open, close it instead.
                 purchasePanel.Close();
-                return; // The shop will not close.
+                return;
             }
             else
             {
-                // If there is no PurchasePanel, close the entire shop.
-                CloseShop();
+                //ToggleShop();
                 return;
             }
         }
 
-        // Cursor Control
         if (purchasePanel != null && purchasePanel.IsPurchasePanelActive)
         {
-            // Disable cursor movement while the PurchasePanel is open
             EventSystem.current.sendNavigationEvents = false;
         }
         else
         {
-            // Normally enabled
             EventSystem.current.sendNavigationEvents = true;
 
-            // Prevent the selected item from moving outside the view
             GameObject selected = EventSystem.current.currentSelectedGameObject;
             if (selected != null && selected.transform.IsChildOf(contentTransform))
             {
@@ -94,31 +117,32 @@ public class ShopManager : MonoBehaviour
         }
     }
 
+
     /// <summary>
-    /// Generate item button
+    /// アイテムボタンを生成
     /// </summary>
     private void PopulateShop()
     {
-        // Remove existing child elements
+        // 既存の子要素を削除
         foreach (Transform child in contentTransform)
         {
             Destroy(child.gameObject);
         }
 
-        // Generate a button for each item
+        // アイテムごとにボタンを生成
         foreach (var item in shopItems)
         {
             GameObject buttonObj = Instantiate(itemButtonPrefab, contentTransform);
 
-            // Force all graphics ON
+            // 全Graphicを強制ON
             Graphic[] graphics = buttonObj.GetComponentsInChildren<Graphic>(true);
             foreach (var g in graphics) g.enabled = true;
 
-            // Force all buttons ON
+            // 全Buttonを強制ON
             Button[] buttons = buttonObj.GetComponentsInChildren<Button>(true);
             foreach (var b in buttons) b.enabled = true;
 
-            // Retrieve and display the icon, name, and price.
+            // アイコン、名前、値段を取得して反映
             Transform iconTrans = buttonObj.transform.Find("Image");
             Transform nameTrans = buttonObj.transform.Find("Name");
             Transform priceTrans = buttonObj.transform.Find("Price");
@@ -149,34 +173,41 @@ public class ShopManager : MonoBehaviour
             if (buttonComp != null)
             {
                 buttonComp.onClick.AddListener(() => BuyItem(item));
+                buttonComp.onClick.AddListener(() => PurchaseItem(item, 1));
+
             }
         }
     }
 
     /// <summary>
-    /// Fit the selected UI within the ScrollRect
+    /// 選択されたUIをScrollRect内に収める
     /// </summary>
     private void ScrollToSelected(RectTransform target)
     {
-        // Get the Content and Viewport
+        // ContentとViewportを取得
         RectTransform viewport = scrollRect.viewport;
+        RectTransform content = scrollRect.content;
 
-        // Convert to viewport coordinates
+        // ビューポート座標に変換
+        Vector3 viewportLocalPos = viewport.InverseTransformPoint(viewport.position);
         Vector3 childLocalPos = viewport.InverseTransformPoint(target.position);
 
-        // Calculate the top and bottom edges of the button
+        float viewportHeight = viewport.rect.height;
+        float contentHeight = content.rect.height;
+
+        // ボタンの上端・下端を計算
         float childTop = childLocalPos.y + target.rect.height * 0.1f;
         float childBottom = childLocalPos.y - target.rect.height * 0.1f;
 
-        // Current scroll position
+        // 現在のスクロール位置
         float normalizedPos = scrollRect.verticalNormalizedPosition;
 
-        // If it extends beyond the top, scroll up.
+        // 上にはみ出したら上にスクロール
         if (childTop > viewport.rect.height * 0.1f)
         {
-            normalizedPos += 0.05f; // Scroll speed
+            normalizedPos += 0.05f; // スクロール速度（調整可）
         }
-        // If it extends below, scroll down
+        // 下にはみ出したら下にスクロール
         else if (childBottom < -viewport.rect.height * 0.1f)
         {
             normalizedPos -= 0.05f;
@@ -186,69 +217,115 @@ public class ShopManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Item Purchase Processing
+    /// アイテム購入処理
     /// </summary>
-    public void BuyItem(ShopItem item)
+    public void BuyItem(Item item)
     {
-        // Items that cannot be held in multiple quantities cannot be purchased if already held.
-        if (item.type == ItemType.Unique && PlayerInventory.Instance.HasItem(item))
+        // 複数所持不可アイテムは所持済みなら購入不可
+        if (item.type == ItemTypes.Unique /*&& PlayerInventory.Instance.HasItem(item)*/)
         {
             ShowMessage("You already have this Unique Item!");
             return;
         }
 
+        // 数量選択パネルを開く
         purchasePanel.Open(item);
     }
 
     /// <summary>
-    /// Actual purchase process (called from PurchasePanel)
+    /// カートまとめて購入
     /// </summary>
-    public void PurchaseItem(ShopItem item, int quantity)
+    public void OnBuyButtonPressed()
     {
-        int totalCost = item.price * quantity;
+        int totalCost = 0;
+        foreach (var entry in cart)
+            totalCost += entry.item.price * entry.quantity;
 
-        // Confirm that you are not attempting to purchase two or more of the same unique item.
-        if (item.type == ItemType.Unique && quantity > 1)
+        if (totalCost == 0)
         {
-            ShowMessage("You cannot purchase more than two Unique Items!");
+            ShowMessage("Cart is empty!");
             return;
         }
 
-        // Check if you have enough money
-        if (PlayerInventory.Instance.Money < totalCost)
+        if (playerInventory == null)
+        {
+            Debug.LogError("No player inventory found!");
+            return;
+        }
+
+        if (playerInventory.Money < totalCost)
         {
             ShowMessage("Not enough money!");
             return;
         }
 
-        // Payment
-        if (PlayerInventory.Instance.TrySpendMoney(totalCost))
+        if (playerInventory.TrySpendMoney(totalCost))
         {
-            for (int i = 0; i < quantity; i++)
-            {
-                PlayerInventory.Instance.AddItem(item);
-            }
+            foreach (var entry in cart)
+                playerInventory.AddItem(entry.item, entry.quantity);
 
-            ShowMessage($"Purchased {quantity} x {item.itemName}!");
+            ShowMessage("Purchase successful!");
             UpdateMoneyUI();
+            cart.Clear();
         }
     }
 
-
     /// <summary>
-    /// Cash Balance UI Update
+    /// 実際の購入処理（PurchasePanelから呼ばれる）
     /// </summary>
+    public void PurchaseItem(Item item, int quantity)
+    {
+        int totalCost = item.price * quantity;
+
+        if (item.type == ItemTypes.Unique && playerInventory.HasItem(item))
+        {
+            ShowMessage("You already own this Unique Item!");
+            return;
+        }
+
+        if (item.type == ItemTypes.Unique && quantity > 1)
+        {
+            ShowMessage("You cannot purchase more than one Unique Item!");
+            return;
+        }
+
+        if (playerInventory.Money < totalCost)
+        {
+            ShowMessage("Not enough money!");
+            return;
+        }
+
+        if (playerInventory.TrySpendMoney(totalCost))
+        {
+            playerInventory.AddItem(item, quantity);
+            ShowMessage($"Purchased {quantity} x {item.itemName}!");
+            UpdateMoneyUI();
+
+            // Refresh Inventory UI
+            var ui = FindObjectOfType<InventoryUIManager>();
+            if (ui != null) ui.RefreshUI();
+        }
+    }
+
     private void UpdateMoneyUI()
     {
-        moneyText.text = $"Money: {PlayerInventory.Instance.Money} G";
+        if (playerInventory != null && moneyText != null)
+            moneyText.text = $"Money: {playerInventory.Money} G";
     }
 
     /// <summary>
-    /// Message Display
+    /// メッセージ表示
     /// </summary>
     private void ShowMessage(string msg)
     {
         messageText.text = msg;
+
+        // stop old fade coroutine if one is running
+        if (messageRoutine != null)
+            StopCoroutine(messageRoutine);
+
+        messageRoutine = StartCoroutine(FadeMessageOut());
+
     }
 
     private void ClearMessage()
@@ -257,17 +334,49 @@ public class ShopManager : MonoBehaviour
             messageText.text = "";
     }
 
+    private IEnumerator FadeMessageOut()
+    {
+        yield return new WaitForSeconds(1.5f); // wait 2 seconds before fading
+
+        float duration = 1f; // fade duration
+        float elapsed = 0f;
+
+        Color startColor = messageText.color;
+        Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            messageText.color = Color.Lerp(startColor, endColor, elapsed / duration);
+            yield return null;
+        }
+
+        messageText.text = ""; // clear text fully after fade
+        messageText.color = new Color(startColor.r, startColor.g, startColor.b, 1f); // reset alpha for next time
+
+        if (purchasePanel != null)
+            purchasePanel.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// ショップを開く
+    /// </summary>
     public void OpenShop()
     {
         if (shopUI != null)
+        {
             shopUI.SetActive(true);
 
+        }
         isOpen = true;
         UpdateMoneyUI();
         ClearMessage();
-        PlayerController.Instance.SetCanMove(false); // Player Stop
+
     }
 
+    /// <summary>
+    /// ショップを閉じる
+    /// </summary>
     public void CloseShop()
     {
         if (shopUI != null)
@@ -275,7 +384,15 @@ public class ShopManager : MonoBehaviour
 
         isOpen = false;
         ClearMessage();
-        PlayerController.Instance.SetCanMove(true); // Player can move
     }
+
+    public void ToggleShop()
+    {
+        if (isOpen)
+            CloseShop();
+        else
+            OpenShop();
+    }
+
 
 }

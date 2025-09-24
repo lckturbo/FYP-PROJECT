@@ -4,8 +4,9 @@ using System;
 [RequireComponent(typeof(Collider2D))]
 public class PuzzleGoal : MonoBehaviour
 {
-    public bool requireExactBlock = false; // if true, checks block type by tag or component
-    public string requiredBlockTag = "PushableBlock"; // optional tag match
+    [Header("Block Requirements")]
+    public bool requireExactBlock = false;         // If true, must match blockName
+    public string requiredBlockName = "PushableBlock"; // Must match GameObject.name
 
     public bool IsOccupied { get; private set; } = false;
     public PushableBlock occupyingBlock;
@@ -18,7 +19,12 @@ public class PuzzleGoal : MonoBehaviour
         var block = other.GetComponent<PushableBlock>();
         if (block == null) return;
 
-        if (requireExactBlock && !other.CompareTag(requiredBlockTag)) return;
+        // If requirement is enabled, check by GameObject name
+        if (requireExactBlock && !other.gameObject.name.Equals(requiredBlockName, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        // If already occupied by this block, ignore
+        if (occupyingBlock == block) return;
 
         IsOccupied = true;
         occupyingBlock = block;
@@ -29,6 +35,7 @@ public class PuzzleGoal : MonoBehaviour
     {
         var block = other.GetComponent<PushableBlock>();
         if (block == null) return;
+
         if (occupyingBlock == block)
         {
             IsOccupied = false;

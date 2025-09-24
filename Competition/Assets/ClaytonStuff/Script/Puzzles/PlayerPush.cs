@@ -18,7 +18,7 @@ public class PlayerPush : MonoBehaviour
         animator = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
         if (playerInput != null)
-            pushAction = playerInput.actions["Interact"]; // optional if you have an action named Interact
+            pushAction = playerInput.actions["Interaction"]; // optional if you have an action named Interact
     }
 
     private void Update()
@@ -91,6 +91,7 @@ public class PlayerPush : MonoBehaviour
 
         Debug.Log($"Pushing block {pushable.name} in {dir}");
         pushable.TryPush(dir);
+
     }
 
 

@@ -3,10 +3,15 @@ using UnityEngine;
 
 public class PuzzleManager : MonoBehaviour
 {
+    [Tooltip("List of goal spots. If empty, will auto-find all PuzzleGoal in scene.")]
     public List<PuzzleGoal> goals;
+
+    [Header("Gate / Barrier to Remove")]
+    public GameObject gate;   // Assign your gate/door/barrier in the Inspector
 
     private void Start()
     {
+        // Auto-populate if not set in inspector
         if (goals == null || goals.Count == 0)
             goals = new List<PuzzleGoal>(FindObjectsOfType<PuzzleGoal>());
 
@@ -15,6 +20,7 @@ public class PuzzleManager : MonoBehaviour
             g.OnOccupied += HandleGoalOccupied;
             g.OnEmptied += HandleGoalEmptied;
         }
+
         CheckSolved();
     }
 
@@ -32,7 +38,11 @@ public class PuzzleManager : MonoBehaviour
     {
         foreach (var g in goals)
         {
-            if (!g.IsOccupied) return;
+            if (!g.IsOccupied)
+            {
+                // At least one goal is empty, puzzle not solved
+                return;
+            }
         }
 
         // All goals occupied
@@ -40,8 +50,20 @@ public class PuzzleManager : MonoBehaviour
         OnPuzzleSolved();
     }
 
+    public event System.Action OnPuzzleSolvedEvent;
+
     private void OnPuzzleSolved()
     {
-        // TODO: do whatever (open door, spawn reward, etc.)
+        if (gate != null)
+        {
+            Destroy(gate);
+            Debug.Log("Gate removed!");
+        }
+        else
+        {
+            Debug.LogWarning("Puzzle solved, but no gate assigned.");
+        }
+
+        OnPuzzleSolvedEvent?.Invoke();
     }
 }
