@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class SaveLoadSystem : MonoBehaviour
 {
@@ -18,46 +19,80 @@ public class SaveLoadSystem : MonoBehaviour
             instance = this;
         else
             Destroy(gameObject);
+
+        fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
+
+        //gameData = fileDataHandler.Load();
+        //if (gameData == null) NewGame();
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
-    private void Start()
+    private void OnDestroy()
     {
-        this.fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
-        this.dataPersistenceObjs = FindAllDataPersistenceObjects();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        dataPersistenceObjs = FindAllDataPersistenceObjects();
         LoadGame();
     }
+    private void OnSceneUnloaded(Scene scene)
+    {
+        if (scene.name == "jasBattle") return;
 
+        SaveGame();
+    }
+
+    public void RegisterDataPersistenceObjects(IDataPersistence obj)
+    {
+        if (!dataPersistenceObjs.Contains(obj))
+            dataPersistenceObjs.Add(obj);
+    }
     public void NewGame()
     {
-        this.gameData = new GameData();
+        gameData = new GameData();
     }
     public void LoadGame()
     {
         // load saved data from file using data handler
-        this.gameData = fileDataHandler.Load();
+        gameData = fileDataHandler.Load();
         // if no data, initialize new game
-        if (this.gameData == null) NewGame();
+        if (gameData == null) NewGame();
 
         // push loaded data to all other scripts that need it
         foreach(IDataPersistence dataObjs in dataPersistenceObjs)
         {
             dataObjs.LoadData(gameData);
         }
+
+        Debug.Log("Loading: " + gameData);
     }
     public void SaveGame()
     {
+        dataPersistenceObjs = FindAllDataPersistenceObjects();
+        
         // pass data to other scripts so they can update
         foreach (IDataPersistence dataObjs in dataPersistenceObjs)
         {
             dataObjs.SaveData(ref gameData);
         }
+        Debug.Log("Saving: " + gameData.playerPosition);
         // save data to a file using data handler
         fileDataHandler.Save(gameData);
     }
 
-    public void OnApplicationQuit()
+    //public void OnApplicationQuit()
+    //{
+    //    SaveGame();
+    //}
+
+    public GameData GetGameData()
     {
-        SaveGame();
+        return gameData;
     }
 
     private List<IDataPersistence> FindAllDataPersistenceObjects()

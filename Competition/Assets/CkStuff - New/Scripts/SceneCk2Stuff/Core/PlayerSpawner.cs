@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerSpawner : MonoBehaviour
@@ -25,7 +23,15 @@ public class PlayerSpawner : MonoBehaviour
             return;
         }
 
-        var pos = spawnPoint ? spawnPoint.position : Vector3.zero;
+        // JAS ADDED THIS //
+        var data = SaveLoadSystem.instance.GetGameData();
+        Vector3 pos;
+        if (data != null && data.playerPosition != Vector3.zero)
+            pos = data.playerPosition; // continue from saved pos
+        else
+            pos = spawnPoint ? spawnPoint.position : Vector3.zero; // new game
+        ///////////////////
+
         var rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
 
         var go = Instantiate(prefab, pos, rot);

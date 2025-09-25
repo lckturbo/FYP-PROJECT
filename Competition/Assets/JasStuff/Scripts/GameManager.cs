@@ -12,6 +12,13 @@ public class GameManager : MonoBehaviour
         else
             Destroy(instance);
     }
+
+    public void Update()
+    {
+        // for testing
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.P))
+            SceneManager.LoadScene("jas");
+    }
     public void ChangeScene(string scn)
     {
         SceneManager.LoadScene(scn);

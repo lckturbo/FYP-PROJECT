@@ -146,4 +146,15 @@ public class CharacterSelectView : MonoBehaviour
     }
 
     public int GetCurrentIndex() => currentIndex;
+
+    //public void LoadData(GameData data)
+    //{
+    //    if(data.selectedCharacterIndex >= 0 && data.selectedCharacterIndex< )
+    //        currentIndex = data.selectedCharacterIndex;
+    //}
+
+    //public void SaveData(ref GameData data)
+    //{
+    //    data.selectedCharacterIndex = currentIndex;
+    //}
 }
