@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
   m_Name: NormalEnemy
   m_EditorClassIdentifier: 
-  Speed: 2
-  maxHealth: 50
-  attackreduction: 0
+  Speed: 2.5
+  maxHealth: 60
+  attackreduction: 1
   atkDmg: 10
   actionvaluespeed: 1
-  critRate: 0
-  critDamage: 0
-  attackElement: 1
-  defenseElement: 1
+  critRate: 0.1
+  critDamage: 0.5
+  attackElement: 0
+  defenseElement: 0
   fireRes: 1
   waterRes: 1
   grassRes: 1
