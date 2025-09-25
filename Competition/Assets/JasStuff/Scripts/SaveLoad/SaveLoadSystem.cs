@@ -22,29 +22,18 @@ public class SaveLoadSystem : MonoBehaviour
 
         fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
 
-        //gameData = fileDataHandler.Load();
-        //if (gameData == null) NewGame();
-
         SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
     private void OnDestroy()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         dataPersistenceObjs = FindAllDataPersistenceObjects();
         LoadGame();
-    }
-    private void OnSceneUnloaded(Scene scene)
-    {
-        if (scene.name == "jasBattle") return;
-
-        SaveGame();
     }
 
     public void RegisterDataPersistenceObjects(IDataPersistence obj)
@@ -68,8 +57,6 @@ public class SaveLoadSystem : MonoBehaviour
         {
             dataObjs.LoadData(gameData);
         }
-
-        Debug.Log("Loading: " + gameData);
     }
     public void SaveGame()
     {
@@ -80,15 +67,9 @@ public class SaveLoadSystem : MonoBehaviour
         {
             dataObjs.SaveData(ref gameData);
         }
-        Debug.Log("Saving: " + gameData.playerPosition);
         // save data to a file using data handler
         fileDataHandler.Save(gameData);
     }
-
-    //public void OnApplicationQuit()
-    //{
-    //    SaveGame();
-    //}
 
     public GameData GetGameData()
     {

@@ -19,7 +19,7 @@ public class CharacterSelectView : MonoBehaviour
     [Header("LEFT: Bars (0..1 fill)")]
     [SerializeField] private Image healthFill;
     [SerializeField] private Image dmgFill;
-    [SerializeField] private Image defFill; 
+    [SerializeField] private Image defFill;
 
     [Header("LEFT: Resist icons (tint only)")]
     [SerializeField] private Image fireIcon;
@@ -146,15 +146,4 @@ public class CharacterSelectView : MonoBehaviour
     }
 
     public int GetCurrentIndex() => currentIndex;
-
-    //public void LoadData(GameData data)
-    //{
-    //    if(data.selectedCharacterIndex >= 0 && data.selectedCharacterIndex< )
-    //        currentIndex = data.selectedCharacterIndex;
-    //}
-
-    //public void SaveData(ref GameData data)
-    //{
-    //    data.selectedCharacterIndex = currentIndex;
-    //}
 }

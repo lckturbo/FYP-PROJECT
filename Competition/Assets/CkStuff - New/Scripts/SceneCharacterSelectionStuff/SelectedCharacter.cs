@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "SelectedCharacter", menuName = "Game/Selected Character")]
-public class SelectedCharacter : ScriptableObject, IDataPersistence
+public class SelectedCharacter : ScriptableObject
 {
     public NewCharacterDefinition definition;
     public int index = -1;
@@ -10,15 +10,5 @@ public class SelectedCharacter : ScriptableObject, IDataPersistence
     {
         definition = def;
         index = idx;
-    }
-
-    public void LoadData(GameData data)
-    {
-        index = data.selectedCharacterIndex;
-    }
-
-    public void SaveData(ref GameData data)
-    {
-        data.selectedCharacterIndex = index;
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(Animator))]
-public class NewPlayerMovement : MonoBehaviour, IDataPersistence
+public class NewPlayerMovement : MonoBehaviour
 {
     [Header("Stats (provides walkSpeed)")]
     [SerializeField] private BaseStats stats;
@@ -38,8 +38,8 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         if (stats != null)
             ApplyStats(stats);
 
-        if (SaveLoadSystem.instance)
-            SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
+        //if (SaveLoadSystem.instance)
+        //    SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
 
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
@@ -105,13 +105,13 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         return useStatsDirectly ? stats.Speed : cachedWalkSpeed;
     }
 
-    public void LoadData(GameData data)
-    {
-        transform.position = data.playerPosition;
-    }
+    //public void LoadData(GameData data)
+    //{
+    //    transform.position = data.playerPosition;
+    //}
 
-    public void SaveData(ref GameData data)
-    {
-        data.playerPosition = transform.position;
-    }
+    //public void SaveData(ref GameData data)
+    //{
+    //    data.playerPosition = transform.position;
+    //}
 }

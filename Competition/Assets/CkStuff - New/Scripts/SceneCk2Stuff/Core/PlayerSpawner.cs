@@ -5,8 +5,6 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] private SelectedCharacter selectedStore;
     [SerializeField] private Transform spawnPoint;
 
-    public static System.Action<Transform> OnPlayerSpawned;
-
     private void Awake()
     {
         if (!selectedStore || !selectedStore.definition)
@@ -23,15 +21,8 @@ public class PlayerSpawner : MonoBehaviour
             return;
         }
 
-        // JAS ADDED THIS //
-        var data = SaveLoadSystem.instance.GetGameData();
         Vector3 pos;
-        if (data != null && data.playerPosition != Vector3.zero)
-            pos = data.playerPosition; // continue from saved pos
-        else
-            pos = spawnPoint ? spawnPoint.position : Vector3.zero; // new game
-        ///////////////////
-
+        pos = spawnPoint ? spawnPoint.position : Vector3.zero; // new game
         var rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
 
         var go = Instantiate(prefab, pos, rot);
@@ -57,7 +48,5 @@ public class PlayerSpawner : MonoBehaviour
         {
             Debug.LogWarning("PlayerSpawner: No NewCameraController found in scene (tag your camera MainCamera or add the component).");
         }
-
-        OnPlayerSpawned?.Invoke(go.transform);
     }
 }
