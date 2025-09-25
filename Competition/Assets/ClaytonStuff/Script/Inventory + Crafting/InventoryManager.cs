@@ -1,14 +1,40 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InventoryManager : MonoBehaviour
 {
+    public static InventoryManager Instance { get; private set; }
     public Inventory playerInventory;
 
-    void Start()
+    void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Reassign if missing
         if (playerInventory == null)
         {
-            playerInventory = GetComponent<Inventory>();
+            playerInventory = FindObjectOfType<Inventory>();
+            Debug.Log($"Reassigned Inventory to: {playerInventory}");
         }
     }
 
@@ -27,6 +53,11 @@ public class InventoryManager : MonoBehaviour
             {
                 Debug.Log($"{slot.item.itemName} x{slot.quantity}");
             }
+
+        }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            GameManager.instance.ChangeScene("ClaytonTestScene");
         }
     }
 
