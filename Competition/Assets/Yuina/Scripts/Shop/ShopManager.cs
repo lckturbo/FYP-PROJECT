@@ -73,6 +73,9 @@ public class ShopManager : MonoBehaviour
             if (playerInput != null)
                 cancelAction = playerInput.actions["Interaction"];
         }
+
+        AssignInventory();
+
     }
 
     private void Start()
@@ -121,6 +124,28 @@ public class ShopManager : MonoBehaviour
     /// <summary>
     /// アイテムボタンを生成
     /// </summary>
+
+    private void AssignInventory()
+    {
+        if (playerInventory == null)
+        {
+            playerInventory = FindObjectOfType<Inventory>();
+            if (playerInventory != null)
+            {
+                Debug.Log($"[ShopManager] Linked to inventory on {playerInventory.gameObject.name}");
+            }
+            else
+            {
+                Debug.LogError("[ShopManager] No Inventory found in the scene!");
+            }
+        }
+
+        // Optional: also hook up UI manager if it isn稚 on the player anymore
+        if (inventoryUIManager == null)
+        {
+            inventoryUIManager = FindObjectOfType<InventoryUIManager>();
+        }
+    }
     private void PopulateShop()
     {
         // 既存の子要素を削除
