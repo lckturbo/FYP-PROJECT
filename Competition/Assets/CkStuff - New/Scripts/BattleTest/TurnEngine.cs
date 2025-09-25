@@ -46,9 +46,7 @@ public class TurnEngine : MonoBehaviour
                 if (u.isPlayerTeam && u.isLeader)
                 {
                     if (autoBattle)
-                    {
-                        AutoAct(u);
-                    }
+                        AutoAct(u, true);
                     else
                     {
                         _waitingForLeader = true;
@@ -59,7 +57,7 @@ public class TurnEngine : MonoBehaviour
                 }
                 else
                 {
-                    AutoAct(u);
+                    AutoAct(u, false);
                 }
 
                 if (IsTeamWiped(true) || IsTeamWiped(false)) { _running = false; return; }
@@ -73,6 +71,9 @@ public class TurnEngine : MonoBehaviour
         if (!_waitingForLeader || _currentLeader == null) return;
         var target = FindFirstAlive(opponentOf: _currentLeader);
         if (target != null) _currentLeader.BasicAttack(target);
+
+        Debug.Log($"[TURN] Leader {_currentLeader.name} used BASIC ATTACK on {target?.name}");
+
         _waitingForLeader = false;
         _currentLeader = null;
         if (IsTeamWiped(true) || IsTeamWiped(false)) _running = false;
@@ -80,17 +81,58 @@ public class TurnEngine : MonoBehaviour
 
     public void LeaderChooseSkill(int skillIndex)
     {
-        // TODO: pick a skill later; for now behave like Attack
-        LeaderChooseBasicAttack();
+        if (!_waitingForLeader || _currentLeader == null) return;
+        var target = FindFirstAlive(opponentOf: _currentLeader);
+
+        if (skillIndex == 0)
+        {
+            _currentLeader.Skill1(target);
+            Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL 1 on {target?.name}");
+        }
+        else if (skillIndex == 1)
+        {
+            _currentLeader.Skill2(target);
+            Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL 2 on {target?.name}");
+        }
+
+        _waitingForLeader = false;
+        _currentLeader = null;
+        if (IsTeamWiped(true) || IsTeamWiped(false)) _running = false;
     }
 
     // ---- helpers ----
-    private void AutoAct(Combatant actor)
+    private void AutoAct(Combatant actor, bool isLeaderAuto)
     {
         var target = FindFirstAlive(opponentOf: actor);
-        if (target != null) actor.BasicAttack(target);
+        if (target == null) return;
 
-        Debug.Log($"[TURN] {actor.name} -> {target.name}");
+        if (actor.isPlayerTeam)
+        {
+            if (actor.isLeader && isLeaderAuto)
+            {
+                // Leader auto mode: pick randomly between all 3
+                int roll = UnityEngine.Random.Range(0, 3);
+                if (roll == 0) actor.BasicAttack(target);
+                else if (roll == 1) actor.Skill1(target);
+                else actor.Skill2(target);
+            }
+            else
+            {
+                // Ally auto mode: weighted chance
+                float r = UnityEngine.Random.value;
+                if (r < 0.6f) actor.BasicAttack(target);      // 60%
+                else if (r < 0.8f) actor.Skill1(target);      // 20%
+                else actor.Skill2(target);                   // 20%
+            }
+        }
+        else
+        {
+            // Enemy AI: 50% basic, 50% skill1 (or replace with skill2 if boss later)
+            if (UnityEngine.Random.value < 0.5f) actor.BasicAttack(target);
+            else actor.Skill1(target);
+        }
+
+        Debug.Log($"[TURN] {actor.name} auto-acted on {target.name}");
     }
 
     private Combatant FindFirstAlive(Combatant opponentOf)
