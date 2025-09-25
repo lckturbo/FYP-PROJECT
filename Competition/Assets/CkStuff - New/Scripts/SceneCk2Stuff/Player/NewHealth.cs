@@ -31,39 +31,37 @@ public class NewHealth : MonoBehaviour
     {
         if (stats == null) return;
 
-        // 1) Which element?
+        // --- 0) Inputs / defaults ---
+        float baseAtk = (rawDamage > 0) ? rawDamage : (attacker != null ? attacker.atkDmg : 1);
         NewElementType atkElem = (skillElement != NewElementType.None)
             ? skillElement
             : (attacker != null ? attacker.attackElement : NewElementType.None);
 
-        // 2) Base damage
-        float dmg = (rawDamage > 0) ? rawDamage : (attacker != null ? attacker.atkDmg : 1);
+        // --- 1) Flat defense BEFORE multipliers ---
+        float def = Mathf.Max(0f, stats.attackreduction);
+        float dmg = baseAtk - def;                 // shave off some raw damage first
+        if (dmg < 0f) dmg = 0f;                    // don't go negative before mults
 
-        // 3) Crit (use UnityEngine.Random explicitly)
+        // --- 2) Crit (BONUS: 0.5 => +50%) ---
         if (attacker != null && UnityEngine.Random.value < Mathf.Clamp01(attacker.critRate))
         {
-            dmg *= attacker.critDamage;
-            Debug.Log($"{attacker.name} landed a CRIT!");
+            float critBonus = Mathf.Max(0f, attacker.critDamage);
+            float critMult = 1f + critBonus;
+            dmg *= critMult;
+            Debug.Log($"{attacker?.name ?? "Unknown"} CRIT x{critMult:0.##}!");
         }
 
-        // 4) Defense
-        dmg -= stats.attackreduction;
-        if (dmg < 1f) dmg = 1f;
+        // --- 3) Element triangle + per-character resistance ---
+        float tri = GetElementTriangleMultiplier(atkElem, stats.defenseElement);
+        float res = stats.GetResistance(atkElem);
+        dmg *= (tri * res);
 
-        // 5) Element triangle
-        dmg *= GetElementTriangleMultiplier(atkElem, stats.defenseElement);
-
-        // 6) Per-character resistance
-        dmg *= stats.GetResistance(atkElem);
-
-        // 7) Apply
+        // --- 4) Final clamp & apply ---
         int final = Mathf.Max(1, Mathf.RoundToInt(dmg));
         currentHp = Mathf.Max(0, currentHp - final);
 
         Debug.Log($"{gameObject.name} took {final} {atkElem} damage. HP = {currentHp}/{GetMaxHealth()}");
-
         OnHealthChanged?.Invoke(this);
-
         if (currentHp <= 0) Die();
     }
 

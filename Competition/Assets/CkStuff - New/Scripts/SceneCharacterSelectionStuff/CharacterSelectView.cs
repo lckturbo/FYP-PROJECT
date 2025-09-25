@@ -19,7 +19,7 @@ public class CharacterSelectView : MonoBehaviour
     [Header("LEFT: Bars (0..1 fill)")]
     [SerializeField] private Image healthFill;
     [SerializeField] private Image dmgFill;
-    [SerializeField] private Image defFill;
+    [SerializeField] private Image defFill; 
 
     [Header("LEFT: Resist icons (tint only)")]
     [SerializeField] private Image fireIcon;
@@ -141,7 +141,7 @@ public class CharacterSelectView : MonoBehaviour
 
     private void Confirm()
     {
-        // UnityEngine.SceneManagement.SceneManager.LoadScene("SceneCk2");
+        //GameManager.instance.ChangeScene("jas");
         GameManager.instance.ChangeScene("SampleScene");
     }
 
