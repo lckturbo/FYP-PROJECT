@@ -6,14 +6,13 @@ public class QuestManager : MonoBehaviour
     public static QuestManager Instance { get; private set; }
 
     public List<Quest> activeQuests = new List<Quest>();
-    private List<Quest> questsToRemove = new List<Quest>();
-    private HashSet<string> completedQuests = new HashSet<string>(); //  NEW
+    private List<Quest> questsToRemove = new List<Quest>(); // buffer for removals
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // ensure only one manager exists
             return;
         }
 
@@ -23,12 +22,6 @@ public class QuestManager : MonoBehaviour
 
     public Quest StartQuest(QuestData questData)
     {
-        if (IsQuestCompleted(questData))
-        {
-            Debug.Log($"Quest {questData.questName} is already completed. Skipping.");
-            return null;
-        }
-
         Quest newQuest = questData.CreateQuestInstance(gameObject);
         newQuest.StartQuest();
         newQuest.OnQuestCompleted += HandleQuestCompleted;
@@ -39,18 +32,18 @@ public class QuestManager : MonoBehaviour
     private void HandleQuestCompleted(Quest quest)
     {
         Debug.Log($"Quest Finished: {quest.questData.questName}");
-
-        completedQuests.Add(quest.questData.questID); //  track by ID
-        questsToRemove.Add(quest);
+        questsToRemove.Add(quest); // mark for removal, don’t remove immediately
     }
 
     private void Update()
     {
+        // Update all quests
         foreach (var quest in activeQuests)
         {
             quest.CheckProgress();
         }
 
+        // Remove completed quests safely after loop
         if (questsToRemove.Count > 0)
         {
             foreach (var quest in questsToRemove)
@@ -60,11 +53,5 @@ public class QuestManager : MonoBehaviour
             }
             questsToRemove.Clear();
         }
-    }
-
-    // === NEW HELPERS ===
-    public bool IsQuestCompleted(QuestData questData)
-    {
-        return completedQuests.Contains(questData.questID);
     }
 }
