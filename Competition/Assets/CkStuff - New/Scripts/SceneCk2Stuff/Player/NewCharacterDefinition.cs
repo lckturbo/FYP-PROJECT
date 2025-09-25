@@ -5,7 +5,6 @@ public class NewCharacterDefinition : ScriptableObject
 {
     [Header("General")]
     public string displayName;
-    //public string className; //if we doing and have
 
     [TextArea] public string description;
 

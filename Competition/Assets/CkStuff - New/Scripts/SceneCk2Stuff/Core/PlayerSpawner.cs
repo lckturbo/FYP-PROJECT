@@ -7,8 +7,6 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] private SelectedCharacter selectedStore;
     [SerializeField] private Transform spawnPoint;
 
-    public static System.Action<Transform> OnPlayerSpawned;
-
     private void Awake()
     {
         if (!selectedStore || !selectedStore.definition)
@@ -51,7 +49,5 @@ public class PlayerSpawner : MonoBehaviour
         {
             Debug.LogWarning("PlayerSpawner: No NewCameraController found in scene (tag your camera MainCamera or add the component).");
         }
-
-        OnPlayerSpawned?.Invoke(go.transform);
     }
 }
