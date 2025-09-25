@@ -40,6 +40,21 @@ public abstract class EnemyBase : MonoBehaviour
     public event Action<GameObject, EnemyParty> OnAttackPlayer;
     protected bool inBattle;
 
+    private void OnEnable()
+    {
+        PlayerSpawner.OnPlayerSpawned += HandlePlayerSpawned;
+    }
+
+    private void OnDisable()
+    {
+        PlayerSpawner.OnPlayerSpawned -= HandlePlayerSpawned;
+    }
+
+    private void HandlePlayerSpawned(Transform playerTransform)
+    {
+        player = playerTransform;
+    }
+
     private void Awake()
     {
         if (!enemyStats || !aiPath || !rb2d || !seeker) return;
@@ -49,7 +64,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Start()
     {
-        if (!player) player = GameObject.FindWithTag("Player").transform;
+        //if (!player) player = GameObject.FindWithTag("Player").transform;
         if (!animator) animator = GetComponent<Animator>();
         if (!health) health = GetComponent<NewHealth>();
         health.ApplyStats(enemyStats);

@@ -57,6 +57,7 @@ public class SaveLoadSystem : MonoBehaviour
         {
             dataObjs.LoadData(gameData);
         }
+        Debug.Log("Loaded: " + gameData.selectedCharacterIndex);
     }
     public void SaveGame()
     {
@@ -67,6 +68,7 @@ public class SaveLoadSystem : MonoBehaviour
         {
             dataObjs.SaveData(ref gameData);
         }
+        Debug.Log("Saved: " + gameData.selectedCharacterIndex);
         // save data to a file using data handler
         fileDataHandler.Save(gameData);
     }
