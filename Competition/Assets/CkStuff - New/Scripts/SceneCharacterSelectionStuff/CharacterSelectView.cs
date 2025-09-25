@@ -142,7 +142,7 @@ public class CharacterSelectView : MonoBehaviour
     private void Confirm()
     {
         // UnityEngine.SceneManagement.SceneManager.LoadScene("SceneCk2");
-        GameManager.instance.ChangeScene("jas");
+        GameManager.instance.ChangeScene("SampleScene");
     }
 
     public int GetCurrentIndex() => currentIndex;
