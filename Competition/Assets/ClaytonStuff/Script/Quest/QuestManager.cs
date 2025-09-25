@@ -3,8 +3,22 @@ using UnityEngine;
 
 public class QuestManager : MonoBehaviour
 {
+    public static QuestManager Instance { get; private set; }
+
     public List<Quest> activeQuests = new List<Quest>();
     private List<Quest> questsToRemove = new List<Quest>(); // buffer for removals
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject); // ensure only one manager exists
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
 
     public Quest StartQuest(QuestData questData)
     {

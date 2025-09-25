@@ -19,18 +19,16 @@ public class InventoryUIManager : MonoBehaviour
     private bool subInventoryOpen = false;
 
     private int selectedMainSlot = -1; // -1 = none selected
-
     private int selectedSubSlot = -1; // -1 = none selected
     private int subColumns = 6;       // grid width
-    private int subRows = 5;         // grid height
-
+    private int subRows = 5;          // grid height
 
     void Start()
     {
         inventoryManager = FindObjectOfType<InventoryManager>();
         playerMovement = FindObjectOfType<NewPlayerMovement>();
 
-        // Create UI slots (6 main, 60 sub)
+        // Create UI slots (6 main, 30 sub)
         for (int i = 0; i < 6; i++)
         {
             var slot = Instantiate(slotPrefab, mainInventoryPanel.transform);
@@ -52,11 +50,7 @@ public class InventoryUIManager : MonoBehaviour
 
     void Update()
     {
-        // Toggle sub inventory with I key
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            ToggleSubInventory();
-        }
+        if (Input.GetKeyDown(KeyCode.I)) ToggleSubInventory();
 
         if (!subInventoryOpen)
         {
@@ -69,29 +63,22 @@ public class InventoryUIManager : MonoBehaviour
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                UseSelectedItem();
-            }
+            if (Input.GetKeyDown(KeyCode.E)) UseSelectedItem();
         }
         else
         {
-            // Sub-inventory navigation with arrows
+            // Sub-inventory navigation
             if (Input.GetKeyDown(KeyCode.RightArrow)) MoveSubSelection(1, 0);
             if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveSubSelection(-1, 0);
             if (Input.GetKeyDown(KeyCode.UpArrow)) MoveSubSelection(0, -1);
             if (Input.GetKeyDown(KeyCode.DownArrow)) MoveSubSelection(0, 1);
 
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                UseSelectedItemSub();
-            }
+            if (Input.GetKeyDown(KeyCode.E)) UseSelectedItemSub();
         }
     }
 
     private void MoveSubSelection(int dx, int dy)
     {
-        // Initialize to (0,0) if none selected yet
         if (selectedSubSlot == -1) selectedSubSlot = 0;
 
         int x = selectedSubSlot % subColumns;
@@ -107,15 +94,19 @@ public class InventoryUIManager : MonoBehaviour
             UpdateSubHighlight();
         }
     }
+
     private void UseSelectedItemSub()
     {
-        if (selectedSubSlot < 0 || selectedSubSlot >= inventoryManager.playerInventory.subInventory.Count)
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null) return;
+
+        if (selectedSubSlot < 0 || selectedSubSlot >= inv.subInventory.Count)
         {
             Debug.Log("No valid sub item selected.");
             return;
         }
 
-        var slot = inventoryManager.playerInventory.subInventory[selectedSubSlot];
+        var slot = inv.subInventory[selectedSubSlot];
         if (slot.item == null || slot.quantity <= 0)
         {
             Debug.Log("Selected sub slot is empty.");
@@ -124,10 +115,6 @@ public class InventoryUIManager : MonoBehaviour
 
         if (slot.item.itemName == "Heal Potion")
         {
-            //Debug.Log("Using Heal Potion from Sub Inventory...");
-            //var player = FindObjectOfType<Player>(); // replace with your health script
-            //if (player != null) player.Heal(50);
-
             inventoryManager.RemoveItemFromInventory(slot.item, 1);
         }
         else
@@ -135,7 +122,6 @@ public class InventoryUIManager : MonoBehaviour
             Debug.Log($"Selected sub item: {slot.item.itemName} (not usable here).");
         }
     }
-
 
     private void UpdateSubHighlight()
     {
@@ -146,35 +132,27 @@ public class InventoryUIManager : MonoBehaviour
         }
     }
 
-
     private void UseSelectedItem()
     {
-        if (selectedMainSlot < 0 || selectedMainSlot >= inventoryManager.playerInventory.mainInventory.Count)
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null) return;
+
+        if (selectedMainSlot < 0 || selectedMainSlot >= inv.mainInventory.Count)
         {
             Debug.Log("No valid item selected.");
             return;
         }
 
-        var slot = inventoryManager.playerInventory.mainInventory[selectedMainSlot];
+        var slot = inv.mainInventory[selectedMainSlot];
         if (slot.item == null || slot.quantity <= 0)
         {
             Debug.Log("Selected slot is empty.");
             return;
         }
 
-        // Example: Check if item is Heal Potion
         if (slot.item.itemName == "Heal Potion")
         {
             Debug.Log("Using Heal Potion...");
-
-            //// Call player heal logic here
-            //var player = FindObjectOfType<Player>(); // replace with your player health script
-            //if (player != null)
-            //{
-            //    player.Heal(50); // heal amount example
-            //}
-
-            // Remove one from inventory
             inventoryManager.RemoveItemFromInventory(slot.item, 1);
         }
         else
@@ -182,7 +160,6 @@ public class InventoryUIManager : MonoBehaviour
             Debug.Log($"Selected item: {slot.item.itemName} (not usable here).");
         }
     }
-
 
     private void ToggleSubInventory()
     {
@@ -198,39 +175,37 @@ public class InventoryUIManager : MonoBehaviour
     {
         selectedMainSlot = index;
 
-        // Turn off all highlights first
         for (int i = 0; i < mainSlots.Count; i++)
         {
             var highlight = mainSlots[i].transform.Find("Highlight").gameObject;
             highlight.SetActive(i == index);
         }
 
-        // === NEW: Tell player to display item ===
-        if (index >= 0 && index < inventoryManager.playerInventory.mainInventory.Count)
+        var inv = inventoryManager.PlayerInventory;
+        if (inv != null && index >= 0 && index < inv.mainInventory.Count)
         {
-            var slot = inventoryManager.playerInventory.mainInventory[index];
+            var slot = inv.mainInventory[index];
             var heldItem = FindObjectOfType<PlayerHeldItem>();
             if (heldItem != null) heldItem.DisplayItem(slot.item);
         }
     }
 
-
     public void RefreshUI()
     {
-        // Clear all slots
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null) return;
+
         foreach (var slot in mainSlots) ClearSlot(slot);
         foreach (var slot in subSlots) ClearSlot(slot);
 
-        // Fill Main Inventory
-        for (int i = 0; i < inventoryManager.playerInventory.mainInventory.Count && i < mainSlots.Count; i++)
+        for (int i = 0; i < inv.mainInventory.Count && i < mainSlots.Count; i++)
         {
-            UpdateSlot(mainSlots[i], inventoryManager.playerInventory.mainInventory[i]);
+            UpdateSlot(mainSlots[i], inv.mainInventory[i]);
         }
 
-        // Fill Sub Inventory
-        for (int i = 0; i < inventoryManager.playerInventory.subInventory.Count && i < subSlots.Count; i++)
+        for (int i = 0; i < inv.subInventory.Count && i < subSlots.Count; i++)
         {
-            UpdateSlot(subSlots[i], inventoryManager.playerInventory.subInventory[i]);
+            UpdateSlot(subSlots[i], inv.subInventory[i]);
         }
     }
 
@@ -242,8 +217,6 @@ public class InventoryUIManager : MonoBehaviour
         icon.sprite = null;
         icon.enabled = false;
         qtyText.text = "";
-
-        // leave Highlight state as is
     }
 
     private void UpdateSlot(GameObject slotObj, InventorySlot slotData)
@@ -251,10 +224,18 @@ public class InventoryUIManager : MonoBehaviour
         Image icon = slotObj.transform.Find("Icon").GetComponent<Image>();
         TextMeshProUGUI qtyText = slotObj.transform.Find("QuantityText").GetComponent<TextMeshProUGUI>();
 
-        icon.sprite = slotData.item.icon;
-        icon.enabled = true;
+        if (slotData.item != null && slotData.item.icon != null)
+        {
+            icon.sprite = slotData.item.icon;
+            icon.enabled = true;
+        }
+        else
+        {
+            icon.sprite = null;
+            icon.enabled = false;
+        }
 
-        qtyText.text = slotData.item.isStackable && slotData.quantity > 1
+        qtyText.text = slotData.item != null && slotData.item.isStackable && slotData.quantity > 1
             ? slotData.quantity.ToString()
             : "";
     }
