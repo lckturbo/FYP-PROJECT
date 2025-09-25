@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 751cdc46136c0114ca56c5d04e45b164, type: 3}
   m_Name: Journalist
   m_EditorClassIdentifier: 
-  Speed: 3
-  maxHealth: 50
-  attackreduction: 5
-  atkDmg: 10
-  actionvaluespeed: 0.6
-  critRate: 0.25
-  critDamage: 25
-  attackElement: 3
-  defenseElement: 2
-  fireRes: 2
-  waterRes: 0.25
-  grassRes: 0.25
-  darkRes: 1
-  lightRes: 1
+  Speed: 6
+  maxHealth: 70
+  attackreduction: 1
+  atkDmg: 8
+  actionvaluespeed: 1.2
+  critRate: 0.15
+  critDamage: 1.4
+  attackElement: 4
+  defenseElement: 0
+  fireRes: 1
+  waterRes: 1
+  grassRes: 1
+  darkRes: 0.8
+  lightRes: 1.2
   level: 1
   atkCD: 1
-  atkRange: 2
+  atkRange: 2.5

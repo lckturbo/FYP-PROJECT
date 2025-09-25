@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 751cdc46136c0114ca56c5d04e45b164, type: 3}
   m_Name: Cameraman
   m_EditorClassIdentifier: 
-  Speed: 3
-  maxHealth: 50
-  attackreduction: 5
-  atkDmg: 10
-  actionvaluespeed: 0.3
-  critRate: 0.25
-  critDamage: 25
+  Speed: 6
+  maxHealth: 80
+  attackreduction: 1.5
+  atkDmg: 12
+  actionvaluespeed: 1.1
+  critRate: 0.2
+  critDamage: 1.5
   attackElement: 5
-  defenseElement: 4
-  fireRes: 1
-  waterRes: 2
+  defenseElement: 0
+  fireRes: 1.2
+  waterRes: 1.3
   grassRes: 1
-  darkRes: 0.25
-  lightRes: 0.25
+  darkRes: 1.2
+  lightRes: 0.8
   level: 1
   atkCD: 1
-  atkRange: 2
+  atkRange: 4.5
