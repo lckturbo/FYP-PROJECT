@@ -1,13 +1,9 @@
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerSpawner : MonoBehaviour
 {
     [SerializeField] private SelectedCharacter selectedStore;
     [SerializeField] private Transform spawnPoint;
-
-    public static System.Action<Transform> OnPlayerSpawned;
 
     private void Awake()
     {
@@ -25,7 +21,8 @@ public class PlayerSpawner : MonoBehaviour
             return;
         }
 
-        var pos = spawnPoint ? spawnPoint.position : Vector3.zero;
+        Vector3 pos;
+        pos = spawnPoint ? spawnPoint.position : Vector3.zero; // new game
         var rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
 
         var go = Instantiate(prefab, pos, rot);
@@ -51,7 +48,5 @@ public class PlayerSpawner : MonoBehaviour
         {
             Debug.LogWarning("PlayerSpawner: No NewCameraController found in scene (tag your camera MainCamera or add the component).");
         }
-
-        OnPlayerSpawned?.Invoke(go.transform);
     }
 }

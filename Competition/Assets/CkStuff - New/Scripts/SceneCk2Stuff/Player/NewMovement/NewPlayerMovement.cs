@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
@@ -36,6 +37,24 @@ public class NewPlayerMovement : MonoBehaviour
 
         if (stats != null)
             ApplyStats(stats);
+
+        //if (SaveLoadSystem.instance)
+        //    SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
+
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneUnloaded -= OnSceneUnloaded;
+    }
+
+    private void OnSceneUnloaded(Scene scene)
+    {
+        if (scene.name == "jasBattle") return;
+
+        if (SaveLoadSystem.instance)
+            SaveLoadSystem.instance.SaveGame();
     }
 
     public void ApplyStats(BaseStats newStats)
@@ -85,4 +104,14 @@ public class NewPlayerMovement : MonoBehaviour
         if (stats == null) return cachedWalkSpeed;
         return useStatsDirectly ? stats.Speed : cachedWalkSpeed;
     }
+
+    //public void LoadData(GameData data)
+    //{
+    //    transform.position = data.playerPosition;
+    //}
+
+    //public void SaveData(ref GameData data)
+    //{
+    //    data.playerPosition = transform.position;
+    //}
 }

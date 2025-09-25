@@ -77,7 +77,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (!targetwp || !targetwp.isOccupied())
         {
             targetwp = WayPointManager.instance.GetFreeWayPoint();
-            if (targetwp) targetwp.SetOccupied(true);
+            //if (targetwp) targetwp.SetOccupied(true);
         }
 
         currIdleTimer -= Time.deltaTime;
@@ -104,16 +104,16 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (aiPath.reachedEndOfPath || aiPath.remainingDistance < 0.5f)
         {
-            targetwp.SetOccupied(false);
+            //targetwp.SetOccupied(false);
 
             foreach (var neighbor in targetwp.nearestWaypoints)
             {
-                if (!neighbor.isOccupied())
-                {
+                //if (!neighbor.isOccupied())
+                //{
                     targetwp = neighbor;
-                    targetwp.SetOccupied(true);
+                    //targetwp.SetOccupied(true);
                     break;
-                }
+                //}
             }
             enemyStates = EnemyStates.Idle;
         }
