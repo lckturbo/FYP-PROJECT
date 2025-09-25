@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &127878781583409471
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1266757329446937657}
+  m_Layer: 8
+  m_Name: AttackPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1266757329446937657
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 127878781583409471}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.29999998, y: 0.29999998, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2818916189593433376}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &674514919271071580
 GameObject:
   m_ObjectHideFlags: 0
@@ -48,6 +79,8 @@ GameObject:
   - component: {fileID: 6885134644018083666}
   - component: {fileID: 8786016409251649494}
   - component: {fileID: 966526206247983570}
+  - component: {fileID: 5706041144145697489}
+  - component: {fileID: 8483604339182903694}
   m_Layer: 8
   m_Name: Journalist
   m_TagString: Player
@@ -68,6 +101,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1266757329446937657}
   - {fileID: 1780617080246823407}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -303,3 +337,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 141e732d85795ae4992a279d83a46c74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5706041144145697489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e51c9de02043164385d366d3c7bea38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackPoint: {fileID: 1266757329446937657}
+  attackRange: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  attackDamage: 1
+  attackRate: 1
+  arrowPool: {fileID: 0}
+  rightAttackOffset: {x: 1, y: 0}
+  leftAttackOffset: {x: -1, y: 0}
+  upAttackOffset: {x: 0, y: 1}
+  downAttackOffset: {x: 0, y: -1}
+--- !u!114 &8483604339182903694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdcd91b98b717c64fb8ba20c12bf0dcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handPoint: {fileID: 1266757329446937657}

@@ -14,14 +14,13 @@ public class EnemyScaler : MonoBehaviour
         }
 
     }
-
-    private void ScaleToPlayer(int playerLevelValue)
-    {
-    }
-
     private void OnDestroy()
     {
         if (!playerLevel)
             playerLevel.levelSystem.OnLevelUp -= ScaleToPlayer;
+    }
+
+    private void ScaleToPlayer(int playerLevelValue)
+    {
     }
 }

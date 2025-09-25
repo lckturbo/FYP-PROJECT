@@ -29,6 +29,18 @@ public class PlayerAttack : MonoBehaviour
     private PlayerInput playerInput;
     private InputAction attackAction;
 
+    private void Start()
+    {
+        if (arrowPool == null)
+        {
+            arrowPool = FindObjectOfType<ObjectPool>();
+            if (arrowPool != null)
+                Debug.Log("Arrow pool assigned automatically.");
+            else
+                Debug.LogWarning("No ObjectPool found for arrows!");
+        }
+    }
+
     private void Awake()
     {
         playerMovement = GetComponent<NewPlayerMovement>();
