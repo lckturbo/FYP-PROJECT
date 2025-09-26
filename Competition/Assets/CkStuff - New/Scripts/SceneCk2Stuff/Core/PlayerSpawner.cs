@@ -1,18 +1,34 @@
+using System;
 using UnityEngine;
 
-public class PlayerSpawner : MonoBehaviour
+public class PlayerSpawner : MonoBehaviour, IDataPersistence
 {
     [SerializeField] private SelectedCharacter selectedStore;
     [SerializeField] private Transform spawnPoint;
 
-    private void Awake()
+    public static event Action<Transform> OnPlayerSpawned; // for enemy
+
+    public void LoadData(GameData data)
+    {
+        selectedStore.index = data.selectedCharacterIndex;
+        selectedStore.RestoreFromIndex(data.selectedCharacterIndex);
+    }
+
+    public void SaveData(ref GameData data) { }
+
+    private void Start()
     {
         if (!selectedStore || !selectedStore.definition)
         {
-            Debug.LogError("PlayerSpawner: No SelectedCharacter/definition assigned.");
+            Debug.LogError("PlayerSpawner: No SelectedCharacter/definition assigned after load.");
             return;
         }
 
+        SpawnPlayer();
+    }
+
+    private void SpawnPlayer()
+    {
         var def = selectedStore.definition;
         var prefab = def.playerPrefab;
         if (!prefab)
@@ -21,32 +37,30 @@ public class PlayerSpawner : MonoBehaviour
             return;
         }
 
-        Vector3 pos;
-        pos = spawnPoint ? spawnPoint.position : Vector3.zero; // new game
-        var rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
+        // JAS ADDED -> load player position //
+        Vector2 position;
+        var data = SaveLoadSystem.instance.GetGameData();
+        if (data != null && data.playerPosition != Vector2.zero)
+            position = data.playerPosition;
+        else
+            position = spawnPoint ? spawnPoint.position : Vector2.zero;
+        ///////////////
 
-        var go = Instantiate(prefab, pos, rot);
+        Quaternion rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
+
+        var go = Instantiate(prefab, position, rot);
         go.name = $"Player_{def.displayName}";
 
-        // Apply stats
-        var stats = def.stats; // NewCharacterStats : BaseStats
+        var stats = def.stats;
         if (stats != null)
         {
             go.GetComponentInChildren<NewPlayerMovement>()?.ApplyStats(stats);
             go.GetComponentInChildren<NewHealth>()?.ApplyStats(stats);
         }
 
-        var camCtrl = Camera.main ? Camera.main.GetComponent<NewCameraController>() : null;
-        if (!camCtrl)
-            camCtrl = FindFirstObjectByType<NewCameraController>();
+        var camCtrl = Camera.main ? Camera.main.GetComponent<NewCameraController>() : FindFirstObjectByType<NewCameraController>();
+        if (camCtrl) camCtrl.target = go.transform;
 
-        if (camCtrl)
-        {
-            camCtrl.target = go.transform;
-        }
-        else
-        {
-            Debug.LogWarning("PlayerSpawner: No NewCameraController found in scene (tag your camera MainCamera or add the component).");
-        }
+        OnPlayerSpawned?.Invoke(go.transform);
     }
 }

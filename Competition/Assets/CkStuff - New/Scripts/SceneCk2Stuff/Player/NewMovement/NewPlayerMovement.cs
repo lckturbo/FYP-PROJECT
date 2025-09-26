@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(Animator))]
-public class NewPlayerMovement : MonoBehaviour
+public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 {
     [Header("Stats (provides walkSpeed)")]
     [SerializeField] private BaseStats stats;
@@ -54,7 +54,10 @@ public class NewPlayerMovement : MonoBehaviour
         if (scene.name == "jasBattle") return;
 
         if (SaveLoadSystem.instance)
+        {
+            Debug.Log("saveload is here");
             SaveLoadSystem.instance.SaveGame();
+        }
     }
 
     public void ApplyStats(BaseStats newStats)
@@ -105,13 +108,10 @@ public class NewPlayerMovement : MonoBehaviour
         return useStatsDirectly ? stats.Speed : cachedWalkSpeed;
     }
 
-    //public void LoadData(GameData data)
-    //{
-    //    transform.position = data.playerPosition;
-    //}
+    public void LoadData(GameData data) { }
 
-    //public void SaveData(ref GameData data)
-    //{
-    //    data.playerPosition = transform.position;
-    //}
+    public void SaveData(ref GameData data)
+    {
+        data.playerPosition = transform.position;
+    }
 }

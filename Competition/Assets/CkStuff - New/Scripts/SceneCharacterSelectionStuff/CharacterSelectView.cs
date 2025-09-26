@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterSelectView : MonoBehaviour
+public class CharacterSelectView : MonoBehaviour, IDataPersistence
 {
     [Header("Data")]
     [SerializeField] private NewCharacterDefinition[] roster;
@@ -141,9 +141,17 @@ public class CharacterSelectView : MonoBehaviour
 
     private void Confirm()
     {
-        //GameManager.instance.ChangeScene("jas");
-        GameManager.instance.ChangeScene("SampleScene");
+        //GameManager.instance.ChangeScene("SampleScene");
+        SaveLoadSystem.instance.SaveGame();
+        GameManager.instance.ChangeScene("jas");
     }
 
     public int GetCurrentIndex() => currentIndex;
+
+    public void LoadData(GameData data) { }
+
+    public void SaveData(ref GameData data)
+    {
+        data.selectedCharacterIndex = currentIndex;
+    }
 }
