@@ -21,21 +21,6 @@ public class EnemyScaler : MonoBehaviour
         ScaleToPlayer(playerLevel.levelSystem.level);
     }
 
-    //private void Start()
-    //{
-    //    if (!playerLevel)
-    //    {
-    //        playerLevel.levelSystem.OnLevelUp += ScaleToPlayer;
-    //        ScaleToPlayer(playerLevel.levelSystem.level);
-    //    }
-
-    //}
-    private void OnDestroy()
-    {
-        if (!playerLevel)
-            playerLevel.levelSystem.OnLevelUp -= ScaleToPlayer;
-    }
-
     private void ScaleToPlayer(int playerLevelValue)
     {
     }
