@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class BattleSystem : MonoBehaviour
 {
     [Header("SpawnPoints")]
-    //[SerializeField] private Transform leaderSpawnPt;
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
 
@@ -19,13 +18,14 @@ public class BattleSystem : MonoBehaviour
     private List<GameObject> playerAllies = new List<GameObject>();
     private List<GameObject> enemies = new List<GameObject>();
 
-    [Header("TESTING")]
+    [Header("Systems")]
     [SerializeField] private TurnEngine turnEngine;
 
     private void Start()
     {
         SetupBattle();
     }
+
     private void SetupBattle()
     {
         List<NewCharacterDefinition> fullParty = PlayerParty.instance.GetFullParty();
@@ -113,6 +113,7 @@ public class BattleSystem : MonoBehaviour
                 int idx = i;
                 h.OnHealthChanged += (nh) =>
                 {
+                    playerHealth[idx].maxValue = nh.GetMaxHealth();
                     playerHealth[idx].maxValue = nh.GetMaxHealth();
                     playerHealth[idx].value = nh.GetCurrHealth();
                 };

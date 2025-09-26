@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b30668b56d339e74eb926853f3ab6c88, type: 3}
+  m_Name: LevelGrowthPlayer
+  m_EditorClassIdentifier: 
+  maxHealthAdd: 10
+  atkDmgAdd: 2
+  defenseAdd: 0.2
+  speedAdd: 0.05
+  critRateAdd: 0.01
+  critDmgAdd: 0.05
+  maxHealthMul: 1
+  atkDmgMul: 1
+  speedMul: 1
+  minSpeed: 0.1
+  maxSpeed: 5
+  maxCritRate: 0.9
+  maxDefense: 999
