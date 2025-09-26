@@ -55,6 +55,9 @@ public class Chest : MonoBehaviour
         }
         else
         {
+            var movement = FindObjectOfType<NewPlayerMovement>();
+            if (movement != null)
+                playerInput = movement.GetComponent<PlayerInput>();
             // Player interaction
             Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.5f);
             foreach (var hit in hits)

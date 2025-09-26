@@ -142,7 +142,6 @@ public class PlayerAttack : MonoBehaviour
         else
             Debug.Log("Arrow fired diagonally: " + dir);
     }
-
     private void AttackMelee()
     {
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
@@ -156,7 +155,9 @@ public class PlayerAttack : MonoBehaviour
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
                 if (party != null)
                 {
+                    // Transition into battle, same as enemy attack
                     BattleManager.instance.HandleBattleTransition(gameObject, party);
+                    BattleManager.instance.SetBattleMode(true);
                 }
             }
         }

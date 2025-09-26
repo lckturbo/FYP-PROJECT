@@ -49,18 +49,18 @@ public class Arrow : MonoBehaviour
         {
             Debug.Log($"Hit enemy {collision.name}, dealt {damage}");
 
-            // Try to get the enemy's party
             EnemyBase enemy = collision.GetComponent<EnemyBase>();
             if (enemy != null)
             {
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
                 if (party != null)
                 {
-                    // Transition to battle
+                    // Same battle transition as melee & enemy attacks
                     BattleManager.instance.HandleBattleTransition(
-                        GameObject.FindWithTag("Player"), // player reference
+                        GameObject.FindWithTag("Player"),
                         party
                     );
+                    BattleManager.instance.SetBattleMode(true);
                 }
             }
 
