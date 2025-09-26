@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [System.Serializable]
 public class ChestItem
@@ -27,6 +28,24 @@ public class Chest : MonoBehaviour
 
     private bool opened = false;
 
+    private PlayerInput playerInput;
+    private InputAction interactAction;
+
+    void Awake()
+    {
+        // Get PlayerInput from NewPlayerMovement
+        NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerInput = playerMovement.GetComponent<PlayerInput>();
+            if (playerInput != null)
+            {
+                interactAction = playerInput.actions["Interaction"];
+                interactAction.Enable();
+            }
+        }
+    }
+
     private void Update()
     {
         // Spin chest if opened
@@ -40,7 +59,8 @@ public class Chest : MonoBehaviour
             Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.5f);
             foreach (var hit in hits)
             {
-                if (hit.CompareTag("Player") && Input.GetKeyDown(KeyCode.F))
+                var action = playerInput.actions["Interaction"];
+                if (hit.CompareTag("Player") && action.WasPressedThisFrame())
                 {
                     OpenChest();
                     break;

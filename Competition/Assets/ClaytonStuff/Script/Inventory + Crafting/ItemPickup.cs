@@ -8,16 +8,14 @@ public class ItemPickup : MonoBehaviour
 
     private void Update()
     {
-        if (playerInRange && Input.GetKeyDown(KeyCode.F))
-        {
-            CollectItem();
-        }
+
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
+            CollectItem();
             playerInRange = true;
             // Optionally, show UI prompt like "Press F to collect"
         }
