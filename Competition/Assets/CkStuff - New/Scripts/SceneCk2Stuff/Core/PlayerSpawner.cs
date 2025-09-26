@@ -14,7 +14,10 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         selectedStore.RestoreFromIndex(data.selectedCharacterIndex);
     }
 
-    public void SaveData(ref GameData data) { }
+    public void SaveData(ref GameData data)
+    {
+        
+    }
 
     private void Start()
     {
@@ -40,7 +43,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         // JAS ADDED -> load player position //
         Vector2 position;
         var data = SaveLoadSystem.instance.GetGameData();
-        if (data != null && data.playerPosition != Vector2.zero)
+        if (data != null && data.hasSavedPosition)
             position = data.playerPosition;
         else
             position = spawnPoint ? spawnPoint.position : Vector2.zero;

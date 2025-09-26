@@ -19,7 +19,7 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     [Header("LEFT: Bars (0..1 fill)")]
     [SerializeField] private Image healthFill;
     [SerializeField] private Image dmgFill;
-    [SerializeField] private Image defFill; 
+    [SerializeField] private Image defFill;
 
     [Header("LEFT: Resist icons (tint only)")]
     [SerializeField] private Image fireIcon;

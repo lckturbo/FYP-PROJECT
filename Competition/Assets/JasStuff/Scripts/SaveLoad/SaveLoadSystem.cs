@@ -41,7 +41,7 @@ public class SaveLoadSystem : MonoBehaviour
     private void OnSceneUnloaded(Scene scene)
     {
         if (scene.name == "jasBattle") return;
-        Debug.Log("loading");
+        Debug.Log("IM SAVING");
         SaveGame();
     }
 
@@ -61,8 +61,10 @@ public class SaveLoadSystem : MonoBehaviour
         // if no data, initialize new game
         if (gameData == null) NewGame();
 
+        dataPersistenceObjs = FindAllDataPersistenceObjects();
+
         // push loaded data to all other scripts that need it
-        foreach(IDataPersistence dataObjs in dataPersistenceObjs)
+        foreach (IDataPersistence dataObjs in dataPersistenceObjs)
         {
             dataObjs.LoadData(gameData);
         }
@@ -70,8 +72,10 @@ public class SaveLoadSystem : MonoBehaviour
     }
     public void SaveGame()
     {
+        if (gameData == null) gameData = new GameData();
+
         dataPersistenceObjs = FindAllDataPersistenceObjects();
-        
+
         // pass data to other scripts so they can update
         foreach (IDataPersistence dataObjs in dataPersistenceObjs)
         {
