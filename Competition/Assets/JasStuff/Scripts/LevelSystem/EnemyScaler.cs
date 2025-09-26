@@ -56,5 +56,7 @@ public class EnemyScaler : MonoBehaviour
         if (health) health.ApplyStats(rt);
         var c = GetComponent<Combatant>();
         if (c) c.stats = rt;
+
+        Debug.Log($"{name}: scaled to party level {partyLevel} (HP {rt.maxHealth}, ATK {rt.atkDmg})");
     }
 }

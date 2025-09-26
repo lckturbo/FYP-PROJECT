@@ -1,5 +1,6 @@
-// PlayerLevelApplier.cs
+// PlayerLevelApplier.cs  (additions marked // NEW)
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(NewHealth))]
 public class PlayerLevelApplier : MonoBehaviour
@@ -15,6 +16,8 @@ public class PlayerLevelApplier : MonoBehaviour
     private NewPlayerMovement movement;
     private Combatant combatant;
 
+    private bool _bound; // NEW
+
     private void Awake()
     {
         health = GetComponentInChildren<NewHealth>();
@@ -22,29 +25,52 @@ public class PlayerLevelApplier : MonoBehaviour
         combatant = GetComponent<Combatant>();
     }
 
-    private void Start()
+    private void OnEnable() // NEW
     {
-        // Auto-bind to shared party system if not set
+        // Try bind immediately; if not ready, wait a frame loop until it is.
+        if (!TryBind())
+            StartCoroutine(BindWhenReady());
+    }
+
+    private void OnDisable() // NEW
+    {
+        if (_bound && levelSystem != null)
+        {
+            levelSystem.OnLevelUp -= HandleLevelUp;
+            _bound = false;
+        }
+    }
+
+    private bool TryBind() // NEW
+    {
         if (levelSystem == null && PartyLevelSystem.Instance != null)
             levelSystem = PartyLevelSystem.Instance.levelSystem;
 
-        if (levelSystem != null)
-            levelSystem.OnLevelUp += HandleLevelUp;
+        if (levelSystem == null) return false;
 
-        // initial apply at current party level
-        ApplyForLevel(levelSystem != null ? levelSystem.level : 1);
+        // prevent double subscribe
+        if (!_bound)
+        {
+            levelSystem.OnLevelUp += HandleLevelUp;
+            _bound = true;
+            ApplyForLevel(levelSystem.level); // apply current party level now
+        }
+        return true;
     }
 
-    private void OnDestroy()
+    private IEnumerator BindWhenReady() // NEW
     {
-        if (levelSystem != null)
-            levelSystem.OnLevelUp -= HandleLevelUp;
+        // Wait until the PartyLevelSystem singleton exists
+        while (PartyLevelSystem.Instance == null)
+            yield return null;
+
+        TryBind();
     }
 
     private void HandleLevelUp(int newLevel)
     {
         ApplyForLevel(newLevel);
-        Debug.Log($"{name}: leveled to {newLevel}");
+        Debug.Log($"{name}: Level {newLevel} applied. HP {runtimeStats?.maxHealth}, ATK {runtimeStats?.atkDmg}");
     }
 
     public void ApplyForLevel(int level)
