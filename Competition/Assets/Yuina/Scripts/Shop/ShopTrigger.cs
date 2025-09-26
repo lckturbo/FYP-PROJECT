@@ -25,13 +25,23 @@ public class ShopTrigger : MonoBehaviour
 
     void Update()
     {
-        if (playerInRange && interactAction != null && interactAction.WasPressedThisFrame())
+        if (playerInRange)
         {
-            if (!ShopManager.Instance) return;
+            if (playerInput == null)
+            {
+                var movement = FindObjectOfType<NewPlayerMovement>();
+                if (movement != null)
+                    playerInput = movement.GetComponent<PlayerInput>();
+            }
 
-            //  Always toggle when in range
-            Debug.Log("Toggling Shop");
-            ShopManager.Instance.ToggleShop();
+            if (playerInput != null)
+            {
+                var action = playerInput.actions["Interaction"];
+                if (action.WasPressedThisFrame())
+                {
+                    ShopManager.Instance.ToggleShop();
+                }
+            }
         }
     }
 
@@ -40,7 +50,10 @@ public class ShopTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
+            Debug.Log("Collide with player");
         }
+
+
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -48,6 +61,8 @@ public class ShopTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = false;
+            Debug.Log("Out of Collide with player");
+
 
             //  Auto close when leaving range
             if (ShopManager.Instance && ShopManager.Instance.IsShopActive)
