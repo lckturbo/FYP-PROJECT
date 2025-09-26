@@ -4,6 +4,8 @@ public class BattleManager : MonoBehaviour
 {
     public static BattleManager instance;
 
+    private bool inBattle;
+    
     public GameObject playerRef { get; private set; }
     public EnemyParty enemypartyRef { get; private set; }
 
@@ -25,6 +27,16 @@ public class BattleManager : MonoBehaviour
     public void UnRegisterEnemy(EnemyBase enemy)
     {
         enemy.OnAttackPlayer -= HandleBattleTransition;
+    }
+
+    public void SetBattleMode(bool v)
+    {
+        inBattle = v;
+    }
+
+    public bool GetBattleMode()
+    {
+        return inBattle;
     }
 
     public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)

@@ -84,7 +84,6 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     public void Bind(int index)
     {
         currentIndex = Mathf.Clamp(index, 0, roster.Length - 1);
-        Debug.Log(currentIndex);
         var def = roster[currentIndex];
         if (!def || def.stats == null) return;
 

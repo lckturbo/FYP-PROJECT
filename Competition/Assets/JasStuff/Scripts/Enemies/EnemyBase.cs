@@ -38,7 +38,6 @@ public abstract class EnemyBase : MonoBehaviour
 
     //public event Action<GameObject, float> OnDeath;
     public event Action<GameObject, EnemyParty> OnAttackPlayer;
-    protected bool inBattle;
 
     private void OnEnable()
     {
@@ -81,24 +80,30 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Idle()
     {
         if (animator) animator.Play("IdleBack");
-        aiPath.canMove = false;
-        rb2d.velocity = Vector2.zero;
-        if (CanSeePlayer())
-        {
-            enemyStates = EnemyStates.Chase;
-            return;
-        }
 
-        if (!targetwp || !targetwp.isOccupied())
+        if (!BattleManager.instance.GetBattleMode())
         {
-            targetwp = WayPointManager.instance.GetFreeWayPoint();
-            //if (targetwp) targetwp.SetOccupied(true);
+            aiPath.canMove = false;
+            rb2d.velocity = Vector2.zero;
+            if (CanSeePlayer())
+            {
+                enemyStates = EnemyStates.Chase;
+                return;
+            }
+
+            if (!targetwp || !targetwp.isOccupied())
+            {
+                targetwp = WayPointManager.instance.GetFreeWayPoint();
+                //if (targetwp) targetwp.SetOccupied(true);
+            }
         }
 
         currIdleTimer -= Time.deltaTime;
         if (currIdleTimer <= 0 && targetwp)
         {
-            enemyStates = EnemyStates.Patrol;
+            if (!BattleManager.instance.GetBattleMode())
+                enemyStates = EnemyStates.Patrol;
+
             currIdleTimer = enemyStats.idleTimer;
         }
     }
@@ -125,9 +130,9 @@ public abstract class EnemyBase : MonoBehaviour
             {
                 //if (!neighbor.isOccupied())
                 //{
-                    targetwp = neighbor;
-                    //targetwp.SetOccupied(true);
-                    break;
+                targetwp = neighbor;
+                //targetwp.SetOccupied(true);
+                break;
                 //}
             }
             enemyStates = EnemyStates.Idle;
@@ -231,15 +236,16 @@ public abstract class EnemyBase : MonoBehaviour
         //FaceDir(dir);
         //PlayerNearby();
 
-        if (CanSeePlayer()) enemyStates = EnemyStates.Chase;
-
-        // TODO: play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
-        if (!inBattle)
+        if (!BattleManager.instance.GetBattleMode())
         {
+            if (CanSeePlayer()) enemyStates = EnemyStates.Chase;
+
+            // TODO: play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
             BattleManager.instance.RegisterEnemy(this);
             OnAttackPlayer.Invoke(player.gameObject, GetComponent<EnemyParty>());
-            inBattle = true;
+            BattleManager.instance.SetBattleMode(true);
         }
+
         enemyStates = EnemyStates.Idle;
     }
 
