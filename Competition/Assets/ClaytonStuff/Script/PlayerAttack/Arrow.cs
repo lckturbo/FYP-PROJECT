@@ -48,9 +48,24 @@ public class Arrow : MonoBehaviour
         if (collision.CompareTag("Enemy"))
         {
             Debug.Log($"Hit enemy {collision.name}, dealt {damage}");
-            // TODO: Apply damage
-            GameManager.instance.ChangeScene("jasBattle");
+
+            // Try to get the enemy's party
+            EnemyBase enemy = collision.GetComponent<EnemyBase>();
+            if (enemy != null)
+            {
+                EnemyParty party = enemy.GetComponent<EnemyParty>();
+                if (party != null)
+                {
+                    // Transition to battle
+                    BattleManager.instance.HandleBattleTransition(
+                        GameObject.FindWithTag("Player"), // player reference
+                        party
+                    );
+                }
+            }
+
             gameObject.SetActive(false);
         }
     }
+
 }

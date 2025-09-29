@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class BattleSystem : MonoBehaviour
 {
     [Header("SpawnPoints")]
-    //[SerializeField] private Transform leaderSpawnPt;
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
 
@@ -19,13 +18,30 @@ public class BattleSystem : MonoBehaviour
     private List<GameObject> playerAllies = new List<GameObject>();
     private List<GameObject> enemies = new List<GameObject>();
 
-    [Header("TESTING")]
+    [Header("Systems")]
     [SerializeField] private TurnEngine turnEngine;
+
+    [Header("Level Growth")]              
+    [SerializeField] private LevelGrowth playerGrowth; 
+    [SerializeField] private LevelGrowth enemyGrowth;  
+
+    private void OnEnable()                  
+    {                                        
+        if (turnEngine)                      
+            turnEngine.OnBattleEnd += HandleBattleEnd; 
+    }                                        
+
+    private void OnDisable()                 
+    {                                        
+        if (turnEngine)                      
+            turnEngine.OnBattleEnd -= HandleBattleEnd; 
+    }                                        
 
     private void Start()
     {
         SetupBattle();
     }
+
     private void SetupBattle()
     {
         List<NewCharacterDefinition> fullParty = PlayerParty.instance.GetFullParty();
@@ -44,6 +60,8 @@ public class BattleSystem : MonoBehaviour
         cL.isLeader = true;
         cL.stats = leader.stats;
         turnEngine.Register(cL);
+
+        AddPlayerLevelApplier(leaderObj, leader); 
 
         // Allies
         for (int i = 0; i < fullParty.Count; i++)
@@ -65,6 +83,8 @@ public class BattleSystem : MonoBehaviour
                 cA.isLeader = false;
                 cA.stats = member.stats;
                 turnEngine.Register(cA);
+
+                AddPlayerLevelApplier(allyObj, member);
             }
         }
 
@@ -90,6 +110,8 @@ public class BattleSystem : MonoBehaviour
             cE.isLeader = false;
             cE.stats = es;
             turnEngine.Register(cE);
+
+            AddEnemyScaler(enemy);
         }
 
         SetUpHealth();
@@ -137,10 +159,75 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
-    private void ApplyStatsIfPresent(GameObject go, BaseStats stats)
+    private void ApplyStatsIfPresent(GameObject go, NewCharacterStats stats)
     {
         if (!go || stats == null) return;
         go.GetComponentInChildren<NewPlayerMovement>()?.ApplyStats(stats);
         go.GetComponentInChildren<NewHealth>()?.ApplyStats(stats);
+    }
+
+    private void AddPlayerLevelApplier(GameObject go, NewCharacterDefinition def)
+    {
+        var applier = go.GetComponent<PlayerLevelApplier>();
+        if (!applier) applier = go.AddComponent<PlayerLevelApplier>();
+        applier.definition = def;
+        if (applier.levelSystem == null && PartyLevelSystem.Instance != null)
+            applier.levelSystem = PartyLevelSystem.Instance.levelSystem;
+        if (applier.growth == null) applier.growth = playerGrowth;
+    }
+
+    private void AddEnemyScaler(GameObject enemyGO) 
+    {                                              
+        var scaler = enemyGO.GetComponent<EnemyScaler>();                         
+        if (!scaler) scaler = enemyGO.AddComponent<EnemyScaler>();
+
+        var field = typeof(EnemyScaler).GetField("enemyGrowth",
+            System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public |
+            System.Reflection.BindingFlags.NonPublic);
+        if (field != null) field.SetValue(scaler, enemyGrowth);
+    }
+
+    private void HandleBattleEnd(bool playerWon)
+    {
+        if (playerWon)
+        {
+            int xp = CalculateXpReward();
+            PartyLevelSystem.Instance?.AddXP(xp);
+            Debug.Log($"[BattleEnd] Victory! Awarded {xp} XP to party.");
+        }
+        else
+        {
+            Debug.Log("[BattleEnd] Defeat.");
+        }
+
+        GameManager.instance.ChangeScene("SampleScene");
+    }
+
+    private int CalculateXpReward()
+    {
+        int xp = 0;
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            var go = enemies[i];
+            //original
+            //if (!go) { xp += 20; continue; }
+            
+            //for testing
+            if (!go) { xp += 120; continue; }
+
+            var c = go.GetComponent<Combatant>();
+            if (c && c.stats != null)
+            {
+                var cs = c.stats as NewCharacterStats;
+                int lvl = (cs != null && cs.level > 0) ? cs.level : 1;
+                xp += 20 + lvl * 5;
+            }
+            else
+            {
+                xp += 20;
+            }
+        }
+        return xp;
     }
 }

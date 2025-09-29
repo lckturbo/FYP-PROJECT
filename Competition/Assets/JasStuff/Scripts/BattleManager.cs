@@ -44,8 +44,6 @@ public class BattleManager : MonoBehaviour
         playerRef = player;
         enemypartyRef = enemyParty;
 
-        SaveLoadSystem.instance.SaveGame();
-        // load scene
         GameManager.instance.ChangeScene("jasBattle");
     }
 }

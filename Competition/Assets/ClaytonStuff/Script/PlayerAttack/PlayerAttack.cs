@@ -143,17 +143,25 @@ public class PlayerAttack : MonoBehaviour
             Debug.Log("Arrow fired diagonally: " + dir);
     }
 
-
     private void AttackMelee()
     {
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
-        foreach (var enemy in hitEnemies)
+        foreach (var enemyCollider in hitEnemies)
         {
-            Debug.Log($"Melee hit {enemy.name}, dealt {attackDamage}");
-            // TODO: Apply damage here
-            GameManager.instance.ChangeScene("jasBattle");
+            Debug.Log($"Melee hit {enemyCollider.name}, dealt {attackDamage}");
+
+            EnemyBase enemy = enemyCollider.GetComponent<EnemyBase>();
+            if (enemy != null)
+            {
+                EnemyParty party = enemy.GetComponent<EnemyParty>();
+                if (party != null)
+                {
+                    BattleManager.instance.HandleBattleTransition(gameObject, party);
+                }
+            }
         }
     }
+
 
     private void UpdateAttackPoint()
     {

@@ -17,6 +17,8 @@ public class TurnEngine : MonoBehaviour
     private bool _waitingForLeader;
     private Combatant _currentLeader;
 
+    public event Action<bool> OnBattleEnd;
+
     public void Register(Combatant c)
     {
         if (c != null && !_units.Contains(c)) _units.Add(c);
@@ -60,7 +62,13 @@ public class TurnEngine : MonoBehaviour
                     AutoAct(u, false);
                 }
 
-                if (IsTeamWiped(true) || IsTeamWiped(false)) { _running = false; return; }
+                if (IsTeamWiped(true) || IsTeamWiped(false))
+                {
+                    _running = false;
+                    bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+                    OnBattleEnd?.Invoke(playerWon);
+                    return;
+                }
             }
         }
     }
@@ -76,7 +84,13 @@ public class TurnEngine : MonoBehaviour
 
         _waitingForLeader = false;
         _currentLeader = null;
-        if (IsTeamWiped(true) || IsTeamWiped(false)) _running = false;
+
+        if (IsTeamWiped(true) || IsTeamWiped(false))
+        {
+            _running = false;
+            bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+            OnBattleEnd?.Invoke(playerWon);
+        }
     }
 
     public void LeaderChooseSkill(int skillIndex)
@@ -97,7 +111,13 @@ public class TurnEngine : MonoBehaviour
 
         _waitingForLeader = false;
         _currentLeader = null;
-        if (IsTeamWiped(true) || IsTeamWiped(false)) _running = false;
+
+        if (IsTeamWiped(true) || IsTeamWiped(false))
+        {
+            _running = false;
+            bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+            OnBattleEnd?.Invoke(playerWon);
+        }
     }
 
     // ---- helpers ----
@@ -110,7 +130,6 @@ public class TurnEngine : MonoBehaviour
         {
             if (actor.isLeader && isLeaderAuto)
             {
-                // Leader auto mode: pick randomly between all 3
                 int roll = UnityEngine.Random.Range(0, 3);
                 if (roll == 0) actor.BasicAttack(target);
                 else if (roll == 1) actor.Skill1(target);
@@ -118,16 +137,15 @@ public class TurnEngine : MonoBehaviour
             }
             else
             {
-                // Ally auto mode: weighted chance
                 float r = UnityEngine.Random.value;
-                if (r < 0.6f) actor.BasicAttack(target);      // 60%
-                else if (r < 0.8f) actor.Skill1(target);      // 20%
-                else actor.Skill2(target);                   // 20%
+                if (r < 0.6f) actor.BasicAttack(target);
+                else if (r < 0.8f) actor.Skill1(target);
+                else actor.Skill2(target);
             }
         }
         else
         {
-            // Enemy AI: 50% basic, 50% skill1 (or replace with skill2 if boss later)
+            // Enemy AI
             if (UnityEngine.Random.value < 0.5f) actor.BasicAttack(target);
             else actor.Skill1(target);
         }
