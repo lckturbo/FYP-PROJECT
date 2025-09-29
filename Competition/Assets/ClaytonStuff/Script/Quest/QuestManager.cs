@@ -6,13 +6,16 @@ public class QuestManager : MonoBehaviour
     public static QuestManager Instance { get; private set; }
 
     public List<Quest> activeQuests = new List<Quest>();
-    private List<Quest> questsToRemove = new List<Quest>(); // buffer for removals
+    private List<Quest> questsToRemove = new List<Quest>();
+
+    // NEW: Track NPC progress across scenes
+    private Dictionary<string, int> npcQuestStages = new Dictionary<string, int>();
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject); // ensure only one manager exists
+            Destroy(gameObject);
             return;
         }
 
@@ -32,18 +35,16 @@ public class QuestManager : MonoBehaviour
     private void HandleQuestCompleted(Quest quest)
     {
         Debug.Log($"Quest Finished: {quest.questData.questName}");
-        questsToRemove.Add(quest); // mark for removal, don’t remove immediately
+        questsToRemove.Add(quest);
     }
 
     private void Update()
     {
-        // Update all quests
         foreach (var quest in activeQuests)
         {
             quest.CheckProgress();
         }
 
-        // Remove completed quests safely after loop
         if (questsToRemove.Count > 0)
         {
             foreach (var quest in questsToRemove)
@@ -53,5 +54,16 @@ public class QuestManager : MonoBehaviour
             }
             questsToRemove.Clear();
         }
+    }
+
+    // ---- NPC Progress Functions ----
+    public void SaveNPCStage(string npcName, int stageIndex)
+    {
+        npcQuestStages[npcName] = stageIndex;
+    }
+
+    public int GetNPCStage(string npcName)
+    {
+        return npcQuestStages.TryGetValue(npcName, out int stageIndex) ? stageIndex : 0;
     }
 }

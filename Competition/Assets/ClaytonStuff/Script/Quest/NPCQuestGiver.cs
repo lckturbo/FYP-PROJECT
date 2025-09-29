@@ -8,13 +8,18 @@ public class NPCQuestGiver : MonoBehaviour
     private bool playerInRange = false;
     private Quest activeQuest;
 
+    private void Start()
+    {
+        // Load stage progress for this NPC
+        currentStageIndex = QuestManager.Instance.GetNPCStage(questDialogueData.npcName);
+    }
+
     private void Update()
     {
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             if (!DialogueManager.Instance.IsDialogueActive)
             {
-                // Case: all stages finished
                 if (currentStageIndex >= questDialogueData.stages.Length)
                 {
                     if (questDialogueData.finalDialogue != null)
@@ -28,14 +33,14 @@ public class NPCQuestGiver : MonoBehaviour
 
                 if (stage.questData != null)
                 {
-                    if (activeQuest == null) // Quest not started yet
+                    if (activeQuest == null)
                     {
                         DialogueManager.Instance.StartDialogue(stage.startDialogue);
 
                         activeQuest = QuestManagerInstance().StartQuest(stage.questData);
                         activeQuest.OnQuestCompleted += HandleQuestCompleted;
                     }
-                    else if (!activeQuest.isCompleted) // Quest in progress
+                    else if (!activeQuest.isCompleted)
                     {
                         if (stage.inProgressDialogue != null)
                             DialogueManager.Instance.StartDialogue(stage.inProgressDialogue);
@@ -57,7 +62,7 @@ public class NPCQuestGiver : MonoBehaviour
 
     private QuestManager QuestManagerInstance()
     {
-        return FindObjectOfType<QuestManager>();
+        return QuestManager.Instance;
     }
 
     private void HandleQuestCompleted(Quest quest)
@@ -66,9 +71,11 @@ public class NPCQuestGiver : MonoBehaviour
 
         activeQuest = null;
 
-        // Move to next stage
         if (currentStageIndex < questDialogueData.stages.Length)
+        {
             currentStageIndex++;
+            QuestManager.Instance.SaveNPCStage(questDialogueData.npcName, currentStageIndex);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)

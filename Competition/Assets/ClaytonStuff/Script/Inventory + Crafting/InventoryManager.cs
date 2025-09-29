@@ -63,6 +63,10 @@ public class InventoryManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.O))
         {
+            GameManager.instance.ChangeScene("jas");
+        }
+        if (Input.GetKeyDown(KeyCode.L))
+        {
             GameManager.instance.ChangeScene("ClaytonTestScene");
         }
     }
