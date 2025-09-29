@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,6 +6,9 @@ public class EnemyParty : MonoBehaviour
 {
     [SerializeField] private GameObject _enemyPrefab;
     private int partySize = 3;
+
+    [SerializeField] private string uniqueID;
+    public string GetID() => uniqueID;
 
     private void Start()
     {
