@@ -1,4 +1,3 @@
-// BattleActionUI.cs (only the new bits shown)
 using UnityEngine;
 using UnityEngine.UI;
 
