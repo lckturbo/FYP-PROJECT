@@ -11,6 +11,7 @@ public class NPCDialogueTrigger : MonoBehaviour
     {
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
+            Debug.Log("is in range");
             if (!DialogueManager.Instance.IsDialogueActive)
             {
                 DialogueManager.Instance.StartDialogue(dialogue);

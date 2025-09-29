@@ -23,6 +23,10 @@ public class InventoryUIManager : MonoBehaviour
     private int subColumns = 6;       // grid width
     private int subRows = 5;          // grid height
 
+    [Header("Item Info UI")]
+    [SerializeField] private TMP_Text descriptionText;
+    [SerializeField] private GameObject descriptionPanel;
+
     void Start()
     {
         inventoryManager = FindObjectOfType<InventoryManager>();
@@ -54,7 +58,7 @@ public class InventoryUIManager : MonoBehaviour
 
         if (!subInventoryOpen)
         {
-            // Main inventory number key selection
+            // Main inventory selection...
             for (int i = 0; i < 6; i++)
             {
                 if (Input.GetKeyDown(KeyCode.Alpha1 + i))
@@ -64,6 +68,9 @@ public class InventoryUIManager : MonoBehaviour
             }
 
             if (Input.GetKeyDown(KeyCode.E)) UseSelectedItem();
+
+            // Hide description when not in sub-inventory
+            descriptionPanel.SetActive(false);
         }
         else
         {
@@ -74,8 +81,12 @@ public class InventoryUIManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.DownArrow)) MoveSubSelection(0, 1);
 
             if (Input.GetKeyDown(KeyCode.E)) UseSelectedItemSub();
+
+            // Show description if valid item selected
+            ShowSubItemDescription();
         }
     }
+
 
     private void MoveSubSelection(int dx, int dy)
     {
@@ -130,7 +141,30 @@ public class InventoryUIManager : MonoBehaviour
             var highlight = subSlots[i].transform.Find("Highlight").gameObject;
             highlight.SetActive(i == selectedSubSlot);
         }
+
+        ShowSubItemDescription();
     }
+
+    private void ShowSubItemDescription()
+    {
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null || selectedSubSlot < 0 || selectedSubSlot >= inv.subInventory.Count)
+        {
+            descriptionPanel.SetActive(false);
+            return;
+        }
+
+        var slot = inv.subInventory[selectedSubSlot];
+        if (slot.item == null || slot.quantity <= 0)
+        {
+            descriptionPanel.SetActive(false);
+            return;
+        }
+
+        descriptionPanel.SetActive(true);
+        descriptionText.text = $"{slot.item.itemName}\n\n{slot.item.description}";
+    }
+
 
     private void UseSelectedItem()
     {
