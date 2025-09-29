@@ -12,6 +12,8 @@ public class TurnEngine : MonoBehaviour
     private readonly List<Combatant> _units = new();
     private bool _running;
 
+    [SerializeField] private TargetSelector targetSelector;
+
     // Leader choice plumbing
     public event Action<Combatant> OnLeaderTurnStart;
     private bool _waitingForLeader;
@@ -48,12 +50,16 @@ public class TurnEngine : MonoBehaviour
                 if (u.isPlayerTeam && u.isLeader)
                 {
                     if (autoBattle)
+                    {
                         AutoAct(u, true);
+                    }
                     else
                     {
                         _waitingForLeader = true;
                         _currentLeader = u;
                         OnLeaderTurnStart?.Invoke(u);
+                        targetSelector?.EnableForLeaderTurn();
+                        targetSelector?.Clear();
                         return;
                     }
                 }
@@ -67,63 +73,66 @@ public class TurnEngine : MonoBehaviour
                     _running = false;
                     bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
                     OnBattleEnd?.Invoke(playerWon);
+                    targetSelector?.Disable();
                     return;
                 }
             }
         }
     }
 
-    // ---- UI callbacks ----
-    public void LeaderChooseBasicAttack()
+    public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
     {
         if (!_waitingForLeader || _currentLeader == null) return;
-        var target = FindFirstAlive(opponentOf: _currentLeader);
+        var target = ValidateOrFallback(explicitTarget);
         if (target != null) _currentLeader.BasicAttack(target);
-
         Debug.Log($"[TURN] Leader {_currentLeader.name} used BASIC ATTACK on {target?.name}");
-
-        _waitingForLeader = false;
-        _currentLeader = null;
-
-        if (IsTeamWiped(true) || IsTeamWiped(false))
-        {
-            _running = false;
-            bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-            OnBattleEnd?.Invoke(playerWon);
-        }
+        EndLeaderDecisionAndCheck();
     }
 
-    public void LeaderChooseSkill(int skillIndex)
+    public void LeaderChooseSkillTarget(int skillIndex, Combatant explicitTarget)
     {
         if (!_waitingForLeader || _currentLeader == null) return;
-        var target = FindFirstAlive(opponentOf: _currentLeader);
+        var target = ValidateOrFallback(explicitTarget);
+        if (target == null) { EndLeaderDecisionAndCheck(); return; }
 
-        if (skillIndex == 0)
-        {
-            _currentLeader.Skill1(target);
-            Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL 1 on {target?.name}");
-        }
-        else if (skillIndex == 1)
-        {
-            _currentLeader.Skill2(target);
-            Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL 2 on {target?.name}");
-        }
+        if (skillIndex == 0) _currentLeader.Skill1(target);
+        else if (skillIndex == 1) _currentLeader.Skill2(target);
 
+        Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL {skillIndex + 1} on {target?.name}");
+        EndLeaderDecisionAndCheck();
+    }
+
+    private void EndLeaderDecisionAndCheck()
+    {
         _waitingForLeader = false;
         _currentLeader = null;
+        targetSelector?.Disable();
 
         if (IsTeamWiped(true) || IsTeamWiped(false))
         {
             _running = false;
             bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
             OnBattleEnd?.Invoke(playerWon);
+            targetSelector?.Disable();
         }
     }
 
-    // ---- helpers ----
+    private Combatant ValidateOrFallback(Combatant explicitTarget)
+    {
+        if (explicitTarget != null &&
+            _currentLeader != null &&
+            explicitTarget.IsAlive &&
+            explicitTarget.isPlayerTeam != _currentLeader.isPlayerTeam)
+        {
+            return explicitTarget;
+        }
+        return _currentLeader != null ? FindRandomAlive(!_currentLeader.isPlayerTeam) : null;
+    }
+
     private void AutoAct(Combatant actor, bool isLeaderAuto)
     {
-        var target = FindFirstAlive(opponentOf: actor);
+        // Random target on the opposing team for both allies and enemies
+        var target = FindRandomAlive(!actor.isPlayerTeam);
         if (target == null) return;
 
         if (actor.isPlayerTeam)
@@ -145,7 +154,7 @@ public class TurnEngine : MonoBehaviour
         }
         else
         {
-            // Enemy AI
+            // Enemy AI: simple random choice of basic or skill1
             if (UnityEngine.Random.value < 0.5f) actor.BasicAttack(target);
             else actor.Skill1(target);
         }
@@ -153,15 +162,16 @@ public class TurnEngine : MonoBehaviour
         Debug.Log($"[TURN] {actor.name} auto-acted on {target.name}");
     }
 
-    private Combatant FindFirstAlive(Combatant opponentOf)
+    private Combatant FindRandomAlive(bool playerTeam)
     {
-        bool targetTeam = !opponentOf.isPlayerTeam;
+        List<Combatant> alive = new List<Combatant>();
         for (int i = 0; i < _units.Count; i++)
         {
             var u = _units[i];
-            if (u && u.isPlayerTeam == targetTeam && u.IsAlive) return u;
+            if (u && u.isPlayerTeam == playerTeam && u.IsAlive) alive.Add(u);
         }
-        return null;
+        if (alive.Count == 0) return null;
+        return alive[UnityEngine.Random.Range(0, alive.Count)];
     }
 
     private bool IsTeamWiped(bool playerTeam)
