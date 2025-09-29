@@ -63,7 +63,6 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Start()
     {
-        //if (!player) player = GameObject.FindWithTag("Player").transform;
         if (!animator) animator = GetComponent<Animator>();
         if (!health) health = GetComponent<NewHealth>();
         health.ApplyStats(enemyStats);
@@ -232,15 +231,11 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Attack()
     {
-        //float dir = player.position.x - transform.position.x;
-        //FaceDir(dir);
-        //PlayerNearby();
-
         if (!BattleManager.instance.GetBattleMode())
         {
             if (CanSeePlayer()) enemyStates = EnemyStates.Chase;
 
-            // TODO: play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
+            // play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
             BattleManager.instance.RegisterEnemy(this);
             OnAttackPlayer.Invoke(player.gameObject, GetComponent<EnemyParty>());
             BattleManager.instance.SetBattleMode(true);

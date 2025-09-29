@@ -53,8 +53,7 @@ public class WayPointManager : MonoBehaviour
         foreach (GameObject go in _waypoints)
         {
             Waypoints wp = go.GetComponent<Waypoints>();
-            if (wp != null && !wp.isOccupied())
-                free.Add(wp);
+            if (wp) free.Add(wp);
         }
 
         if (free.Count == 0) return null;

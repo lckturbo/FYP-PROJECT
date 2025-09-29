@@ -1,5 +1,7 @@
 using Pathfinding;
+using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -21,25 +23,30 @@ public class BattleSystem : MonoBehaviour
     [Header("Systems")]
     [SerializeField] private TurnEngine turnEngine;
 
-    [Header("Level Growth")]              
-    [SerializeField] private LevelGrowth playerGrowth; 
-    [SerializeField] private LevelGrowth enemyGrowth;  
+    [Header("Level Growth")]
+    [SerializeField] private LevelGrowth playerGrowth;
+    [SerializeField] private LevelGrowth enemyGrowth;
 
-    private void OnEnable()                  
-    {                                        
-        if (turnEngine)                      
-            turnEngine.OnBattleEnd += HandleBattleEnd; 
-    }                                        
+    public event Action<bool> OnBattleEnd;
 
-    private void OnDisable()                 
-    {                                        
-        if (turnEngine)                      
-            turnEngine.OnBattleEnd -= HandleBattleEnd; 
-    }                                        
+    private void OnEnable()
+    {
+        if (turnEngine)
+            turnEngine.OnBattleEnd += HandleBattleEnd;
+    }
+
+    private void OnDisable()
+    {
+        if (turnEngine)
+            turnEngine.OnBattleEnd -= HandleBattleEnd;
+    }
 
     private void Start()
     {
         SetupBattle();
+
+        if (BattleManager.instance)
+            OnBattleEnd += BattleManager.instance.HandleBattleEnd;
     }
 
     private void SetupBattle()
@@ -61,7 +68,7 @@ public class BattleSystem : MonoBehaviour
         cL.stats = leader.stats;
         turnEngine.Register(cL);
 
-        AddPlayerLevelApplier(leaderObj, leader); 
+        AddPlayerLevelApplier(leaderObj, leader);
 
         // Allies
         for (int i = 0; i < fullParty.Count; i++)
@@ -176,16 +183,17 @@ public class BattleSystem : MonoBehaviour
         if (applier.growth == null) applier.growth = playerGrowth;
     }
 
-    private void AddEnemyScaler(GameObject enemyGO) 
-    {                                              
-        var scaler = enemyGO.GetComponent<EnemyScaler>();                         
+    private void AddEnemyScaler(GameObject enemyGO)
+    {
+        var scaler = enemyGO.GetComponent<EnemyScaler>();
         if (!scaler) scaler = enemyGO.AddComponent<EnemyScaler>();
 
         var field = typeof(EnemyScaler).GetField("enemyGrowth",
             System.Reflection.BindingFlags.Instance |
             System.Reflection.BindingFlags.Public |
             System.Reflection.BindingFlags.NonPublic);
-        if (field != null) field.SetValue(scaler, enemyGrowth);
+        if (field != null)
+            field.SetValue(scaler, enemyGrowth);
     }
 
     private void HandleBattleEnd(bool playerWon)
@@ -196,12 +204,8 @@ public class BattleSystem : MonoBehaviour
             PartyLevelSystem.Instance?.AddXP(xp);
             Debug.Log($"[BattleEnd] Victory! Awarded {xp} XP to party.");
         }
-        else
-        {
-            Debug.Log("[BattleEnd] Defeat.");
-        }
 
-        GameManager.instance.ChangeScene("SampleScene");
+        OnBattleEnd?.Invoke(playerWon);
     }
 
     private int CalculateXpReward()
@@ -212,7 +216,7 @@ public class BattleSystem : MonoBehaviour
             var go = enemies[i];
             //original
             //if (!go) { xp += 20; continue; }
-            
+
             //for testing
             if (!go) { xp += 120; continue; }
 

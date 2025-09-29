@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
@@ -38,26 +37,9 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         if (stats != null)
             ApplyStats(stats);
 
-        //if (SaveLoadSystem.instance)
-        //    SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
-
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
-    }
-
-    private void OnDestroy()
-    {
-        SceneManager.sceneUnloaded -= OnSceneUnloaded;
-    }
-
-    private void OnSceneUnloaded(Scene scene)
-    {
-        if (scene.name == "jasBattle") return;
-
         if (SaveLoadSystem.instance)
-        {
-            Debug.Log("saveload is here");
-            SaveLoadSystem.instance.SaveGame();
-        }
+            SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
+
     }
 
     public void ApplyStats(BaseStats newStats)
@@ -112,6 +94,14 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
-        data.playerPosition = transform.position;
+        data.playerPosition = (Vector2)transform.position;
+        Debug.Log("transform.position: "+ transform.position);
+        data.hasSavedPosition = true;
     }
+
+    //private void OnDisable()
+    //{
+    //    if (SaveLoadSystem.instance && SceneManager.GetActiveScene().name != "jasBattle")
+    //        SaveLoadSystem.instance.SaveGame();
+    //}
 }
