@@ -179,7 +179,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Attack
+  m_text: Basic Attack
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3690,6 +3690,8 @@ MonoBehaviour:
   - {fileID: 2073634353}
   - {fileID: 28508257}
   turnEngine: {fileID: 2058573157}
+  playerGrowth: {fileID: 0}
+  enemyGrowth: {fileID: 0}
 --- !u!4 &579761203
 Transform:
   m_ObjectHideFlags: 0
@@ -3905,7 +3907,7 @@ GameObject:
   - component: {fileID: 798715090}
   - component: {fileID: 798715089}
   m_Layer: 5
-  m_Name: Skill
+  m_Name: Skill One
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4088,6 +4090,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 825246986}
   m_CullTransparentMesh: 1
+--- !u!1 &831640393
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 831640394}
+  - component: {fileID: 831640395}
+  m_Layer: 5
+  m_Name: TargetSelector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &831640394
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 831640393}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 871096326}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &831640395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 831640393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b62ba1e114969974ea0b374190137ae3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectableLayers:
+    serializedVersion: 2
+    m_Bits: 512
+  highlight: {r: 1, g: 0.086284414, b: 0, a: 1}
+  clickEmptyClears: 1
 --- !u!1 &855544740
 GameObject:
   m_ObjectHideFlags: 0
@@ -4198,6 +4253,7 @@ RectTransform:
   m_Children:
   - {fileID: 1797444861}
   - {fileID: 1782614124}
+  - {fileID: 831640394}
   m_Father: {fileID: 1421823486}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -4235,8 +4291,9 @@ MonoBehaviour:
   engine: {fileID: 2058573157}
   panel: {fileID: 1797444860}
   attackBtn: {fileID: 1621106823}
-  skill1Btn: {fileID: 798715089}
+  skillBtn: {fileID: 798715089}
   skill2Btn: {fileID: 1549859707}
+  selector: {fileID: 831640395}
 --- !u!114 &871096329
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4822,7 +4879,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Skill
+  m_text: Skill One
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5016,7 +5073,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1421823486}
   m_Layer: 0
-  m_Name: -----TEST-----
+  m_Name: -----COMBAT-----
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5506,7 +5563,7 @@ GameObject:
   - component: {fileID: 1549859708}
   - component: {fileID: 1549859707}
   m_Layer: 5
-  m_Name: Skill (1)
+  m_Name: Skill Two
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5730,7 +5787,7 @@ GameObject:
   - component: {fileID: 1621106824}
   - component: {fileID: 1621106823}
   m_Layer: 5
-  m_Name: Attack
+  m_Name: Basic Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6239,7 +6296,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Skill
+  m_text: Skill Two
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6987,6 +7044,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   atbFillSeconds: 3
   autoBattle: 0
+  targetSelector: {fileID: 831640395}
 --- !u!1 &2073634351
 GameObject:
   m_ObjectHideFlags: 0
