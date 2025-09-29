@@ -4,29 +4,37 @@ using UnityEngine;
 public class ItemPickup : MonoBehaviour
 {
     public Item item; // The item to give when picked up
-    private bool playerInRange = false; // Track if player is near
+    public float moveSpeed = 5f;   // how fast the item moves toward the player
+    public float collectDistance = 0.5f; // how close before auto-collect
 
-    private void Update()
+    private Transform player;
+
+    private void Start()
     {
-
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
+        // Find player by tag once
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
         {
-            CollectItem();
-            playerInRange = true;
-            // Optionally, show UI prompt like "Press F to collect"
+            player = playerObj.transform;
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    private void Update()
     {
-        if (other.CompareTag("Player"))
+        if (player == null) return;
+
+        // Smoothly move toward the player
+        transform.position = Vector2.MoveTowards(
+            transform.position,
+            player.position,
+            moveSpeed * Time.deltaTime
+        );
+
+        // Check if close enough to auto-collect
+        float distance = Vector2.Distance(transform.position, player.position);
+        if (distance <= collectDistance)
         {
-            playerInRange = false;
-            // Hide UI prompt if any
+            CollectItem();
         }
     }
 
@@ -41,17 +49,17 @@ public class ItemPickup : MonoBehaviour
 
         // Update active collection quests
         QuestManager qm = FindObjectOfType<QuestManager>();
-        // Create a snapshot to avoid modifying while iterating
-        var questsCopy = new List<Quest>(qm.activeQuests);
-
-        foreach (Quest quest in questsCopy)
+        if (qm != null)
         {
-            if (quest is CollectionQuestRuntime collectionQuest)
+            var questsCopy = new List<Quest>(qm.activeQuests);
+            foreach (Quest quest in questsCopy)
             {
-                collectionQuest.AddItem(item.itemName);
+                if (quest is CollectionQuestRuntime collectionQuest)
+                {
+                    collectionQuest.AddItem(item.itemName);
+                }
             }
         }
-
 
         // Destroy the item from the world
         Destroy(gameObject);

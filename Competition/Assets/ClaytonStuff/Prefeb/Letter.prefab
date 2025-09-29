@@ -173,6 +173,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 11400000, guid: 9fad20d47aa9c08429affeea9581f166, type: 2}
+  moveSpeed: 5
+  collectDistance: 0.5
 --- !u!61 &2805684062590050397
 BoxCollider2D:
   m_ObjectHideFlags: 0
