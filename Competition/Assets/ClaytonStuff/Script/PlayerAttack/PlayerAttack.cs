@@ -28,6 +28,8 @@ public class PlayerAttack : MonoBehaviour
     private Animator animator;
     private PlayerInput playerInput;
     private InputAction attackAction;
+    [SerializeField] private NewCharacterStats characterStats;
+    private float CurrentAttackRange => characterStats != null ? characterStats.atkRange : attackRange;
 
     private void Start()
     {
@@ -83,6 +85,13 @@ public class PlayerAttack : MonoBehaviour
     {
         UpdateAttackPoint();
     }
+
+    public void ApplyStats(NewCharacterStats newStats)
+    {
+        characterStats = newStats;
+        Debug.Log($"PlayerAttack stats applied: Range={characterStats.atkRange}, CD={characterStats.atkCD}");
+    }
+
 
     private void OnAttackPerformed(InputAction.CallbackContext ctx)
     {
@@ -144,8 +153,12 @@ public class PlayerAttack : MonoBehaviour
     }
     private void AttackMelee()
     {
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+            attackPoint.position,
+            CurrentAttackRange,
+            enemyLayer
+        );
 
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
         foreach (var enemyCollider in hitEnemies)
         {
             Debug.Log($"Melee hit {enemyCollider.name}, dealt {attackDamage}");
@@ -156,7 +169,6 @@ public class PlayerAttack : MonoBehaviour
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
                 if (party != null)
                 {
-                    // Transition into battle, same as enemy attack
                     BattleManager.instance.HandleBattleTransition(gameObject, party);
                     BattleManager.instance.SetBattleMode(true);
                 }
@@ -171,16 +183,17 @@ public class PlayerAttack : MonoBehaviour
 
         float moveX = animator.GetFloat("moveX");
         float moveY = animator.GetFloat("moveY");
-        Vector2 offset = Vector2.zero;
+        Vector2 baseOffset = Vector2.zero;
 
         if (Mathf.Abs(moveX) > Mathf.Abs(moveY))
-            offset = moveX > 0 ? rightAttackOffset : leftAttackOffset;
+            baseOffset = moveX > 0 ? rightAttackOffset : leftAttackOffset;
         else if (Mathf.Abs(moveY) > 0.01f)
-            offset = moveY > 0 ? upAttackOffset : downAttackOffset;
+            baseOffset = moveY > 0 ? upAttackOffset : downAttackOffset;
         else
-            offset = rightAttackOffset;
+            baseOffset = rightAttackOffset;
 
-        attackPoint.localPosition = offset;
+        // Push attack point outward relative to current range
+        attackPoint.localPosition = baseOffset.normalized * CurrentAttackRange;
     }
 
     private void OnDrawGizmosSelected()

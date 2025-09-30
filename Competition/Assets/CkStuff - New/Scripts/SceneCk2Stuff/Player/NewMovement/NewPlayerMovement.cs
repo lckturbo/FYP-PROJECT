@@ -49,7 +49,15 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         stats = newStats;
         if (!useStatsDirectly && stats != null)
             cachedWalkSpeed = stats.Speed;
+
+        // Tell PlayerAttack too if stats are character-specific
+        PlayerAttack atk = GetComponent<PlayerAttack>();
+        if (atk != null && newStats is NewCharacterStats charStats)
+        {
+            atk.ApplyStats(charStats);
+        }
     }
+
 
     void Update()
     {
