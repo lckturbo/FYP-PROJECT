@@ -18,9 +18,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         Debug.Log("from playerspawner: " + position);
     }
 
-    public void SaveData(ref GameData data)
-    {
-    }
+    public void SaveData(ref GameData data) { }
 
     private void Start()
     {
