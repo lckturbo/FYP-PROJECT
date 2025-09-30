@@ -40,6 +40,8 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         if (SaveLoadSystem.instance)
             SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
 
+        Debug.Log("from newplayermovement: " + transform.position);
+
     }
 
     public void ApplyStats(BaseStats newStats)
@@ -95,13 +97,6 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
     public void SaveData(ref GameData data)
     {
         data.playerPosition = (Vector2)transform.position;
-        Debug.Log("transform.position: "+ transform.position);
         data.hasSavedPosition = true;
     }
-
-    //private void OnDisable()
-    //{
-    //    if (SaveLoadSystem.instance && SceneManager.GetActiveScene().name != "jasBattle")
-    //        SaveLoadSystem.instance.SaveGame();
-    //}
 }
