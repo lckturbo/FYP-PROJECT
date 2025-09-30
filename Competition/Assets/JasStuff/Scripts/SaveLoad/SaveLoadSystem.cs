@@ -51,6 +51,12 @@ public class SaveLoadSystem : MonoBehaviour
         if (!dataPersistenceObjs.Contains(obj))
             dataPersistenceObjs.Add(obj);
     }
+
+    private void Start()
+    {
+        NewGame(); // testing for now
+    }
+
     public void NewGame()
     {
         gameData = new GameData();
