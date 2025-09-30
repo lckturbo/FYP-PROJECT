@@ -68,6 +68,19 @@ public class BattleSystem : MonoBehaviour
         cL.stats = leader.stats;
         turnEngine.Register(cL);
 
+        var leaderHealth = leaderObj.GetComponent<NewHealth>();
+        if (leaderHealth)
+        {
+            leaderHealth.OnHealthChanged += (h) =>
+            {
+                if (h.GetCurrHealth() <= 0)
+                {
+                    Debug.Log("[Battle System] Leader died, ending battle");
+                    HandleBattleEnd(false);
+                }
+            };
+        }
+
         AddPlayerLevelApplier(leaderObj, leader);
 
         // Allies

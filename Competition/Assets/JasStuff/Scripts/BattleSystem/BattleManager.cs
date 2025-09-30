@@ -70,7 +70,11 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Defeated"); // TODO: GO BACK MAIN MENU -> when leader died // FOR ALPHA
+            Debug.Log("Defeated"); // TODO: GAME OVER UI
+
+            // TODO: go back sample scene (reset every progress) -> when leader died // FOR ALPHA
+            SaveLoadSystem.instance.NewGame(true);
+            SaveLoadSystem.instance.SaveGame();
         }
 
         GameManager.instance.ChangeScene("SampleScene");

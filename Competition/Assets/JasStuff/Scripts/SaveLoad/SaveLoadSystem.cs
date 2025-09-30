@@ -57,10 +57,19 @@ public class SaveLoadSystem : MonoBehaviour
         NewGame(); // testing for now
     }
 
-    public void NewGame()
+    public void NewGame(bool keepCharIndex = false)
     {
+        int savedIndex = -1;
+
+        if (keepCharIndex && gameData != null)
+            savedIndex = gameData.selectedCharacterIndex;
+
         gameData = new GameData();
+
+        if (keepCharIndex)
+            gameData.selectedCharacterIndex = savedIndex;
     }
+
     public void LoadGame()
     {
         // load saved data from file using data handler
