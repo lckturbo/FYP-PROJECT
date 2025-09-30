@@ -5,6 +5,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
 {
     [SerializeField] private SelectedCharacter selectedStore;
     [SerializeField] private Transform spawnPoint;
+    private Vector2 position;
 
     public static event Action<Transform> OnPlayerSpawned; // for enemy
 
@@ -12,20 +13,19 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
     {
         selectedStore.index = data.selectedCharacterIndex;
         selectedStore.RestoreFromIndex(data.selectedCharacterIndex);
+
+        position = data.playerPosition;
+        Debug.Log("from playerspawner: " + position);
     }
 
     public void SaveData(ref GameData data)
     {
-        
     }
 
     private void Start()
     {
         if (!selectedStore || !selectedStore.definition)
-        {
-            Debug.LogError("PlayerSpawner: No SelectedCharacter/definition assigned after load.");
             return;
-        }
 
         SpawnPlayer();
     }
@@ -35,16 +35,15 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         var def = selectedStore.definition;
         var prefab = def.playerPrefab;
         if (!prefab)
-        {
-            Debug.LogError($"PlayerSpawner: '{def.displayName}' has no playerPrefab assigned.");
             return;
-        }
 
         // JAS ADDED -> load player position //
-        Vector2 position;
         var data = SaveLoadSystem.instance.GetGameData();
         if (data != null && data.hasSavedPosition)
+        {
             position = data.playerPosition;
+            Debug.Log("loaded position -> from playerspawner");
+        }
         else
             position = spawnPoint ? spawnPoint.position : Vector2.zero;
         ///////////////

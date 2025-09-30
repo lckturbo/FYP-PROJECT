@@ -23,27 +23,28 @@ public class SaveLoadSystem : MonoBehaviour
         fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
+       // SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        SceneManager.sceneUnloaded -= OnSceneUnloaded;
+       // SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         dataPersistenceObjs = FindAllDataPersistenceObjects();
+        Debug.Log("IM LOADING");
         LoadGame();
     }
 
-    private void OnSceneUnloaded(Scene scene)
-    {
-        if (scene.name == "jasBattle") return;
-        Debug.Log("IM SAVING");
-        SaveGame();
-    }
+    //private void OnSceneUnloaded(Scene scene)
+    //{
+    //    if (scene.name == "jasBattle") return;
+    //    Debug.Log("IM SAVING");
+    //    SaveGame();
+    //}
 
     public void RegisterDataPersistenceObjects(IDataPersistence obj)
     {
