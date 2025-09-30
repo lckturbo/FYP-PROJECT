@@ -69,7 +69,9 @@ public class BattleManager : MonoBehaviour
             }
         }
         else
+        {
             Debug.Log("Defeated"); // TODO: GO BACK MAIN MENU -> when leader died // FOR ALPHA
+        }
 
         GameManager.instance.ChangeScene("SampleScene");
     }
