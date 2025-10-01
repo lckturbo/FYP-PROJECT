@@ -27,9 +27,11 @@ public class Item : ScriptableObject
 
     [Header("Combat")]
     public bool isWeapon; //  Only true items can attack
+    public float WeaponAttack;
 
     [Header("Projectile")]
     public bool isBow;
+    public float BowAttack;
 
     [Header("Category")]    // 分類
     public ItemTypes type;             // アイテムタイプ
