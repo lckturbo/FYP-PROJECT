@@ -6297,6 +6297,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58bb0d783206a3b44a49b3a027b5122b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playBtn: {fileID: 0}
+  creditsBtn: {fileID: 0}
+  exitBtn: {fileID: 0}
 --- !u!4 &1568993296
 Transform:
   m_ObjectHideFlags: 0
@@ -54220,18 +54223,6 @@ PrefabInstance:
     - target: {fileID: 4249954731921599678, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
       propertyPath: m_Name
       value: BasicEnemy (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4249954731921599678, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6191435852665564058, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
-      propertyPath: uniqueID
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8907702388655403980, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
-      propertyPath: canMove
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

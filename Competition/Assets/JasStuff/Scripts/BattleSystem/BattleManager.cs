@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,6 +11,8 @@ public class BattleManager : MonoBehaviour
     public GameObject playerRef { get; private set; }
     public EnemyParty enemypartyRef { get; private set; }
     private string enemyPartyID;
+
+    public static event Action<string, bool> OnGlobalBattleEnd;
 
     private void Awake()
     {
@@ -77,6 +80,8 @@ public class BattleManager : MonoBehaviour
             SaveLoadSystem.instance.NewGame(true);
             SaveLoadSystem.instance.SaveGame(false);
         }
+        OnGlobalBattleEnd?.Invoke(enemyPartyID, playerWon);
+
 
         GameManager.instance.ChangeScene("SampleScene");
     }

@@ -19,10 +19,12 @@ MonoBehaviour:
   healing: 0
   worldPrefab: {fileID: 6959797460596084576, guid: 71f34e09fd71b1845b3f4a08b1daa141, type: 3}
   isWeapon: 0
+  WeaponAttack: 0
   isBow: 0
+  BowAttack: 0
   type: 0
   description: It buffs u
   price: 100
   isBuff: 1
-  attackBuffAmount: 10
-  buffDuration: 5
+  attackBuffAmount: 100
+  buffDuration: 10

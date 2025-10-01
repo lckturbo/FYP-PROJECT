@@ -3,37 +3,26 @@ using UnityEngine;
 public class BattleQuest : Quest
 {
     private BattleQuestData battleData;
-    private bool registered;
 
     public override void StartQuest()
     {
         battleData = (BattleQuestData)questData;
 
-        // Subscribe to battle end
-        var bm = BattleManager.instance;
-        if (bm != null)
-        {
-            var bs = FindObjectOfType<BattleSystem>();
-            if (bs != null)
-            {
-                bs.OnBattleEnd += OnBattleEnd;
-                registered = true;
-            }
-        }
+        //  Subscribe to global event
+        BattleManager.OnGlobalBattleEnd += HandleGlobalBattleEnd;
     }
 
     public override void CheckProgress()
     {
-        // Nothing to check every frame, we only care about battle events
+        // No polling needed, handled by events
     }
 
-    private void OnBattleEnd(bool playerWon)
+    private void HandleGlobalBattleEnd(string defeatedPartyID, bool playerWon)
     {
         if (!playerWon) return;
 
-        // Check if the defeated enemy matches the quest target
-        string lastEnemyID = BattleManager.instance?.enemypartyRef?.GetID();
-        if (!string.IsNullOrEmpty(lastEnemyID) && lastEnemyID == battleData.targetEnemyPartyID)
+        //  Check if this is the right enemy party
+        if (!string.IsNullOrEmpty(defeatedPartyID) && defeatedPartyID == battleData.targetEnemyPartyID)
         {
             CompleteQuest();
         }
@@ -41,11 +30,7 @@ public class BattleQuest : Quest
 
     private void OnDestroy()
     {
-        if (registered)
-        {
-            var bs = FindObjectOfType<BattleSystem>();
-            if (bs != null)
-                bs.OnBattleEnd -= OnBattleEnd;
-        }
+        //  Always unsubscribe to prevent leaks
+        BattleManager.OnGlobalBattleEnd -= HandleGlobalBattleEnd;
     }
 }
