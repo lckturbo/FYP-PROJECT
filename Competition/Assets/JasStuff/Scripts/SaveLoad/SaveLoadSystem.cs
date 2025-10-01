@@ -23,13 +23,11 @@ public class SaveLoadSystem : MonoBehaviour
         fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
-       // SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-       // SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -38,13 +36,6 @@ public class SaveLoadSystem : MonoBehaviour
         Debug.Log("IM LOADING");
         LoadGame();
     }
-
-    //private void OnSceneUnloaded(Scene scene)
-    //{
-    //    if (scene.name == "jasBattle") return;
-    //    Debug.Log("IM SAVING");
-    //    SaveGame();
-    //}
 
     public void RegisterDataPersistenceObjects(IDataPersistence obj)
     {
@@ -86,18 +77,22 @@ public class SaveLoadSystem : MonoBehaviour
         }
         Debug.Log("Loaded: " + gameData.playerPosition);
     }
-    public void SaveGame()
+    public void SaveGame(bool battleMode = true)
     {
         if (gameData == null) gameData = new GameData();
 
-        dataPersistenceObjs = FindAllDataPersistenceObjects();
-
-        // pass data to other scripts so they can update
-        foreach (IDataPersistence dataObjs in dataPersistenceObjs)
+        if (battleMode)
         {
-            dataObjs.SaveData(ref gameData);
+            dataPersistenceObjs = FindAllDataPersistenceObjects();
+
+            // pass data to other scripts so they can update
+            foreach (IDataPersistence dataObjs in dataPersistenceObjs)
+            {
+                dataObjs.SaveData(ref gameData);
+            }
+            Debug.Log("Saved: " + gameData.playerPosition);
         }
-        Debug.Log("Saved: " + gameData.playerPosition);
+
         // save data to a file using data handler
         fileDataHandler.Save(gameData);
     }

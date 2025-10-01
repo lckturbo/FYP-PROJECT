@@ -58,6 +58,7 @@ public class BattleManager : MonoBehaviour
     public void HandleBattleEnd(bool playerWon)
     {
         inBattle = false;
+
         if (playerWon)
         {
             Debug.Log("Victory"); // TODO: HANDLE XP UI
@@ -74,7 +75,7 @@ public class BattleManager : MonoBehaviour
 
             // TODO: go back sample scene (reset every progress) -> when leader died // FOR ALPHA
             SaveLoadSystem.instance.NewGame(true);
-            SaveLoadSystem.instance.SaveGame();
+            SaveLoadSystem.instance.SaveGame(false);
         }
 
         GameManager.instance.ChangeScene("SampleScene");
