@@ -58,7 +58,6 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         }
     }
 
-
     void Update()
     {
         // read raw input from Input System
@@ -83,7 +82,32 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         {
             animator.SetBool("moving", false);
         }
+
+        // ?? Check for B key to print stats
+        if (Keyboard.current.bKey.wasPressedThisFrame)
+        {
+            PrintStats();
+        }
     }
+
+    private void PrintStats()
+    {
+        if (stats == null)
+        {
+            Debug.LogWarning("[NewPlayerMovement] No stats assigned!");
+            return;
+        }
+
+        Debug.Log($"[Player Stats]\n" +
+                  $"Speed: {stats.Speed}\n" +
+                  $"Max HP: {stats.maxHealth}\n" +
+                  $"Attack Damage: {stats.atkDmg}\n" +
+                  $"Defense: {stats.attackreduction}\n" +
+                  $"Crit Rate: {stats.critRate * 100f}%\n" +
+                  $"Crit Damage: {stats.critDamage}\n" +
+                  $"Element: {stats.attackElement}\n");
+    }
+
 
     void FixedUpdate()
     {

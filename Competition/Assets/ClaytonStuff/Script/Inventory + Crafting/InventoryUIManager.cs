@@ -171,6 +171,7 @@ public class InventoryUIManager : MonoBehaviour
         var inv = inventoryManager.PlayerInventory;
         if (inv == null) return;
 
+
         if (selectedMainSlot < 0 || selectedMainSlot >= inv.mainInventory.Count)
         {
             Debug.Log("No valid item selected.");
@@ -184,15 +185,6 @@ public class InventoryUIManager : MonoBehaviour
             return;
         }
 
-        if (slot.item.itemName == "Heal Potion")
-        {
-            Debug.Log("Using Heal Potion...");
-            inventoryManager.RemoveItemFromInventory(slot.item, 1);
-        }
-        else
-        {
-            Debug.Log($"Selected item: {slot.item.itemName} (not usable here).");
-        }
         if (slot.item.isBuff)
         {
             var buffHandler = FindObjectOfType<PlayerBuffHandler>();
@@ -201,6 +193,16 @@ public class InventoryUIManager : MonoBehaviour
                 buffHandler.ApplyAttackBuff(slot.item.attackBuffAmount, slot.item.buffDuration);
                 inventoryManager.RemoveItemFromInventory(slot.item, 1);
             }
+        }
+
+        if (slot.item.itemName == "Heal Potion")
+        {
+            Debug.Log("Using Heal Potion...");
+            inventoryManager.RemoveItemFromInventory(slot.item, 1);
+        }
+        else
+        {
+            Debug.Log($"Selected item: {slot.item.itemName} (not usable here).");
         }
 
 
