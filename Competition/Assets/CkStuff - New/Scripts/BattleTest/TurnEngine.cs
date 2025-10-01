@@ -29,7 +29,8 @@ public class TurnEngine : MonoBehaviour
     public void Begin()
     {
         _running = true;
-        for (int i = 0; i < _units.Count; i++) if (_units[i]) _units[i].atb = 0f;
+        for (int i = 0; i < _units.Count; i++)
+            if (_units[i]) _units[i].atb = 0f;
     }
 
     private void Update()
@@ -58,8 +59,12 @@ public class TurnEngine : MonoBehaviour
                         _waitingForLeader = true;
                         _currentLeader = u;
                         OnLeaderTurnStart?.Invoke(u);
-                        targetSelector?.EnableForLeaderTurn();
-                        targetSelector?.Clear();
+
+                        if (targetSelector)
+                        {
+                            targetSelector.EnableForLeaderTurn();
+                            targetSelector.Clear();
+                        }
                         return;
                     }
                 }
@@ -80,25 +85,38 @@ public class TurnEngine : MonoBehaviour
         }
     }
 
+    // === Leader actions ===
     public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
     {
         if (!_waitingForLeader || _currentLeader == null) return;
+
         var target = ValidateOrFallback(explicitTarget);
-        if (target != null) _currentLeader.BasicAttack(target);
-        Debug.Log($"[TURN] Leader {_currentLeader.name} used BASIC ATTACK on {target?.name}");
+        if (target == null)
+        {
+            Debug.LogWarning("[TURN] No valid target for basic attack");
+            return;
+        }
+
+        _currentLeader.BasicAttack(target);
+        Debug.Log($"[TURN] Leader {_currentLeader.name} used BASIC ATTACK on {target.name}");
         EndLeaderDecisionAndCheck();
     }
 
     public void LeaderChooseSkillTarget(int skillIndex, Combatant explicitTarget)
     {
         if (!_waitingForLeader || _currentLeader == null) return;
+
         var target = ValidateOrFallback(explicitTarget);
-        if (target == null) { EndLeaderDecisionAndCheck(); return; }
+        if (target == null)
+        {
+            Debug.LogWarning($"[TURN] No valid target for skill {skillIndex + 1}");
+            return;
+        }
 
         if (skillIndex == 0) _currentLeader.Skill1(target);
         else if (skillIndex == 1) _currentLeader.Skill2(target);
 
-        Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL {skillIndex + 1} on {target?.name}");
+        Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL {skillIndex + 1} on {target.name}");
         EndLeaderDecisionAndCheck();
     }
 
@@ -117,6 +135,7 @@ public class TurnEngine : MonoBehaviour
         }
     }
 
+    // === Helpers ===
     private Combatant ValidateOrFallback(Combatant explicitTarget)
     {
         if (explicitTarget != null &&
@@ -126,12 +145,12 @@ public class TurnEngine : MonoBehaviour
         {
             return explicitTarget;
         }
+
         return _currentLeader != null ? FindRandomAlive(!_currentLeader.isPlayerTeam) : null;
     }
 
     private void AutoAct(Combatant actor, bool isLeaderAuto)
     {
-        // Random target on the opposing team for both allies and enemies
         var target = FindRandomAlive(!actor.isPlayerTeam);
         if (target == null) return;
 
@@ -154,7 +173,6 @@ public class TurnEngine : MonoBehaviour
         }
         else
         {
-            // Enemy AI: simple random choice of basic or skill1
             if (UnityEngine.Random.value < 0.5f) actor.BasicAttack(target);
             else actor.Skill1(target);
         }
@@ -165,21 +183,22 @@ public class TurnEngine : MonoBehaviour
     private Combatant FindRandomAlive(bool playerTeam)
     {
         List<Combatant> alive = new List<Combatant>();
-        for (int i = 0; i < _units.Count; i++)
+        foreach (var u in _units)
         {
-            var u = _units[i];
-            if (u && u.isPlayerTeam == playerTeam && u.IsAlive) alive.Add(u);
+            if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
+                alive.Add(u);
         }
+
         if (alive.Count == 0) return null;
         return alive[UnityEngine.Random.Range(0, alive.Count)];
     }
 
     private bool IsTeamWiped(bool playerTeam)
     {
-        for (int i = 0; i < _units.Count; i++)
+        foreach (var u in _units)
         {
-            var u = _units[i];
-            if (u && u.isPlayerTeam == playerTeam && u.IsAlive) return false;
+            if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
+                return false;
         }
         return true;
     }
