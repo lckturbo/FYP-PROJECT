@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
             if (playBtn || exitBtn)
             {
                 playBtn.onClick.RemoveAllListeners();
-                playBtn.onClick.AddListener(() => ChangeScene("CharSelection"));
+                playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
                 exitBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.AddListener(() => ChangeScene("Main"));
             }
@@ -69,11 +69,17 @@ public class GameManager : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "Main")
         {
             if (Input.anyKeyDown || Input.GetMouseButtonDown(0))
-                ChangeScene("Lobby");
+                ASyncManager.instance.LoadLevelBtn("Lobby");
+                //ChangeScene("Lobby");
         }
     }
     public void ChangeScene(string scn)
     {
         SceneManager.LoadScene(scn);
     }
+
+    //public void AyncScene(string scn)
+    //{
+    //    Scene.
+    //}
 }
