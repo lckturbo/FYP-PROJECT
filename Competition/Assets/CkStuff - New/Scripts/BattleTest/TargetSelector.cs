@@ -7,7 +7,7 @@ public class TargetSelector : MonoBehaviour
 {
     [Header("Pick Settings")]
     [SerializeField] private LayerMask selectableLayers;
-    [SerializeField] private Color highlight = new(1f, .85f, .2f, 1f);
+    [SerializeField] private Color highlight;
     [SerializeField] private bool clickEmptyClears = true;
 
     [Header("Debug")]
