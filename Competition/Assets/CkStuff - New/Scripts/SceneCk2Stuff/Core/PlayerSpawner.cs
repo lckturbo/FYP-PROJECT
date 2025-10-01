@@ -15,12 +15,9 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         selectedStore.RestoreFromIndex(data.selectedCharacterIndex);
 
         position = data.playerPosition;
-        Debug.Log("from playerspawner: " + position);
     }
 
-    public void SaveData(ref GameData data)
-    {
-    }
+    public void SaveData(ref GameData data) { }
 
     private void Start()
     {
@@ -42,7 +39,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         if (data != null && data.hasSavedPosition)
         {
             position = data.playerPosition;
-            Debug.Log("loaded position -> from playerspawner");
+            Debug.Log("loaded position -> from PlayerSpawner");
         }
         else
             position = spawnPoint ? spawnPoint.position : Vector2.zero;

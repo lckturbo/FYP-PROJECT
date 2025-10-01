@@ -104,6 +104,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
+        Debug.Log("[NewPlayerMovement] saving position");
         data.playerPosition = (Vector2)transform.position;
         data.hasSavedPosition = true;
     }
