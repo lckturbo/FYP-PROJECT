@@ -193,6 +193,17 @@ public class InventoryUIManager : MonoBehaviour
         {
             Debug.Log($"Selected item: {slot.item.itemName} (not usable here).");
         }
+        if (slot.item.isBuff)
+        {
+            var buffHandler = FindObjectOfType<PlayerBuffHandler>();
+            if (buffHandler != null)
+            {
+                buffHandler.ApplyAttackBuff(slot.item.attackBuffAmount, slot.item.buffDuration);
+                inventoryManager.RemoveItemFromInventory(slot.item, 1);
+            }
+        }
+
+
     }
 
     private void ToggleSubInventory()

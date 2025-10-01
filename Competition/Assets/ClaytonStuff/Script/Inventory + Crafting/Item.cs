@@ -36,4 +36,10 @@ public class Item : ScriptableObject
 
     [TextArea] public string description; // ê‡ñæï∂
     public int price;                 // ílíi
+
+    [Header("Buff Settings")]
+    public bool isBuff;
+    public int attackBuffAmount;   // flat atk increase
+    public float buffDuration;     // seconds
+
 }
