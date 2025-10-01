@@ -29,13 +29,38 @@ public class TurnEngine : MonoBehaviour
     public void Begin()
     {
         _running = true;
+        _waitingForLeader = false;
+        _currentLeader = null;
+
         for (int i = 0; i < _units.Count; i++)
             if (_units[i]) _units[i].atb = 0f;
     }
 
+    public void ForceEnd(bool playerWon)
+    {
+        if (!_running) return;
+
+        _running = false;
+        _waitingForLeader = false;
+        _currentLeader = null;
+
+        targetSelector?.Disable();
+        OnBattleEnd?.Invoke(playerWon);
+    }
+
     private void Update()
     {
-        if (!_running || _waitingForLeader) return;
+        if (!_running) return;
+
+        var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
+        if (leader != null && !leader.IsAlive)
+        {
+            ForceEnd(false);
+            return;
+        }
+
+        if (_waitingForLeader) return;
+
         float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
         for (int i = 0; i < _units.Count; i++)
@@ -44,43 +69,42 @@ public class TurnEngine : MonoBehaviour
             if (u == null || !u.IsAlive) continue;
 
             u.atb += u.Speed * step;
-            if (u.atb >= 1f)
+            if (u.atb < 1f) continue;
+
+            // Unit gets a turn
+            u.atb = 0f;
+
+            if (u.isPlayerTeam && u.isLeader)
             {
-                u.atb = 0f;
-
-                if (u.isPlayerTeam && u.isLeader)
+                if (autoBattle)
                 {
-                    if (autoBattle)
-                    {
-                        AutoAct(u, true);
-                    }
-                    else
-                    {
-                        _waitingForLeader = true;
-                        _currentLeader = u;
-                        OnLeaderTurnStart?.Invoke(u);
-
-                        if (targetSelector)
-                        {
-                            targetSelector.EnableForLeaderTurn();
-                            targetSelector.Clear();
-                        }
-                        return;
-                    }
+                    AutoAct(u, true);
                 }
                 else
                 {
-                    AutoAct(u, false);
-                }
+                    _waitingForLeader = true;
+                    _currentLeader = u;
+                    OnLeaderTurnStart?.Invoke(u);
 
-                if (IsTeamWiped(true) || IsTeamWiped(false))
-                {
-                    _running = false;
-                    bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-                    OnBattleEnd?.Invoke(playerWon);
-                    targetSelector?.Disable();
-                    return;
+                    if (targetSelector)
+                    {
+                        targetSelector.EnableForLeaderTurn();
+                        targetSelector.Clear();
+                    }
+                    return; // wait for player decision
                 }
+            }
+            else
+            {
+                AutoAct(u, false);
+            }
+
+            // After any action, check for wipe and end cleanly
+            if (IsTeamWiped(true) || IsTeamWiped(false))
+            {
+                bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+                ForceEnd(playerWon);
+                return;
             }
         }
     }
@@ -128,10 +152,8 @@ public class TurnEngine : MonoBehaviour
 
         if (IsTeamWiped(true) || IsTeamWiped(false))
         {
-            _running = false;
             bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-            OnBattleEnd?.Invoke(playerWon);
-            targetSelector?.Disable();
+            ForceEnd(playerWon);
         }
     }
 
