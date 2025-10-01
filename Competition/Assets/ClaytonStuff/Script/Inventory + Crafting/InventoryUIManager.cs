@@ -190,10 +190,20 @@ public class InventoryUIManager : MonoBehaviour
             var buffHandler = FindObjectOfType<PlayerBuffHandler>();
             if (buffHandler != null)
             {
-                buffHandler.ApplyAttackBuff(slot.item.attackBuffAmount, slot.item.buffDuration);
-                inventoryManager.RemoveItemFromInventory(slot.item, 1);
+                //  Check if buff is already active
+                if (!buffHandler.IsBuffActive)
+                {
+                    buffHandler.ApplyAttackBuff(slot.item.attackBuffAmount, slot.item.buffDuration);
+                    inventoryManager.RemoveItemFromInventory(slot.item, 1);
+                }
+                else
+                {
+                    Debug.Log("Buff already active — cannot consume another until it expires!");
+                    // (Optional) Show UI message to the player instead of just logging
+                }
             }
         }
+
 
         if (slot.item.itemName == "Heal Potion")
         {

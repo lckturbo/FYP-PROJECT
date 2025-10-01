@@ -7,12 +7,17 @@ public class BattleManager : MonoBehaviour
     public static BattleManager instance;
 
     private bool inBattle;
-    
+
     public GameObject playerRef { get; private set; }
     public EnemyParty enemypartyRef { get; private set; }
     private string enemyPartyID;
 
     public static event Action<string, bool> OnGlobalBattleEnd;
+    public event Action OnBattleStart;
+    public event Action<bool> OnBattleEndEvent;
+
+    //  New event for buff cleanup
+    public static event Action OnClearAllBuffs;
 
     private void Awake()
     {
@@ -38,21 +43,17 @@ public class BattleManager : MonoBehaviour
             bs.OnBattleEnd -= HandleBattleEnd;
     }
 
-    public void SetBattleMode(bool v)
-    {
-        inBattle = v;
-    }
+    public void SetBattleMode(bool v) => inBattle = v;
 
-    public bool GetBattleMode()
-    {
-        return inBattle;
-    }
+    public bool GetBattleMode() => inBattle;
 
     public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)
     {
         playerRef = player;
         enemypartyRef = enemyParty;
         enemyPartyID = enemypartyRef.GetID();
+
+        OnBattleStart?.Invoke(); // notify listeners
 
         SaveLoadSystem.instance.SaveGame();
         GameManager.instance.ChangeScene("jasBattle");
@@ -62,27 +63,34 @@ public class BattleManager : MonoBehaviour
     {
         inBattle = false;
 
+        OnBattleEndEvent?.Invoke(playerWon);
+
+        // Remove buffs from the player in the previous scene
+        var player = FindObjectOfType<PlayerBuffHandler>();
+        if (player != null)
+        {
+            player.ClearAllBuffs();
+            Debug.Log("Buffs cleared before scene change.");
+        }
+
         if (playerWon)
         {
-            Debug.Log("Victory"); // TODO: HANDLE XP UI
-
+            Debug.Log("Victory");
             if (!string.IsNullOrEmpty(enemyPartyID))
             {
-                if (EnemyTracker.instance)
-                    EnemyTracker.instance.MarkDefeated(enemyPartyID);
+                EnemyTracker.instance?.MarkDefeated(enemyPartyID);
             }
         }
         else
         {
-            Debug.Log("Defeated"); // TODO: GAME OVER UI
-
-            // TODO: go back sample scene (reset every progress) -> when leader died // FOR ALPHA
+            Debug.Log("Defeated");
             SaveLoadSystem.instance.NewGame(true);
             SaveLoadSystem.instance.SaveGame(false);
         }
-        OnGlobalBattleEnd?.Invoke(enemyPartyID, playerWon);
 
+        OnGlobalBattleEnd?.Invoke(enemyPartyID, playerWon);
 
         GameManager.instance.ChangeScene("SampleScene");
     }
+
 }

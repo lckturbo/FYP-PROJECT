@@ -42,6 +42,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
         Debug.Log("from newplayermovement: " + transform.position);
 
+
     }
 
     public void ApplyStats(BaseStats newStats)
