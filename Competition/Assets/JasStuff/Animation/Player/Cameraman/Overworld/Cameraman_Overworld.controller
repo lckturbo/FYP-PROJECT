@@ -80,10 +80,10 @@ BlendTree:
   m_Name: Idel Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 8ad57506d7f7ada4a98dca5d1c658216, type: 2}
+    m_Motion: {fileID: 7400000, guid: 19ff0c203d905b349b229591cf1b8779, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: -1}
-    m_TimeScale: 1
+    m_TimeScale: 0.8
     m_CycleOffset: 0
     m_DirectBlendParameter: Blend
     m_Mirror: 0
@@ -176,7 +176,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Cameraman
+  m_Name: Cameraman_Overworld
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: Blend

@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour
 {
@@ -48,6 +47,12 @@ public class BattleManager : MonoBehaviour
         return inBattle;
     }
 
+    public void ChangeAnimation()
+    {
+        // TODO: change from overworld anim to turnbased anim
+        Animator anim = playerRef.GetComponent<Animator>();
+
+    }
     public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)
     {
         playerRef = player;

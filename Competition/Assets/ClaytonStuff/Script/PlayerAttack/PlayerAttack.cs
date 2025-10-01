@@ -110,6 +110,7 @@ public class PlayerAttack : MonoBehaviour
             AttackMelee();
 
         nextAttackTime = Time.time + 1f / Mathf.Max(0.01f, attackRate);
+        //animator.ResetTrigger("attack");
     }
 
     private void FireArrow()
@@ -153,6 +154,8 @@ public class PlayerAttack : MonoBehaviour
     }
     private void AttackMelee()
     {
+        animator.SetTrigger("attack");
+
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
             attackPoint.position,
             CurrentAttackRange,
