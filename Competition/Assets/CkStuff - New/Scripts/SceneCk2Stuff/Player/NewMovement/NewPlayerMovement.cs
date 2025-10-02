@@ -64,6 +64,8 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         if (GetComponent<PlayerAttack>().IsAttacking)
         {
             moveDir = Vector2.zero;
+            animator.SetBool("moving", false);
+            Debug.Log("[NewPlayerMovement] moving; " + animator.GetBool("moving"));
             return;
         }
 
@@ -91,6 +93,8 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             //animator.SetFloat("moveY", -1f); // jas add
             animator.SetBool("moving", false);
         }
+
+        Debug.Log("[NewPlayerMovement] moving2; " + animator.GetBool("moving"));
 
         // ?? Check for B key to print stats
         if (Keyboard.current.bKey.wasPressedThisFrame)
