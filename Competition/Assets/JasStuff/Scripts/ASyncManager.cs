@@ -15,31 +15,10 @@ public class ASyncManager : MonoBehaviour
 
     private void Awake()
     {
-        if (!instance)
-        {
-            instance = this;
-            SceneManager.sceneLoaded += OnSceneLoaded;
-        }
+        if (!instance) instance = this;
         else Destroy(gameObject);
-
-        DontDestroyOnLoad(gameObject);
     }
 
-    private void OnDestroy()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        string scnName = scene.name;
-
-        if (scnName == "Main" || scnName == "Lobby")
-        {
-            mainScreen = GameObject.Find("MainCanvas");
-            loadingScreen = GameObject.Find("LoadingCanvas");
-        }
-    }
     public void LoadLevelBtn(string levelToLoad)
     {
         mainScreen.SetActive(false);
