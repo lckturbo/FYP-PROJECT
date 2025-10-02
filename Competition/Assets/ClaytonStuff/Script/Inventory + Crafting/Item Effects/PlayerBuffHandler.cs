@@ -11,14 +11,10 @@ public class PlayerBuffHandler : MonoBehaviour
 
     public bool IsBuffActive => buffActive;
 
-    private void Awake()
-    {
-
-    }
 
     private void OnEnable()
     {
-            BattleManager.OnClearAllBuffs += RemoveStoredBuff;
+        BattleManager.OnClearAllBuffs += RemoveStoredBuff;
     }
 
     private void OnDisable()
@@ -83,7 +79,7 @@ public class PlayerBuffHandler : MonoBehaviour
 
             BuffData.instance.ClearBuff();
 
-            Debug.Log($"Buff removed at battle end: -{amount} atk");
+            Debug.LogWarning($"[Buff Removed] Character: {gameObject.name}, Stats ID: {stats.name}, -{amount} atk, atk now {stats.atkDmg}");
         }
     }
 }
