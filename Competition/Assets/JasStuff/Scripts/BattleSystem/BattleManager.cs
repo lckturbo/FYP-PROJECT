@@ -64,6 +64,8 @@ public class BattleManager : MonoBehaviour
 
         OnClearAllBuffs?.Invoke();
 
+        PlayerBuffHandler.instance.RemoveStoredBuff();
+
         if (playerWon)
         {
             Debug.Log("Victory"); // TODO: HANDLE XP UI
