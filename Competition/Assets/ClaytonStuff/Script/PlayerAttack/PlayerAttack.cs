@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerAttack : MonoBehaviour
 {
+    private bool isAttacking;
+    public bool IsAttacking => isAttacking;
+
     [Header("Attack Config")]
     [SerializeField] private Transform attackPoint;
     [SerializeField] private float attackRange = 1f;
@@ -13,6 +16,7 @@ public class PlayerAttack : MonoBehaviour
     [Header("Attack Settings")]
     [SerializeField] private float attackRate = 1f;
     private float nextAttackTime = 0f;
+    public float NextAttackTime => nextAttackTime;
 
     [Header("References")]
     [SerializeField] private ObjectPool arrowPool; // pool of Arrow prefab
@@ -23,7 +27,6 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private Vector2 upAttackOffset = new Vector2(0f, 1f);
     [SerializeField] private Vector2 downAttackOffset = new Vector2(0f, -1f);
 
-    private NewPlayerMovement playerMovement;
     private PlayerHeldItem heldItem;
     private Animator animator;
     private PlayerInput playerInput;
@@ -45,7 +48,6 @@ public class PlayerAttack : MonoBehaviour
 
     private void Awake()
     {
-        playerMovement = GetComponent<NewPlayerMovement>();
         heldItem = GetComponent<PlayerHeldItem>();
         animator = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
@@ -104,6 +106,8 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
+        animator.SetBool("moving", false);
+
         if (item.isBow)
             FireArrow();
         else
@@ -157,9 +161,9 @@ public class PlayerAttack : MonoBehaviour
     }
     private void AttackMelee()
     {
-        // animator.SetBool("attack", true);
-        animator.SetTrigger("attack");
-        this.GetComponent<PlayerInput>().enabled = false;
+        if (isAttacking) return;
+        isAttacking = true;
+        animator.SetTrigger("attack"); 
 
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
             attackPoint.position,
@@ -206,9 +210,10 @@ public class PlayerAttack : MonoBehaviour
 
     public void EndAttack()
     {
-        //animator.SetBool("attack", false);
-        GetComponent<PlayerInput>().enabled = true;
-        Debug.Log("testing");
+        //animator.ResetTrigger("attack");
+        isAttacking = false;
+        animator.ResetTrigger("attack");
+        //GetComponent<PlayerInput>().enabled = true;
     }
 
     private void OnDrawGizmosSelected()
