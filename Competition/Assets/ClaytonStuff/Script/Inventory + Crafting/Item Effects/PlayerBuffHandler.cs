@@ -11,25 +11,14 @@ public class PlayerBuffHandler : MonoBehaviour
 
     public bool IsBuffActive => buffActive;
 
-    private void Awake()
-    {
-        if (stats != null) ApplyStats(stats);
-
-        // If a buff was active before scene reload, reapply it
-        if (BuffData.instance != null && BuffData.instance.isBuffActive)
-        {
-            ApplyAttackBuff(BuffData.instance.latestAttackBuff, 0); // duration 0 means instant apply
-        }
-    }
-
     private void OnEnable()
     {
-        BattleManager.OnClearAllBuffs += ClearAllBuffs;
+        BattleManager.OnClearAllBuffs += RemoveStoredBuff;
     }
 
     private void OnDisable()
     {
-        BattleManager.OnClearAllBuffs -= ClearAllBuffs;
+        BattleManager.OnClearAllBuffs -= RemoveStoredBuff;
     }
 
     public void ApplyStats(NewCharacterStats newStats)
@@ -39,73 +28,44 @@ public class PlayerBuffHandler : MonoBehaviour
         stats = newStats;
         stats.atkDmg = newStats.atkDmg;
         stats.maxHealth = newStats.maxHealth;
-
-        Debug.Log("Stats applied to player.");
     }
 
     public void ApplyAttackBuff(int amount, float duration)
     {
-        if (stats == null) return;
-
-        if (buffActive)
-            return;
+        if (stats == null || buffActive) return;
 
         currentAttackBuff += amount;
         stats.atkDmg += amount;
         buffActive = true;
 
-        // Store in BuffData
-        if (BuffData.instance != null)
-            BuffData.instance.SetBuff(currentAttackBuff);
-
-        Debug.Log($"Attack buff applied: +{amount} atk for {duration}s");
+        // Store amount to BuffData for later removal
+        BuffData.instance?.StoreBuff(amount);
 
         if (duration > 0)
-            activeBuffRoutine = StartCoroutine(AttackBuffRoutine(amount, duration));
+            activeBuffRoutine = StartCoroutine(AttackBuffRoutine(duration));
     }
 
-    private IEnumerator AttackBuffRoutine(int amount, float duration)
+    private IEnumerator AttackBuffRoutine(float duration)
     {
         yield return new WaitForSeconds(duration);
-        RemoveBuff(amount);
-    }
-
-    private void RemoveBuff(int amount)
-    {
-        if (!buffActive) return;
-
-        stats.atkDmg -= amount;
-        currentAttackBuff -= amount;
         buffActive = false;
         activeBuffRoutine = null;
-
-        // Clear BuffData since it's removed
-        if (BuffData.instance != null)
-            BuffData.instance.ClearBuff();
-
-        Debug.Log("Attack buff expired.");
+        // BuffData still keeps the amount until battle ends
     }
 
-    public void ClearAllBuffs()
+    private void RemoveStoredBuff()
     {
-        if (activeBuffRoutine != null)
+        if (BuffData.instance != null && BuffData.instance.hasBuff)
         {
-            StopCoroutine(activeBuffRoutine);
-            activeBuffRoutine = null;
-        }
+            int amount = BuffData.instance.latestAttackBuff;
 
-        if (currentAttackBuff > 0)
-        {
-            stats.atkDmg -= currentAttackBuff;
-            currentAttackBuff = 0;
-        }
+            stats.atkDmg -= amount;
+            currentAttackBuff -= amount;
+            buffActive = false;
 
-        buffActive = false;
-
-        // Clear BuffData
-        if (BuffData.instance != null)
             BuffData.instance.ClearBuff();
 
-        Debug.Log("All buffs cleared.");
+            Debug.Log($"Buff removed: -{amount} atk");
+        }
     }
 }
