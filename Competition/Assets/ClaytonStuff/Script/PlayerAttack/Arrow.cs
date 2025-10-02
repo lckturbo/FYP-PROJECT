@@ -58,6 +58,7 @@ public class Arrow : MonoBehaviour
                 if (party != null)
                 {
                     BattleManager.instance.HandleBattleTransition(
+                        GameObject.FindWithTag("Player"),
                         party
                     );
                     BattleManager.instance.SetBattleMode(true);

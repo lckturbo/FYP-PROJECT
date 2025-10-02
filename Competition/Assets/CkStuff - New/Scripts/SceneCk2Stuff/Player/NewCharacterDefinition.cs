@@ -4,7 +4,6 @@ using UnityEngine;
 public class NewCharacterDefinition : ScriptableObject
 {
     [Header("General")]
-    public string id;
     public string displayName;
 
     [TextArea] public string description;

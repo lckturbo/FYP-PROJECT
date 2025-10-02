@@ -81,8 +81,6 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         }
         else
         {
-            //animator.SetFloat("moveX", 0f); // jas add
-            //animator.SetFloat("moveY", -1f); // jas add
             animator.SetBool("moving", false);
         }
 
