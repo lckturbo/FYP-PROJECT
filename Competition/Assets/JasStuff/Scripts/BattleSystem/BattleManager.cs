@@ -12,6 +12,8 @@ public class BattleManager : MonoBehaviour
 
     public static event Action<string, bool> OnGlobalBattleEnd;
 
+    public static event Action OnClearAllBuffs;
+
     private void Awake()
     {
         if (!instance)
@@ -59,6 +61,7 @@ public class BattleManager : MonoBehaviour
     public void HandleBattleEnd(bool playerWon)
     {
         inBattle = false;
+        OnClearAllBuffs?.Invoke();
 
         if (playerWon)
         {
