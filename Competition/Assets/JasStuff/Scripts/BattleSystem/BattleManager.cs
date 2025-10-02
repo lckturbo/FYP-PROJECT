@@ -13,11 +13,13 @@ public class BattleManager : MonoBehaviour
     private string enemyPartyID;
 
     public static event Action<string, bool> OnGlobalBattleEnd;
+
     public event Action OnBattleStart;
     public event Action<bool> OnBattleEndEvent;
 
     //  New event for buff cleanup
     public static event Action OnClearAllBuffs;
+
 
     private void Awake()
     {
@@ -70,6 +72,8 @@ public class BattleManager : MonoBehaviour
         Debug.Log("Buffs cleared before scene change.");
 
         // --- 2) Handle battle result ---
+        OnClearAllBuffs?.Invoke();
+
         if (playerWon)
         {
             Debug.Log("Victory");
