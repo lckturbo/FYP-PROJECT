@@ -1,14 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// Persistent container for the latest buff amount.
+/// Singleton to store the latest buff value across scenes.
 /// </summary>
 public class BuffData : MonoBehaviour
 {
     public static BuffData instance;
 
-    public int latestAttackBuff = 0;  // Amount of buff to remove
-    public bool hasBuff = false;       // Whether a buff exists
+    public int latestAttackBuff = 0;       // Latest applied attack buff
+    public bool isBuffActive = false;      // Whether the buff is active
 
     private void Awake()
     {
@@ -23,15 +23,15 @@ public class BuffData : MonoBehaviour
         }
     }
 
-    public void StoreBuff(int amount)
+    public void SetBuff(int amount)
     {
         latestAttackBuff = amount;
-        hasBuff = true;
+        isBuffActive = true;
     }
 
     public void ClearBuff()
     {
         latestAttackBuff = 0;
-        hasBuff = false;
+        isBuffActive = false;
     }
 }

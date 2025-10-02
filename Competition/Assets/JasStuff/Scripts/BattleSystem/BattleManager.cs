@@ -61,9 +61,8 @@ public class BattleManager : MonoBehaviour
     public void HandleBattleEnd(bool playerWon)
     {
         inBattle = false;
-        // --- 1) Clear all buffs ---
+
         OnClearAllBuffs?.Invoke();
-        Debug.Log("Buffs cleared before scene change.");
 
         if (playerWon)
         {
