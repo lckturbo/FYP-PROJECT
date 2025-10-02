@@ -3,7 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewBattleQuest", menuName = "Quests/Battle Quest")]
 public class BattleQuestData : QuestData
 {
-    public string targetEnemyPartyID; // The ID of the enemy party to defeat
+    [Tooltip("Target enemy party IDs to defeat")]
+    public string[] targetEnemyPartyIDs;
 
     public override Quest CreateQuestInstance(GameObject questHolder)
     {

@@ -3,26 +3,49 @@ using UnityEngine;
 public class BattleQuest : Quest
 {
     private BattleQuestData battleData;
+    private bool[] completedTargets;
 
     public override void StartQuest()
     {
         battleData = (BattleQuestData)questData;
 
-        //  Subscribe to global event
+        if (battleData.targetEnemyPartyIDs != null)
+            completedTargets = new bool[battleData.targetEnemyPartyIDs.Length];
+
         BattleManager.OnGlobalBattleEnd += HandleGlobalBattleEnd;
     }
 
     public override void CheckProgress()
     {
-        // No polling needed, handled by events
+        // handled by events
     }
 
     private void HandleGlobalBattleEnd(string defeatedPartyID, bool playerWon)
     {
         if (!playerWon) return;
+        if (battleData.targetEnemyPartyIDs == null) return;
 
-        //  Check if this is the right enemy party
-        if (!string.IsNullOrEmpty(defeatedPartyID) && defeatedPartyID == battleData.targetEnemyPartyID)
+        for (int i = 0; i < battleData.targetEnemyPartyIDs.Length; i++)
+        {
+            if (!completedTargets[i] && battleData.targetEnemyPartyIDs[i] == defeatedPartyID)
+            {
+                completedTargets[i] = true;
+                Debug.Log($"Target {defeatedPartyID} completed!");
+            }
+        }
+
+        // Complete quest if all targets defeated
+        bool allCompleted = true;
+        for (int i = 0; i < completedTargets.Length; i++)
+        {
+            if (!completedTargets[i])
+            {
+                allCompleted = false;
+                break;
+            }
+        }
+
+        if (allCompleted)
         {
             CompleteQuest();
         }
@@ -30,7 +53,6 @@ public class BattleQuest : Quest
 
     private void OnDestroy()
     {
-        //  Always unsubscribe to prevent leaks
         BattleManager.OnGlobalBattleEnd -= HandleGlobalBattleEnd;
     }
 }
