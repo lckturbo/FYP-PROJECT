@@ -61,6 +61,12 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
     void Update()
     {
+        if (GetComponent<PlayerAttack>().IsAttacking)
+        {
+            moveDir = Vector2.zero;
+            return;
+        }
+
         // read raw input from Input System
         inputRaw = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
 
