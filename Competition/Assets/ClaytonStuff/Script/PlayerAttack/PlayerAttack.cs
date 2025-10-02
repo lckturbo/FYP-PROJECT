@@ -106,7 +106,6 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        animator.SetBool("moving", false);
 
         if (item.isBow)
             FireArrow();
@@ -163,7 +162,8 @@ public class PlayerAttack : MonoBehaviour
     {
         if (isAttacking) return;
         isAttacking = true;
-        animator.SetTrigger("attack"); 
+        //animator.SetTrigger("attack"); 
+        animator.SetBool("attack1", true);
 
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
             attackPoint.position,
@@ -223,7 +223,8 @@ public class PlayerAttack : MonoBehaviour
     {
         //animator.ResetTrigger("attack");
         isAttacking = false;
-        animator.ResetTrigger("attack");
+        // animator.ResetTrigger("attack");
+        animator.SetBool("attack1", false);
         //GetComponent<PlayerInput>().enabled = true;
     }
 
