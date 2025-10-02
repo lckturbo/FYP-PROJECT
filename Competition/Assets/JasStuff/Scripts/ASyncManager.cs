@@ -13,6 +13,8 @@ public class ASyncManager : MonoBehaviour
     [Header("Slider")]
     [SerializeField] private Slider loadingSlider;
 
+    private bool isLoading = false;
+
     private void Awake()
     {
         if (!instance) instance = this;
@@ -21,6 +23,9 @@ public class ASyncManager : MonoBehaviour
 
     public void LoadLevelBtn(string levelToLoad)
     {
+        if (isLoading) return;
+
+        isLoading = true;
         mainScreen.SetActive(false);
         loadingScreen.SetActive(true);
 
@@ -47,5 +52,7 @@ public class ASyncManager : MonoBehaviour
 
             yield return null;
         }
+
+        isLoading = false;
     }
 }
