@@ -37,7 +37,7 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] private float avoidanceStrength;
 
     //public event Action<GameObject, float> OnDeath;
-    public event Action<EnemyParty> OnAttackPlayer;
+    public event Action<GameObject, EnemyParty> OnAttackPlayer;
 
     private void OnEnable()
     {
@@ -237,7 +237,7 @@ public abstract class EnemyBase : MonoBehaviour
 
             // play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
             BattleManager.instance.RegisterEnemy(this);
-            OnAttackPlayer.Invoke(GetComponent<EnemyParty>());
+            OnAttackPlayer.Invoke(player.gameObject, GetComponent<EnemyParty>());
             BattleManager.instance.SetBattleMode(true);
         }
 

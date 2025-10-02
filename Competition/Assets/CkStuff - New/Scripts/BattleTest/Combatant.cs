@@ -11,12 +11,10 @@ public class Combatant : MonoBehaviour
 
     // ATB gauge 0..1
     [HideInInspector] public float atb;
-    private Animator anim;
 
     private void Awake()
     {
         if (!health) health = GetComponentInChildren<NewHealth>();
-        if(!anim) anim = GetComponent<Animator>();
     }
 
     public float Speed => stats ? Mathf.Max(0.01f, stats.actionvaluespeed) : 0.01f;
@@ -25,8 +23,6 @@ public class Combatant : MonoBehaviour
     public void BasicAttack(Combatant target)
     {
         if (!stats || !target || !target.health) return;
-
-        if (anim) anim.SetTrigger("attack");
         target.health.TakeDamage(0, stats, NewElementType.None);
 
         Debug.Log($"[ACTION] {name} used BASIC ATTACK on {target.name}");
@@ -36,7 +32,6 @@ public class Combatant : MonoBehaviour
     {
         if (!stats || !target || !target.health) return;
 
-        if (anim) anim.SetTrigger("skill1");
         // Example: 1.2x normal attack damage
         int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.2f);
         target.health.TakeDamage(rawDamage, stats, NewElementType.None);

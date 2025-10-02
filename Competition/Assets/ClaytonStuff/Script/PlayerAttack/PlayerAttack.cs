@@ -109,11 +109,7 @@ public class PlayerAttack : MonoBehaviour
         else
             AttackMelee();
 
-        //animator.SetBool("attack", false);
-        //this.GetComponent<PlayerInput>().enabled = true;
-
         nextAttackTime = Time.time + 1f / Mathf.Max(0.01f, attackRate);
-        //animator.ResetTrigger("attack");
     }
 
     private void FireArrow()
@@ -157,10 +153,6 @@ public class PlayerAttack : MonoBehaviour
     }
     private void AttackMelee()
     {
-        // animator.SetBool("attack", true);
-        animator.SetTrigger("attack");
-        this.GetComponent<PlayerInput>().enabled = false;
-
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
             attackPoint.position,
             CurrentAttackRange,
@@ -177,7 +169,7 @@ public class PlayerAttack : MonoBehaviour
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
                 if (party != null)
                 {
-                    BattleManager.instance.HandleBattleTransition(party);
+                    BattleManager.instance.HandleBattleTransition(gameObject, party);
                     BattleManager.instance.SetBattleMode(true);
                 }
             }
@@ -213,13 +205,6 @@ public class PlayerAttack : MonoBehaviour
 
         // Push attack point outward relative to current range
         attackPoint.localPosition = baseOffset.normalized * CurrentAttackRange;
-    }
-
-    public void EndAttack()
-    {
-        //animator.SetBool("attack", false);
-        GetComponent<PlayerInput>().enabled = true;
-        Debug.Log("testing");
     }
 
     private void OnDrawGizmosSelected()

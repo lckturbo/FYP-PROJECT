@@ -81,14 +81,6 @@ public class BattleSystem : MonoBehaviour
         leaderObj.GetComponent<PlayerInput>().enabled = false;
         ApplyStatsIfPresent(leaderObj, leader.stats);
 
-        Animator anim;
-        anim = leaderObj.GetComponent<Animator>();
-        if (anim && anim.layerCount > 1)
-        {
-            anim.SetLayerWeight(0, 0f);
-            anim.SetLayerWeight(1, 1f);
-        }
-
         var cL = leaderObj.AddComponent<Combatant>();
         cL.isPlayerTeam = true;
         cL.isLeader = true;
@@ -98,11 +90,12 @@ public class BattleSystem : MonoBehaviour
         var leaderHealth = leaderObj.GetComponent<NewHealth>();
         if (leaderHealth)
         {
-            leaderHealth.OnDeathComplete += (h) =>
+            leaderHealth.OnHealthChanged += (h) =>
             {
                 if (h.GetCurrHealth() <= 0)
                 {
                     Debug.Log("[Battle System] Leader died — force end battle.");
+                    // IMPORTANT: stop the engine, don't call HandleBattleEnd directly
                     turnEngine?.ForceEnd(false);
                 }
             };
@@ -125,13 +118,6 @@ public class BattleSystem : MonoBehaviour
                 allyObj.GetComponent<PlayerInput>().enabled = false;
                 ApplyStatsIfPresent(allyObj, member.stats);
                 playerAllies.Add(allyObj);
-
-                anim = allyObj.GetComponent<Animator>();
-                if (anim && anim.layerCount > 1)
-                {
-                    anim.SetLayerWeight(0, 0f);
-                    anim.SetLayerWeight(1, 1f);
-                }
 
                 var cA = allyObj.AddComponent<Combatant>();
                 cA.isPlayerTeam = true;
@@ -258,6 +244,7 @@ public class BattleSystem : MonoBehaviour
 
     private void HandleBattleEnd(bool playerWon)
     {
+        // Guard against multiple invocations (e.g., multiple health events)
         if (_ended) return;
         _ended = true;
 
@@ -276,15 +263,16 @@ public class BattleSystem : MonoBehaviour
 
         var payload = BuildResultsPayload(playerWon, xpAwarded, preLevel, postLevel);
 
-        foreach (var member in FindObjectsOfType<NewHealth>())
+        if (resultsUI)
         {
-            member.OnDeathComplete += (deadChar) =>
+            resultsUI.Show(payload, () =>
             {
-                resultsUI?.Show(payload, () =>
-                {
-                    OnBattleEnd?.Invoke(playerWon);
-                });
-            };
+                OnBattleEnd?.Invoke(playerWon);
+            });
+        }
+        else
+        {
+            OnBattleEnd?.Invoke(playerWon);
         }
     }
 

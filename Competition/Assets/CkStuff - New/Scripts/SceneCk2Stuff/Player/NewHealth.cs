@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class NewHealth : MonoBehaviour
@@ -6,12 +5,10 @@ public class NewHealth : MonoBehaviour
     [Header("Character Stats")]
     [SerializeField] private BaseStats stats;
     [SerializeField] private bool useStatsDirectly = true;
-    [SerializeField] private Animator anim;
 
     private int currentHp;
 
     public event System.Action<NewHealth> OnHealthChanged;
-    public event System.Action<NewHealth> OnDeathComplete;
 
     public int GetCurrHealth() => currentHp;
     public int GetMaxHealth() => stats ? stats.maxHealth : 1;
@@ -19,11 +16,6 @@ public class NewHealth : MonoBehaviour
     void Awake()
     {
         if (stats != null) ApplyStats(stats);
-    }
-
-    private void Start()
-    {
-        if (!anim) anim = GetComponent<Animator>();
     }
 
     public void ApplyStats(BaseStats newStats)
@@ -92,14 +84,7 @@ public class NewHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log(gameObject.name + " has died.");
-        if (anim) anim.SetTrigger("death");
-
         OnHealthChanged?.Invoke(this);
-    }
-
-    public void EndDeath()
-    {
-        OnDeathComplete?.Invoke(this);
-        Destroy(gameObject, 0.1f);
+        Destroy(gameObject, 1f);
     }
 }
