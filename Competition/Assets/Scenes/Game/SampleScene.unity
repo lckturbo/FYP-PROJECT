@@ -1708,8 +1708,9 @@ GameObject:
   - component: {fileID: 497025164}
   - component: {fileID: 497025163}
   - component: {fileID: 497025162}
+  - component: {fileID: 497025166}
   m_Layer: 0
-  m_Name: Shop
+  m_Name: Jackle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1839,6 +1840,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1721717872}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &497025166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497025161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf7247a21e4fa6840912051e34b4ff2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  questData: {fileID: 11400000, guid: 17ddfd459dcaa6e48a061662a47f6bd3, type: 2}
+  targetLocation: {fileID: 497025165}
 --- !u!1 &516281664
 GameObject:
   m_ObjectHideFlags: 0
@@ -53995,7 +54010,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   latestAttackBuff: 0
-  isBuffActive: 0
+  hasBuff: 0
 --- !u!4 &1952907277
 Transform:
   m_ObjectHideFlags: 0

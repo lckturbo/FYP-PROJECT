@@ -10,7 +10,6 @@ public class Arrow : MonoBehaviour
     private float timer;
     private Vector2 direction;
     private Rigidbody2D rb;
-    
 
     private void Awake()
     {
@@ -45,9 +44,12 @@ public class Arrow : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision == null) return;
+
+        // Hit Enemy
         if (collision.CompareTag("Enemy"))
         {
-            Debug.Log($"Hit enemy {collision.name}, dealt {damage}");
+            Debug.Log($"Arrow hit enemy {collision.name}, dealt {damage}");
 
             EnemyBase enemy = collision.GetComponent<EnemyBase>();
             if (enemy != null)
@@ -55,7 +57,6 @@ public class Arrow : MonoBehaviour
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
                 if (party != null)
                 {
-                    // Same battle transition as melee & enemy attacks
                     BattleManager.instance.HandleBattleTransition(
                         GameObject.FindWithTag("Player"),
                         party
@@ -65,7 +66,20 @@ public class Arrow : MonoBehaviour
             }
 
             gameObject.SetActive(false);
+            return;
         }
-    }
 
+        // Hit Breakable Object
+        BreakableObject breakable = collision.GetComponent<BreakableObject>();
+        if (breakable != null)
+        {
+            Debug.Log($"Arrow hit breakable object: {collision.name}");
+            breakable.TakeHit();
+            gameObject.SetActive(false);
+            return;
+        }
+
+        // Optional: stop arrow on any other collision
+        gameObject.SetActive(false);
+    }
 }

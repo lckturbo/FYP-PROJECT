@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: NewBattleQuest
   m_EditorClassIdentifier: 
   questID: Kill enemy
-  questName: Kill enemy
-  description: Kill 1 enemy
-  targetEnemyPartyID: 1
+  questName: Many Enemies
+  description: Kill 2 enemy
+  targetEnemyPartyIDs:
+  - 1
+  - 2

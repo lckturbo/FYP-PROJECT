@@ -174,6 +174,17 @@ public class PlayerAttack : MonoBehaviour
                 }
             }
         }
+        Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, CurrentAttackRange);
+        foreach (var hit in hits)
+        {
+            var breakable = hit.GetComponent<BreakableObject>();
+            if (breakable != null)
+            {
+                breakable.TakeHit();
+                Debug.Log($"Hit breakable object: {hit.name}");
+            }
+        }
+
     }
 
 
