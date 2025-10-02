@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerHeldItem : MonoBehaviour
@@ -29,20 +30,52 @@ public class PlayerHeldItem : MonoBehaviour
             //}
         }
     }
-
     public void DisplayItem(Item item)
     {
-        if (currentHeld != null) Destroy(currentHeld);
+        // If no item, just hide what we're holding
+        if (item == null || item.worldPrefab == null)
+        {
+            HideItem();
+            return;
+        }
+
+        // If we’re swapping to a different item, remove the old one
+        if (currentHeld != null)
+        {
+            Destroy(currentHeld);
+            currentHeld = null;
+        }
 
         equippedItem = item;
 
-        if (item == null || item.worldPrefab == null) return;
-
+        // Spawn the item
         currentHeld = Instantiate(item.worldPrefab, handPoint.position, Quaternion.identity, handPoint);
-
         currentHeld.transform.localPosition = Vector3.zero;
-        currentHeld.transform.localRotation = Quaternion.identity; // will get corrected in Update
+        currentHeld.transform.localRotation = Quaternion.identity;
     }
+
+
+    public void RemoveItem()
+    {
+        if (currentHeld != null)
+        {
+            Destroy(currentHeld);
+            currentHeld = null;
+        }
+
+        equippedItem = null;
+    }
+
+    public void HideItem()
+    {
+        if (currentHeld != null)
+        {
+            currentHeld.SetActive(false);
+        }
+        equippedItem = null;
+    }
+
+
 
     public Item GetEquippedItem()
     {

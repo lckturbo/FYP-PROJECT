@@ -227,25 +227,32 @@ public class InventoryUIManager : MonoBehaviour
 
         RefreshUI();
     }
-
     private void SelectMainSlot(int index)
     {
         selectedMainSlot = index;
 
+        // Toggle highlight
         for (int i = 0; i < mainSlots.Count; i++)
         {
             var highlight = mainSlots[i].transform.Find("Highlight").gameObject;
             highlight.SetActive(i == index);
         }
 
-        var inv = inventoryManager.PlayerInventory;
-        if (inv != null && index >= 0 && index < inv.mainInventory.Count)
+        var heldItem = FindObjectOfType<PlayerHeldItem>();
+
+        if (IsHighlightedMainSlotEmpty())
         {
-            var slot = inv.mainInventory[index];
-            var heldItem = FindObjectOfType<PlayerHeldItem>();
-            if (heldItem != null) heldItem.DisplayItem(slot.item);
+            Debug.Log($"Selected slot {index}: EMPTY");
+            heldItem?.HideItem();
+        }
+        else
+        {
+            var slot = inventoryManager.PlayerInventory.mainInventory[index];
+            Debug.Log($"Selected slot {index}: {slot.item.itemName} (qty {slot.quantity})");
+            heldItem?.DisplayItem(slot.item);
         }
     }
+
 
     public void RefreshUI()
     {
@@ -265,6 +272,17 @@ public class InventoryUIManager : MonoBehaviour
             UpdateSlot(subSlots[i], inv.subInventory[i]);
         }
     }
+
+    private bool IsHighlightedMainSlotEmpty()
+    {
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null) return true;
+        if (selectedMainSlot < 0 || selectedMainSlot >= inv.mainInventory.Count) return true;
+
+        var slot = inv.mainInventory[selectedMainSlot];
+        return slot.item == null || slot.quantity <= 0;
+    }
+
 
     private void ClearSlot(GameObject slotObj)
     {
