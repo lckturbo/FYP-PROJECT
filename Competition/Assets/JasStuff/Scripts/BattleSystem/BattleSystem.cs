@@ -1,7 +1,6 @@
 using Pathfinding;
 using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -29,6 +28,21 @@ public class BattleSystem : MonoBehaviour
 
     public event Action<bool> OnBattleEnd;
 
+    [Header("Results UI")]
+    [SerializeField] private BattleResultsUI resultsUI;
+
+    private int _preBattlePartyLevel;
+    private List<PreBattleSnapshot> _snapshots = new();
+
+    // NEW: ensure HandleBattleEnd only runs once
+    private bool _ended = false;
+
+    private struct PreBattleSnapshot
+    {
+        public NewCharacterDefinition def;
+        public NewCharacterStats statsAtLevel;
+    }
+
     private void OnEnable()
     {
         if (turnEngine)
@@ -55,6 +69,11 @@ public class BattleSystem : MonoBehaviour
         NewCharacterDefinition leader = PlayerParty.instance.GetLeader();
         if (fullParty == null || fullParty.Count < 1 || leader == null) return;
 
+        _ended = false; // reset guard for a fresh battle
+
+        _preBattlePartyLevel = PartyLevelSystem.Instance ? PartyLevelSystem.Instance.levelSystem.level : 1;
+        _snapshots.Clear();
+
         // Leader
         GameObject leaderObj = Instantiate(leader.playerPrefab, allySpawnPt[0].position, Quaternion.identity);
         playerLeader = leaderObj;
@@ -75,13 +94,15 @@ public class BattleSystem : MonoBehaviour
             {
                 if (h.GetCurrHealth() <= 0)
                 {
-                    Debug.Log("[Battle System] Leader died, ending battle");
-                    HandleBattleEnd(false);
+                    Debug.Log("[Battle System] Leader died — force end battle.");
+                    // IMPORTANT: stop the engine, don't call HandleBattleEnd directly
+                    turnEngine?.ForceEnd(false);
                 }
             };
         }
 
         AddPlayerLevelApplier(leaderObj, leader);
+        SnapshotChar(leader);
 
         // Allies
         for (int i = 0; i < fullParty.Count; i++)
@@ -105,6 +126,7 @@ public class BattleSystem : MonoBehaviour
                 turnEngine.Register(cA);
 
                 AddPlayerLevelApplier(allyObj, member);
+                SnapshotChar(member);
             }
         }
 
@@ -136,6 +158,17 @@ public class BattleSystem : MonoBehaviour
 
         SetUpHealth();
         turnEngine.Begin();
+    }
+
+    private void SnapshotChar(NewCharacterDefinition def)
+    {
+        if (!def || !def.stats) return;
+        var rt = StatsRuntimeBuilder.BuildRuntimeStats(def.stats, _preBattlePartyLevel, playerGrowth);
+        _snapshots.Add(new PreBattleSnapshot
+        {
+            def = def,
+            statsAtLevel = rt
+        });
     }
 
     private void SetUpHealth()
@@ -211,14 +244,83 @@ public class BattleSystem : MonoBehaviour
 
     private void HandleBattleEnd(bool playerWon)
     {
+        // Guard against multiple invocations (e.g., multiple health events)
+        if (_ended) return;
+        _ended = true;
+
+        int preLevel = _preBattlePartyLevel;
+
+        int xpAwarded = 0;
         if (playerWon)
         {
-            int xp = CalculateXpReward();
-            PartyLevelSystem.Instance?.AddXP(xp);
-            Debug.Log($"[BattleEnd] Victory! Awarded {xp} XP to party.");
+            xpAwarded = CalculateXpReward();
+            PartyLevelSystem.Instance?.AddXP(xpAwarded);
         }
 
-        OnBattleEnd?.Invoke(playerWon);
+        int postLevel = PartyLevelSystem.Instance
+            ? PartyLevelSystem.Instance.levelSystem.level
+            : preLevel;
+
+        var payload = BuildResultsPayload(playerWon, xpAwarded, preLevel, postLevel);
+
+        if (resultsUI)
+        {
+            resultsUI.Show(payload, () =>
+            {
+                OnBattleEnd?.Invoke(playerWon);
+            });
+        }
+        else
+        {
+            OnBattleEnd?.Invoke(playerWon);
+        }
+    }
+
+    private BattleResultsPayload BuildResultsPayload(bool playerWon, int xp, int preLevel, int postLevel)
+    {
+        var leaderDef = PlayerParty.instance.GetLeader();
+        var baseStats = leaderDef ? leaderDef.stats : null;
+
+        var pre = (baseStats != null) ? StatsRuntimeBuilder.BuildRuntimeStats(baseStats, preLevel, playerGrowth) : null;
+        var post = (baseStats != null) ? StatsRuntimeBuilder.BuildRuntimeStats(baseStats, postLevel, playerGrowth) : null;
+
+        var stats = new List<BattleResultsStat>();
+
+        if (pre != null && post != null)
+        {
+            stats.Add(MakeStat("HP", pre.maxHealth, post.maxHealth, false, ""));
+            stats.Add(MakeStat("Attack", pre.atkDmg, post.atkDmg, false, ""));
+            stats.Add(MakeStat("Defense", pre.attackreduction, post.attackreduction, false, ""));
+            stats.Add(MakeStat("Action Speed", pre.actionvaluespeed, post.actionvaluespeed, false, ""));
+            stats.Add(MakeStat("CR", pre.critRate, post.critRate, true, ""));
+            stats.Add(MakeStat("CD", pre.critDamage, post.critDamage, false, "×"));
+        }
+
+        return new BattleResultsPayload
+        {
+            playerWon = playerWon,
+            xpGained = xp,
+            oldLevel = preLevel,
+            newLevel = postLevel,
+            enemyScaledToLevel = (postLevel > preLevel) ? postLevel : 0,
+            stats = stats
+        };
+    }
+
+    // NEW: formatter for a single stat row
+    private BattleResultsStat MakeStat(string name, float oldVal, float newVal, bool asPercent, string prefix)
+    {
+        string OldFmt(float v) => asPercent ? $"{Mathf.RoundToInt(v * 100f)}%" : $"{prefix}{v:0.##}";
+        string NewFmt(float v) => asPercent ? $"{Mathf.RoundToInt(v * 100f)}%" : $"{prefix}{v:0.##}";
+
+        return new BattleResultsStat
+        {
+            label = name,
+            oldValue = oldVal,
+            newValue = newVal,
+            oldValueText = OldFmt(oldVal),
+            newValueText = NewFmt(newVal)
+        };
     }
 
     private int CalculateXpReward()
@@ -227,11 +329,7 @@ public class BattleSystem : MonoBehaviour
         for (int i = 0; i < enemies.Count; i++)
         {
             var go = enemies[i];
-            //original
-            //if (!go) { xp += 20; continue; }
-
-            //for testing
-            if (!go) { xp += 120; continue; }
+            if (!go) { xp += 35; continue; }
 
             var c = go.GetComponent<Combatant>();
             if (c && c.stats != null)
