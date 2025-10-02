@@ -65,14 +65,11 @@ public class BattleManager : MonoBehaviour
 
         OnBattleEndEvent?.Invoke(playerWon);
 
-        // Remove buffs from the player in the previous scene
-        var player = FindObjectOfType<PlayerBuffHandler>();
-        if (player != null)
-        {
-            player.ClearAllBuffs();
-            Debug.Log("Buffs cleared before scene change.");
-        }
+        // --- 1) Clear all buffs ---
+        OnClearAllBuffs?.Invoke();
+        Debug.Log("Buffs cleared before scene change.");
 
+        // --- 2) Handle battle result ---
         if (playerWon)
         {
             Debug.Log("Victory");
@@ -90,6 +87,7 @@ public class BattleManager : MonoBehaviour
 
         OnGlobalBattleEnd?.Invoke(enemyPartyID, playerWon);
 
+        // --- 3) Load return scene ---
         GameManager.instance.ChangeScene("SampleScene");
     }
 

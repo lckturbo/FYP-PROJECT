@@ -51,6 +51,7 @@ GameObject:
   - component: {fileID: 8216708204523283783}
   - component: {fileID: 5877766306136470381}
   - component: {fileID: 8784752624267437246}
+  - component: {fileID: -92138703383983078}
   m_Layer: 8
   m_Name: Cameraman
   m_TagString: Player
@@ -360,6 +361,19 @@ MonoBehaviour:
   definition: {fileID: 11400000, guid: 35512be6d945da84fbe0801d7ea4721a, type: 2}
   growth: {fileID: 11400000, guid: a08bbaeb371d05f46a29c0060adfa452, type: 2}
   runtimeStats: {fileID: 11400000, guid: 809ab4e15286b4b40813635ef86e5215, type: 2}
+--- !u!114 &-92138703383983078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f803e7b734caa9e48b8f940a40812935, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stats: {fileID: 11400000, guid: 809ab4e15286b4b40813635ef86e5215, type: 2}
 --- !u!1 &5284496553185815870
 GameObject:
   m_ObjectHideFlags: 0
