@@ -57,7 +57,6 @@ public class Arrow : MonoBehaviour
                 {
                     // Same battle transition as melee & enemy attacks
                     BattleManager.instance.HandleBattleTransition(
-                        GameObject.FindWithTag("Player"),
                         party
                     );
                     BattleManager.instance.SetBattleMode(true);

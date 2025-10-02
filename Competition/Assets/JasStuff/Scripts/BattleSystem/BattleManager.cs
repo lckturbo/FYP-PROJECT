@@ -6,8 +6,7 @@ public class BattleManager : MonoBehaviour
     public static BattleManager instance;
 
     private bool inBattle;
-    
-    public GameObject playerRef { get; private set; }
+    public string leaderID { get; private set; }
     public EnemyParty enemypartyRef { get; private set; }
     private string enemyPartyID;
 
@@ -46,16 +45,10 @@ public class BattleManager : MonoBehaviour
     {
         return inBattle;
     }
-
-    public void ChangeAnimation()
+    public void HandleBattleTransition(EnemyParty enemyParty)
     {
-        // TODO: change from overworld anim to turnbased anim
-        Animator anim = playerRef.GetComponent<Animator>();
+        if (PlayerParty.instance) leaderID = PlayerParty.instance.GetLeader().id;
 
-    }
-    public void HandleBattleTransition(GameObject player, EnemyParty enemyParty)
-    {
-        playerRef = player;
         enemypartyRef = enemyParty;
         enemyPartyID = enemypartyRef.GetID();
 
