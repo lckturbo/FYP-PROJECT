@@ -12,13 +12,20 @@ public class SettingsManager : MonoBehaviour, IDataPersistence
 
         DontDestroyOnLoad(gameObject);
     }
+    public void OnBGMVolumeChanged(float value)
+    {
+        AudioManager.instance.SetBgmVol(value);
+    }
+
+    public void OnSFXVolumeChanged(float value)
+    {
+        AudioManager.instance.SetSFXVol(value);
+    }
     public void LoadData(GameData data)
     {
-        throw new System.NotImplementedException();
     }
 
     public void SaveData(ref GameData data)
     {
-        throw new System.NotImplementedException();
     }
 }
