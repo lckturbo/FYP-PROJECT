@@ -28,6 +28,11 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    private void Start()
+    {
+        SaveLoadSystem.instance.NewGame();
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         string scnName = scene.name;
