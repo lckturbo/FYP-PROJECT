@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 [System.Serializable]
 public class CartEntry
