@@ -11,6 +11,9 @@ public class QuestManager : MonoBehaviour
     // NEW: Track NPC progress across scenes
     private Dictionary<string, int> npcQuestStages = new Dictionary<string, int>();
 
+    //  Track completed quests across scenes
+    public List<QuestData> completedQuests = new List<QuestData>();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -36,6 +39,12 @@ public class QuestManager : MonoBehaviour
     {
         Debug.Log($"Quest Finished: {quest.questData.questName}");
         questsToRemove.Add(quest);
+
+        //  Save questData so UI can replay "Quest Complete"
+        if (!completedQuests.Contains(quest.questData))
+        {
+            completedQuests.Add(quest.questData);
+        }
     }
 
     private void Update()
