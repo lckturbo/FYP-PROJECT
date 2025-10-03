@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class AudioManager : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField] private Sound[] sounds;
     private Dictionary<string, Sound> soundDictionary;
+    [SerializeField] private AudioMixer audioMixer;
 
     private void Awake()
     {
@@ -25,6 +27,7 @@ public class AudioManager : MonoBehaviour
             sound.audioSource.volume = sound.volume;
             sound.audioSource.pitch = sound.pitch;
             sound.audioSource.loop = sound.loop;
+            sound.audioSource.outputAudioMixerGroup = sound.audioMixer;
 
             soundDictionary[sound.clip.name] = sound;
         }
@@ -48,6 +51,14 @@ public class AudioManager : MonoBehaviour
                 sound.audioSource.Stop();
         }
     }
+    public void SetBgmVol(float vol)
+    {
+        
+    }
+    public void SetSFXVol(float vol)
+    {
+
+    }
 }
 
 [System.Serializable]
@@ -57,6 +68,8 @@ public class Sound
     [Range(0, 1f)] public float volume = 1f;
     [Range(0, 3f)] public float pitch = 1f;
     public bool loop = false;
+
+    public AudioMixerGroup audioMixer;
 
     [HideInInspector] public AudioSource audioSource;
 }
