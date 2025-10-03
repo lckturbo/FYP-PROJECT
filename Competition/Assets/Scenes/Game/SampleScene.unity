@@ -3390,7 +3390,7 @@ GameObject:
   - component: {fileID: 667851355}
   - component: {fileID: 667851356}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: SpawnPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7739,6 +7739,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activeQuests: []
+  completedQuests: []
 --- !u!4 &1324848618
 Transform:
   m_ObjectHideFlags: 0
@@ -57321,6 +57322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   latestAttackBuff: 0
+  targetStats: {fileID: 0}
   hasBuff: 0
 --- !u!4 &1952907277
 Transform:
