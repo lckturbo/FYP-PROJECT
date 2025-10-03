@@ -390,6 +390,16 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        //  Inventory space check
+        foreach (var entry in cart)
+        {
+            if (!playerInventory.CanAddItem(entry.item))
+            {
+                ShowMessage($"No space in main inventory for {entry.item.itemName}!");
+                return;
+            }
+        }
+
         if (playerInventory.TrySpendMoney(totalCost))
         {
             foreach (var entry in cart)
@@ -400,6 +410,7 @@ public class ShopManager : MonoBehaviour
             cart.Clear();
         }
     }
+
 
     /// <summary>
     /// é¿ç€ÇÃçwì¸èàóùÅiPurchasePanelÇ©ÇÁåƒÇŒÇÍÇÈÅj
@@ -426,6 +437,13 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        //  Inventory space check
+        if (!playerInventory.CanAddItem(item))
+        {
+            ShowMessage($"No space in main inventory for {item.itemName}!");
+            return;
+        }
+
         if (playerInventory.TrySpendMoney(totalCost))
         {
             playerInventory.AddItem(item, quantity);
@@ -437,6 +455,7 @@ public class ShopManager : MonoBehaviour
             if (ui != null) ui.RefreshUI();
         }
     }
+
 
     private void UpdateMoneyUI()
     {

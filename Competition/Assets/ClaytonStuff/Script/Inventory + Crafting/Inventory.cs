@@ -19,11 +19,40 @@ public class Inventory : MonoBehaviour
     public List<InventorySlot> mainInventory = new List<InventorySlot>();
     public List<InventorySlot> subInventory = new List<InventorySlot>();
 
+    [Header("Limits")]
+    public int mainInventoryLimit = 6;  // max slots for main
+
     [Header("Currency")]
     public int Money = 100; // starting money, adjust as needed
 
+    public bool CanAddItem(Item item)
+    {
+        List<InventorySlot> targetInventory =
+            (item.category == ItemCategory.Main) ? mainInventory : subInventory;
+
+        // If item is stackable and already exists ? can add more
+        if (item.isStackable)
+        {
+            InventorySlot slot = targetInventory.Find(s => s.item == item);
+            if (slot != null) return true;
+        }
+
+        // Otherwise, check slot capacity
+        if (item.category == ItemCategory.Main)
+            return mainInventory.Count < mainInventoryLimit;
+
+        // Sub inventory has no slot limit (you can set one if needed)
+        return true;
+    }
+
     public void AddItem(Item item, int amount = 1)
     {
+        if (!CanAddItem(item))
+        {
+            Debug.LogWarning($"Cannot add {item.itemName}, inventory is full!");
+            return;
+        }
+
         List<InventorySlot> targetInventory =
             (item.category == ItemCategory.Main) ? mainInventory : subInventory;
 
