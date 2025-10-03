@@ -275,17 +275,20 @@ public class BattleSystem : MonoBehaviour
             : preLevel;
 
         var payload = BuildResultsPayload(playerWon, xpAwarded, preLevel, postLevel);
-
-        foreach (var member in FindObjectsOfType<NewHealth>())
+        if (!playerWon)
         {
-            member.OnDeathComplete += (deadChar) =>
+            var leader = playerLeader?.GetComponent<NewHealth>();
+            if (leader)
             {
-                resultsUI?.Show(payload, () =>
+                leader.OnDeathComplete += (deadChar) =>
                 {
-                    OnBattleEnd?.Invoke(playerWon);
-                });
-            };
+                    resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
+                };
+                return;
+            }
         }
+
+        resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
     }
 
     private BattleResultsPayload BuildResultsPayload(bool playerWon, int xp, int preLevel, int postLevel)
