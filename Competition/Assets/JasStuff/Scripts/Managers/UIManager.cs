@@ -2,35 +2,33 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
-    public static GameManager instance;
+    public static UIManager instance;
 
+    [Header("Buttons")]
     [SerializeField] private Button playBtn;
+    [SerializeField] private Button settingsBtn;
     [SerializeField] private Button creditsBtn;
     [SerializeField] private Button exitBtn;
 
+    [Header("UIs")]
+    [SerializeField] private GameObject settingsUI;
+
     private void Awake()
     {
-        if (instance == null)
+        if (!instance)
         {
             instance = this;
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
-        else
-            Destroy(gameObject);
+        else Destroy(gameObject);
 
         DontDestroyOnLoad(gameObject);
     }
-
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void Start()
-    {
-        SaveLoadSystem.instance.NewGame();
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -39,52 +37,44 @@ public class GameManager : MonoBehaviour
 
         if (scnName == "Main")
         {
+            AudioManager.instance.StopAllSounds();
+            AudioManager.instance.PlaySound("bgm");
+
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ExitBtn").GetComponent<Button>();
 
             if (creditsBtn || exitBtn)
             {
                 creditsBtn.onClick.RemoveAllListeners();
-                creditsBtn.onClick.AddListener(() => ChangeScene("CreditsScene"));
                 exitBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.AddListener(() => Application.Quit());
             }
         }
         else if (scnName == "Lobby")
         {
+            AudioManager.instance.StopAllSounds();
+            AudioManager.instance.PlaySound("bgm");
+
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
+            settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
+            settingsUI = GameObject.Find("SettingsUI");
             exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
 
-            if (playBtn || exitBtn)
+            if (playBtn || settingsBtn || settingsUI || exitBtn)
             {
+                settingsUI.SetActive(false);
+
                 playBtn.onClick.RemoveAllListeners();
                 playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
+                settingsBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.RemoveAllListeners();
-                exitBtn.onClick.AddListener(() => ChangeScene("Main"));
+                exitBtn.onClick.AddListener(() => GameManager.instance.ChangeScene("Main"));
             }
         }
     }
 
-    public void Update()
+    private void Start()
     {
-        // for testing
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.P))
-            SceneManager.LoadScene("jas");
-
-        if (SceneManager.GetActiveScene().name == "Main")
-        {
-            if (Input.anyKeyDown || Input.GetMouseButtonDown(0))
-                ASyncManager.instance.LoadLevelBtn("Lobby");
-                //ChangeScene("Lobby");
-        }
+        
     }
-    public void ChangeScene(string scn)
-    {
-        SceneManager.LoadScene(scn);
-    }
-
-    //public void AyncScene(string scn)
-    //{
-    //    Scene.
-    //}
 }
