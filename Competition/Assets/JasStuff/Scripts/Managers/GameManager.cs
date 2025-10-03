@@ -39,6 +39,9 @@ public class GameManager : MonoBehaviour
 
         if (scnName == "Main")
         {
+            AudioManager.instance.StopAllSounds();
+            AudioManager.instance.PlaySound("bgm");
+
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ExitBtn").GetComponent<Button>();
 
@@ -52,6 +55,9 @@ public class GameManager : MonoBehaviour
         }
         else if (scnName == "Lobby")
         {
+            AudioManager.instance.StopAllSounds();
+            AudioManager.instance.PlaySound("bgm");
+
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
 
