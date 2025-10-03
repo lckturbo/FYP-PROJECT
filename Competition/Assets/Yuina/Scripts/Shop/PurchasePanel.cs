@@ -13,33 +13,38 @@ public class PurchasePanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
 
     [Header("Repeat Settings")]
-    [SerializeField] private float repeatDelay = 0.3f;
-    [SerializeField] private float repeatRate = 0.1f;
+    [SerializeField] private float repeatDelay = 0.3f;   // delay before repeating
+    [SerializeField] private float repeatRate = 0.1f;    // speed of repeat when held
 
     private Item currentItem;
     private int quantity = 1;
+
     private float nextChangeTime;
+    private bool inputHeld;
 
     private PlayerInput playerInput;
     private InputAction moveAction;
     private InputAction submitAction;
+    private InputAction cancelAction;
 
     public bool IsPurchasePanelActive => gameObject.activeSelf;
 
     private void Awake()
     {
-        // Get PlayerInput from NewPlayerMovement
+        // Find PlayerInput via NewPlayerMovement
         NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
         if (playerMovement != null)
         {
             playerInput = playerMovement.GetComponent<PlayerInput>();
             if (playerInput != null)
             {
-                //moveAction = playerInput.actions["Move"];
-                //moveAction.Enable();
+                moveAction = playerInput.actions["Move"];
+                submitAction = playerInput.actions["Submit"];
+                cancelAction = playerInput.actions["Cancel"];
 
-                //submitAction = playerInput.actions["Submit"];
-                //submitAction.Enable();
+                moveAction?.Enable();
+                submitAction?.Enable();
+                cancelAction?.Enable();
             }
         }
 
@@ -55,10 +60,10 @@ public class PurchasePanel : MonoBehaviour
         quantity = 1;
         UpdateQuantityText();
 
-        if (itemNameText != null) itemNameText.text = item.itemName;
-        if (priceText != null) priceText.text = item.price.ToString() + " G";
-        if (iconImage != null) iconImage.sprite = item.icon;
-        if (descriptionText != null) descriptionText.text = item.description;
+        if (itemNameText) itemNameText.text = item.itemName;
+        if (priceText) priceText.text = item.price + " G";
+        if (iconImage && item.icon) iconImage.sprite = item.icon;
+        if (descriptionText) descriptionText.text = item.description;
 
         gameObject.SetActive(true);
     }
@@ -66,6 +71,7 @@ public class PurchasePanel : MonoBehaviour
     public void Close()
     {
         gameObject.SetActive(false);
+        currentItem = null;
     }
 
     // ===============================
@@ -76,6 +82,7 @@ public class PurchasePanel : MonoBehaviour
         quantity = 1;
         UpdateQuantityText();
         nextChangeTime = 0f;
+        inputHeld = false;
     }
 
     private void Update()
@@ -85,36 +92,40 @@ public class PurchasePanel : MonoBehaviour
             OnConfirm();
         }
 
+        if (cancelAction != null && cancelAction.WasPressedThisFrame())
+        {
+            OnCancel();
+        }
+
         if (moveAction == null) return;
 
         Vector2 input = moveAction.ReadValue<Vector2>();
-        if (input == Vector2.zero) return;
+        HandleQuantityInput(input);
+    }
 
-        if (Time.time >= nextChangeTime)
+    private void HandleQuantityInput(Vector2 input)
+    {
+        if (input == Vector2.zero)
         {
-            int change = 0;
-
-            if (input.y > 0.5f) change = +1;
-            else if (input.y < -0.5f) change = -1;
-            else if (input.x > 0.5f) change = +10;
-            else if (input.x < -0.5f) change = -10;
-
-            if (change != 0)
-            {
-                quantity = Mathf.Max(1, quantity + change);
-                UpdateQuantityText();
-                nextChangeTime = Time.time + repeatRate;
-            }
+            inputHeld = false;
+            nextChangeTime = 0f;
+            return;
         }
 
-        if (input != Vector2.zero && nextChangeTime == 0f)
+        if (!inputHeld)
         {
+            ApplyChange(input);
+            inputHeld = true;
             nextChangeTime = Time.time + repeatDelay;
-            ApplyImmediateChange(input);
+        }
+        else if (Time.time >= nextChangeTime)
+        {
+            ApplyChange(input);
+            nextChangeTime = Time.time + repeatRate;
         }
     }
 
-    private void ApplyImmediateChange(Vector2 input)
+    private void ApplyChange(Vector2 input)
     {
         int change = 0;
 
@@ -133,7 +144,7 @@ public class PurchasePanel : MonoBehaviour
     private void UpdateQuantityText()
     {
         if (quantityText != null)
-            quantityText.text = "x" + quantity.ToString();
+            quantityText.text = "x" + quantity;
     }
 
     // ===============================
