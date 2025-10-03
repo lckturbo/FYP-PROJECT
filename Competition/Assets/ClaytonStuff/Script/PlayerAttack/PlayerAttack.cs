@@ -94,7 +94,6 @@ public class PlayerAttack : MonoBehaviour
         Debug.Log($"PlayerAttack stats applied: Range={characterStats.atkRange}, CD={characterStats.atkCD}");
     }
 
-
     private void OnAttackPerformed(InputAction.CallbackContext ctx)
     {
         if (Time.time < nextAttackTime) return;
@@ -106,18 +105,21 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-
         if (item.isBow)
             FireArrow();
         else
             AttackMelee();
 
-        //animator.SetBool("attack", false);
-        //this.GetComponent<PlayerInput>().enabled = true;
+        // --- Use atkCD from CharacterStats (fallback to attackRate) ---
+        float cd = characterStats != null && characterStats.atkCD > 0
+            ? characterStats.atkCD
+            : 1f / Mathf.Max(0.01f, attackRate);
 
-        nextAttackTime = Time.time + 1f / Mathf.Max(0.01f, attackRate);
-        //animator.ResetTrigger("attack");
+        nextAttackTime = Time.time + cd;
+
+        Debug.Log($"Attack performed. Cooldown: {cd} sec (Next attack at {nextAttackTime})");
     }
+
 
     private void FireArrow()
     {

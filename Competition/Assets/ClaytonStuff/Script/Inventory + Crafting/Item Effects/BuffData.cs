@@ -1,14 +1,15 @@
 using UnityEngine;
 
 /// <summary>
-/// Persistent container for the latest buff amount.
+/// Persistent container for the latest buff amount and target stats.
 /// </summary>
 public class BuffData : MonoBehaviour
 {
     public static BuffData instance;
 
-    public int latestAttackBuff = 0;  // Amount of buff to remove
-    public bool hasBuff = false;       // Whether a buff exists
+    public int latestAttackBuff = 0;        // Amount of buff to remove
+    public NewCharacterStats targetStats;   // Which character stats this buff belongs to
+    public bool hasBuff = false;            // Whether a buff exists
 
     private void Awake()
     {
@@ -23,15 +24,17 @@ public class BuffData : MonoBehaviour
         }
     }
 
-    public void StoreBuff(int amount)
+    public void StoreBuff(int amount, NewCharacterStats stats)
     {
         latestAttackBuff = amount;
+        targetStats = stats;
         hasBuff = true;
     }
 
     public void ClearBuff()
     {
         latestAttackBuff = 0;
+        targetStats = null;
         hasBuff = false;
     }
 }

@@ -1,13 +1,12 @@
 using UnityEngine;
-using System.Collections;
 
 public class PlayerBuffHandler : MonoBehaviour
 {
     [SerializeField] private NewCharacterStats stats;
 
     private int currentAttackBuff = 0;
-    private Coroutine activeBuffRoutine;
     private bool buffActive = false;
+    private float buffEndTime = 0f;   // timestamp when buff ends
 
     public bool IsBuffActive => buffActive;
 
@@ -34,38 +33,54 @@ public class PlayerBuffHandler : MonoBehaviour
     {
         if (stats == null || buffActive) return;
 
-        currentAttackBuff += amount;
+        currentAttackBuff = amount;
         stats.atkDmg += amount;
         buffActive = true;
 
-        // Store amount to BuffData for later removal
-        BuffData.instance?.StoreBuff(amount);
+        // Store amount + stats reference to BuffData for later cleanup
+        BuffData.instance?.StoreBuff(amount, stats);
 
         if (duration > 0)
-            activeBuffRoutine = StartCoroutine(AttackBuffRoutine(duration));
+        {
+            buffEndTime = Time.time + duration;  // set expiry timestamp
+        }
+        else
+        {
+            buffEndTime = 0f; // permanent until cleared manually
+        }
     }
 
-    private IEnumerator AttackBuffRoutine(float duration)
+    private void Update()
     {
-        yield return new WaitForSeconds(duration);
-        buffActive = false;
-        activeBuffRoutine = null;
-        // BuffData still keeps the amount until battle ends
+        if (buffActive && buffEndTime > 0f && Time.time >= buffEndTime)
+        {
+            // Expire buff when time is up
+            stats.atkDmg -= currentAttackBuff;
+            Debug.Log($"Buff expired: -{currentAttackBuff} atk");
+
+            currentAttackBuff = 0;
+            buffActive = false;
+
+            BuffData.instance?.ClearBuff();
+        }
     }
 
-    private void RemoveStoredBuff()
+    public void RemoveStoredBuff()
     {
         if (BuffData.instance != null && BuffData.instance.hasBuff)
         {
             int amount = BuffData.instance.latestAttackBuff;
+            NewCharacterStats target = BuffData.instance.targetStats;
 
-            stats.atkDmg -= amount;
-            currentAttackBuff -= amount;
+            if (target != null)
+            {
+                target.atkDmg -= amount;
+                Debug.LogWarning($"[Buff Removed] Character Stats: {target.name}, -{amount} atk, atk now {target.atkDmg}");
+            }
+
+            currentAttackBuff = 0;
             buffActive = false;
-
             BuffData.instance.ClearBuff();
-
-            Debug.Log($"Buff removed: -{amount} atk");
         }
     }
 }

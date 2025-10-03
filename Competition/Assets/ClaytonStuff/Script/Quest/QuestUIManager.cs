@@ -21,7 +21,17 @@ public class QuestUIManager : MonoBehaviour
     private void Start()
     {
         questManager = FindObjectOfType<QuestManager>();
+
+        //  Replay Quest Complete popups for already finished quests
+        if (questManager != null)
+        {
+            foreach (var questData in questManager.completedQuests)
+            {
+                ShowQuestComplete(questData.questName);
+            }
+        }
     }
+
     private void Update()
     {
         if (questManager == null) return;
