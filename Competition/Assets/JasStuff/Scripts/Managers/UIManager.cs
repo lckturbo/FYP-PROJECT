@@ -15,6 +15,11 @@ public class UIManager : MonoBehaviour
     [Header("UIs")]
     [SerializeField] private GameObject settingsUI;
 
+    [Header("Settings")]
+    [SerializeField] private Slider BGMSlider;
+    [SerializeField] private Slider SFXSlider;
+    private bool isOpen;
+
     private void Awake()
     {
         if (!instance)
@@ -60,21 +65,35 @@ public class UIManager : MonoBehaviour
             settingsUI = GameObject.Find("SettingsUI");
             exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
 
-            if (playBtn || settingsBtn || settingsUI || exitBtn)
+            if (settingsUI)
             {
-                settingsUI.SetActive(false);
+                BGMSlider = GameObject.Find("BGMSlider").GetComponent<Slider>();
+                SFXSlider = GameObject.Find("SFXSlider").GetComponent<Slider>();
 
+                if(BGMSlider || SFXSlider)
+                {
+                    BGMSlider.onValueChanged.RemoveAllListeners();
+                    //BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
+                    //BGMSlider.value = Mathf.Clamp01(AudioManager.instance.GetBgmVol());
+                    SFXSlider.onValueChanged.RemoveAllListeners();
+                }
+                settingsUI.SetActive(false);
+            }
+            if (playBtn || settingsBtn || exitBtn)
+            {
                 playBtn.onClick.RemoveAllListeners();
                 playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
                 settingsBtn.onClick.RemoveAllListeners();
+                settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
                 exitBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.AddListener(() => GameManager.instance.ChangeScene("Main"));
             }
         }
     }
 
-    private void Start()
+    private void ToggleSettings(bool v)
     {
-        
+        isOpen = v;
+        settingsUI.SetActive(v);
     }
 }

@@ -53,11 +53,26 @@ public class AudioManager : MonoBehaviour
     }
     public void SetBgmVol(float vol)
     {
+        if (vol <= 0.0001f) vol = 0.0001f; 
         audioMixer.SetFloat("bgmVol", Mathf.Log10(vol) * 20);
     }
+
     public void SetSFXVol(float vol)
     {
+        if (vol <= 0.0001f) vol = 0.0001f;
         audioMixer.SetFloat("sfxVol", Mathf.Log10(vol) * 20);
+    }
+
+    public float GetBgmVol()
+    {
+        audioMixer.GetFloat("bgmVol", out float value);
+        return Mathf.Pow(10, value / 20f); 
+    }
+
+    public float GetSFXVol()
+    {
+        audioMixer.GetFloat("sfxVol", out float value);
+        return Mathf.Pow(10, value / 20f);
     }
 }
 
