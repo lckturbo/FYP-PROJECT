@@ -34,12 +34,13 @@ public class ShopTrigger : MonoBehaviour
                     playerInput = movement.GetComponent<PlayerInput>();
             }
 
-            if (playerInput != null)
+            if (playerInput != null && ShopManager.Instance.isSellOpen == false)
             {
                 var action = playerInput.actions["Interaction"];
                 if (action.WasPressedThisFrame())
                 {
                     ShopManager.Instance.ToggleShop();
+                    
                 }
             }
         }
@@ -65,9 +66,13 @@ public class ShopTrigger : MonoBehaviour
 
 
             //  Auto close when leaving range
-            if (ShopManager.Instance && ShopManager.Instance.IsShopActive)
+            if (ShopManager.Instance && ShopManager.Instance.IsShopActive && ShopManager.Instance.isSellOpen == false)
             {
                 ShopManager.Instance.CloseShop();
+            }
+            else
+            {
+                ShopManager.Instance.CloseSellMenu();
             }
         }
     }

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 [System.Serializable]
 public class CartEntry
@@ -37,6 +38,14 @@ public class ShopManager : MonoBehaviour
 
     [Header("Panels")]
     [SerializeField] private PurchasePanel purchasePanel;
+
+    [Header("Sell Menu")]
+    [SerializeField] private GameObject sellUI;
+    [SerializeField] private RectTransform sellContent;
+    [SerializeField] private GameObject sellItemButtonPrefab;
+    [SerializeField] private TextMeshProUGUI sellMoneyText;
+
+    public bool isSellOpen = false;
 
     private bool isOpen = false;
     private List<CartEntry> cart = new();
@@ -203,6 +212,103 @@ public class ShopManager : MonoBehaviour
             }
         }
     }
+
+    private void PopulateSellMenu()
+    {
+        if (playerInventory == null) return;
+
+        // Clear old buttons
+        foreach (Transform child in sellContent)
+            Destroy(child.gameObject);
+
+        // Add all items from main + sub inventory
+        List<InventorySlot> allItems = new List<InventorySlot>();
+        allItems.AddRange(playerInventory.mainInventory);
+        allItems.AddRange(playerInventory.subInventory);
+
+        foreach (var slot in allItems)
+        {
+            GameObject buttonObj = Instantiate(sellItemButtonPrefab, sellContent);
+            Transform iconTrans = buttonObj.transform.Find("Image");
+            TextMeshProUGUI nameText = buttonObj.transform.Find("Name")?.GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI priceText = buttonObj.transform.Find("Price")?.GetComponent<TextMeshProUGUI>();
+            Button buttonComp = buttonObj.GetComponentInChildren<Button>();
+
+            if (nameText != null)
+                nameText.text = $"{slot.item.itemName} x{slot.quantity}";
+            if (priceText != null)
+                priceText.text = $"{slot.item.price / 2} G"; // sell price = 50% of buy price
+            if (iconTrans != null && slot.item.icon != null)
+            {
+                Image iconImage = iconTrans.GetComponent<Image>();
+                if (iconImage != null)
+                    iconImage.sprite = slot.item.icon;
+            }
+
+            if (buttonComp != null)
+            {
+                Item localItem = slot.item; //  capture a local copy
+                buttonComp.onClick.AddListener(() => SellItem(localItem));
+
+            }
+        }
+
+
+        UpdateSellMoneyUI();
+    }
+
+    private void SellItem(Item item)
+    {
+        if (playerInventory == null || !playerInventory.HasItem(item)) return;
+
+        // Remove 1 item from inventory
+        playerInventory.RemoveItem(item, 1);
+
+        // Give money to player (example: 50% of price)
+        int sellPrice = item.price / 2;
+        playerInventory.AddMoney(sellPrice);
+
+        // Update UI
+        PopulateSellMenu();
+        UpdateSellMoneyUI();
+        ShowMessage($"Sold 1 x {item.itemName} for {sellPrice} G!");
+        inventoryUIManager.RefreshUI();
+    }
+
+    private void UpdateSellMoneyUI()
+    {
+        if (sellMoneyText != null && playerInventory != null)
+            sellMoneyText.text = $"Money: {playerInventory.Money} G";
+    }
+
+    public void ToggleSellMenu()
+    {
+        if (isSellOpen)
+        {
+            CloseSellMenu();
+            OpenShop();
+        }
+        else
+        {
+            OpenSellMenu();
+            CloseShop(); // optional, close the buy shop
+        }
+    }
+
+
+    public void OpenSellMenu()
+    {
+        if (sellUI != null) sellUI.SetActive(true);
+        isSellOpen = true;
+        PopulateSellMenu();
+    }
+
+    public void CloseSellMenu()
+    {
+        if (sellUI != null) sellUI.SetActive(false);
+        isSellOpen = false;
+    }
+
 
     /// <summary>
     /// ‘I‘ð‚³‚ê‚½UI‚ðScrollRect“à‚ÉŽû‚ß‚é

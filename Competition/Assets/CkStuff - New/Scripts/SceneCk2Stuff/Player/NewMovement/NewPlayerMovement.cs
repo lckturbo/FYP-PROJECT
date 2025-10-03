@@ -94,7 +94,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             animator.SetBool("moving", false);
         }
 
-        Debug.Log("[NewPlayerMovement] moving2; " + animator.GetBool("moving"));
+        //Debug.Log("[NewPlayerMovement] moving2; " + animator.GetBool("moving"));
 
         // ?? Check for B key to print stats
         if (Keyboard.current.bKey.wasPressedThisFrame)
