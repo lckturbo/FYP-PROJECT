@@ -26,7 +26,7 @@ public class ASyncManager : MonoBehaviour
         if (isLoading) return;
 
         isLoading = true;
-        mainScreen.SetActive(false);
+        if(mainScreen) mainScreen.SetActive(false);
         loadingScreen.SetActive(true);
 
         StartCoroutine(LoadLevelAsync(levelToLoad));
