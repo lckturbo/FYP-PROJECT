@@ -1591,6 +1591,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9fad20d47aa9c08429affeea9581f166, type: 2}
   - {fileID: 11400000, guid: 031b349ba8b81d04683629a62f37838c, type: 2}
   - {fileID: 11400000, guid: 80f706f4144cabd49a2cf1e95cad8ad3, type: 2}
+  - {fileID: 11400000, guid: d2c97b0f4dbd12a4fa99b6c03b2f7f5f, type: 2}
   purchasePanel: {fileID: 469413582}
   sellUI: {fileID: 673619995}
   sellContent: {fileID: 1871233576}
@@ -9621,7 +9622,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1393981009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12055,7 +12056,7 @@ RectTransform:
   m_Father: {fileID: 1034913285}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
