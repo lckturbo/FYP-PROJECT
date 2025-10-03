@@ -43,11 +43,6 @@ public class SaveLoadSystem : MonoBehaviour
             dataPersistenceObjs.Add(obj);
     }
 
-    private void Start()
-    {
-        NewGame(); // testing for now
-    }
-
     public void NewGame(bool keepCharIndex = false)
     {
         int savedIndex = -1;
@@ -56,6 +51,8 @@ public class SaveLoadSystem : MonoBehaviour
             savedIndex = gameData.selectedCharacterIndex;
 
         gameData = new GameData();
+
+        if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
 
         if (keepCharIndex)
             gameData.selectedCharacterIndex = savedIndex;
@@ -77,21 +74,23 @@ public class SaveLoadSystem : MonoBehaviour
         }
         Debug.Log("Loaded: " + gameData.playerPosition);
     }
-    public void SaveGame(bool battleMode = true)
+    public void SaveGame(bool savePlayer = true, bool saveEnemies = true)
     {
-        if (gameData == null) gameData = new GameData();
+        if (gameData == null)
+            gameData = new GameData();
 
-        if (battleMode)
+        dataPersistenceObjs = FindAllDataPersistenceObjects();
+
+        foreach (IDataPersistence dataObj in dataPersistenceObjs)
         {
-            dataPersistenceObjs = FindAllDataPersistenceObjects();
+            if (!savePlayer && dataObj.GetType().Name.Contains("Player")) continue;
 
-            // pass data to other scripts so they can update
-            foreach (IDataPersistence dataObjs in dataPersistenceObjs)
-            {
-                dataObjs.SaveData(ref gameData);
-            }
-            Debug.Log("Saved: " + gameData.playerPosition);
+            if (!saveEnemies && dataObj is EnemyTracker) continue;
+
+            dataObj.SaveData(ref gameData);
         }
+
+        Debug.Log($"Saved Game | Player: {savePlayer} | Enemies: {saveEnemies}");
 
         // save data to a file using data handler
         fileDataHandler.Save(gameData);

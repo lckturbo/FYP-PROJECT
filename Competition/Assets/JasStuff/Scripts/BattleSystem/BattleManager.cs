@@ -71,7 +71,10 @@ public class BattleManager : MonoBehaviour
             if (!string.IsNullOrEmpty(enemyPartyID))
             {
                 if (EnemyTracker.instance)
+                {
                     EnemyTracker.instance.MarkDefeated(enemyPartyID);
+                    SaveLoadSystem.instance.SaveGame(false, true);
+                }
             }
         }
         else
@@ -80,7 +83,7 @@ public class BattleManager : MonoBehaviour
 
             // TODO: go back sample scene (reset every progress) -> when leader died // FOR ALPHA
             SaveLoadSystem.instance.NewGame(true);
-            SaveLoadSystem.instance.SaveGame(false);
+            SaveLoadSystem.instance.SaveGame(false, false);
         }
         OnGlobalBattleEnd?.Invoke(enemyPartyID, playerWon);
 
