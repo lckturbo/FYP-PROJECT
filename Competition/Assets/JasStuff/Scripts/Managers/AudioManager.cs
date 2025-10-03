@@ -53,11 +53,11 @@ public class AudioManager : MonoBehaviour
     }
     public void SetBgmVol(float vol)
     {
-        
+        audioMixer.SetFloat("bgmVol", Mathf.Log10(vol) * 20);
     }
     public void SetSFXVol(float vol)
     {
-
+        audioMixer.SetFloat("sfxVol", Mathf.Log10(vol) * 20);
     }
 }
 

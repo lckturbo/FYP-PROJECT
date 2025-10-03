@@ -3,6 +3,7 @@ using UnityEngine;
 public class SettingsManager : MonoBehaviour, IDataPersistence
 {
     public static SettingsManager instance;
+    [SerializeField] 
 
     private void Awake()
     {

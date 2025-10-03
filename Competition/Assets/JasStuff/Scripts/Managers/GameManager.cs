@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -6,69 +7,19 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    [SerializeField] private Button playBtn;
-    [SerializeField] private Button creditsBtn;
-    [SerializeField] private Button exitBtn;
-
     private void Awake()
     {
         if (instance == null)
-        {
             instance = this;
-            SceneManager.sceneLoaded += OnSceneLoaded;
-        }
         else
             Destroy(gameObject);
 
         DontDestroyOnLoad(gameObject);
     }
 
-    private void OnDestroy()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
     private void Start()
     {
         SaveLoadSystem.instance.NewGame();
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        string scnName = scene.name;
-
-        if (scnName == "Main")
-        {
-            AudioManager.instance.StopAllSounds();
-            AudioManager.instance.PlaySound("bgm");
-
-            creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
-            exitBtn = GameObject.Find("ExitBtn").GetComponent<Button>();
-
-            if (creditsBtn || exitBtn)
-            {
-                creditsBtn.onClick.RemoveAllListeners();
-                creditsBtn.onClick.AddListener(() => ChangeScene("CreditsScene"));
-                exitBtn.onClick.RemoveAllListeners();
-                exitBtn.onClick.AddListener(() => Application.Quit());
-            }
-        }
-        else if (scnName == "Lobby")
-        {
-            AudioManager.instance.StopAllSounds();
-            AudioManager.instance.PlaySound("bgm");
-
-            playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
-            exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
-
-            if (playBtn || exitBtn)
-            {
-                playBtn.onClick.RemoveAllListeners();
-                playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
-                exitBtn.onClick.RemoveAllListeners();
-                exitBtn.onClick.AddListener(() => ChangeScene("Main"));
-            }
-        }
     }
 
     public void Update()
@@ -79,18 +30,12 @@ public class GameManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name == "Main")
         {
-            if (Input.anyKeyDown || Input.GetMouseButtonDown(0))
+            if ((Input.anyKeyDown || Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject())
                 ASyncManager.instance.LoadLevelBtn("Lobby");
-                //ChangeScene("Lobby");
         }
     }
     public void ChangeScene(string scn)
     {
         SceneManager.LoadScene(scn);
     }
-
-    //public void AyncScene(string scn)
-    //{
-    //    Scene.
-    //}
 }
