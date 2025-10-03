@@ -3,14 +3,12 @@ using UnityEngine;
 public class PlayerBuffHandler : MonoBehaviour
 {
     [SerializeField] private NewCharacterStats stats;
-    public static PlayerBuffHandler instance;
 
     private int currentAttackBuff = 0;
     private bool buffActive = false;
     private float buffEndTime = 0f;   // timestamp when buff ends
 
     public bool IsBuffActive => buffActive;
-
 
     private void OnEnable()
     {
@@ -39,8 +37,8 @@ public class PlayerBuffHandler : MonoBehaviour
         stats.atkDmg += amount;
         buffActive = true;
 
-        // Store amount to BuffData for later cleanup
-        BuffData.instance?.StoreBuff(amount);
+        // Store amount + stats reference to BuffData for later cleanup
+        BuffData.instance?.StoreBuff(amount, stats);
 
         if (duration > 0)
         {
@@ -72,14 +70,17 @@ public class PlayerBuffHandler : MonoBehaviour
         if (BuffData.instance != null && BuffData.instance.hasBuff)
         {
             int amount = BuffData.instance.latestAttackBuff;
+            NewCharacterStats target = BuffData.instance.targetStats;
 
-            stats.atkDmg -= amount;
+            if (target != null)
+            {
+                target.atkDmg -= amount;
+                Debug.LogWarning($"[Buff Removed] Character Stats: {target.name}, -{amount} atk, atk now {target.atkDmg}");
+            }
+
             currentAttackBuff = 0;
             buffActive = false;
-
             BuffData.instance.ClearBuff();
-
-            Debug.LogWarning($"[Buff Removed] Character: {gameObject.name}, Stats ID: {stats.name}, -{amount} atk, atk now {stats.atkDmg}");
         }
     }
 }
