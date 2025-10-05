@@ -12,7 +12,7 @@ public class QuestUIManager : MonoBehaviour
     [Header("Quest Complete Popup")]
     [SerializeField] private GameObject questCompletePrefab; // prefab for popup
     [SerializeField] private Transform popupParent; // usually a Canvas
-    [SerializeField] private float popupDuration = 2f;
+  //  [SerializeField] private float popupDuration = 2f;
 
     private Dictionary<Quest, GameObject> activeQuestEntries = new Dictionary<Quest, GameObject>();
 
