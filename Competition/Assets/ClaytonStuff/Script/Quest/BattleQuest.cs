@@ -30,7 +30,7 @@ public class BattleQuest : Quest
             if (!completedTargets[i] && battleData.targetEnemyPartyIDs[i] == defeatedPartyID)
             {
                 completedTargets[i] = true;
-                Debug.Log($"Target {defeatedPartyID} completed!");
+                Debug.Log($"Target {defeatedPartyID} completed! ({GetProgressText()})");
             }
         }
 
@@ -49,6 +49,21 @@ public class BattleQuest : Quest
         {
             CompleteQuest();
         }
+    }
+
+    //  New: Report progress like "1/2 defeated"
+    public override string GetProgressText()
+    {
+        if (completedTargets == null || completedTargets.Length == 0)
+            return "No targets";
+
+        int defeatedCount = 0;
+        foreach (bool done in completedTargets)
+        {
+            if (done) defeatedCount++;
+        }
+
+        return $"{defeatedCount}/{completedTargets.Length} defeated";
     }
 
     private void OnDestroy()

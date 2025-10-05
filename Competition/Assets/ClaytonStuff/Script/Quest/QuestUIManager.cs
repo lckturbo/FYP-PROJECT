@@ -45,21 +45,20 @@ public class QuestUIManager : MonoBehaviour
             }
         }
 
-        //  Update quest entries only if it's a CollectionQuestRuntime
+        //  Update quest entries for any quest that has progress text
         foreach (var entry in activeQuestEntries)
         {
-            if (entry.Key is CollectionQuestRuntime) // check type
+            TextMeshProUGUI text = entry.Value.GetComponentInChildren<TextMeshProUGUI>();
+            if (text != null)
             {
-                TextMeshProUGUI text = entry.Value.GetComponentInChildren<TextMeshProUGUI>();
-                if (text != null)
-                {
-                    text.text =
-                        $"{entry.Key.questData.description}\n" +
-                        $"<size=80%>{entry.Key.questData.questName} ({entry.Key.GetProgressText()})</size>";
-                }
+                string progress = entry.Key.GetProgressText(); // may return empty if not implemented
+                text.text = $"{entry.Key.questData.questName}\n<size=80%>{entry.Key.questData.description}";
 
+                if (!string.IsNullOrEmpty(progress))
+                    text.text += $"\n<color=#CCCCCC><size=75%>{progress}</size></color>";
             }
         }
+
 
         // Remove completed quests
         List<Quest> toRemove = new List<Quest>();
