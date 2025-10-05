@@ -206,7 +206,7 @@ public class ShopManager : MonoBehaviour
             if (buttonComp != null)
             {
                 buttonComp.onClick.AddListener(() => BuyItem(item));
-                buttonComp.onClick.AddListener(() => PurchaseItem(item, 1));
+                //buttonComp.onClick.AddListener(() => PurchaseItem(item, 1));
 
             }
         }

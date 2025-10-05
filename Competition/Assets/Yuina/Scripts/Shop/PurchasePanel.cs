@@ -27,6 +27,9 @@ public class PurchasePanel : MonoBehaviour
     private InputAction submitAction;
     private InputAction cancelAction;
 
+    [Header("Confirm UI")]
+    [SerializeField] private GameObject confirmButton; // Button shown with panel
+
     public bool IsPurchasePanelActive => gameObject.activeSelf;
 
     private void Awake()
@@ -66,13 +69,19 @@ public class PurchasePanel : MonoBehaviour
         if (descriptionText) descriptionText.text = item.description;
 
         gameObject.SetActive(true);
+
+        if (confirmButton != null)
+            confirmButton.SetActive(true); // show confirm button
     }
 
     public void Close()
     {
         gameObject.SetActive(false);
+        if (confirmButton != null)
+            confirmButton.SetActive(false); // hide confirm button
         currentItem = null;
     }
+
 
     // ===============================
     // Quantity Control
