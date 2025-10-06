@@ -83,6 +83,7 @@ GameObject:
   - component: {fileID: 8483604339182903694}
   - component: {fileID: 2993868756288602634}
   - component: {fileID: 301491934580173242}
+  - component: {fileID: 5250839774030710301}
   m_Layer: 8
   m_Name: Journalist
   m_TagString: Player
@@ -260,6 +261,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
   useStatsDirectly: 1
+  anim: {fileID: 0}
 --- !u!95 &6885134644018083666
 Animator:
   serializedVersion: 5
@@ -405,3 +407,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: afedffbe4652cdb459b80bac67094ea3, type: 2}
+--- !u!114 &5250839774030710301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 334815209170a1c41a20a19fdabd8e07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

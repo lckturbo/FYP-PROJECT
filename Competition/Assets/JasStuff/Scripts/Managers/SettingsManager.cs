@@ -23,9 +23,13 @@ public class SettingsManager : MonoBehaviour, IDataPersistence
     }
     public void LoadData(GameData data)
     {
+        AudioManager.instance.SetBgmVol(data.bgmVolume);
+        AudioManager.instance.SetSFXVol(data.sfxVolume);
     }
 
     public void SaveData(ref GameData data)
     {
+        data.bgmVolume = AudioManager.instance.GetBgmVol();
+        data.sfxVolume = AudioManager.instance.GetSFXVol();
     }
 }
