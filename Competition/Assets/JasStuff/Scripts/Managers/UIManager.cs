@@ -1,8 +1,9 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class UIManager : MonoBehaviour, IDataPersistence
 {
     public static UIManager instance;
 
@@ -18,6 +19,7 @@ public class UIManager : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private Slider BGMSlider;
     [SerializeField] private Slider SFXSlider;
+    [SerializeField] private Button backBtn;
     private bool isOpen;
 
     private void Awake()
@@ -43,8 +45,8 @@ public class UIManager : MonoBehaviour
         if (scnName == "Main")
         {
             AudioManager.instance.StopAllSounds();
-            //AudioManager.instance.PlaySound("bgm");
-            AudioManager.instance.PlaySound("MainMenuBGM");
+            AudioManager.instance.PlaySound("bgm");
+            //AudioManager.instance.PlaySound("MainMenuBGM");
 
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ExitBtn").GetComponent<Button>();
@@ -63,22 +65,31 @@ public class UIManager : MonoBehaviour
 
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
-            settingsUI = GameObject.Find("SettingsUI");
+            settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
             exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
 
             if (settingsUI)
             {
-                BGMSlider = GameObject.Find("BGMSlider").GetComponent<Slider>();
-                SFXSlider = GameObject.Find("SFXSlider").GetComponent<Slider>();
+                BGMSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "BGMSlider");
+                SFXSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "SFXSlider");
+                backBtn = settingsUI.GetComponentsInChildren<Button>(true).FirstOrDefault(s => s.name == "ExitBtn");
 
-                if(BGMSlider || SFXSlider)
+                if (BGMSlider || SFXSlider || backBtn)
                 {
                     BGMSlider.onValueChanged.RemoveAllListeners();
-                    //BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
-                    //BGMSlider.value = Mathf.Clamp01(AudioManager.instance.GetBgmVol());
+                    BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
+                    BGMSlider.value = AudioManager.instance.GetBgmVol();
+
                     SFXSlider.onValueChanged.RemoveAllListeners();
+                    SFXSlider.onValueChanged.AddListener(SettingsManager.instance.OnSFXVolumeChanged);
+                    SFXSlider.value = AudioManager.instance.GetSFXVol();
+
+                    backBtn.onClick.AddListener(() =>
+                    {
+                        ToggleSettings(false);
+                        SaveLoadSystem.instance.SaveGame();
+                    });
                 }
-                settingsUI.SetActive(false);
             }
             if (playBtn || settingsBtn || exitBtn)
             {
@@ -87,7 +98,11 @@ public class UIManager : MonoBehaviour
                 settingsBtn.onClick.RemoveAllListeners();
                 settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
                 exitBtn.onClick.RemoveAllListeners();
-                exitBtn.onClick.AddListener(() => GameManager.instance.ChangeScene("Main"));
+                exitBtn.onClick.AddListener(() =>
+                {
+                    GameManager.instance.ChangeScene("Main");
+                    SaveLoadSystem.instance.SaveGame();
+                });
             }
         }
     }
@@ -97,4 +112,12 @@ public class UIManager : MonoBehaviour
         isOpen = v;
         settingsUI.SetActive(v);
     }
+
+    public void LoadData(GameData data)
+    {
+        if (BGMSlider != null) BGMSlider.value = data.bgmVolume;
+        if (SFXSlider != null) SFXSlider.value = data.sfxVolume;
+    }
+
+    public void SaveData(ref GameData data) { }
 }

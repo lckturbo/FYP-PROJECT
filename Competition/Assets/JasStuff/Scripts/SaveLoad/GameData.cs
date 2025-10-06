@@ -11,6 +11,10 @@ public class GameData
 
     // enemies //
     public List<string> defeatedEnemies;
+
+    // audio //
+    public float bgmVolume;
+    public float sfxVolume;
     
     public GameData()
     {
@@ -18,5 +22,7 @@ public class GameData
         playerPosition = Vector2.zero;
         hasSavedPosition = false;
         defeatedEnemies = new List<string>();
+        bgmVolume = 1f;
+        sfxVolume = 1f;
     }
 }
