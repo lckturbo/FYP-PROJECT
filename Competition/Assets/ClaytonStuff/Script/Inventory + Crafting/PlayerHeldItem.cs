@@ -1,10 +1,12 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerHeldItem : MonoBehaviour
 {
     [Header("Attachment Point")]
-    [SerializeField] private Transform handPoint; // assign in inspector (empty GameObject at hand)
+    [SerializeField] private Transform handPoint;
+
+    [Header("Starting Equipment")]
+    [SerializeField] private Item startingItem; // assign your Sword item here in Inspector
 
     private GameObject currentHeld;
     private Item equippedItem;
@@ -15,31 +17,41 @@ public class PlayerHeldItem : MonoBehaviour
         playerMovement = GetComponent<NewPlayerMovement>();
     }
 
+    private void Start()
+    {
+        // Spawn with sword if set
+        if (startingItem != null)
+        {
+            DisplayItem(startingItem);
+
+            // Add to inventory
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.AddItemToInventory(startingItem, 1);
+            }
+            else
+            {
+                Debug.LogWarning("No InventoryManager found when trying to add starting item!");
+            }
+        }
+    }
+
     private void Update()
     {
         if (currentHeld != null && playerMovement != null)
         {
-            //  Flip the held item depending on facing direction
-            //if (playerMovement)
-            //{
-            //    currentHeld.transform.localRotation = Quaternion.Euler(0, 180, 0); // facing left
-            //}
-            //else
-            //{
-            //    currentHeld.transform.localRotation = Quaternion.identity; // facing right
-            //}
+            // Flip logic (optional)
         }
     }
+
     public void DisplayItem(Item item)
     {
-        // If no item, just hide what we're holding
         if (item == null || item.worldPrefab == null)
         {
             HideItem();
             return;
         }
 
-        // If we’re swapping to a different item, remove the old one
         if (currentHeld != null)
         {
             Destroy(currentHeld);
@@ -47,13 +59,10 @@ public class PlayerHeldItem : MonoBehaviour
         }
 
         equippedItem = item;
-
-        // Spawn the item
         currentHeld = Instantiate(item.worldPrefab, handPoint.position, Quaternion.identity, handPoint);
         currentHeld.transform.localPosition = Vector3.zero;
         currentHeld.transform.localRotation = Quaternion.identity;
     }
-
 
     public void RemoveItem()
     {
@@ -74,8 +83,6 @@ public class PlayerHeldItem : MonoBehaviour
         }
         equippedItem = null;
     }
-
-
 
     public Item GetEquippedItem()
     {

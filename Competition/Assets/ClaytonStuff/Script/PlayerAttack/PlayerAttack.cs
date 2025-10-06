@@ -93,9 +93,15 @@ public class PlayerAttack : MonoBehaviour
         characterStats = newStats;
         Debug.Log($"PlayerAttack stats applied: Range={characterStats.atkRange}, CD={characterStats.atkCD}");
     }
-
     private void OnAttackPerformed(InputAction.CallbackContext ctx)
     {
+        if (ShopManager.Instance != null &&
+            (ShopManager.Instance.IsShopActive || ShopManager.Instance.isSellOpen))
+        {
+            Debug.Log("Cannot attack while shop or sell menu is open!");
+            return;
+        }
+
         if (Time.time < nextAttackTime) return;
 
         var item = heldItem != null ? heldItem.GetEquippedItem() : null;
@@ -110,7 +116,6 @@ public class PlayerAttack : MonoBehaviour
         else
             AttackMelee();
 
-        // --- Use atkCD from CharacterStats (fallback to attackRate) ---
         float cd = characterStats != null && characterStats.atkCD > 0
             ? characterStats.atkCD
             : 1f / Mathf.Max(0.01f, attackRate);
@@ -119,7 +124,6 @@ public class PlayerAttack : MonoBehaviour
 
         Debug.Log($"Attack performed. Cooldown: {cd} sec (Next attack at {nextAttackTime})");
     }
-
 
     private void FireArrow()
     {

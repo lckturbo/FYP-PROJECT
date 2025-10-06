@@ -84,7 +84,7 @@ public class Chest : MonoBehaviour
 
         // Stop spinning and destroy chest after a moment
         opened = false;
-        Destroy(gameObject, 1f);
+        Destroy(gameObject);
     }
 
     private List<GameObject> RollDrops(int itemCount)
