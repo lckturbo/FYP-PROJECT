@@ -66,6 +66,9 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
             SetLayerRecursively(followerObj, LayerMask.NameToLayer("Ally"));
 
             Destroy(followerObj.GetComponentInChildren<NewPlayerMovement>());
+            Destroy(followerObj.GetComponentInChildren<PlayerHeldItem>());
+            Destroy(followerObj.GetComponentInChildren<PlayerAttack>());
+
             var follower = followerObj.AddComponent<PartyFollower>();
             follower.SetTarget(lastTarget);
             lastTarget = followerObj.transform;
