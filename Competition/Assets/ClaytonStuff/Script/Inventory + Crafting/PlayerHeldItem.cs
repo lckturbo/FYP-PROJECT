@@ -19,22 +19,29 @@ public class PlayerHeldItem : MonoBehaviour
 
     private void Start()
     {
-        // Spawn with sword if set
-        if (startingItem != null)
-        {
-            DisplayItem(startingItem);
+        if (startingItem == null)
+            return;
 
-            // Add to inventory
-            if (InventoryManager.Instance != null)
+        // Check if player already owns this item
+        if (InventoryManager.Instance != null)
+        {
+            if (InventoryManager.Instance.HasItem(startingItem))
             {
-                InventoryManager.Instance.AddItemToInventory(startingItem, 1);
+                Debug.Log($"Player already owns '{startingItem.itemName}'. Skipping spawn.");
+                return; // Don't spawn or add again
             }
-            else
-            {
-                Debug.LogWarning("No InventoryManager found when trying to add starting item!");
-            }
+
+            // Add to inventory and display
+            InventoryManager.Instance.AddItemToInventory(startingItem, 1);
+            DisplayItem(startingItem);
+            Debug.Log($"Spawned and added starting item: {startingItem.itemName}");
+        }
+        else
+        {
+            Debug.LogWarning("No InventoryManager found when trying to add starting item!");
         }
     }
+
 
     private void Update()
     {

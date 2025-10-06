@@ -30,18 +30,34 @@ public class PlayerInventory : MonoBehaviour
 
     public void AddItem(ShopItem item)
     {
+        if (item == null)
+        {
+            Debug.LogWarning("Tried to add null item to inventory!");
+            return;
+        }
+
+        // Check if item already exists
+        bool alreadyOwned = ownedItems.Exists(owned => owned.itemName == item.itemName);
+
+        if (alreadyOwned)
+        {
+            Debug.LogWarning($"Item '{item.itemName}' already in inventory! Not adding again.");
+            return;
+        }
+
         ownedItems.Add(item);
+        Debug.Log($"Added new item: {item.itemName}");
     }
+
 
     // Duplicate Check for Items with Multiple Possession Restrictions
     public bool HasItem(ShopItem item)
     {
-        foreach (var owned in ownedItems)
-        {
-            if (owned.itemName == item.itemName && owned.type == ItemType.Unique)
-                return true;
-        }
-        return false;
+        if (item.type != ItemType.Unique)
+            return false; // non-unique items can stack or repeat
+
+        return ownedItems.Exists(owned => owned.itemName == item.itemName);
     }
+
 
 }

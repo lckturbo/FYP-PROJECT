@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -21,6 +22,14 @@ public class DialogueManager : MonoBehaviour
     private DialogueLine currentLine;                   // Œ»Ý•\Ž¦’†‚Ìs
 
     public bool IsDialogueActive => dialogueUI.activeSelf;
+    public static bool IsDialogueActiveGlobal => Instance != null && Instance.IsDialogueActive;
+
+    private NewPlayerMovement playerMovement;
+
+    private void Start()
+    {
+        playerMovement = FindObjectOfType<NewPlayerMovement>();
+    }
 
     private void Awake()
     {
@@ -39,13 +48,12 @@ public class DialogueManager : MonoBehaviour
     public void StartDialogue(DialogueData dialogueData)
     {
         dialogueUI.SetActive(true);
-        //PlayerController.Instance.SetCanMove(false);
+        if (playerMovement != null)
+            playerMovement.GetComponent<PlayerInput>().enabled = false;
 
         linesQueue.Clear();
         foreach (var line in dialogueData.lines)
-        {
             linesQueue.Enqueue(line);
-        }
 
         DisplayNextLine();
     }
@@ -111,9 +119,9 @@ public class DialogueManager : MonoBehaviour
     private void EndDialogue()
     {
         dialogueUI.SetActive(false);
-        //PlayerController.Instance.SetCanMove(true);
+        if (playerMovement != null)
+            playerMovement.GetComponent<PlayerInput>().enabled = true;
     }
-
 
 
 }

@@ -102,4 +102,29 @@ public class InventoryManager : MonoBehaviour
         var ui = FindObjectOfType<InventoryUIManager>();
         if (ui != null) ui.RefreshUI();
     }
+
+    public bool HasItem(Item item)
+    {
+        if (PlayerInventory == null)
+        {
+            Debug.LogWarning("No PlayerInventory assigned!");
+            return false;
+        }
+
+        // Check main inventory
+        foreach (var slot in PlayerInventory.mainInventory)
+        {
+            if (slot.item != null && slot.item.itemName == item.itemName)
+                return true;
+        }
+
+        // Check sub inventory
+        foreach (var slot in PlayerInventory.subInventory)
+        {
+            if (slot.item != null && slot.item.itemName == item.itemName)
+                return true;
+        }
+
+        return false;
+    }
 }

@@ -61,6 +61,21 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
     void Update()
     {
+        // Disable movement when dialogue is open
+        if (DialogueManager.IsDialogueActiveGlobal)
+        {
+            moveDir = Vector2.zero;
+            animator.SetBool("moving", false);
+            rb.velocity = Vector2.zero;
+            return;
+        }
+
+        if (GetComponent<PlayerAttack>().IsAttacking)
+        {
+            moveDir = Vector2.zero;
+            animator.SetBool("moving", false);
+            return;
+        }
         if (GetComponent<PlayerAttack>().IsAttacking)
         {
             moveDir = Vector2.zero;
