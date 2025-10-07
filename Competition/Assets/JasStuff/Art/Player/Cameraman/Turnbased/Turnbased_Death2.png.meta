@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ce7cf649fe91d9a4b9e48aef91926622
+guid: e7949acdde2ff084a812590c4553a212
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -69,7 +69,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -110,13 +110,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: InitiateAttack_Right_0
+      name: Turnbased_Death2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -124,41 +124,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 930e27b7f5b0d514eb3dbfcb13dedb27
-      internalID: 94982637
+      spriteID: 06ffe970c869c564a88363007801bfda
+      internalID: 728308217
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: InitiateAttack_Right_1
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 97d763a0df8da4f4d9f88f85a927c043
-      internalID: 1721868475
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: InitiateAttack_Right_2
+      name: Turnbased_Death2_1
       rect:
         serializedVersion: 2
         x: 128
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,41 +145,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d039f39a172d9854e9618cec8db8e45f
-      internalID: 1316014198
+      spriteID: 4d9ea11000cfd8d41a154fe67e164568
+      internalID: 826936630
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: InitiateAttack_Right_3
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b48ddf4f3b9773e458035a6582c83483
-      internalID: -1336975331
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: InitiateAttack_Right_4
+      name: Turnbased_Death2_2
       rect:
         serializedVersion: 2
         x: 256
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -208,41 +166,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 135736bce7d6eb742846cc52f9a4c0a1
-      internalID: -943173250
+      spriteID: c7e408a89ab420a4fbbd58db1a7fea4d
+      internalID: 631719847
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: InitiateAttack_Right_5
-      rect:
-        serializedVersion: 2
-        x: 320
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a907ca51c54302c4bb6d57419e6ba977
-      internalID: -1549609920
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: InitiateAttack_Right_6
+      name: Turnbased_Death2_3
       rect:
         serializedVersion: 2
         x: 384
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -250,41 +187,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b60e4576595a63a4c91a67b8410f0d46
-      internalID: -1896764990
+      spriteID: 1b3e29aeb6794264e9542307c7d1506e
+      internalID: -1080843524
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: InitiateAttack_Right_7
-      rect:
-        serializedVersion: 2
-        x: 448
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a1fc47d9acabf3c42b6d5b27e166b7c8
-      internalID: -527961188
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: InitiateAttack_Right_8
+      name: Turnbased_Death2_4
       rect:
         serializedVersion: 2
         x: 512
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -292,41 +208,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1c88b8eb50bd05e41a6cbe255ea7d95d
-      internalID: -1099509744
+      spriteID: 2b9a3792b30b5a44a8487a2a2d601bb8
+      internalID: -601900455
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: InitiateAttack_Right_9
-      rect:
-        serializedVersion: 2
-        x: 576
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1cc8c08ec9438fd4cad19b8fc94947f3
-      internalID: 697595105
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: InitiateAttack_Right_10
+      name: Turnbased_Death2_5
       rect:
         serializedVersion: 2
         x: 640
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -334,41 +229,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7b74abfe4d1737145b803efa11dc4ecd
-      internalID: 1308829055
+      spriteID: 881e125ac45663c429496c60f1282d68
+      internalID: -1941936879
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: InitiateAttack_Right_11
-      rect:
-        serializedVersion: 2
-        x: 704
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 3fedc2b15e3ad3141ba2669a270a02de
-      internalID: 251557645
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: InitiateAttack_Right_12
+      name: Turnbased_Death2_6
       rect:
         serializedVersion: 2
         x: 768
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -376,20 +250,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 166bae02ecda0944bac4f736a0531644
-      internalID: 1407845750
+      spriteID: efa6201acea1195438aaad20cdeaabb6
+      internalID: -230588079
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: InitiateAttack_Right_13
+      name: Turnbased_Death2_7
       rect:
         serializedVersion: 2
-        x: 832
+        x: 896
         y: 0
-        width: 64
-        height: 64
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -397,8 +271,176 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 187c8d2434d13dc47a5b85d673d62757
-      internalID: 839975338
+      spriteID: bda9b2f2f5b633a4eb78157abaff4fab
+      internalID: -95189811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_8
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93e7efc0d3c08164cb7125447dfeacd6
+      internalID: -1745051869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_9
+      rect:
+        serializedVersion: 2
+        x: 1152
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f9fe1b67372d4e498cc5327a4b657b6
+      internalID: 1094378182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_10
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 37670cd8c7c3e594abf55faad52f0bf1
+      internalID: 1473273804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_11
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7fdf0b357406dd744b8ee6552beb279e
+      internalID: -113263366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_12
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c5aed195f887d44abf5c7467359e2b9
+      internalID: 1142372081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_13
+      rect:
+        serializedVersion: 2
+        x: 1664
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc10d2a9e8bcb8644a695f7caa74ac34
+      internalID: -560134273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_14
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: baaa4819ba98ee84583b146be4e075f0
+      internalID: -1097895245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Turnbased_Death2_15
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 0
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2662ec8ffdc3b6a458c32e1fdf2eac39
+      internalID: 1940388201
       vertices: []
       indices: 
       edges: []
@@ -414,20 +456,22 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      InitiateAttack_Right_0: 94982637
-      InitiateAttack_Right_1: 1721868475
-      InitiateAttack_Right_10: 1308829055
-      InitiateAttack_Right_11: 251557645
-      InitiateAttack_Right_12: 1407845750
-      InitiateAttack_Right_13: 839975338
-      InitiateAttack_Right_2: 1316014198
-      InitiateAttack_Right_3: -1336975331
-      InitiateAttack_Right_4: -943173250
-      InitiateAttack_Right_5: -1549609920
-      InitiateAttack_Right_6: -1896764990
-      InitiateAttack_Right_7: -527961188
-      InitiateAttack_Right_8: -1099509744
-      InitiateAttack_Right_9: 697595105
+      Turnbased_Death2_0: 728308217
+      Turnbased_Death2_1: 826936630
+      Turnbased_Death2_10: 1473273804
+      Turnbased_Death2_11: -113263366
+      Turnbased_Death2_12: 1142372081
+      Turnbased_Death2_13: -560134273
+      Turnbased_Death2_14: -1097895245
+      Turnbased_Death2_15: 1940388201
+      Turnbased_Death2_2: 631719847
+      Turnbased_Death2_3: -1080843524
+      Turnbased_Death2_4: -601900455
+      Turnbased_Death2_5: -1941936879
+      Turnbased_Death2_6: -230588079
+      Turnbased_Death2_7: -95189811
+      Turnbased_Death2_8: -1745051869
+      Turnbased_Death2_9: 1094378182
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

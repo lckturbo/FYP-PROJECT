@@ -4,9 +4,9 @@ using System.Collections.Generic;
 public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
-    [SerializeField] private float followDistance = 0.7f;
-    [SerializeField] private float moveSpeed = 4f;
-    [SerializeField] private float stopDistance = 0.2f;
+    [SerializeField] private float followDistance = 0.6f;
+    [SerializeField] private float moveSpeed = 3.8f;
+    [SerializeField] private float stopDistance = 0.25f;
 
     private Animator animator;
     private Vector2 lastMoveDirection;

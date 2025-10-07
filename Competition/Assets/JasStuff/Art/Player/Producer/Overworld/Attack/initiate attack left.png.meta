@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 1df52697451f95b43b7852d053aaa130
+guid: 3b3949a4ab9da734eb5238768d06aba7
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,7 +110,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: turnbased_idle_0
+      name: initiate attack left_0
       rect:
         serializedVersion: 2
         x: 0
@@ -124,14 +124,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ccbd99db8c80ee34aa936c05f1fe5b18
-      internalID: 2021607241
+      spriteID: 5bf293e2d7d87a94fa8cda87e759308f
+      internalID: 108746665
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_1
+      name: initiate attack left_1
       rect:
         serializedVersion: 2
         x: 64
@@ -145,14 +145,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 106d6b90bd4dbea49bd140e2ed2381e8
-      internalID: -1040127515
+      spriteID: a3aee8b1c50f5dc4c948948a44ca44e1
+      internalID: -257800570
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_2
+      name: initiate attack left_2
       rect:
         serializedVersion: 2
         x: 128
@@ -166,14 +166,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3a2485c2daf03ed40a4e6b9c1cee0fdb
-      internalID: -1394050277
+      spriteID: e125de568c175ae40b4f7cd23f9e46c3
+      internalID: 2015131773
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_3
+      name: initiate attack left_3
       rect:
         serializedVersion: 2
         x: 192
@@ -187,14 +187,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5c31130529d63084ea13d70ec98dc052
-      internalID: 1192782617
+      spriteID: 161d0f39fca56f14aaed1d4822c30c4c
+      internalID: -538039950
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_4
+      name: initiate attack left_4
       rect:
         serializedVersion: 2
         x: 256
@@ -208,14 +208,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b0ecd59c4c29efc4d8df6c6a2ef30279
-      internalID: -574022728
+      spriteID: 0546bcc45fe142e46b468d2fe6680868
+      internalID: -1474771643
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_5
+      name: initiate attack left_5
       rect:
         serializedVersion: 2
         x: 320
@@ -229,14 +229,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 587c30574657f0442bcb7d6a3ea94aea
-      internalID: 226334420
+      spriteID: 85f8bd3351992474699049e0efe06c7f
+      internalID: 240354925
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_6
+      name: initiate attack left_6
       rect:
         serializedVersion: 2
         x: 384
@@ -250,14 +250,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cf16d2a78f352f741a386e8bf118b26e
-      internalID: -1039704098
+      spriteID: 569c8aa0170a1264fb424a823237d406
+      internalID: 1017353408
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_7
+      name: initiate attack left_7
       rect:
         serializedVersion: 2
         x: 448
@@ -271,8 +271,176 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bce4ee89f7cf1f74bb3a78f5be102702
-      internalID: 829978276
+      spriteID: 667679d984415cc439d7395de0871273
+      internalID: 1458974487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_8
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d69e330db3134294684b4e83ae63a496
+      internalID: -2049666954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_9
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd13a676b62e37449ab408eeea04ee36
+      internalID: -1410778871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_10
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3518994bc656c1742b112d4fa9dcde40
+      internalID: 1409157715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_11
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62497eb91c0d1bf4a94be83ae54118f7
+      internalID: -2145711621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_12
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 69fe2aadcb3875a4eb62468d130878be
+      internalID: -575277051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_13
+      rect:
+        serializedVersion: 2
+        x: 832
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c81bba9a83620664d93653fc82b4550b
+      internalID: -1063096803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_14
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf9d26dde5824ab41b97f56360c0d8c0
+      internalID: 1175482265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: initiate attack left_15
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d6bf906ead19cc49b9e472c59ee072e
+      internalID: 48139353
       vertices: []
       indices: 
       edges: []
@@ -288,14 +456,22 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      turnbased_idle_0: 2021607241
-      turnbased_idle_1: -1040127515
-      turnbased_idle_2: -1394050277
-      turnbased_idle_3: 1192782617
-      turnbased_idle_4: -574022728
-      turnbased_idle_5: 226334420
-      turnbased_idle_6: -1039704098
-      turnbased_idle_7: 829978276
+      initiate attack left_0: 108746665
+      initiate attack left_1: -257800570
+      initiate attack left_10: 1409157715
+      initiate attack left_11: -2145711621
+      initiate attack left_12: -575277051
+      initiate attack left_13: -1063096803
+      initiate attack left_14: 1175482265
+      initiate attack left_15: 48139353
+      initiate attack left_2: 2015131773
+      initiate attack left_3: -538039950
+      initiate attack left_4: -1474771643
+      initiate attack left_5: 240354925
+      initiate attack left_6: 1017353408
+      initiate attack left_7: 1458974487
+      initiate attack left_8: -2049666954
+      initiate attack left_9: -1410778871
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

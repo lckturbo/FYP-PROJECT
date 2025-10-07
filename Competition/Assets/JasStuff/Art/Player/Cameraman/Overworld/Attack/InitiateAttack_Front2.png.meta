@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 1df52697451f95b43b7852d053aaa130
+guid: 233686f839b4d0b42af32c8b067c6589
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,7 +110,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: turnbased_idle_0
+      name: InitiateAttack_Front2_0
       rect:
         serializedVersion: 2
         x: 0
@@ -124,14 +124,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ccbd99db8c80ee34aa936c05f1fe5b18
-      internalID: 2021607241
+      spriteID: 8f09f1a916ff2f1459ded1f71bcaa58e
+      internalID: -1924180927
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_1
+      name: InitiateAttack_Front2_1
       rect:
         serializedVersion: 2
         x: 64
@@ -145,14 +145,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 106d6b90bd4dbea49bd140e2ed2381e8
-      internalID: -1040127515
+      spriteID: d1b6fc2e705dd5c41b43fc7e74e7d68f
+      internalID: -330880084
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_2
+      name: InitiateAttack_Front2_2
       rect:
         serializedVersion: 2
         x: 128
@@ -166,14 +166,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3a2485c2daf03ed40a4e6b9c1cee0fdb
-      internalID: -1394050277
+      spriteID: 444134a361092934a8827f8af03baae5
+      internalID: -467396929
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_3
+      name: InitiateAttack_Front2_3
       rect:
         serializedVersion: 2
         x: 192
@@ -187,14 +187,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5c31130529d63084ea13d70ec98dc052
-      internalID: 1192782617
+      spriteID: 404ed320bb8ebfd42b9bff1c59cfebcc
+      internalID: 717408680
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_4
+      name: InitiateAttack_Front2_4
       rect:
         serializedVersion: 2
         x: 256
@@ -208,14 +208,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b0ecd59c4c29efc4d8df6c6a2ef30279
-      internalID: -574022728
+      spriteID: fcc28ddda0d7b6a47a01cd141e50c2a3
+      internalID: -169116213
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_5
+      name: InitiateAttack_Front2_5
       rect:
         serializedVersion: 2
         x: 320
@@ -229,14 +229,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 587c30574657f0442bcb7d6a3ea94aea
-      internalID: 226334420
+      spriteID: d5db944370bcaa8479bdef11d9934bdf
+      internalID: -30202144
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_6
+      name: InitiateAttack_Front2_6
       rect:
         serializedVersion: 2
         x: 384
@@ -250,14 +250,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cf16d2a78f352f741a386e8bf118b26e
-      internalID: -1039704098
+      spriteID: 9d8ec0694f1655d4691b6ddace510660
+      internalID: -2049556541
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: turnbased_idle_7
+      name: InitiateAttack_Front2_7
       rect:
         serializedVersion: 2
         x: 448
@@ -271,8 +271,134 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bce4ee89f7cf1f74bb3a78f5be102702
-      internalID: 829978276
+      spriteID: 82fc05d6009af014eb05c94ed9afcabc
+      internalID: -1629092541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InitiateAttack_Front2_8
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4537b6961b1235488b77a130ffc2e7c
+      internalID: -316643659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InitiateAttack_Front2_9
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 635c2b044f62dd442b7f3b95d90b2b22
+      internalID: -1717547987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InitiateAttack_Front2_10
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35b6f02f194bde141a9683641ed2e055
+      internalID: 1128941410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InitiateAttack_Front2_11
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e235834b8bcf3348a390e5101f97a46
+      internalID: 1719383860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InitiateAttack_Front2_12
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd9b9546f72e41945af2f4aa008840c6
+      internalID: 1367212929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InitiateAttack_Front2_13
+      rect:
+        serializedVersion: 2
+        x: 832
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64ae0f2a078d39f4a96aa947bbca333b
+      internalID: 1220764151
       vertices: []
       indices: 
       edges: []
@@ -288,14 +414,20 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      turnbased_idle_0: 2021607241
-      turnbased_idle_1: -1040127515
-      turnbased_idle_2: -1394050277
-      turnbased_idle_3: 1192782617
-      turnbased_idle_4: -574022728
-      turnbased_idle_5: 226334420
-      turnbased_idle_6: -1039704098
-      turnbased_idle_7: 829978276
+      InitiateAttack_Front2_0: -1924180927
+      InitiateAttack_Front2_1: -330880084
+      InitiateAttack_Front2_10: 1128941410
+      InitiateAttack_Front2_11: 1719383860
+      InitiateAttack_Front2_12: 1367212929
+      InitiateAttack_Front2_13: 1220764151
+      InitiateAttack_Front2_2: -467396929
+      InitiateAttack_Front2_3: 717408680
+      InitiateAttack_Front2_4: -169116213
+      InitiateAttack_Front2_5: -30202144
+      InitiateAttack_Front2_6: -2049556541
+      InitiateAttack_Front2_7: -1629092541
+      InitiateAttack_Front2_8: -316643659
+      InitiateAttack_Front2_9: -1717547987
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
