@@ -1,12 +1,10 @@
 using UnityEngine;
-using System.Collections.Generic;
-
 public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
-    [SerializeField] private float followDistance = 0.6f;
-    [SerializeField] private float moveSpeed = 3.8f;
-    [SerializeField] private float stopDistance = 0.25f;
+    [SerializeField] private float followDistance = 0.75f;
+    [SerializeField] private float moveSpeed = 4.0f;
+    [SerializeField] private float stopDistance = 0.15f;
 
     private Animator animator;
     private Vector2 lastMoveDirection;

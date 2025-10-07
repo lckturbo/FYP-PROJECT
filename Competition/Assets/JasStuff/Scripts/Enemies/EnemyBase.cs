@@ -31,13 +31,15 @@ public abstract class EnemyBase : MonoBehaviour
     private bool reachedPath;
     private float currIdleTimer;
     private Waypoints targetwp;
+    private bool isAttacking;
+    private float attackCooldownTimer = 0f;
 
     [SerializeField] private float detectionDist;
     [SerializeField] private float sideOffSet; // left/right raycast
     [SerializeField] private float avoidanceStrength;
 
-    //public event Action<GameObject, float> OnDeath;
     public event Action<EnemyParty> OnAttackPlayer;
+    private Vector2 lastMoveDir = Vector2.down;
 
     private void OnEnable()
     {
@@ -75,15 +77,18 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.L))
             health.TakeDamage(10, enemyStats);
+
+        if (attackCooldownTimer > 0)
+            attackCooldownTimer -= Time.deltaTime;
     }
     protected virtual void Idle()
     {
-        if (animator) animator.Play("IdleBack");
-
         if (!BattleManager.instance.GetBattleMode())
         {
             aiPath.canMove = false;
             rb2d.velocity = Vector2.zero;
+            FaceDir(Vector2.zero);
+
             if (CanSeePlayer())
             {
                 enemyStates = EnemyStates.Chase;
@@ -93,7 +98,6 @@ public abstract class EnemyBase : MonoBehaviour
             if (!targetwp || !targetwp.isOccupied())
             {
                 targetwp = WayPointManager.instance.GetFreeWayPoint();
-                //if (targetwp) targetwp.SetOccupied(true);
             }
         }
 
@@ -123,14 +127,9 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (aiPath.reachedEndOfPath || aiPath.remainingDistance < 0.5f)
         {
-            //targetwp.SetOccupied(false);
-
             foreach (var neighbor in targetwp.nearestWaypoints)
             {
-                //if (!neighbor.isOccupied())
-                //{
                 targetwp = neighbor;
-                //targetwp.SetOccupied(true);
                 break;
                 //}
             }
@@ -209,7 +208,8 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Chase()
     {
-        if (!player) return;
+        if (isAttacking || !player) return;
+
         float dist = Vector2.Distance(rb2d.position, player.position);
 
         if (dist > enemyStats.chaseRange)
@@ -222,7 +222,12 @@ public abstract class EnemyBase : MonoBehaviour
         aiPath.canMove = true;
         aiPath.destination = player.position;
 
-        if (dist < enemyStats.atkRange)
+        if (aiPath.velocity.sqrMagnitude > 0.01f)
+            FaceDir(aiPath.velocity.normalized);
+        else
+            FaceDir(((Vector2)player.position - rb2d.position).normalized);
+
+        if (dist < enemyStats.atkRange && !isAttacking)
         {
             aiPath.canMove = false;
             enemyStates = EnemyStates.Attack;
@@ -231,17 +236,30 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Attack()
     {
-        if (!BattleManager.instance.GetBattleMode())
-        {
-            if (CanSeePlayer()) enemyStates = EnemyStates.Chase;
+        if (isAttacking || BattleManager.instance.GetBattleMode()) return;
 
-            // play "hit" animation (don't need to deduct player's health -> transition to jasBattle scene
-            BattleManager.instance.RegisterEnemy(this);
-            OnAttackPlayer.Invoke(GetComponent<EnemyParty>());
-            BattleManager.instance.SetBattleMode(true);
-        }
+        aiPath.canMove = false;
+        isAttacking = true;
 
+        Vector2 dir = ((Vector2)player.position - rb2d.position).normalized;
+        FaceDir(dir);
+
+        animator.SetTrigger("attack");
+    }
+
+    public void EndAttack()
+    {
+        isAttacking = false;
+        attackCooldownTimer = 1f;
         enemyStates = EnemyStates.Idle;
+    }
+
+
+    public virtual void TriggerAttack()
+    {
+        BattleManager.instance.RegisterEnemy(this);
+        OnAttackPlayer.Invoke(GetComponent<EnemyParty>());
+        BattleManager.instance.SetBattleMode(true);
     }
 
     protected abstract void BattleAttack();
@@ -251,15 +269,17 @@ public abstract class EnemyBase : MonoBehaviour
         if (!player) return false;
 
         float dist = Vector2.Distance(transform.position, player.position);
-
         if (dist > enemyStats.chaseRange)
             return false;
 
-        Vector2 distToPlayer = (player.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, distToPlayer, enemyStats.chaseRange, LayerMask.GetMask("Player"));
+        Vector2 dirToPlayer = (player.position - transform.position).normalized;
 
+        int mask = ~LayerMask.GetMask("Enemy");
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToPlayer, enemyStats.chaseRange, mask);
+        Debug.DrawRay(transform.position, dirToPlayer * enemyStats.chaseRange, Color.red);
         return hit.collider != null && hit.collider.CompareTag("Player");
     }
+
 
     // NORMAL -> ALL FSM
     // BATTLE -> IDLE(waiting turn) -> ATTACK
@@ -282,54 +302,26 @@ public abstract class EnemyBase : MonoBehaviour
             case EnemyStates.BattleAttack:
                 //BattleAttack();
                 break;
-                //case EnemyStates.Death:
-                //    //Death();
-                //    break;
         }
     }
-    //protected virtual void Death()
-    //{
-    //    // TODO: ANIMATION
-    //    //OnDeath?.Invoke(this.gameObject, deathTime);
-    //    //Destroy(gameObject, deathTime);
-    //}
 
     protected void FaceDir(Vector2 dir)
     {
-        if (!player || !animator) return;
+        if (!animator) return;
 
-        Vector2 moveDir = Vector2.zero;
+        animator.SetFloat("speed", dir.magnitude);
 
-        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+        if (dir.magnitude > 0.01f)
         {
-            SpriteRenderer sprite = GetComponent<SpriteRenderer>();
-            // move horizontal
-            if (dir.x > 0)
-            {
-                moveDir.x = 1;
-                animator.Play("WalkRight");
-                sprite.flipX = false;
-            }
-            else
-            {
-                moveDir.x = -1;
-                animator.Play("WalkRight");
-                sprite.flipX = true;
-            }
+            animator.SetFloat("moveX", dir.x);
+            animator.SetFloat("moveY", dir.y);
+            lastMoveDir = dir.normalized;
         }
         else
         {
-            // move vertical
-            if (dir.y > 0)
-            {
-                moveDir.y = 1;
-                animator.Play("WalkFront");
-            }
-            else
-            {
-                moveDir.y = -1;
-                animator.Play("WalkBack");
-            }
+            animator.SetFloat("moveX", lastMoveDir.x);
+            animator.SetFloat("moveY", lastMoveDir.y);
         }
     }
+
 }
