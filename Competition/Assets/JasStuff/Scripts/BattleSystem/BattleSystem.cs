@@ -163,6 +163,13 @@ public class BattleSystem : MonoBehaviour
             enemy.name = "Enemy_" + i;
             this.enemies.Add(enemy);
 
+            anim = enemy.GetComponent<Animator>();
+            if (anim && anim.layerCount > 1)
+            {
+                anim.SetLayerWeight(0, 0f);
+                anim.SetLayerWeight(1, 1f);
+            }
+
             enemy.GetComponent<AIPath>().enabled = false;
             enemy.GetComponent<Seeker>().enabled = false;
 
