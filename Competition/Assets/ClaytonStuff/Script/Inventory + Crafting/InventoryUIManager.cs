@@ -50,6 +50,9 @@ public class InventoryUIManager : MonoBehaviour
         subInventoryPanel.SetActive(false);
 
         RefreshUI();
+
+        //  Highlight the first slot by default
+        SelectMainSlot(0);
     }
 
     void Update()
