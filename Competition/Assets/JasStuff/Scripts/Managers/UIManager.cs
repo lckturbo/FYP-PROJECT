@@ -62,6 +62,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         {
             AudioManager.instance.StopAllSounds();
             AudioManager.instance.PlaySound("bgm");
+            //AudioManager.instance.PlaySound("MainMenuBGM");
 
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
