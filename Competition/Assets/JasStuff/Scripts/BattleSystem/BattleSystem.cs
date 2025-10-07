@@ -15,6 +15,9 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private Slider[] playerHealth;
     [SerializeField] private Slider[] enemyHealth;
 
+    [SerializeField] private Slider[] playerATB;   
+    [SerializeField] private Slider[] enemyATB;    
+
     private GameObject playerLeader;
     private List<GameObject> playerAllies = new List<GameObject>();
     private List<GameObject> enemies = new List<GameObject>();
@@ -34,8 +37,11 @@ public class BattleSystem : MonoBehaviour
     private int _preBattlePartyLevel;
     private List<PreBattleSnapshot> _snapshots = new();
 
-    // NEW: ensure HandleBattleEnd only runs once
+    // Ensure HandleBattleEnd only runs once
     private bool _ended = false;
+
+    private readonly List<Combatant> _playerCombatants = new List<Combatant>(); 
+    private readonly List<Combatant> _enemyCombatants = new List<Combatant>(); 
 
     private struct PreBattleSnapshot
     {
@@ -70,9 +76,12 @@ public class BattleSystem : MonoBehaviour
         if (fullParty == null || fullParty.Count < 1 || leader == null) return;
 
         _ended = false; // reset guard for a fresh battle
-
         _preBattlePartyLevel = PartyLevelSystem.Instance ? PartyLevelSystem.Instance.levelSystem.level : 1;
         _snapshots.Clear();
+
+        // Clear ATB lists just in case (scene reload, etc.) 
+        _playerCombatants.Clear(); 
+        _enemyCombatants.Clear();  
 
         // Leader
         GameObject leaderObj = Instantiate(leader.playerPrefab, allySpawnPt[0].position, Quaternion.identity);
@@ -94,6 +103,7 @@ public class BattleSystem : MonoBehaviour
         cL.isLeader = true;
         cL.stats = leader.stats;
         turnEngine.Register(cL);
+        _playerCombatants.Add(cL); 
 
         var leaderHealth = leaderObj.GetComponent<NewHealth>();
         if (leaderHealth)
@@ -138,6 +148,7 @@ public class BattleSystem : MonoBehaviour
                 cA.isLeader = false;
                 cA.stats = member.stats;
                 turnEngine.Register(cA);
+                _playerCombatants.Add(cA); 
 
                 AddPlayerLevelApplier(allyObj, member);
                 SnapshotChar(member);
@@ -166,11 +177,13 @@ public class BattleSystem : MonoBehaviour
             cE.isLeader = false;
             cE.stats = es;
             turnEngine.Register(cE);
+            _enemyCombatants.Add(cE); 
 
             AddEnemyScaler(enemy);
         }
 
         SetUpHealth();
+        SetUpATBBars(); 
         turnEngine.Begin();
     }
 
@@ -225,6 +238,26 @@ public class BattleSystem : MonoBehaviour
             }
         }
     }
+
+    private void SetUpATBBars() 
+    {                           
+        for (int i = 0; i < playerATB.Length; i++) 
+        {                                          
+            if (!playerATB[i]) continue;           
+            playerATB[i].minValue = 0f;            
+            playerATB[i].maxValue = 1f;            
+            playerATB[i].value = 0f;               
+            playerATB[i].interactable = false;     
+        }                                          
+        for (int i = 0; i < enemyATB.Length; i++)  
+        {                                          
+            if (!enemyATB[i]) continue;            
+            enemyATB[i].minValue = 0f;             
+            enemyATB[i].maxValue = 1f;             
+            enemyATB[i].value = 0f;                
+            enemyATB[i].interactable = false;      
+        }                                          
+    }                                              
 
     private void ApplyStatsIfPresent(GameObject go, NewCharacterStats stats)
     {
@@ -322,7 +355,6 @@ public class BattleSystem : MonoBehaviour
         };
     }
 
-    // NEW: formatter for a single stat row
     private BattleResultsStat MakeStat(string name, float oldVal, float newVal, bool asPercent, string prefix)
     {
         string OldFmt(float v) => asPercent ? $"{Mathf.RoundToInt(v * 100f)}%" : $"{prefix}{v:0.##}";
@@ -360,4 +392,23 @@ public class BattleSystem : MonoBehaviour
         }
         return xp;
     }
+
+    private void LateUpdate() 
+    {                         
+        // Players                                                 
+        for (int i = 0; i < _playerCombatants.Count && i < playerATB.Length; i++) 
+        {                                                                         
+            var c = _playerCombatants[i];                                         
+            if (!c || playerATB[i] == null) continue;                             
+            playerATB[i].value = Mathf.Clamp01(c.atb);                             
+        }                                                                         
+
+        // Enemies                                                 
+        for (int i = 0; i < _enemyCombatants.Count && i < enemyATB.Length; i++)   
+        {                                                                         
+            var c = _enemyCombatants[i];                                          
+            if (!c || enemyATB[i] == null) continue;                              
+            enemyATB[i].value = Mathf.Clamp01(c.atb);                              
+        }                                                                         
+    }                                                                             
 }
