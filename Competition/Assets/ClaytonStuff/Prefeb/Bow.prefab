@@ -175,6 +175,7 @@ MonoBehaviour:
   item: {fileID: 11400000, guid: 80f706f4144cabd49a2cf1e95cad8ad3, type: 2}
   moveSpeed: 5
   collectDistance: 0.5
+  followDuration: 3
 --- !u!61 &8154799703806024082
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -190,7 +191,7 @@ BoxCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 2304
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
