@@ -16,7 +16,7 @@ public class PlayerLevelApplier : MonoBehaviour
     private NewPlayerMovement movement;
     private Combatant combatant;
 
-    private bool _bound; // NEW
+    private bool _bound;
 
     private void Awake()
     {
@@ -25,14 +25,14 @@ public class PlayerLevelApplier : MonoBehaviour
         combatant = GetComponent<Combatant>();
     }
 
-    private void OnEnable() // NEW
+    private void OnEnable()
     {
         // Try bind immediately; if not ready, wait a frame loop until it is.
         if (!TryBind())
             StartCoroutine(BindWhenReady());
     }
 
-    private void OnDisable() // NEW
+    private void OnDisable()
     {
         if (_bound && levelSystem != null)
         {
@@ -41,7 +41,7 @@ public class PlayerLevelApplier : MonoBehaviour
         }
     }
 
-    private bool TryBind() // NEW
+    private bool TryBind()
     {
         if (levelSystem == null && PartyLevelSystem.Instance != null)
             levelSystem = PartyLevelSystem.Instance.levelSystem;
@@ -58,7 +58,7 @@ public class PlayerLevelApplier : MonoBehaviour
         return true;
     }
 
-    private IEnumerator BindWhenReady() // NEW
+    private IEnumerator BindWhenReady()
     {
         // Wait until the PartyLevelSystem singleton exists
         while (PartyLevelSystem.Instance == null)
