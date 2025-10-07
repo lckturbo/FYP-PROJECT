@@ -45,8 +45,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (scnName == "Main")
         {
             AudioManager.instance.StopAllSounds();
-            AudioManager.instance.PlaySound("bgm");
-            //AudioManager.instance.PlaySound("MainMenuBGM");
+            //AudioManager.instance.PlaySound("bgm");
+            AudioManager.instance.PlaySound("MainMenuBGM");
 
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ExitBtn").GetComponent<Button>();
@@ -62,6 +62,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         {
             AudioManager.instance.StopAllSounds();
             AudioManager.instance.PlaySound("bgm");
+            //AudioManager.instance.PlaySound("MainMenuBGM");
 
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();

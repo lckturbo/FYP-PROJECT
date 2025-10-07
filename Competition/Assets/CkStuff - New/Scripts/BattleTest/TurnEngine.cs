@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TurnEngine : MonoBehaviour
 {
-    [Tooltip("Seconds to fill ATB from 0->1 when Speed = 1")]
+    //Seconds to fill ATB from 0 -> 1 when Speed = 1
     [SerializeField] private float atbFillSeconds = 3f;
 
     public bool autoBattle = false;
