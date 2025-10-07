@@ -1,3 +1,4 @@
+// PlayerLevelApplier.cs  (additions marked // NEW)
 using UnityEngine;
 using System.Collections;
 
@@ -24,7 +25,7 @@ public class PlayerLevelApplier : MonoBehaviour
         combatant = GetComponent<Combatant>();
     }
 
-    private void OnEnable() 
+    private void OnEnable()
     {
         // Try bind immediately; if not ready, wait a frame loop until it is.
         if (!TryBind())
