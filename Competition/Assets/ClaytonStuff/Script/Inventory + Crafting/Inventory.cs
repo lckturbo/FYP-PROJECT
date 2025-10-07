@@ -30,7 +30,26 @@ public class Inventory : MonoBehaviour
         List<InventorySlot> targetInventory =
             (item.category == ItemCategory.Main) ? mainInventory : subInventory;
 
-        // If item is stackable and already exists ? can add more
+        //  Prevent more than one sword or bow in main inventory
+        if (item.category == ItemCategory.Main)
+        {
+            bool alreadyHasSword = mainInventory.Exists(s => s.item != null && s.item.isWeapon && !s.item.isBow);
+            bool alreadyHasBow = mainInventory.Exists(s => s.item != null && s.item.isBow);
+
+            if (item.isWeapon && !item.isBow && alreadyHasSword)
+            {
+                Debug.LogWarning("Main inventory already has a sword! Cannot add another.");
+                return false;
+            }
+
+            if (item.isBow && alreadyHasBow)
+            {
+                Debug.LogWarning("Main inventory already has a bow! Cannot add another.");
+                return false;
+            }
+        }
+
+        // If item is stackable and already exists  can add more
         if (item.isStackable)
         {
             InventorySlot slot = targetInventory.Find(s => s.item == item);
@@ -41,9 +60,9 @@ public class Inventory : MonoBehaviour
         if (item.category == ItemCategory.Main)
             return mainInventory.Count < mainInventoryLimit;
 
-        // Sub inventory has no slot limit (you can set one if needed)
         return true;
     }
+
 
     public void AddItem(Item item, int amount = 1)
     {

@@ -88,6 +88,17 @@ public class InventoryUIManager : MonoBehaviour
             // Show description if valid item selected
             ShowSubItemDescription();
         }
+
+        // --- Always check the highlighted slot contents ---
+        if (!subInventoryOpen)
+        {
+            CheckHighlightedMainSlot();
+        }
+        else
+        {
+            CheckHighlightedSubSlot();
+        }
+
     }
 
 
@@ -317,4 +328,60 @@ public class InventoryUIManager : MonoBehaviour
             ? slotData.quantity.ToString()
             : "";
     }
+
+    private void CheckHighlightedMainSlot()
+    {
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null) return;
+
+        // Make sure the index exists in the inventory list
+        if (selectedMainSlot < 0 || selectedMainSlot >= inv.mainInventory.Count)
+        {
+            // Slot is empty
+            FindObjectOfType<PlayerHeldItem>()?.HideItem();
+            return;
+        }
+
+        var slot = inv.mainInventory[selectedMainSlot];
+        var heldItem = FindObjectOfType<PlayerHeldItem>();
+
+        if (slot.item == null || slot.quantity <= 0)
+        {
+            heldItem?.HideItem();
+            Debug.Log($"Main slot {selectedMainSlot} is empty.");
+        }
+        else
+        {
+            if (heldItem?.GetEquippedItem() != slot.item)
+            {
+                heldItem?.DisplayItem(slot.item);
+                Debug.Log($"Main slot {selectedMainSlot}: showing {slot.item.itemName}");
+            }
+        }
+    }
+
+
+    private void CheckHighlightedSubSlot()
+    {
+        if (selectedSubSlot < 0 || selectedSubSlot >= subSlots.Count)
+            return;
+
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null) return;
+
+        var slot = inv.subInventory[selectedSubSlot];
+        if (slot.item == null || slot.quantity <= 0)
+        {
+            descriptionPanel.SetActive(false);
+            Debug.Log($"Sub slot {selectedSubSlot} is empty.");
+        }
+        else
+        {
+            if (!descriptionPanel.activeSelf)
+                descriptionPanel.SetActive(true);
+
+            descriptionText.text = $"{slot.item.itemName}\n\n{slot.item.description}";
+        }
+    }
+
 }
