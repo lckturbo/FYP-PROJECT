@@ -95,11 +95,14 @@ public class NewHealth : MonoBehaviour
         if (anim) anim.SetTrigger("death");
 
         OnHealthChanged?.Invoke(this);
+        Destroy(gameObject, 0.1f);
+        //Debug.LogWarning("enemy die");
     }
 
     public void EndDeath()
     {
         OnDeathComplete?.Invoke(this);
         Destroy(gameObject, 0.1f);
+        //Debug.Log("Enemy die");
     }
 }
