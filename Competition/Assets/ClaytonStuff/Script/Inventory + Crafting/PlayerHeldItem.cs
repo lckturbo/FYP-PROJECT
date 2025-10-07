@@ -22,19 +22,26 @@ public class PlayerHeldItem : MonoBehaviour
         if (startingItem == null)
             return;
 
-        // Check if player already owns this item
+        //  Don't spawn if player is in battle
+        if (BattleManager.instance != null && BattleManager.instance.inBattle)
+        {
+            Debug.Log("In battle — skipping starting weapon spawn.");
+            return;
+        }
+
+        //  Only add if player doesn't already have it
         if (InventoryManager.Instance != null)
         {
-            if (InventoryManager.Instance.HasItem(startingItem))
+            if (!InventoryManager.Instance.HasItem(startingItem))
             {
-                Debug.Log($"Player already owns '{startingItem.itemName}'. Skipping spawn.");
-                return; // Don't spawn or add again
+                InventoryManager.Instance.AddItemToInventory(startingItem, 1);
+                DisplayItem(startingItem);
+                Debug.Log($"Spawned and added starting item: {startingItem.itemName}");
             }
-
-            // Add to inventory and display
-            InventoryManager.Instance.AddItemToInventory(startingItem, 1);
-            DisplayItem(startingItem);
-            Debug.Log($"Spawned and added starting item: {startingItem.itemName}");
+            else
+            {
+                Debug.Log($"Player already owns '{startingItem.itemName}', not spawning again.");
+            }
         }
         else
         {

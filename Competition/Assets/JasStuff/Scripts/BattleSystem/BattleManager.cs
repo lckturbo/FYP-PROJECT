@@ -5,7 +5,7 @@ public class BattleManager : MonoBehaviour
 {
     public static BattleManager instance;
 
-    private bool inBattle;
+    public bool inBattle;
     public string leaderID { get; private set; }
     public EnemyParty enemypartyRef { get; private set; }
     private string enemyPartyID;
