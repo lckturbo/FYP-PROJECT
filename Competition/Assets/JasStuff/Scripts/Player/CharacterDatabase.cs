@@ -27,4 +27,12 @@ public class CharacterDatabase : ScriptableObject
         if (index < 0 || index >= roster.Length) return null;
         return roster[index];
     }
+
+    public NewCharacterDefinition GetByID(string id)
+    {
+        if (lookup == null) OnEnable();
+        if (lookup.TryGetValue(id, out var def)) return def;
+        Debug.LogWarning($"Character with ID {id} not found!");
+        return null;
+    }
 }
