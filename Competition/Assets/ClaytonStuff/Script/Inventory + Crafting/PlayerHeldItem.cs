@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerHeldItem : MonoBehaviour
 {
     [Header("Attachment Point")]
-    [SerializeField] private Transform handPoint;
+    [SerializeField] public Transform handPoint;
 
     [Header("Starting Equipment")]
     [SerializeField] private Item startingItem; // assign your Sword item here in Inspector
