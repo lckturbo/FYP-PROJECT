@@ -13,11 +13,44 @@ public class PlayerBuffHandler : MonoBehaviour
     private void OnEnable()
     {
         BattleManager.OnClearAllBuffs += RemoveStoredBuff;
+
+        // Automatically assign the correct stats based on the current leader
+        AssignLeaderStats();
     }
 
     private void OnDisable()
     {
         BattleManager.OnClearAllBuffs -= RemoveStoredBuff;
+    }
+
+    /// <summary>
+    /// Automatically finds and assigns stats based on the current party leader.
+    /// </summary>
+    private void AssignLeaderStats()
+    {
+        if (PlayerParty.instance == null)
+        {
+            Debug.LogWarning($"{name}: No PlayerParty found, cannot assign leader stats.");
+            return;
+        }
+
+        var leaderDef = PlayerParty.instance.GetLeader();
+        if (leaderDef == null)
+        {
+            Debug.LogWarning($"{name}: No leader assigned in PlayerParty!");
+            return;
+        }
+
+        // Get the leader’s runtime stats (usually inside the leader prefab)
+        stats = leaderDef.runtimeStats;
+        if (stats != null)
+        {
+            Debug.Log($"[{name}] Assigned leader stats: {stats.name} (ATK {stats.atkDmg}, HP {stats.maxHealth})");
+        }
+        else
+        {
+            Debug.LogWarning($"{name}: Leader definition has no runtimeStats assigned!");
+        }
     }
 
     public void ApplyStats(NewCharacterStats newStats)
@@ -40,14 +73,7 @@ public class PlayerBuffHandler : MonoBehaviour
         // Store amount + stats reference to BuffData for later cleanup
         BuffData.instance?.StoreBuff(amount, stats);
 
-        if (duration > 0)
-        {
-            buffEndTime = Time.time + duration;  // set expiry timestamp
-        }
-        else
-        {
-            buffEndTime = 0f; // permanent until cleared manually
-        }
+        buffEndTime = (duration > 0) ? Time.time + duration : 0f;
     }
 
     private void Update()

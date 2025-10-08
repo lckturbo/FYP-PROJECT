@@ -19,6 +19,20 @@ public class PlayerHeldItem : MonoBehaviour
 
     private void Start()
     {
+        //  Check if this character is the leader
+        var combatant = GetComponent<Combatant>();
+        if (combatant != null && !combatant.isLeader)
+        {
+            if (handPoint != null)
+                Destroy(handPoint.gameObject);
+
+            Debug.Log($"{name} is not the leader — disabling handPoint and skipping item spawn.");
+            return;
+        }
+
+        if (handPoint != null)
+            handPoint.gameObject.SetActive(true);
+
         if (startingItem == null)
             return;
 
@@ -48,7 +62,6 @@ public class PlayerHeldItem : MonoBehaviour
             Debug.LogWarning("No InventoryManager found when trying to add starting item!");
         }
     }
-
 
     private void Update()
     {

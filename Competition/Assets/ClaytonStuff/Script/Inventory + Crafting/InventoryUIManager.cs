@@ -355,7 +355,7 @@ public class InventoryUIManager : MonoBehaviour
             if (heldItem?.GetEquippedItem() != slot.item)
             {
                 heldItem?.DisplayItem(slot.item);
-                Debug.Log($"Main slot {selectedMainSlot}: showing {slot.item.itemName}");
+                //Debug.Log($"Main slot {selectedMainSlot}: showing {slot.item.itemName}");
             }
         }
     }
