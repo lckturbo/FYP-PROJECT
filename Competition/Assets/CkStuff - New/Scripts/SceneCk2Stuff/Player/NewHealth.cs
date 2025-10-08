@@ -122,6 +122,7 @@ public class NewHealth : MonoBehaviour
         if (anim) anim.SetTrigger("death");
 
         OnHealthChanged?.Invoke(this);
+        Destroy(gameObject, 0.1f);
     }
 
     public void EndDeath()
