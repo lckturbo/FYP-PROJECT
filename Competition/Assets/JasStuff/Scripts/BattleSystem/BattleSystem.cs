@@ -282,15 +282,7 @@ public class BattleSystem : MonoBehaviour
             : preLevel;
 
         var payload = BuildResultsPayload(playerWon, xpAwarded, preLevel, postLevel);
-
-        if (playerWon)
-        {
-            WaitForAllEnemiesDeath(() =>
-            {
-                resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
-            });
-        }
-        else
+        if (!playerWon)
         {
             var leader = playerLeader?.GetComponent<NewHealth>();
             if (leader)
@@ -302,51 +294,9 @@ public class BattleSystem : MonoBehaviour
                 return;
             }
         }
+
+        resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
     }
-
-    private void WaitForAllEnemiesDeath(System.Action onAllComplete)
-    {
-        var enemies = FindObjectsOfType<EnemyBase>();
-        int total = enemies.Length;
-        int finished = 0;
-
-        if (total == 0)
-        {
-            onAllComplete?.Invoke();
-            return;
-        }
-
-        foreach (var enemy in enemies)
-        {
-            var health = enemy.GetComponent<NewHealth>();
-            if (!health)
-            {
-                finished++;
-                continue;
-            }
-
-            if (health.GetCurrHealth() <= 0)
-            {
-                finished++;
-                if (finished >= total)
-                    onAllComplete?.Invoke();
-                continue;
-            }
-
-            health.OnDeathComplete += (deadChar) =>
-            {
-                finished++;
-                if (finished >= total)
-                {
-                    onAllComplete?.Invoke();
-                }
-            };
-        }
-
-        if (finished >= total)
-            onAllComplete?.Invoke();
-    }
-
 
     private BattleResultsPayload BuildResultsPayload(bool playerWon, int xp, int preLevel, int postLevel)
     {
