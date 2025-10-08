@@ -1,64 +1,84 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+
 public class PlayerSpawner : MonoBehaviour, IDataPersistence
 {
     [SerializeField] private SelectedCharacter selectedStore;
     [SerializeField] private Transform spawnPoint;
+
     private Vector2 position;
-    public static event Action<Transform> OnPlayerSpawned; // for enemy
+    public static event Action<Transform> OnPlayerSpawned;
+
     public void LoadData(GameData data)
     {
         selectedStore.index = data.selectedCharacterIndex;
         selectedStore.RestoreFromIndex(data.selectedCharacterIndex);
         position = data.playerPosition;
     }
+
     public void SaveData(ref GameData data) { }
+
     private void Start()
     {
         if (!selectedStore || !selectedStore.definition)
             return;
+
         SpawnPlayer();
     }
+
     private void SpawnPlayer()
     {
         var def = selectedStore.definition;
         var prefab = def.playerPrefab;
-        if (!prefab)
-            return;
-        // JAS ADDED -> load player position //
+        if (!prefab) return;
+
         var data = SaveLoadSystem.instance.GetGameData();
         if (data != null && data.hasSavedPosition)
         {
             position = data.playerPosition;
-            Debug.Log("loaded position -> from PlayerSpawner");
+            Debug.Log("[PlayerSpawner] Loaded saved position.");
         }
         else
-            position = spawnPoint ? spawnPoint.position : Vector2.zero;
-        ///////////////
-       
+        {
+            position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
+        }
+
         Quaternion rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
         var go = Instantiate(prefab, position, rot);
         go.name = $"Player_{def.displayName}";
 
-        // Set player to Player layer
         SetLayerRecursively(go, LayerMask.NameToLayer("Player"));
 
-        var stats = def.stats;
-        if (stats != null)
+        var applier = go.GetComponent<PlayerLevelApplier>();
+        if (applier != null)
         {
-            go.GetComponentInChildren<NewPlayerMovement>()?.ApplyStats(stats);
-            go.GetComponentInChildren<NewHealth>()?.ApplyStats(stats);
+            int partyLevel = 1;
+            if (PartyLevelSystem.Instance != null && PartyLevelSystem.Instance.levelSystem != null)
+                partyLevel = PartyLevelSystem.Instance.levelSystem.level;
+
+            applier.ApplyForLevel(partyLevel);
+            Debug.Log($"[PlayerSpawner] Applied party level {partyLevel} to player via PlayerLevelApplier.");
         }
+        else
+        {
+            Debug.LogWarning("[PlayerSpawner] PlayerLevelApplier not found on player prefab. Stats will not scale with level.");
+        }
+
         var camCtrl = Camera.main ? Camera.main.GetComponent<NewCameraController>() : FindFirstObjectByType<NewCameraController>();
         if (camCtrl) camCtrl.target = go.transform;
-        PlayerParty.instance.SetupParty(def, new System.Collections.Generic.List<NewCharacterDefinition>());
+
+        PlayerParty.instance.SetupParty(def, new List<NewCharacterDefinition>());
         var fullParty = PlayerParty.instance.GetFullParty();
+
         Transform lastTarget = go.transform;
         int index = 0;
+
         foreach (var memberDef in fullParty)
         {
             if (memberDef == def) continue;
             if (!memberDef.playerPrefab) continue;
+
             Vector3 spawnPos = go.transform.position + new Vector3(-1.5f * (index + 1), 0f, 0f);
             var followerObj = Instantiate(memberDef.playerPrefab, spawnPos, rot);
             followerObj.name = $"Follower_{memberDef.displayName}";
@@ -74,14 +94,14 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
             lastTarget = followerObj.transform;
             index++;
         }
+
         OnPlayerSpawned?.Invoke(go.transform);
     }
+
     private void SetLayerRecursively(GameObject obj, int layer)
     {
         obj.layer = layer;
         foreach (Transform child in obj.transform)
-        {
             SetLayerRecursively(child.gameObject, layer);
-        }
     }
 }
