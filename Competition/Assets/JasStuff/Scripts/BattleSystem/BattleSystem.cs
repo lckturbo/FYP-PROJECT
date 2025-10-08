@@ -15,6 +15,9 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private Slider[] playerHealth;
     [SerializeField] private Slider[] enemyHealth;
 
+    [SerializeField] private Slider[] playerATB;
+    [SerializeField] private Slider[] enemyATB;
+
     private GameObject playerLeader;
     private List<GameObject> playerAllies = new List<GameObject>();
     private List<GameObject> enemies = new List<GameObject>();
@@ -33,9 +36,10 @@ public class BattleSystem : MonoBehaviour
 
     private int _preBattlePartyLevel;
     private List<PreBattleSnapshot> _snapshots = new();
-
-    // NEW: ensure HandleBattleEnd only runs once
     private bool _ended = false;
+
+    private readonly List<Combatant> _playerCombatants = new List<Combatant>();
+    private readonly List<Combatant> _enemyCombatants = new List<Combatant>();
 
     private struct PreBattleSnapshot
     {
@@ -69,31 +73,29 @@ public class BattleSystem : MonoBehaviour
         NewCharacterDefinition leader = PlayerParty.instance.GetLeader();
         if (fullParty == null || fullParty.Count < 1 || leader == null) return;
 
-        _ended = false; // reset guard for a fresh battle
-
+        _ended = false;
         _preBattlePartyLevel = PartyLevelSystem.Instance ? PartyLevelSystem.Instance.levelSystem.level : 1;
         _snapshots.Clear();
+        _playerCombatants.Clear();
+        _enemyCombatants.Clear();
 
-        // Leader
+        // ===== LEADER =====
         GameObject leaderObj = Instantiate(leader.playerPrefab, allySpawnPt[0].position, Quaternion.identity);
         playerLeader = leaderObj;
         leaderObj.name = "Leader_" + leader.name;
-        leaderObj.GetComponent<PlayerInput>().enabled = false;
-        ApplyStatsIfPresent(leaderObj, leader.stats);
+        var leaderPI = leaderObj.GetComponent<PlayerInput>();
+        if (leaderPI) leaderPI.enabled = false;
+        SetAnimatorBattleLayer(leaderObj);
 
-        Animator anim;
-        anim = leaderObj.GetComponent<Animator>();
-        if (anim && anim.layerCount > 1)
-        {
-            anim.SetLayerWeight(0, 0f);
-            anim.SetLayerWeight(1, 1f);
-        }
-
+        // Build runtime stats for leader at party level, apply to Health/Movement & Combatant
+        var leaderRT = StatsRuntimeBuilder.BuildRuntimeStats(leader.stats, _preBattlePartyLevel, playerGrowth);
+        ApplyRuntimeStats(leaderObj, leaderRT); // sets NewHealth & movement
         var cL = leaderObj.AddComponent<Combatant>();
         cL.isPlayerTeam = true;
         cL.isLeader = true;
-        cL.stats = leader.stats;
+        cL.stats = leaderRT;                     // IMPORTANT: Combatant uses leveled stats for ATB/attack:contentReference[oaicite:2]{index=2}
         turnEngine.Register(cL);
+        _playerCombatants.Add(cL);
 
         var leaderHealth = leaderObj.GetComponent<NewHealth>();
         if (leaderHealth)
@@ -111,10 +113,10 @@ public class BattleSystem : MonoBehaviour
         AddPlayerLevelApplier(leaderObj, leader);
         SnapshotChar(leader);
 
-        // Allies
+        // ===== ALLIES =====
         for (int i = 0; i < fullParty.Count; i++)
         {
-            NewCharacterDefinition member = fullParty[i];
+            var member = fullParty[i];
             if (member == leader) continue;
 
             int allyIndex = playerAllies.Count + 1;
@@ -122,62 +124,65 @@ public class BattleSystem : MonoBehaviour
             {
                 GameObject allyObj = Instantiate(member.playerPrefab, allySpawnPt[allyIndex].position, Quaternion.identity);
                 allyObj.name = "Ally_" + member.name;
-                allyObj.GetComponent<PlayerInput>().enabled = false;
-                ApplyStatsIfPresent(allyObj, member.stats);
+                var allyPI = allyObj.GetComponent<PlayerInput>();
+                if (allyPI) allyPI.enabled = false;
+                SetAnimatorBattleLayer(allyObj);
                 playerAllies.Add(allyObj);
 
-                anim = allyObj.GetComponent<Animator>();
-                if (anim && anim.layerCount > 1)
-                {
-                    anim.SetLayerWeight(0, 0f);
-                    anim.SetLayerWeight(1, 1f);
-                }
-
+                var allyRT = StatsRuntimeBuilder.BuildRuntimeStats(member.stats, _preBattlePartyLevel, playerGrowth);
+                ApplyRuntimeStats(allyObj, allyRT);
                 var cA = allyObj.AddComponent<Combatant>();
                 cA.isPlayerTeam = true;
                 cA.isLeader = false;
-                cA.stats = member.stats;
+                cA.stats = allyRT;               // IMPORTANT
                 turnEngine.Register(cA);
+                _playerCombatants.Add(cA);
 
                 AddPlayerLevelApplier(allyObj, member);
                 SnapshotChar(member);
             }
         }
 
-        // Enemies
+        // ===== ENEMIES =====
         List<GameObject> spawnList = BattleManager.instance.enemypartyRef.GetEnemies();
         for (int i = 0; i < spawnList.Count; i++)
         {
             GameObject enemy = Instantiate(spawnList[i], enemySpawnPt[i].position, Quaternion.identity);
             enemy.name = "Enemy_" + i;
-            this.enemies.Add(enemy);
+            enemies.Add(enemy);
 
-            anim = enemy.GetComponent<Animator>();
-            if (anim && anim.layerCount > 1)
-            {
-                anim.SetLayerWeight(0, 0f);
-                anim.SetLayerWeight(1, 1f);
-            }
+            SetAnimatorBattleLayer(enemy);
 
-            enemy.GetComponent<AIPath>().enabled = false;
-            enemy.GetComponent<Seeker>().enabled = false;
+            var aip = enemy.GetComponent<AIPath>();
+            if (aip) aip.enabled = false;
+            var seeker = enemy.GetComponent<Seeker>();
+            if (seeker) seeker.enabled = false;
 
             var eb = enemy.GetComponent<EnemyBase>();
-            var es = eb ? eb.GetEnemyStats() : null;
+
+            // Get whatever the enemy uses (EnemyStats/BaseStats)
+            BaseStats baseEnemyStats = eb ? eb.GetEnemyStats() : null;
+
+            // Build leveled runtime stats from BaseStats via the generic overload
+            BaseStats enemyRT = null;
+            if (baseEnemyStats != null)
+                enemyRT = StatsRuntimeBuilder.BuildRuntimeStats(baseEnemyStats, _preBattlePartyLevel, enemyGrowth);
 
             var eh = enemy.GetComponentInChildren<NewHealth>();
-            if (eh && es) eh.ApplyStats(es);
+            if (eh && enemyRT != null) eh.ApplyStats(enemyRT);
 
             var cE = enemy.AddComponent<Combatant>();
             cE.isPlayerTeam = false;
             cE.isLeader = false;
-            cE.stats = es;
+            cE.stats = enemyRT ?? baseEnemyStats; // use leveled runtime if available, else fallback
             turnEngine.Register(cE);
+            _enemyCombatants.Add(cE);
 
-            AddEnemyScaler(enemy);
+            AddEnemyScaler(enemy); // keeps them synced if party levels mid-battle, optional
         }
 
         SetUpHealth();
+        SetUpATBBars();
         turnEngine.Begin();
     }
 
@@ -185,11 +190,7 @@ public class BattleSystem : MonoBehaviour
     {
         if (!def || !def.stats) return;
         var rt = StatsRuntimeBuilder.BuildRuntimeStats(def.stats, _preBattlePartyLevel, playerGrowth);
-        _snapshots.Add(new PreBattleSnapshot
-        {
-            def = def,
-            statsAtLevel = rt
-        });
+        _snapshots.Add(new PreBattleSnapshot { def = def, statsAtLevel = rt });
     }
 
     private void SetUpHealth()
@@ -233,11 +234,32 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
-    private void ApplyStatsIfPresent(GameObject go, NewCharacterStats stats)
+    private void SetUpATBBars()
     {
-        if (!go || stats == null) return;
-        go.GetComponentInChildren<NewPlayerMovement>()?.ApplyStats(stats);
-        go.GetComponentInChildren<NewHealth>()?.ApplyStats(stats);
+        for (int i = 0; i < playerATB.Length; i++)
+        {
+            if (!playerATB[i]) continue;
+            playerATB[i].minValue = 0f;
+            playerATB[i].maxValue = 1f;
+            playerATB[i].value = 0f;
+            playerATB[i].interactable = false;
+        }
+        for (int i = 0; i < enemyATB.Length; i++)
+        {
+            if (!enemyATB[i]) continue;
+            enemyATB[i].minValue = 0f;
+            enemyATB[i].maxValue = 1f;
+            enemyATB[i].value = 0f;
+            enemyATB[i].interactable = false;
+        }
+    }
+
+    // NEW: apply a (leveled) runtime stats asset to health & movement
+    private void ApplyRuntimeStats(GameObject go, NewCharacterStats rt)
+    {
+        if (!go || rt == null) return;
+        go.GetComponentInChildren<NewPlayerMovement>()?.ApplyStats(rt);
+        go.GetComponentInChildren<NewHealth>()?.ApplyStats(rt);
     }
 
     private void AddPlayerLevelApplier(GameObject go, NewCharacterDefinition def)
@@ -263,6 +285,16 @@ public class BattleSystem : MonoBehaviour
             field.SetValue(scaler, enemyGrowth);
     }
 
+    private void SetAnimatorBattleLayer(GameObject go)
+    {
+        var anim = go.GetComponent<Animator>();
+        if (anim && anim.layerCount > 1)
+        {
+            anim.SetLayerWeight(0, 0f);
+            anim.SetLayerWeight(1, 1f);
+        }
+    }
+
     private void HandleBattleEnd(bool playerWon)
     {
         if (_ended) return;
@@ -282,15 +314,7 @@ public class BattleSystem : MonoBehaviour
             : preLevel;
 
         var payload = BuildResultsPayload(playerWon, xpAwarded, preLevel, postLevel);
-
-        if (playerWon)
-        {
-            WaitForAllEnemiesDeath(() =>
-            {
-                resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
-            });
-        }
-        else
+        if (!playerWon)
         {
             var leader = playerLeader?.GetComponent<NewHealth>();
             if (leader)
@@ -302,51 +326,9 @@ public class BattleSystem : MonoBehaviour
                 return;
             }
         }
+
+        resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
     }
-
-    private void WaitForAllEnemiesDeath(System.Action onAllComplete)
-    {
-        var enemies = FindObjectsOfType<EnemyBase>();
-        int total = enemies.Length;
-        int finished = 0;
-
-        if (total == 0)
-        {
-            onAllComplete?.Invoke();
-            return;
-        }
-
-        foreach (var enemy in enemies)
-        {
-            var health = enemy.GetComponent<NewHealth>();
-            if (!health)
-            {
-                finished++;
-                continue;
-            }
-
-            if (health.GetCurrHealth() <= 0)
-            {
-                finished++;
-                if (finished >= total)
-                    onAllComplete?.Invoke();
-                continue;
-            }
-
-            health.OnDeathComplete += (deadChar) =>
-            {
-                finished++;
-                if (finished >= total)
-                {
-                    onAllComplete?.Invoke();
-                }
-            };
-        }
-
-        if (finished >= total)
-            onAllComplete?.Invoke();
-    }
-
 
     private BattleResultsPayload BuildResultsPayload(bool playerWon, int xp, int preLevel, int postLevel)
     {
@@ -379,7 +361,6 @@ public class BattleSystem : MonoBehaviour
         };
     }
 
-    // NEW: formatter for a single stat row
     private BattleResultsStat MakeStat(string name, float oldVal, float newVal, bool asPercent, string prefix)
     {
         string OldFmt(float v) => asPercent ? $"{Mathf.RoundToInt(v * 100f)}%" : $"{prefix}{v:0.##}";
@@ -416,5 +397,22 @@ public class BattleSystem : MonoBehaviour
             }
         }
         return xp;
+    }
+
+    private void LateUpdate()
+    {
+        for (int i = 0; i < _playerCombatants.Count && i < playerATB.Length; i++)
+        {
+            var c = _playerCombatants[i];
+            if (!c || playerATB[i] == null) continue;
+            playerATB[i].value = Mathf.Clamp01(c.atb);
+        }
+
+        for (int i = 0; i < _enemyCombatants.Count && i < enemyATB.Length; i++)
+        {
+            var c = _enemyCombatants[i];
+            if (!c || enemyATB[i] == null) continue;
+            enemyATB[i].value = Mathf.Clamp01(c.atb);
+        }
     }
 }
