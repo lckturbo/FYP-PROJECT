@@ -13,7 +13,9 @@ public class EnemyCleanUp : MonoBehaviour
         foreach (var p in parties)
         {
             if (EnemyTracker.instance.IsDefeated(p.GetID()))
+            {
                 Destroy(p.gameObject);
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ public class Combatant : MonoBehaviour
         if (anim) anim.SetTrigger("attack");
         target.health.TakeDamage(0, stats, NewElementType.None);
 
-        //Debug.Log($"[ACTION] {name} used BASIC ATTACK on {target.name}");
+        Debug.Log($"[ACTION] {name} used BASIC ATTACK on {target.name}");
     }
 
     public void Skill1(Combatant target)
@@ -37,19 +37,21 @@ public class Combatant : MonoBehaviour
         if (!stats || !target || !target.health) return;
 
         if (anim) anim.SetTrigger("skill1");
+        // Example: 1.2x normal attack damage
         int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.2f);
         target.health.TakeDamage(rawDamage, stats, NewElementType.None);
 
-        //Debug.Log($"[ACTION] {name} used SKILL 1 on {target.name} (raw {rawDamage})");
+        Debug.Log($"[ACTION] {name} used SKILL 1 on {target.name} (raw {rawDamage})");
     }
 
     public void Skill2(Combatant target)
     {
         if (!stats || !target || !target.health) return;
 
+        // Example: 1.5x normal attack damage
         int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
         target.health.TakeDamage(rawDamage, stats, NewElementType.None);
 
-        //Debug.Log($"[ACTION] {name} used SKILL 2 on {target.name} (raw {rawDamage})");
+        Debug.Log($"[ACTION] {name} used SKILL 2 on {target.name} (raw {rawDamage})");
     }
 }

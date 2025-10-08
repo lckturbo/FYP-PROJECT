@@ -39,6 +39,10 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
         if (SaveLoadSystem.instance)
             SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
+
+        Debug.Log("from newplayermovement: " + transform.position);
+
+
     }
 
     public void ApplyStats(BaseStats newStats)
@@ -76,6 +80,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         {
             moveDir = Vector2.zero;
             animator.SetBool("moving", false);
+            Debug.Log("[NewPlayerMovement] moving; " + animator.GetBool("moving"));
             return;
         }
 
@@ -104,6 +109,8 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             animator.SetBool("moving", false);
         }
 
+        //Debug.Log("[NewPlayerMovement] moving2; " + animator.GetBool("moving"));
+
         // ?? Check for B key to print stats
         if (Keyboard.current.bKey.wasPressedThisFrame)
         {
@@ -113,7 +120,11 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
     private void PrintStats()
     {
-        if (stats == null) return;
+        if (stats == null)
+        {
+            Debug.LogWarning("[NewPlayerMovement] No stats assigned!");
+            return;
+        }
 
         Debug.Log($"[Player Stats]\n" +
                   $"Speed: {stats.Speed}\n" +
@@ -145,6 +156,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
+        Debug.Log("[NewPlayerMovement] saving position");
         data.playerPosition = (Vector2)transform.position;
         data.hasSavedPosition = true;
     }
