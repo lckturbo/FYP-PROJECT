@@ -13,31 +13,13 @@ public class PartyFollower : MonoBehaviour
     private Vector2 targetPosition;
     private bool hasTargetPosition;
 
-    public void SetTarget(Transform newTarget, Vector2 initialDirection = default)
+    public void SetTarget(Transform newTarget)
     {
         target = newTarget;
         if (target != null)
         {
             targetPosition = target.position;
             hasTargetPosition = true;
-        }
-
-        if (initialDirection != Vector2.zero)
-            lastMoveDirection = initialDirection;
-    }
-
-    public void FaceSameDirectionAs(Vector2 direction)
-    {
-        if (direction == Vector2.zero) return;
-
-        lastMoveDirection = direction;
-        isMoving = false;
-
-        if (animator)
-        {
-            animator.SetFloat("moveX", direction.x);
-            animator.SetFloat("moveY", direction.y);
-            animator.SetBool("moving", false);
         }
     }
 

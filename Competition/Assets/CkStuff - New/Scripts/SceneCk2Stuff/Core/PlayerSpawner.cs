@@ -23,8 +23,8 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
     {
         var def = selectedStore.definition;
         var prefab = def.playerPrefab;
-        if (!prefab) return;
-
+        if (!prefab)
+            return;
         // JAS ADDED -> load player position //
         var data = SaveLoadSystem.instance.GetGameData();
         if (data != null && data.hasSavedPosition)
@@ -34,32 +34,14 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         }
         else
             position = spawnPoint ? spawnPoint.position : Vector2.zero;
+        ///////////////
        
         Quaternion rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
         var go = Instantiate(prefab, position, rot);
         go.name = $"Player_{def.displayName}";
 
+        // Set player to Player layer
         SetLayerRecursively(go, LayerMask.NameToLayer("Player"));
-        var playerAnimator = go.GetComponentInChildren<Animator>();
-
-        Vector2 leaderFacingDir = Vector2.down;
-
-        if (playerAnimator)
-        {
-            float x = playerAnimator.GetFloat("moveX");
-            float y = playerAnimator.GetFloat("moveY");
-
-            if (x == 0f && y == 0f)
-            {
-                playerAnimator.SetFloat("moveX", 0f);
-                playerAnimator.SetFloat("moveY", -1f);
-                playerAnimator.SetBool("moving", false);
-            }
-            else
-            {
-                leaderFacingDir = new Vector2(x, y);
-            }
-        }
 
         var stats = def.stats;
         if (stats != null)
@@ -69,8 +51,6 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         }
         var camCtrl = Camera.main ? Camera.main.GetComponent<NewCameraController>() : FindFirstObjectByType<NewCameraController>();
         if (camCtrl) camCtrl.target = go.transform;
-
-        // JAS ADDED -> allies set up //
         PlayerParty.instance.SetupParty(def, new System.Collections.Generic.List<NewCharacterDefinition>());
         var fullParty = PlayerParty.instance.GetFullParty();
         Transform lastTarget = go.transform;
@@ -79,7 +59,6 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         {
             if (memberDef == def) continue;
             if (!memberDef.playerPrefab) continue;
-
             Vector3 spawnPos = go.transform.position + new Vector3(-1.5f * (index + 1), 0f, 0f);
             var followerObj = Instantiate(memberDef.playerPrefab, spawnPos, rot);
             followerObj.name = $"Follower_{memberDef.displayName}";
@@ -93,9 +72,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
 
 
             var follower = followerObj.AddComponent<PartyFollower>();
-            follower.SetTarget(lastTarget, leaderFacingDir);
-            follower.FaceSameDirectionAs(leaderFacingDir);
-
+            follower.SetTarget(lastTarget);
             lastTarget = followerObj.transform;
             index++;
         }
