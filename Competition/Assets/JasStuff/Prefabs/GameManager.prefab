@@ -78,7 +78,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 195d0e000c3a4984b8f431e28b75ccdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inBattle: 0
 --- !u!114 &6461459737389674717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,12 +122,6 @@ MonoBehaviour:
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
     audioSource: {fileID: 0}
-  - clip: {fileID: 8300000, guid: 145d6ba0f58dd274e902dc6ba87e164d, type: 3}
-    volume: 1
-    pitch: 1
-    loop: 1
-    audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   audioMixer: {fileID: 24100000, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
 --- !u!114 &2743626251221848417
 MonoBehaviour:
@@ -149,7 +142,6 @@ MonoBehaviour:
   settingsUI: {fileID: 0}
   BGMSlider: {fileID: 0}
   SFXSlider: {fileID: 0}
-  backBtn: {fileID: 0}
 --- !u!114 &8335944949039016364
 MonoBehaviour:
   m_ObjectHideFlags: 0
