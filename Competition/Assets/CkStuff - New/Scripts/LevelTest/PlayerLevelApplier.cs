@@ -77,7 +77,7 @@ public class PlayerLevelApplier : MonoBehaviour
     {
         if (!definition || !definition.stats) return;
 
-        runtimeStats = StatsRuntimeBuilder.BuildRuntimeStats(definition.stats, level, growth);
+        //runtimeStats = StatsRuntimeBuilder.BuildRuntimeStats(definition.stats, level, growth);
 
         health?.ApplyStats(runtimeStats);
         movement?.ApplyStats(runtimeStats);
