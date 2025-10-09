@@ -9,6 +9,8 @@ public class NPCDialogueTrigger : MonoBehaviour
 
     void Update()
     {
+        if (InteractionLock.IsLocked) return; // block all interaction
+
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             Debug.Log("is in range");

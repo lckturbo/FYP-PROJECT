@@ -57,6 +57,18 @@ public class InventoryUIManager : MonoBehaviour
 
     void Update()
     {
+        if (DialogueManager.Instance?.IsDialogueActive == true)
+        {
+            mainInventoryPanel?.SetActive(false);
+        }
+        else
+        {
+            mainInventoryPanel?.SetActive(true);
+        }
+
+
+        if (InteractionLock.IsLocked) return; //  block I and E
+
         if (Input.GetKeyDown(KeyCode.I)) ToggleSubInventory();
 
         if (!subInventoryOpen)
@@ -69,6 +81,7 @@ public class InventoryUIManager : MonoBehaviour
                     SelectMainSlot(i);
                 }
             }
+            if (InteractionLock.IsLocked) return; // block all interaction
 
             if (Input.GetKeyDown(KeyCode.E)) UseSelectedItem();
 
@@ -82,6 +95,7 @@ public class InventoryUIManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveSubSelection(-1, 0);
             if (Input.GetKeyDown(KeyCode.UpArrow)) MoveSubSelection(0, -1);
             if (Input.GetKeyDown(KeyCode.DownArrow)) MoveSubSelection(0, 1);
+            if (InteractionLock.IsLocked) return; // block all interaction
 
             if (Input.GetKeyDown(KeyCode.E)) UseSelectedItemSub();
 
