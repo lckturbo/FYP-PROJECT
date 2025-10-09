@@ -81,6 +81,9 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("Defeated"); // TODO: GAME OVER UI
 
+            if (QuestManager.Instance != null)
+                QuestManager.Instance.ResetAllQuests();
+
             // TODO: go back sample scene (reset every progress) -> when leader died // FOR ALPHA
             SaveLoadSystem.instance.NewGame(true);
             SaveLoadSystem.instance.SaveGame(false, false);

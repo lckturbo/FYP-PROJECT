@@ -77,6 +77,12 @@ public class QuestUIManager : MonoBehaviour
         {
             activeQuestEntries.Remove(quest);
         }
+        if (questManager.activeQuests.Count == 0 && activeQuestEntries.Count > 0)
+        {
+            foreach (var entry in activeQuestEntries.Values)
+                Destroy(entry);
+            activeQuestEntries.Clear();
+        }
 
     }
 

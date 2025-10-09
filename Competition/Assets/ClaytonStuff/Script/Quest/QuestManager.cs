@@ -8,10 +8,7 @@ public class QuestManager : MonoBehaviour
     public List<Quest> activeQuests = new List<Quest>();
     private List<Quest> questsToRemove = new List<Quest>();
 
-    // NEW: Track NPC progress across scenes
     private Dictionary<string, int> npcQuestStages = new Dictionary<string, int>();
-
-    //  Track completed quests across scenes
     public List<QuestData> completedQuests = new List<QuestData>();
 
     private void Awake()
@@ -40,19 +37,14 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"Quest Finished: {quest.questData.questName}");
         questsToRemove.Add(quest);
 
-        //  Save questData so UI can replay "Quest Complete"
         if (!completedQuests.Contains(quest.questData))
-        {
             completedQuests.Add(quest.questData);
-        }
     }
 
     private void Update()
     {
         foreach (var quest in activeQuests)
-        {
             quest.CheckProgress();
-        }
 
         if (questsToRemove.Count > 0)
         {
@@ -65,7 +57,6 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    // ---- NPC Progress Functions ----
     public void SaveNPCStage(string npcName, int stageIndex)
     {
         npcQuestStages[npcName] = stageIndex;
@@ -74,5 +65,24 @@ public class QuestManager : MonoBehaviour
     public int GetNPCStage(string npcName)
     {
         return npcQuestStages.TryGetValue(npcName, out int stageIndex) ? stageIndex : 0;
+    }
+
+    //  NEW: Reset everything on game over
+    public void ResetAllQuests()
+    {
+        Debug.Log("[QuestManager] Resetting all quests and NPC progress...");
+
+        // Clear active quests
+        foreach (var quest in activeQuests)
+        {
+            Destroy(quest);
+        }
+        activeQuests.Clear();
+
+        // Clear completed quests
+        completedQuests.Clear();
+
+        // Reset NPC quest stages
+        npcQuestStages.Clear();
     }
 }
