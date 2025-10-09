@@ -48,11 +48,16 @@ public class UIManager : MonoBehaviour, IDataPersistence
             //AudioManager.instance.PlaySound("bgm");
             AudioManager.instance.PlaySound("MainMenuBGM");
 
+            settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ExitBtn").GetComponent<Button>();
 
-            if (creditsBtn || exitBtn)
+            SetSettings();
+
+            if (settingsBtn || creditsBtn || exitBtn)
             {
+                settingsBtn.onClick.RemoveAllListeners();
+                settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
                 creditsBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.AddListener(() => Application.Quit());
@@ -66,32 +71,10 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
-            settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
             exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
 
-            if (settingsUI)
-            {
-                BGMSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "BGMSlider");
-                SFXSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "SFXSlider");
-                backBtn = settingsUI.GetComponentsInChildren<Button>(true).FirstOrDefault(s => s.name == "ExitBtn");
+            SetSettings();
 
-                if (BGMSlider || SFXSlider || backBtn)
-                {
-                    BGMSlider.onValueChanged.RemoveAllListeners();
-                    BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
-                    BGMSlider.value = AudioManager.instance.GetBgmVol();
-
-                    SFXSlider.onValueChanged.RemoveAllListeners();
-                    SFXSlider.onValueChanged.AddListener(SettingsManager.instance.OnSFXVolumeChanged);
-                    SFXSlider.value = AudioManager.instance.GetSFXVol();
-
-                    backBtn.onClick.AddListener(() =>
-                    {
-                        ToggleSettings(false);
-                        SaveLoadSystem.instance.SaveGame();
-                    });
-                }
-            }
             if (playBtn || settingsBtn || exitBtn)
             {
                 playBtn.onClick.RemoveAllListeners();
@@ -108,10 +91,44 @@ public class UIManager : MonoBehaviour, IDataPersistence
         }
     }
 
+    private void SetSettings()
+    {
+        settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
+
+        if (settingsUI)
+        {
+            BGMSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "BGMSlider");
+            SFXSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "SFXSlider");
+            backBtn = settingsUI.GetComponentsInChildren<Button>(true).FirstOrDefault(s => s.name == "ExitBtn");
+
+            if (BGMSlider || SFXSlider || backBtn)
+            {
+                BGMSlider.onValueChanged.RemoveAllListeners();
+                BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
+                BGMSlider.value = AudioManager.instance.GetBgmVol();
+
+                SFXSlider.onValueChanged.RemoveAllListeners();
+                SFXSlider.onValueChanged.AddListener(SettingsManager.instance.OnSFXVolumeChanged);
+                SFXSlider.value = AudioManager.instance.GetSFXVol();
+
+                backBtn.onClick.AddListener(() =>
+                {
+                    ToggleSettings(false);
+                    SaveLoadSystem.instance.SaveGame();
+                });
+            }
+        }
+    }
+
     private void ToggleSettings(bool v)
     {
         isOpen = v;
         settingsUI.SetActive(v);
+    }
+
+    public bool isSettingsOpen()
+    {
+        return isOpen;
     }
 
     public void LoadData(GameData data)

@@ -32,6 +32,7 @@ public abstract class EnemyBase : MonoBehaviour
     private float currIdleTimer;
     private Waypoints targetwp;
     private bool isAttacking;
+    public bool IsAttacking() => isAttacking;
     private float attackCooldownTimer = 0f;
 
     [SerializeField] private float detectionDist;
@@ -131,7 +132,6 @@ public abstract class EnemyBase : MonoBehaviour
             {
                 targetwp = neighbor;
                 break;
-                //}
             }
             enemyStates = EnemyStates.Idle;
         }
