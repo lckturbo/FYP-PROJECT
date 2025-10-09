@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,7 +11,6 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private Button menuBtn;
 
     private bool isPaused = false;
-    private bool isOpen = false;
     private void Awake()
     {
         if (!instance) instance = this;
@@ -30,21 +28,13 @@ public class PauseManager : MonoBehaviour
     {
         if (scn.name == "Main" || scn.name == "Lobby" || scn.name == "CharSelection") return;
 
-        pauseUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "PauseUI");
-        if (pauseUI)
-        {
-            resumeBtn = pauseUI.GetComponentsInChildren<Button>(true).FirstOrDefault(s => s.name == "ResumeBtn");
-            settingsBtn = pauseUI.GetComponentsInChildren<Button>(true).FirstOrDefault(s => s.name == "SettingsBtn");
-            menuBtn = pauseUI.GetComponentsInChildren<Button>(true).FirstOrDefault(s => s.name == "MainMenuBtn");
-
-            if(resumeBtn || settingsBtn || menuBtn)
-            {
-                resumeBtn.onClick.AddListener(() => Pause(false));
-                settingsBtn.onClick.AddListener(()=> UIManager.instance.ToggleSettings(!isOpen));
-                menuBtn.onClick.AddListener(() => QuitToMenu());
-
-            }
-        }
+        pauseUI = GameObject.Find("PauseUI");
+        resumeBtn = GameObject.Find("ResumeBtn").GetComponent<Button>();
+        if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
+        settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
+        menuBtn = GameObject.Find("MainMenuBtn").GetComponent<Button>();
+        if(menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
+        pauseUI.SetActive(false);
     }
 
     private void Update()

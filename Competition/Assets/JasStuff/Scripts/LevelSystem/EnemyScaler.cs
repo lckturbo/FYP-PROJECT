@@ -52,43 +52,43 @@ public class EnemyScaler : MonoBehaviour
         baseAsChar.darkRes = es.darkRes;
         baseAsChar.lightRes = es.lightRes;
 
-        //  Log all base stats for debugging
-        Debug.Log(
-            $"[EnemyScaler] {name} Base Stats before scaling:\n" +
-            $"  Speed: {baseAsChar.Speed}\n" +
-            $"  Max HP: {baseAsChar.maxHealth}\n" +
-            $"  Attack Damage: {baseAsChar.atkDmg}\n" +
-            $"  Attack Reduction: {baseAsChar.attackreduction}\n" +
-            $"  Action Value Speed: {baseAsChar.actionvaluespeed}\n" +
-            $"  Crit Rate: {baseAsChar.critRate}\n" +
-            $"  Crit Damage: {baseAsChar.critDamage}\n" +
-            $"  Attack Element: {baseAsChar.attackElement}\n" +
-            $"  Defense Element: {baseAsChar.defenseElement}\n" +
-            $"  Fire Res: {baseAsChar.fireRes}\n" +
-            $"  Water Res: {baseAsChar.waterRes}\n" +
-            $"  Grass Res: {baseAsChar.grassRes}\n" +
-            $"  Dark Res: {baseAsChar.darkRes}\n" +
-            $"  Light Res: {baseAsChar.lightRes}"
-        );
+        ////  Log all base stats for debugging
+        //Debug.Log(
+        //    $"[EnemyScaler] {name} Base Stats before scaling:\n" +
+        //    $"  Speed: {baseAsChar.Speed}\n" +
+        //    $"  Max HP: {baseAsChar.maxHealth}\n" +
+        //    $"  Attack Damage: {baseAsChar.atkDmg}\n" +
+        //    $"  Attack Reduction: {baseAsChar.attackreduction}\n" +
+        //    $"  Action Value Speed: {baseAsChar.actionvaluespeed}\n" +
+        //    $"  Crit Rate: {baseAsChar.critRate}\n" +
+        //    $"  Crit Damage: {baseAsChar.critDamage}\n" +
+        //    $"  Attack Element: {baseAsChar.attackElement}\n" +
+        //    $"  Defense Element: {baseAsChar.defenseElement}\n" +
+        //    $"  Fire Res: {baseAsChar.fireRes}\n" +
+        //    $"  Water Res: {baseAsChar.waterRes}\n" +
+        //    $"  Grass Res: {baseAsChar.grassRes}\n" +
+        //    $"  Dark Res: {baseAsChar.darkRes}\n" +
+        //    $"  Light Res: {baseAsChar.lightRes}"
+        //);
 
-        //  Log all base stats for debugging
-        Debug.Log(
-            $"[EnemyScaler] {name} Base Stats before scaling:\n" +
-            $"  Speed: {es.Speed}\n" +
-            $"  Max HP: {es.maxHealth}\n" +
-            $"  Attack Damage: {es.atkDmg}\n" +
-            $"  Attack Reduction: {es.attackreduction}\n" +
-            $"  Action Value Speed: {es.actionvaluespeed}\n" +
-            $"  Crit Rate: {es.critRate}\n" +
-            $"  Crit Damage: {es.critDamage}\n" +
-            $"  Attack Element: {es.attackElement}\n" +
-            $"  Defense Element: {es.defenseElement}\n" +
-            $"  Fire Res: {es.fireRes}\n" +
-            $"  Water Res: {es.waterRes}\n" +
-            $"  Grass Res: {es.grassRes}\n" +
-            $"  Dark Res: {es.darkRes}\n" +
-            $"  Light Res: {es.lightRes}"
-        );
+        ////  Log all base stats for debugging
+        //Debug.Log(
+        //    $"[EnemyScaler] {name} Base Stats before scaling:\n" +
+        //    $"  Speed: {es.Speed}\n" +
+        //    $"  Max HP: {es.maxHealth}\n" +
+        //    $"  Attack Damage: {es.atkDmg}\n" +
+        //    $"  Attack Reduction: {es.attackreduction}\n" +
+        //    $"  Action Value Speed: {es.actionvaluespeed}\n" +
+        //    $"  Crit Rate: {es.critRate}\n" +
+        //    $"  Crit Damage: {es.critDamage}\n" +
+        //    $"  Attack Element: {es.attackElement}\n" +
+        //    $"  Defense Element: {es.defenseElement}\n" +
+        //    $"  Fire Res: {es.fireRes}\n" +
+        //    $"  Water Res: {es.waterRes}\n" +
+        //    $"  Grass Res: {es.grassRes}\n" +
+        //    $"  Dark Res: {es.darkRes}\n" +
+        //    $"  Light Res: {es.lightRes}"
+        //);
 
         var rt = StatsRuntimeBuilder.BuildRuntimeStats(baseAsChar, partyLevel, enemyGrowth);
         if (health) health.ApplyStats(rt);

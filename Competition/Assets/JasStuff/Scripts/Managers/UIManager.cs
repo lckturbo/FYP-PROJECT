@@ -108,7 +108,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    public void ToggleSettings(bool v)
+    private void ToggleSettings(bool v)
     {
         isOpen = v;
         settingsUI.SetActive(v);
