@@ -10,7 +10,7 @@ public class PlayerLevelApplier : MonoBehaviour
     public LevelSystem levelSystem;
     public LevelGrowth growth;
 
-    [SerializeField] private NewCharacterStats runtimeStats;
+    [SerializeField] public NewCharacterStats runtimeStats;
 
     private NewHealth health;
     private NewPlayerMovement movement;

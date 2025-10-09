@@ -1,12 +1,17 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
+/// <summary>
+/// Handles applying attack buffs to the current leader's runtime stats.
+/// Buffs are automatically tracked via BuffData.
+/// </summary>
 public class PlayerBuffHandler : MonoBehaviour
 {
     [SerializeField] private NewCharacterStats stats;
 
     private int currentAttackBuff = 0;
     private bool buffActive = false;
-    private float buffEndTime = 0f;   // timestamp when buff ends
+    private float buffEndTime = 0f;
 
     public bool IsBuffActive => buffActive;
 
@@ -14,7 +19,7 @@ public class PlayerBuffHandler : MonoBehaviour
     {
         BattleManager.OnClearAllBuffs += RemoveStoredBuff;
 
-        // Automatically assign the correct stats based on the current leader
+        // Auto-assign leader stats
         AssignLeaderStats();
     }
 
@@ -24,13 +29,13 @@ public class PlayerBuffHandler : MonoBehaviour
     }
 
     /// <summary>
-    /// Automatically finds and assigns stats based on the current party leader.
+    /// Finds the current party leader and assigns their runtime stats.
     /// </summary>
-    private void AssignLeaderStats()
+    public void AssignLeaderStats()
     {
         if (PlayerParty.instance == null)
         {
-            Debug.LogWarning($"{name}: No PlayerParty found, cannot assign leader stats.");
+            Debug.LogWarning($"{name}: No PlayerParty found.");
             return;
         }
 
@@ -41,56 +46,58 @@ public class PlayerBuffHandler : MonoBehaviour
             return;
         }
 
-        // Get the leader’s runtime stats (usually inside the leader prefab)
-        stats = leaderDef.runtimeStats;
-        if (stats != null)
+        // Pull runtime stats from leader's PlayerLevelApplier
+        var levelApplier = leaderDef.GetComponent<PlayerLevelApplier>();
+        if (levelApplier != null && levelApplier.runtimeStats != null)
         {
+            stats = levelApplier.runtimeStats;
             Debug.Log($"[{name}] Assigned leader stats: {stats.name} (ATK {stats.atkDmg}, HP {stats.maxHealth})");
         }
         else
         {
-            Debug.LogWarning($"{name}: Leader definition has no runtimeStats assigned!");
+            Debug.LogWarning($"{name}: Leader has no runtimeStats available!");
         }
     }
 
-    public void ApplyStats(NewCharacterStats newStats)
-    {
-        if (newStats == null) return;
-
-        stats = newStats;
-        stats.atkDmg = newStats.atkDmg;
-        stats.maxHealth = newStats.maxHealth;
-    }
-
+    /// <summary>
+    /// Apply a direct attack buff to the leader's runtime stats.
+    /// </summary>
     public void ApplyAttackBuff(int amount, float duration)
     {
-        if (stats == null || buffActive) return;
+        if (stats == null)
+        {
+            Debug.LogWarning($"{name}: Cannot apply buff, stats not assigned!");
+            return;
+        }
+
+        if (buffActive)
+        {
+            Debug.LogWarning($"{name}: Buff already active, cannot stack!");
+            return;
+        }
 
         currentAttackBuff = amount;
         stats.atkDmg += amount;
         buffActive = true;
 
-        // Store amount + stats reference to BuffData for later cleanup
+        // Store reference in BuffData for persistence
         BuffData.instance?.StoreBuff(amount, stats);
 
-        buffEndTime = (duration > 0) ? Time.time + duration : 0f;
+        buffEndTime = (duration > 0f) ? Time.time + duration : 0f;
+        Debug.Log($"Buff applied: +{amount} ATK to {stats.name} for {(duration > 0 ? duration + "s" : "permanent")}");
     }
 
     private void Update()
     {
         if (buffActive && buffEndTime > 0f && Time.time >= buffEndTime)
         {
-            // Expire buff when time is up
-            stats.atkDmg -= currentAttackBuff;
-            Debug.Log($"Buff expired: -{currentAttackBuff} atk");
-
-            currentAttackBuff = 0;
-            buffActive = false;
-
-            BuffData.instance?.ClearBuff();
+            ExpireBuff();
         }
     }
 
+    /// <summary>
+    /// Manually remove the stored buff.
+    /// </summary>
     public void RemoveStoredBuff()
     {
         if (BuffData.instance != null && BuffData.instance.hasBuff)
@@ -101,12 +108,25 @@ public class PlayerBuffHandler : MonoBehaviour
             if (target != null)
             {
                 target.atkDmg -= amount;
-                Debug.LogWarning($"[Buff Removed] Character Stats: {target.name}, -{amount} atk, atk now {target.atkDmg}");
+                Debug.LogWarning($"[Buff Removed] {target.name} lost {amount} ATK, new ATK: {target.atkDmg}");
             }
 
             currentAttackBuff = 0;
             buffActive = false;
             BuffData.instance.ClearBuff();
         }
+    }
+
+    /// <summary>
+    /// Internal helper to expire timed buffs.
+    /// </summary>
+    private void ExpireBuff()
+    {
+        stats.atkDmg -= currentAttackBuff;
+        Debug.Log($"Buff expired: -{currentAttackBuff} ATK from {stats.name}");
+
+        currentAttackBuff = 0;
+        buffActive = false;
+        BuffData.instance?.ClearBuff();
     }
 }

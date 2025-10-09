@@ -10,6 +10,11 @@ public enum ItemTypes
     Food,
     Artifact,
     Unique,     // Items that cannot be held in multiple quantities
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Leagendary,
     Other
 }
 

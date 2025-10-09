@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46150ca44fb4ff242966ae9c3c9936ef, type: 3}
-  m_Name: Wood
+  m_Name: Herb
   m_EditorClassIdentifier: 
-  itemName: Wood
-  icon: {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
+  itemName: Herb
+  icon: {fileID: 21300000, guid: 6488ad7a30c323846b53943d1c1a3330, type: 3}
   isStackable: 1
   category: 1
   healing: 0
-  worldPrefab: {fileID: 6959797460596084576, guid: f927d7f2b2765b046be16a3d78eadfc3, type: 3}
+  worldPrefab: {fileID: 0}
   isWeapon: 0
   WeaponAttack: 0
   isBow: 0
   BowAttack: 0
   type: 3
-  description: typical wood to craft other items
+  description: Use to craft healing and buff potions
   price: 5
   isBuff: 0
   attackBuffAmount: 0
