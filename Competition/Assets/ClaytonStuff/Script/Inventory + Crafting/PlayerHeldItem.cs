@@ -67,9 +67,23 @@ public class PlayerHeldItem : MonoBehaviour
     {
         if (currentHeld != null && playerMovement != null)
         {
-            // Flip logic (optional)
+            bool facingRight = playerMovement.IsFacingRight;
+
+            // Flip horizontally by changing local scale
+            Vector3 scale = currentHeld.transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * (facingRight ? 1f : -1f);
+            currentHeld.transform.localScale = scale;
+
+            // Optionally, move the hand point offset depending on direction
+            if (handPoint != null)
+            {
+                Vector3 pos = handPoint.localPosition;
+                pos.x = Mathf.Abs(pos.x) * (facingRight ? 1f : -1f);
+                handPoint.localPosition = pos;
+            }
         }
     }
+
 
     public void DisplayItem(Item item)
     {

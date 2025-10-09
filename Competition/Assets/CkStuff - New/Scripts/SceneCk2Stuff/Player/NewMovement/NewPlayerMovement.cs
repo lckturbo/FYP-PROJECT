@@ -22,6 +22,9 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
     private Vector2 moveDir;      // snapped to 4-way only
     private float cachedWalkSpeed;
 
+    // Add this field to NewPlayerMovement:
+    public bool IsFacingRight { get; private set; } = true;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -94,6 +97,12 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             moveDir = new Vector2(0f, Mathf.Sign(inputRaw.y));
         else
             moveDir = Vector2.zero;
+
+        if (moveDir.x > 0)
+            IsFacingRight = true;
+        else if (moveDir.x < 0)
+            IsFacingRight = false;
+
 
         // animator
         if (moveDir != Vector2.zero)
