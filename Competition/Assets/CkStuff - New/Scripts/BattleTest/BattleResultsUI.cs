@@ -7,25 +7,34 @@ public class BattleResultsUI : MonoBehaviour
 {
     [Header("Wiring")]
     [SerializeField] private GameObject panel;
-    [SerializeField] private TMP_Text title;
+
+    [SerializeField] private Image titleBanner;
+
+    // Backdrop image on the results panel
+    [SerializeField] private Image backdrop;
+
     [SerializeField] private TMP_Text xpLine;
     [SerializeField] private TMP_Text levelLine;
     [SerializeField] private RectTransform statsContainer;
-    [SerializeField] private GameObject statRowPrefab;   // keep this DISABLED in the prefab!
+    [SerializeField] private GameObject statRowPrefab;   // keep DISABLED in the prefab!
     [SerializeField] private TMP_Text enemyWarning;
     [SerializeField] private Button continueBtn;
 
-    [Header("Style")]
-    [SerializeField] private Color victoryColor = new Color(0.2f, 0.95f, 0.5f);
-    [SerializeField] private Color defeatColor  = new Color(1f, 0.3f, 0.3f);
+    [Header("Sprites")]
+    [SerializeField] private Sprite victoryBannerSprite;
+    [SerializeField] private Sprite defeatBannerSprite;
+    [SerializeField] private Sprite victoryBackdropSprite;
+    [SerializeField] private Sprite defeatBackdropSprite;
+
+    [Header("Row Colors")]
     [SerializeField] private Color neutralStatColor = Color.white;
-    [SerializeField] private Color upStatColor      = new Color(0.5f, 1f, 0.5f);
-    [SerializeField] private Color downStatColor    = new Color(1f, 0.5f, 0.5f);
+    [SerializeField] private Color upStatColor = new Color(0.5f, 1f, 0.5f);
+    [SerializeField] private Color downStatColor = new Color(1f, 0.5f, 0.5f);
 
     [Header("Manual Layout")]
-    [SerializeField] private float itemHeight;
-    [SerializeField] private float spacing;
-    [SerializeField] private float topPadding;
+    [SerializeField] private float itemHeight = 28f;
+    [SerializeField] private float spacing = 4f;
+    [SerializeField] private float topPadding = 8f;
 
     private System.Action _onContinue;
 
@@ -46,40 +55,36 @@ public class BattleResultsUI : MonoBehaviour
         if (!panel) return;
         panel.SetActive(true);
 
-        // Title
-        if (title)
-        {
-            title.text = p.playerWon ? "VICTORY" : "DEFEAT";
-            title.color = p.playerWon ? victoryColor : defeatColor;
-        }
+        // ---- NEW: swap sprites for banner and backdrop ----
+        if (titleBanner)
+            titleBanner.sprite = p.playerWon ? victoryBannerSprite : defeatBannerSprite;
 
-        // XP
-        if (xpLine)   xpLine.text   = "Gained " + p.xpGained + " XP";
+        if (backdrop)
+            backdrop.sprite = p.playerWon ? victoryBackdropSprite : defeatBackdropSprite;
 
-        // Level
+        // XP & Level text (unchanged)
+        if (xpLine) xpLine.text = "Gained " + p.xpGained + " XP";
         if (levelLine) levelLine.text = "Level " + p.oldLevel + " -> Level " + p.newLevel;
 
-        // Clear old rows (but keep the disabled template if it's a child of the container)
+        // Clear old rows (keep disabled template)
         if (statsContainer)
         {
             for (int i = statsContainer.childCount - 1; i >= 0; i--)
             {
                 var child = statsContainer.GetChild(i).gameObject;
-                if (child == statRowPrefab) continue; // keep template
+                if (child == statRowPrefab) continue;
                 Destroy(child);
             }
         }
 
-        // Add stat rows with manual placement
+        // Add stat rows
         if (statsContainer && statRowPrefab != null && p.stats != null)
         {
             for (int i = 0; i < p.stats.Count; i++)
-            {
                 AddStatRow(p.stats[i], i);
-            }
         }
 
-        // Enemy warning
+        // Enemy scaling warning (unchanged)
         if (enemyWarning)
         {
             if (p.enemyScaledToLevel > 0)
@@ -87,10 +92,7 @@ public class BattleResultsUI : MonoBehaviour
                 enemyWarning.gameObject.SetActive(true);
                 enemyWarning.text = "[WARNING: Enemies have scaled to Lv " + p.enemyScaledToLevel + "]";
             }
-            else
-            {
-                enemyWarning.gameObject.SetActive(false);
-            }
+            else enemyWarning.gameObject.SetActive(false);
         }
     }
 
@@ -113,8 +115,7 @@ public class BattleResultsUI : MonoBehaviour
     }
 }
 
-
-// ----- payload models -----
+// ----- payload models (unchanged) -----
 [System.Serializable]
 public struct BattleResultsStat
 {
