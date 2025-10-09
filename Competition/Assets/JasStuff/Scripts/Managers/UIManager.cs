@@ -58,16 +58,9 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 exitBtn.onClick.AddListener(() => Application.Quit());
             }
         }
-        else if (scnName == "Lobby")
+        else if (scnName == "CharSelection" || scnName == "Lobby" || scnName == "SampleScene")
         {
-            AudioManager.instance.StopAllSounds();
-            AudioManager.instance.PlaySound("bgm");
-            //AudioManager.instance.PlaySound("MainMenuBGM");
-
-            playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
-            settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
             settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
-            exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
 
             if (settingsUI)
             {
@@ -92,18 +85,29 @@ public class UIManager : MonoBehaviour, IDataPersistence
                     });
                 }
             }
-            if (playBtn || settingsBtn || exitBtn)
+
+            if (scnName == "Lobby")
             {
-                playBtn.onClick.RemoveAllListeners();
-                playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
-                settingsBtn.onClick.RemoveAllListeners();
-                settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
-                exitBtn.onClick.RemoveAllListeners();
-                exitBtn.onClick.AddListener(() =>
+                AudioManager.instance.StopAllSounds();
+                AudioManager.instance.PlaySound("bgm");
+
+                playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
+                settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
+                exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
+
+                if (playBtn || settingsBtn || exitBtn)
                 {
-                    GameManager.instance.ChangeScene("Main");
-                    SaveLoadSystem.instance.SaveGame();
-                });
+                    playBtn.onClick.RemoveAllListeners();
+                    playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
+                    settingsBtn.onClick.RemoveAllListeners();
+                    settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
+                    exitBtn.onClick.RemoveAllListeners();
+                    exitBtn.onClick.AddListener(() =>
+                    {
+                        GameManager.instance.ChangeScene("Main");
+                        SaveLoadSystem.instance.SaveGame();
+                    });
+                }
             }
         }
     }
