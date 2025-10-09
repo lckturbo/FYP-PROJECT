@@ -843,9 +843,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dropItems:
-  - {fileID: 6959797460596084576, guid: 0463f68427f3e89428ff0876b4d7ea63, type: 3}
-  - {fileID: 6959797460596084576, guid: ca64a18ef936ad2499681c62a68c1c18, type: 3}
-  - {fileID: 6959797460596084576, guid: ca64a18ef936ad2499681c62a68c1c18, type: 3}
+  - {fileID: 6959797460596084576, guid: 71f34e09fd71b1845b3f4a08b1daa141, type: 3}
+  - {fileID: 6959797460596084576, guid: f927d7f2b2765b046be16a3d78eadfc3, type: 3}
+  - {fileID: 6959797460596084576, guid: 98e966907e90b5a4f8207b4e0e7b4fe3, type: 3}
   dropChance: 1
   scatterSpeed: 5
   maxScatterRadius: 2
@@ -4680,6 +4680,7 @@ GameObject:
   - component: {fileID: 548966686}
   - component: {fileID: 548966685}
   - component: {fileID: 548966689}
+  - component: {fileID: 548966690}
   m_Layer: 0
   m_Name: NPC (1)
   m_TagString: Untagged
@@ -4870,6 +4871,27 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.5, y: 0.5}
   m_EdgeRadius: 0
+--- !u!95 &548966690
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548966683}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 19d0908d7f8864346b27ecf683e3f175, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!4 &556808155 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 574135864595883451, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
@@ -9756,7 +9778,7 @@ MonoBehaviour:
   mainInventory: []
   subInventory: []
   mainInventoryLimit: 6
-  Money: 10000000
+  Money: 100
 --- !u!114 &1077740747
 MonoBehaviour:
   m_ObjectHideFlags: 0

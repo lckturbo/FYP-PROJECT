@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Letter
   m_EditorClassIdentifier: 
   itemName: Letter
-  icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: ee9b97726c131ba468bd04fa0a5957a5, type: 3}
   isStackable: 1
   category: 1
   healing: 0
-  worldPrefab: {fileID: 6156245796294065881, guid: 5a15eca1b5c42a044abdaa9c3dd93408, type: 3}
+  worldPrefab: {fileID: 0}
   isWeapon: 0
+  WeaponAttack: 0
   isBow: 0
+  BowAttack: 0
   type: 3
   description: 'This is a letter to bob i gonna die in another 10 day help me '
   price: 100
+  isBuff: 0
+  attackBuffAmount: 0
+  buffDuration: 0

@@ -13,12 +13,18 @@ MonoBehaviour:
   m_Name: Heal
   m_EditorClassIdentifier: 
   itemName: Heal Potion
-  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: c57933ceb33480a429176fb80f2c45a8, type: 3}
   isStackable: 1
   category: 0
   healing: 10
-  worldPrefab: {fileID: 3952993623186678031, guid: 92beba79b6509284ebc465646e3c9e35, type: 3}
+  worldPrefab: {fileID: 0}
   isWeapon: 0
-  type: 0
+  WeaponAttack: 0
+  isBow: 0
+  BowAttack: 0
+  type: 5
   description: HealPotion
   price: 1000
+  isBuff: 0
+  attackBuffAmount: 0
+  buffDuration: 0

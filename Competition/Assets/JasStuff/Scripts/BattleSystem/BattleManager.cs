@@ -77,7 +77,15 @@ public class BattleManager : MonoBehaviour
                 }
             }
 
-            Inventory.Instance.AddMoney(100);
+            if (InventoryManager.Instance != null && InventoryManager.Instance.PlayerInventory != null)
+            {
+                InventoryManager.Instance.PlayerInventory.AddMoney(100);
+                Debug.Log($"[Battle Reward] +100 Money. Total: {InventoryManager.Instance.PlayerInventory.Money}");
+            }
+            else
+            {
+                Debug.LogWarning("No InventoryManager or PlayerInventory found when trying to reward money!");
+            }
         }
         else
         {
