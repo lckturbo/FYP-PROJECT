@@ -59,19 +59,8 @@ public class BattleSystem : MonoBehaviour
             turnEngine.OnBattleEnd -= HandleBattleEnd;
     }
 
-    private System.Collections.IEnumerator Start()
+    private void Start()
     {
-        while (PartyLevelSystem.Instance == null || PartyLevelSystem.Instance.levelSystem == null)
-            yield return null;
-
-        while (PlayerParty.instance == null || BattleManager.instance == null || BattleManager.instance.enemypartyRef == null)
-            yield return null;
-
-        Debug.Log($"[BattleSystem] Party level detected = {PartyLevelSystem.Instance.levelSystem.level}");
-
-        if (playerGrowth == null) Debug.LogWarning("[BattleSystem] playerGrowth is NULL — no per-level scaling will be applied.");
-        if (enemyGrowth == null) Debug.LogWarning("[BattleSystem] enemyGrowth is NULL — enemies won’t scale.");
-
         SetupBattle();
 
         if (BattleManager.instance)
