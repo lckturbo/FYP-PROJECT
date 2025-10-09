@@ -221,12 +221,10 @@ public class PlayerAttack : MonoBehaviour
         else
             baseOffset = rightAttackOffset;
 
-        if (attackPoint == null) return;
-        
         // Push attack point outward relative to current range
-        attackPoint.localPosition = baseOffset.normalized * CurrentAttackRange;
+        if (attackPoint == null) return;
 
-       
+        attackPoint.localPosition = baseOffset.normalized * CurrentAttackRange;
     }
 
     public void EndAttack()
