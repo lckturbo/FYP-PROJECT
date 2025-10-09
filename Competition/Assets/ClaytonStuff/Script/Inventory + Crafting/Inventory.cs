@@ -19,6 +19,8 @@ public class Inventory : MonoBehaviour
     public List<InventorySlot> mainInventory = new List<InventorySlot>();
     public List<InventorySlot> subInventory = new List<InventorySlot>();
 
+    public static Inventory Instance { get; private set; }
+
     [Header("Limits")]
     public int mainInventoryLimit = 6;  // max slots for main
 

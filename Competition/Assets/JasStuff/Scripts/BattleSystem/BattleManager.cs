@@ -76,6 +76,8 @@ public class BattleManager : MonoBehaviour
                     SaveLoadSystem.instance.SaveGame(false, true);
                 }
             }
+
+            Inventory.Instance.AddMoney(100);
         }
         else
         {
