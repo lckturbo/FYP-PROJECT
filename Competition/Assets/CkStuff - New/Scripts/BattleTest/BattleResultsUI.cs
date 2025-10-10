@@ -70,7 +70,7 @@ public class BattleResultsUI : MonoBehaviour
         // Title (no color switching)
         if (title)
         {
-            title.text = p.playerWon ? "VICTORY" : "DEFEAT";
+            title.text = p.playerWon ? "Victory" : "Defeat";
             title.color = _defaultTitleColor;
         }
 
