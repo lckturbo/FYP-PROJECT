@@ -57,23 +57,39 @@ public class InventoryUIManager : MonoBehaviour
 
     void Update()
     {
-        if (DialogueManager.Instance?.IsDialogueActive == true)
+        // --- Handle Dialogue Lock ---
+        bool dialogueActive = DialogueManager.Instance?.IsDialogueActive == true;
+
+        // When dialogue starts, force-close sub-inventory
+        if (dialogueActive)
         {
-            mainInventoryPanel?.SetActive(false);
+            if (subInventoryOpen)
+            {
+                subInventoryOpen = false;
+                subInventoryPanel.SetActive(false);
+                mainInventoryPanel.SetActive(false);
+                descriptionPanel.SetActive(false);
+            }
+            else
+            {
+                mainInventoryPanel.SetActive(false);
+            }
+
+            return; // completely stop inventory updates during dialogue
         }
         else
         {
-            mainInventoryPanel?.SetActive(true);
+            mainInventoryPanel.SetActive(!subInventoryOpen);
+            subInventoryPanel.SetActive(subInventoryOpen);
         }
 
-
-        if (InteractionLock.IsLocked) return; //  block I and E
-
-        if (Input.GetKeyDown(KeyCode.I)) ToggleSubInventory();
+        // --- Input Handling ---
+        if (Input.GetKeyDown(KeyCode.I))
+            ToggleSubInventory();
 
         if (!subInventoryOpen)
         {
-            // Main inventory selection...
+            // Main inventory selection
             for (int i = 0; i < 6; i++)
             {
                 if (Input.GetKeyDown(KeyCode.Alpha1 + i))
@@ -81,11 +97,10 @@ public class InventoryUIManager : MonoBehaviour
                     SelectMainSlot(i);
                 }
             }
-            if (InteractionLock.IsLocked) return; // block all interaction
 
-            if (Input.GetKeyDown(KeyCode.E)) UseSelectedItem();
+            if (Input.GetKeyDown(KeyCode.E))
+                UseSelectedItem();
 
-            // Hide description when not in sub-inventory
             descriptionPanel.SetActive(false);
         }
         else
@@ -95,24 +110,18 @@ public class InventoryUIManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveSubSelection(-1, 0);
             if (Input.GetKeyDown(KeyCode.UpArrow)) MoveSubSelection(0, -1);
             if (Input.GetKeyDown(KeyCode.DownArrow)) MoveSubSelection(0, 1);
-            if (InteractionLock.IsLocked) return; // block all interaction
 
-            if (Input.GetKeyDown(KeyCode.E)) UseSelectedItemSub();
+            if (Input.GetKeyDown(KeyCode.E))
+                UseSelectedItemSub();
 
-            // Show description if valid item selected
             ShowSubItemDescription();
         }
 
         // --- Always check the highlighted slot contents ---
         if (!subInventoryOpen)
-        {
             CheckHighlightedMainSlot();
-        }
         else
-        {
             CheckHighlightedSubSlot();
-        }
-
     }
 
 
@@ -139,9 +148,16 @@ public class InventoryUIManager : MonoBehaviour
         var inv = inventoryManager.PlayerInventory;
         if (inv == null) return;
 
+        //  Ensure valid range
+        if (inv.subInventory == null || inv.subInventory.Count == 0)
+        {
+            Debug.Log("Sub-inventory is empty.");
+            return;
+        }
+
         if (selectedSubSlot < 0 || selectedSubSlot >= inv.subInventory.Count)
         {
-            Debug.Log("No valid sub item selected.");
+            Debug.LogWarning($"Invalid sub slot index: {selectedSubSlot}. Count = {inv.subInventory.Count}");
             return;
         }
 
@@ -154,13 +170,17 @@ public class InventoryUIManager : MonoBehaviour
 
         if (slot.item.itemName == "Heal Potion")
         {
+            Debug.Log("Using Heal Potion from sub inventory...");
             inventoryManager.RemoveItemFromInventory(slot.item, 1);
         }
         else
         {
             Debug.Log($"Selected sub item: {slot.item.itemName} (not usable here).");
         }
+
+        RefreshUI();
     }
+
 
     private void UpdateSubHighlight()
     {
@@ -245,16 +265,36 @@ public class InventoryUIManager : MonoBehaviour
 
 
     }
-
     private void ToggleSubInventory()
     {
+        if (DialogueManager.Instance?.IsDialogueActive == true)
+        {
+            Debug.Log("Cannot open inventory during dialogue.");
+            return;
+        }
+
         subInventoryOpen = !subInventoryOpen;
 
-        mainInventoryPanel.SetActive(!subInventoryOpen);
-        subInventoryPanel.SetActive(subInventoryOpen);
+        if (subInventoryOpen)
+        {
+            selectedSubSlot = 0;
+            UpdateSubHighlight();
+            mainInventoryPanel.SetActive(false);
+            subInventoryPanel.SetActive(true);
+            descriptionPanel.SetActive(true);
+        }
+        else
+        {
+            selectedSubSlot = -1;
+            subInventoryPanel.SetActive(false);
+            mainInventoryPanel.SetActive(true);
+            descriptionPanel.SetActive(false);
+        }
 
         RefreshUI();
     }
+
+
     private void SelectMainSlot(int index)
     {
         selectedMainSlot = index;
@@ -374,28 +414,33 @@ public class InventoryUIManager : MonoBehaviour
         }
     }
 
-
     private void CheckHighlightedSubSlot()
     {
-        if (selectedSubSlot < 0 || selectedSubSlot >= subSlots.Count)
-            return;
-
         var inv = inventoryManager.PlayerInventory;
         if (inv == null) return;
+
+        //  Ensure selectedSubSlot is within BOTH UI and inventory bounds
+        if (selectedSubSlot < 0 ||
+            selectedSubSlot >= subSlots.Count ||
+            selectedSubSlot >= inv.subInventory.Count)
+        {
+            descriptionPanel.SetActive(false);
+            return;
+        }
 
         var slot = inv.subInventory[selectedSubSlot];
         if (slot.item == null || slot.quantity <= 0)
         {
             descriptionPanel.SetActive(false);
-            Debug.Log($"Sub slot {selectedSubSlot} is empty.");
+            Debug.Log($"Sub slot {selectedSubSlot} is empty or invalid.");
+            return;
         }
-        else
-        {
-            if (!descriptionPanel.activeSelf)
-                descriptionPanel.SetActive(true);
 
-            descriptionText.text = $"{slot.item.itemName}\n\n{slot.item.description}";
-        }
+        if (!descriptionPanel.activeSelf)
+            descriptionPanel.SetActive(true);
+
+        descriptionText.text = $"{slot.item.itemName}\n\n{slot.item.description}";
     }
+
 
 }
