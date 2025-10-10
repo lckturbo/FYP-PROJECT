@@ -8,10 +8,10 @@ public class BattleResultsUI : MonoBehaviour
     [Header("Wiring")]
     [SerializeField] private GameObject panel;
     [SerializeField] private TMP_Text title;
-    [SerializeField] private TMP_Text xpLine;       // "Gained XXX XP"
-    [SerializeField] private TMP_Text levelLine;    // "Level A -> Level B"
+    [SerializeField] private TMP_Text xpLine;
+    [SerializeField] private TMP_Text levelLine;
     [SerializeField] private RectTransform statsContainer;
-    [SerializeField] private GameObject statRowPrefab;   // keep DISABLED in prefab
+    [SerializeField] private GameObject statRowPrefab;
     [SerializeField] private TMP_Text enemyWarning;
     [SerializeField] private Button continueBtn;
 
@@ -25,7 +25,12 @@ public class BattleResultsUI : MonoBehaviour
     [SerializeField] private Sprite victoryBackdropSprite;
     [SerializeField] private Sprite defeatBackdropSprite;
 
-    [Header("Style (legacy)")]
+    [Header("Victory/Defeat")]
+    [SerializeField] private Image xpBarBackground;
+    [SerializeField] private Sprite victoryXpBarBG;
+    [SerializeField] private Sprite defeatXpBarBG;
+
+    [Header("Style")]
     [SerializeField] private Color neutralStatColor = Color.white;
     [SerializeField] private Color upStatColor = new Color(0.5f, 1f, 0.5f);
     [SerializeField] private Color downStatColor = new Color(1f, 0.5f, 0.5f);
@@ -36,12 +41,9 @@ public class BattleResultsUI : MonoBehaviour
     [SerializeField] private float topPadding;
 
     [Header("XP Bar UI")]
-    [Tooltip("XP progress for the CURRENT (post-battle) level")]
-    [SerializeField] private Slider xpBar;               // set min=0 in prefab
-    [Tooltip("e.g. '123/500 XP' or hidden if data missing")]
-    [SerializeField] private TMP_Text xpBarValueLine;    // optional
-    [Tooltip("e.g. '377 XP to next level' or hidden if data missing")]
-    [SerializeField] private TMP_Text xpToNextLine;      // optional
+    [SerializeField] private Slider xpBar;
+    [SerializeField] private TMP_Text xpBarValueLine;
+    [SerializeField] private TMP_Text xpToNextLine;
 
     private System.Action _onContinue;
     private Color _defaultTitleColor;
@@ -75,6 +77,9 @@ public class BattleResultsUI : MonoBehaviour
         // Title panel & backdrop sprites
         if (titlePanelImage) SetSprite(titlePanelImage, p.playerWon ? victoryTitlePanelSprite : defeatTitlePanelSprite);
         if (backdropImage) SetSprite(backdropImage, p.playerWon ? victoryBackdropSprite : defeatBackdropSprite);
+
+        // XP bar background (NOT the fill)
+        if (xpBarBackground) SetSprite(xpBarBackground, p.playerWon ? victoryXpBarBG : defeatXpBarBG);
 
         // XP gained line
         if (xpLine) xpLine.text = "Gained " + p.xpGained + " XP";
@@ -133,7 +138,7 @@ public class BattleResultsUI : MonoBehaviour
             return;
         }
 
-        // Clamp xpAfter to [0, xpRequiredForNext)
+        // Clamp xpAfter to [0, xpRequiredForNext]
         int clampedAfter = Mathf.Clamp(p.xpAfter, 0, p.xpRequiredForNext);
 
         xpBar.gameObject.SetActive(true);
@@ -168,7 +173,6 @@ public class BattleResultsUI : MonoBehaviour
         {
             image.enabled = true;
             image.sprite = sprite;
-            // image.SetNativeSize(); // optional
         }
         else
         {
@@ -215,11 +219,9 @@ public struct BattleResultsPayload
     public int oldLevel;
     public int newLevel;
 
-    // NEW: XP fields for the bar (post-battle state)
-    // xpAfter is the XP into 'newLevel' after awarding xpGained
-    public int xpBefore;           // optional (for your own use/display)
-    public int xpAfter;            // required for the bar (relative to 'newLevel')
-    public int xpRequiredForNext;  // required: threshold for newLevel -> next
+    public int xpBefore;
+    public int xpAfter;
+    public int xpRequiredForNext;
 
     public int enemyScaledToLevel;
     public List<BattleResultsStat> stats;
