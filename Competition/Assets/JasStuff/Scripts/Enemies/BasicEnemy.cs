@@ -2,26 +2,22 @@ using UnityEngine;
 
 public class BasicEnemy : EnemyBase
 {
-    //protected override void BattleAttack()
-    //{
-    //    if (_currAtkTimer <= _atkCD)
-    //    {
-    //        _currAtkTimer -= Time.deltaTime;
-
-    //        if (_currAtkTimer <= 0)
-    //        {
-    //            // ATTACK PLAYER
-    //            //Health playerHealth = player.GetComponent<Health>();
-    //            //if (playerHealth != null)
-    //            //    playerHealth.TakeDamage(_atkDmg);
-
-    //            _currAtkTimer = _atkCD;
-    //            _states = EnemyStates.Idle;
-    //        }
-    //    }
-    //}
-    protected override void BattleAttack()
+    protected override void Attack()
     {
-        throw new System.NotImplementedException();
+        if (isAttacking) return;
+
+        if (player)
+        {
+            Vector2 lookDir = (player.position - transform.position).normalized;
+            anim.SetFloat("moveX", lookDir.x);
+            anim.SetFloat("moveY", lookDir.y);
+            lastMoveDir = lookDir;
+        }
+
+        aiPath.canMove = false;
+        isAttacking = true;
+
+        anim.SetTrigger("attack");
     }
+
 }

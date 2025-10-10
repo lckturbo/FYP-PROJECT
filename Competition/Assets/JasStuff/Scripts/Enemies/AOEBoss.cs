@@ -57,8 +57,8 @@ public class AOEBoss : EnemyBase
     //        //if (h.TryGetComponent<Health>(out Health playerHealth))
     //        //    playerHealth.TakeDamage(_atkDmg);
     //    }
-    //}
-    protected override void BattleAttack()
+    //
+    protected override void Attack()
     {
         throw new System.NotImplementedException();
     }
