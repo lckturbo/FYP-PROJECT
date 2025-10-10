@@ -302,6 +302,8 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 1
+  floatingDamagePrefab: {fileID: 0}
+  damageSpawnPoint: {fileID: 0}
 --- !u!114 &6191435852665564058
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -434,7 +436,7 @@ CircleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8232163925951149203}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
