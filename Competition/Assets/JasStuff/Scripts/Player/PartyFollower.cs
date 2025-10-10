@@ -88,5 +88,13 @@ public class PartyFollower : MonoBehaviour
             animator.SetFloat("moveY", lastMoveDirection.y);
             animator.SetBool("moving", isMoving);
         }
+        
+        var ySorter = GetComponent<YSorter>();
+        if (ySorter)
+        {
+            ySorter.SetMoveDirection(lastMoveDirection);
+            ySorter.SetLeader(target == null);
+        }
+
     }
 }
