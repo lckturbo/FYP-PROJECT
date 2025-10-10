@@ -37,7 +37,7 @@ public class SummonerBoss : EnemyBase
     //{
     //    throw new System.NotImplementedException();
     //}
-    protected override void BattleAttack()
+    protected override void Attack()
     {
         throw new System.NotImplementedException();
     }

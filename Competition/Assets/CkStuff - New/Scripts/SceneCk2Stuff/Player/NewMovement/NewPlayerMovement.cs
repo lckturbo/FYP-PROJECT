@@ -42,10 +42,6 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
         if (SaveLoadSystem.instance)
             SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
-
-        Debug.Log("from newplayermovement: " + transform.position);
-
-
     }
 
     public void ApplyStats(BaseStats newStats)

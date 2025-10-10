@@ -19,6 +19,5 @@ public class EnemyStats : BaseStats
     [Header("BossStats")]
     public float AOERadius;
     [Header("FSMStats")]
-    public float idleTimer;
     public float chaseRange;
 }

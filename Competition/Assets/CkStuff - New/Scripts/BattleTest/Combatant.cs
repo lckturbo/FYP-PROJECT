@@ -48,6 +48,7 @@ public class Combatant : MonoBehaviour
     {
         if (!stats || !target || !target.health) return;
 
+        if (anim) anim.SetTrigger("skill2");
         // Example: 1.5x normal attack damage
         int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
         target.health.TakeDamage(rawDamage, stats, NewElementType.None);

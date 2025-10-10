@@ -40,7 +40,7 @@ public class RangeEnemy : EnemyBase
     //    proj.SetActive(true);
     //    proj.GetComponent<EnemyProjectile>().Init(dir, _atkDmg);
     //}
-    protected override void BattleAttack()
+    protected override void Attack()
     {
         throw new System.NotImplementedException();
     }
