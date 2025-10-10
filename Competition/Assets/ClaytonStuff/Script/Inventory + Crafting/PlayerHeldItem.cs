@@ -6,20 +6,36 @@ public class PlayerHeldItem : MonoBehaviour
     [SerializeField] public Transform handPoint;
 
     [Header("Starting Equipment")]
-    [SerializeField] private Item startingItem; // assign your Sword item here in Inspector
+    [SerializeField] private Item startingItem;
+
+    [Header("Visual Settings")]
+    [Tooltip("Base scale for the held item.")]
+    [SerializeField] private Vector2 baseItemScale = new Vector2(1f, 1f);
+
+    [Header("Direction Offsets")]
+    [SerializeField] private Vector3 rightOffset = new Vector3(0.3f, 0f, 0f);
+    [SerializeField] private Vector3 leftOffset = new Vector3(-0.3f, 0f, 0f);
+    [SerializeField] private Vector3 upOffset = new Vector3(0f, 0.3f, 0f);
+    [SerializeField] private Vector3 downOffset = new Vector3(0f, -0.3f, 0f);
+
+    [Header("Rotation Angles")]
+    [SerializeField] private float upAngle = 90f;
+    [SerializeField] private float downAngle = -90f;
+    [SerializeField] private float rightAngle = 0f;
+    [SerializeField] private float leftAngle = 0f;
 
     private GameObject currentHeld;
     private Item equippedItem;
-    private NewPlayerMovement playerMovement;
+    private Animator animator;
+    private bool facingRight = true;
 
     private void Awake()
     {
-        playerMovement = GetComponent<NewPlayerMovement>();
+        animator = GetComponent<Animator>();
     }
 
     private void Start()
     {
-        //  Check if this character is the leader
         var combatant = GetComponent<Combatant>();
         if (combatant != null && !combatant.isLeader)
         {
@@ -36,14 +52,12 @@ public class PlayerHeldItem : MonoBehaviour
         if (startingItem == null)
             return;
 
-        //  Don't spawn if player is in battle
         if (BattleManager.instance != null && BattleManager.instance.inBattle)
         {
             Debug.Log("In battle — skipping starting weapon spawn.");
             return;
         }
 
-        //  Only add if player doesn't already have it
         if (InventoryManager.Instance != null)
         {
             if (!InventoryManager.Instance.HasItem(startingItem))
@@ -51,10 +65,6 @@ public class PlayerHeldItem : MonoBehaviour
                 InventoryManager.Instance.AddItemToInventory(startingItem, 1);
                 DisplayItem(startingItem);
                 Debug.Log($"Spawned and added starting item: {startingItem.itemName}");
-            }
-            else
-            {
-                Debug.Log($"Player already owns '{startingItem.itemName}', not spawning again.");
             }
         }
         else
@@ -65,25 +75,57 @@ public class PlayerHeldItem : MonoBehaviour
 
     private void Update()
     {
-        if (currentHeld != null && playerMovement != null)
+        if (currentHeld == null || animator == null) return;
+
+        float moveX = animator.GetFloat("moveX");
+        float moveY = animator.GetFloat("moveY");
+
+        // Determine direction — same as PlayerAttack
+        Vector3 offset = Vector3.zero;
+        float angle = 0f;
+
+        if (Mathf.Abs(moveX) > Mathf.Abs(moveY))
         {
-            bool facingRight = playerMovement.IsFacingRight;
-
-            // Flip horizontally by changing local scale
-            Vector3 scale = currentHeld.transform.localScale;
-            scale.x = Mathf.Abs(scale.x) * (facingRight ? 1f : -1f);
-            currentHeld.transform.localScale = scale;
-
-            // Optionally, move the hand point offset depending on direction
-            if (handPoint != null)
+            if (moveX > 0)
             {
-                Vector3 pos = handPoint.localPosition;
-                pos.x = Mathf.Abs(pos.x) * (facingRight ? 1f : -1f);
-                handPoint.localPosition = pos;
+                // Right
+                offset = rightOffset;
+                angle = rightAngle;
+                facingRight = true;
+            }
+            else
+            {
+                // Left
+                offset = leftOffset;
+                angle = leftAngle;
+                facingRight = false;
             }
         }
-    }
+        else if (Mathf.Abs(moveY) > 0.01f)
+        {
+            if (moveY > 0)
+            {
+                // Up
+                offset = upOffset;
+                angle = upAngle;
+            }
+            else
+            {
+                // Down
+                offset = downOffset;
+                angle = downAngle;
+            }
+        }
 
+        // Apply local position and rotation
+        currentHeld.transform.localPosition = offset;
+        currentHeld.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+
+        // Flip horizontally for left/right
+        Vector3 scale = baseItemScale;
+        scale.x *= facingRight ? 1f : -1f;
+        currentHeld.transform.localScale = scale;
+    }
 
     public void DisplayItem(Item item)
     {
@@ -103,30 +145,25 @@ public class PlayerHeldItem : MonoBehaviour
         currentHeld = Instantiate(item.worldPrefab, handPoint.position, Quaternion.identity, handPoint);
         currentHeld.transform.localPosition = Vector3.zero;
         currentHeld.transform.localRotation = Quaternion.identity;
+        currentHeld.transform.localScale = baseItemScale;
     }
 
     public void RemoveItem()
     {
         if (currentHeld != null)
-        {
             Destroy(currentHeld);
-            currentHeld = null;
-        }
 
+        currentHeld = null;
         equippedItem = null;
     }
 
     public void HideItem()
     {
         if (currentHeld != null)
-        {
             currentHeld.SetActive(false);
-        }
+
         equippedItem = null;
     }
 
-    public Item GetEquippedItem()
-    {
-        return equippedItem;
-    }
+    public Item GetEquippedItem() => equippedItem;
 }

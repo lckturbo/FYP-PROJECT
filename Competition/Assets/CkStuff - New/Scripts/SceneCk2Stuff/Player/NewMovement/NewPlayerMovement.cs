@@ -19,7 +19,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
     private InputAction moveAction;
 
     private Vector2 inputRaw;     // raw input
-    private Vector2 moveDir;      // snapped to 4-way only
+    public Vector2 moveDir;      // snapped to 4-way only
     private float cachedWalkSpeed;
 
     // Add this field to NewPlayerMovement:
