@@ -74,7 +74,7 @@ public class BattleSystem : MonoBehaviour
         if (fullParty == null || fullParty.Count < 1 || leader == null) return;
 
         _ended = false;
-        _preBattlePartyLevel = PartyLevelSystem.Instance ? PartyLevelSystem.Instance.levelSystem.level : 1;
+        _preBattlePartyLevel = (PartyLevelSystem.Instance != null) ? PartyLevelSystem.Instance.levelSystem.level : 1;
         _snapshots.Clear();
         _playerCombatants.Clear();
         _enemyCombatants.Clear();
@@ -93,7 +93,7 @@ public class BattleSystem : MonoBehaviour
         var cL = leaderObj.AddComponent<Combatant>();
         cL.isPlayerTeam = true;
         cL.isLeader = true;
-        cL.stats = leaderRT;                     // IMPORTANT: Combatant uses leveled stats for ATB/attack:contentReference[oaicite:2]{index=2}
+        cL.stats = leaderRT; // IMPORTANT: Combatant uses leveled stats for ATB/attack
         turnEngine.Register(cL);
         _playerCombatants.Add(cL);
 
@@ -134,7 +134,7 @@ public class BattleSystem : MonoBehaviour
                 var cA = allyObj.AddComponent<Combatant>();
                 cA.isPlayerTeam = true;
                 cA.isLeader = false;
-                cA.stats = allyRT;               // IMPORTANT
+                cA.stats = allyRT; // IMPORTANT
                 turnEngine.Register(cA);
                 _playerCombatants.Add(cA);
 
@@ -254,7 +254,7 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
-    // NEW: apply a (leveled) runtime stats asset to health & movement
+    // apply a (leveled) runtime stats asset to health & movement
     private void ApplyRuntimeStats(GameObject go, NewCharacterStats rt)
     {
         if (!go || rt == null) return;
@@ -295,12 +295,18 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
+    // ========= UPDATED: now provides XP fields for results UI =========
     private void HandleBattleEnd(bool playerWon)
     {
         if (_ended) return;
         _ended = true;
 
-        int preLevel = _preBattlePartyLevel;
+        // Access level system
+        var ls = (PartyLevelSystem.Instance != null) ? PartyLevelSystem.Instance.levelSystem : null;
+
+        // BEFORE awarding
+        int preLevel = (ls != null) ? ls.level : _preBattlePartyLevel;
+        int xpBeforeIntoLevel = (ls != null) ? ls.currXP : 0;
 
         int xpAwarded = 0;
         if (playerWon)
@@ -309,11 +315,21 @@ public class BattleSystem : MonoBehaviour
             PartyLevelSystem.Instance?.AddXP(xpAwarded);
         }
 
-        int postLevel = PartyLevelSystem.Instance
-            ? PartyLevelSystem.Instance.levelSystem.level
-            : preLevel;
+        // AFTER awarding
+        int postLevel = (ls != null) ? ls.level : preLevel;
+        int xpAfterIntoLevel = (ls != null) ? ls.currXP : xpBeforeIntoLevel;
+        int xpRequiredForNext = (ls != null) ? ls.xpNextLevel : 0;
 
-        var payload = BuildResultsPayload(playerWon, xpAwarded, preLevel, postLevel);
+        var payload = BuildResultsPayload(
+            playerWon,
+            xpAwarded,
+            preLevel,
+            postLevel,
+            xpBeforeIntoLevel,
+            xpAfterIntoLevel,
+            xpRequiredForNext
+        );
+
         if (!playerWon)
         {
             var leader = playerLeader?.GetComponent<NewHealth>();
@@ -330,7 +346,16 @@ public class BattleSystem : MonoBehaviour
         resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
     }
 
-    private BattleResultsPayload BuildResultsPayload(bool playerWon, int xp, int preLevel, int postLevel)
+    // ========= UPDATED: signature + fills XP bar fields =========
+    private BattleResultsPayload BuildResultsPayload(
+        bool playerWon,
+        int xp,
+        int preLevel,
+        int postLevel,
+        int xpBeforeIntoLevel,
+        int xpAfterIntoLevel,
+        int xpRequiredForNext
+    )
     {
         var leaderDef = PlayerParty.instance.GetLeader();
         var baseStats = leaderDef ? leaderDef.stats : null;
@@ -354,8 +379,15 @@ public class BattleSystem : MonoBehaviour
         {
             playerWon = playerWon,
             xpGained = xp,
+
             oldLevel = preLevel,
             newLevel = postLevel,
+
+            // >>> New fields for XP bar UI <<<
+            xpBefore = xpBeforeIntoLevel,          // XP inside preLevel before battle
+            xpAfter = xpAfterIntoLevel,            // XP inside postLevel after battle
+            xpRequiredForNext = xpRequiredForNext, // postLevel -> next threshold
+
             enemyScaledToLevel = (postLevel > preLevel) ? postLevel : 0,
             stats = stats
         };
