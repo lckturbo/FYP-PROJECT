@@ -21,6 +21,11 @@ public class NewHealth : MonoBehaviour
     public event System.Action<NewHealth> OnHealthChanged;
     public event System.Action<NewHealth> OnDeathComplete;
 
+    [Header("Damage Numbers")]
+    [SerializeField] private GameObject floatingDamagePrefab;
+    [SerializeField] private Transform damageSpawnPoint;
+    private bool canSpawnDamage = true;
+
     public int GetCurrHealth() => currentHp;
     public int GetMaxHealth() => stats ? stats.maxHealth : 1;
 
@@ -47,6 +52,24 @@ public class NewHealth : MonoBehaviour
         OnHealthChanged?.Invoke(this);
     }
 
+    private IEnumerator SpawnFloatingDamageWithDelay(int final, bool wasCrit)
+    {
+        // prevent multiple floating texts at once
+        canSpawnDamage = false;
+
+        // spawn position
+        Vector3 spawnPos = damageSpawnPoint
+            ? damageSpawnPoint.position
+            : transform.position + Vector3.up * 1.5f;
+
+        // create floating damage text
+        var dmgObj = Instantiate(floatingDamagePrefab, spawnPos, Quaternion.identity);
+        dmgObj.GetComponent<FloatingDamage>()?.Initialize(final, wasCrit);
+
+        // wait before next one can appear
+        yield return new WaitForSeconds(0.15f);
+        canSpawnDamage = true;
+    }
     public void TakeDamage(int rawDamage, BaseStats attacker, NewElementType skillElement = NewElementType.None)
     {
         if (stats == null) return;
@@ -81,6 +104,12 @@ public class NewHealth : MonoBehaviour
         currentHp = Mathf.Max(0, currentHp - final);
 
         Debug.Log($"{gameObject.name} took {final} {atkElem} damage. HP = {currentHp}/{GetMaxHealth()}");
+
+        if (floatingDamagePrefab && canSpawnDamage)
+        {
+            bool wasCrit = attacker != null && UnityEngine.Random.value < Mathf.Clamp01(attacker.critRate);
+            StartCoroutine(SpawnFloatingDamageWithDelay(final, wasCrit));
+        }
 
         //  Trigger damage flash
         if (spriteRenderer)
