@@ -371,8 +371,8 @@ public class BattleSystem : MonoBehaviour
             stats.Add(MakeStat("Attack", pre.atkDmg, post.atkDmg, false, ""));
             stats.Add(MakeStat("Defense", pre.attackreduction, post.attackreduction, false, ""));
             stats.Add(MakeStat("Action Speed", pre.actionvaluespeed, post.actionvaluespeed, false, ""));
-            stats.Add(MakeStat("CR", pre.critRate, post.critRate, true, ""));
-            stats.Add(MakeStat("CD", pre.critDamage, post.critDamage, false, "×"));
+            stats.Add(MakeStat("Crit Rate", pre.critRate, post.critRate, true, ""));
+            stats.Add(MakeStat("Crit Damage", pre.critDamage, post.critDamage, false, "×"));
         }
 
         return new BattleResultsPayload
