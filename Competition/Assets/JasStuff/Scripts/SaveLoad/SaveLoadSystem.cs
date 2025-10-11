@@ -13,6 +13,8 @@ public class SaveLoadSystem : MonoBehaviour
     private List<IDataPersistence> dataPersistenceObjs;
     private FileDataHandler fileDataHandler;
 
+    private bool isNewGame = false;
+
     private void Awake()
     {
         if (!instance)
@@ -34,7 +36,11 @@ public class SaveLoadSystem : MonoBehaviour
     {
         dataPersistenceObjs = FindAllDataPersistenceObjects();
         Debug.Log("IM LOADING");
-        LoadGame();
+
+        if (!isNewGame)
+            LoadGame();
+        else
+            Debug.Log("[SaveLoadSystem] Skipped LoadGame() because this is a New Game.");
     }
 
     public void RegisterDataPersistenceObjects(IDataPersistence obj)
@@ -45,6 +51,8 @@ public class SaveLoadSystem : MonoBehaviour
 
     public void NewGame(bool keepCharIndex = false)
     {
+        isNewGame = true;
+
         int savedIndex = -1;
 
         if (keepCharIndex && gameData != null)
@@ -53,6 +61,9 @@ public class SaveLoadSystem : MonoBehaviour
         gameData = new GameData();
 
         if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
+        gameData.playerPosition = Vector2.zero;
+        gameData.hasSavedPosition = false;
+
 
         if (keepCharIndex)
             gameData.selectedCharacterIndex = savedIndex;
@@ -72,7 +83,6 @@ public class SaveLoadSystem : MonoBehaviour
         {
             dataObjs.LoadData(gameData);
         }
-        Debug.Log("Loaded: " + gameData.playerPosition);
     }
     public void SaveGame(bool savePlayer = true, bool saveEnemies = true)
     {
@@ -89,8 +99,6 @@ public class SaveLoadSystem : MonoBehaviour
 
             dataObj.SaveData(ref gameData);
         }
-
-        Debug.Log($"Saved Game | Player: {savePlayer} | Enemies: {saveEnemies}");
 
         // save data to a file using data handler
         fileDataHandler.Save(gameData);
