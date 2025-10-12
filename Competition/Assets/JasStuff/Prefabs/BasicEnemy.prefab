@@ -40,6 +40,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8931024803322961709}
+  - {fileID: 3251432534343560515}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &783659951250230252
@@ -302,8 +303,8 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   defaultFlashColor: {r: 1, g: 0, b: 0.18623066, a: 1}
   flashDuration: 1
-  floatingDamagePrefab: {fileID: 0}
-  damageSpawnPoint: {fileID: 0}
+  floatingDamagePrefab: {fileID: 8308052525228537085, guid: de08c31fc045a62459a36b817bf7648a, type: 3}
+  damageSpawnPoint: {fileID: 3251432534343560515}
 --- !u!114 &6191435852665564058
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,6 +332,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyGrowth: {fileID: 11400000, guid: ef9b76e14dc386645a65cad6f9120bee, type: 2}
+--- !u!1 &6611196082467723058
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3251432534343560515}
+  m_Layer: 9
+  m_Name: DamageNum
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3251432534343560515
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6611196082467723058}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 574135864595883451}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8232163925951149203
 GameObject:
   m_ObjectHideFlags: 0
