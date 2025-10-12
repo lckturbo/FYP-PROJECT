@@ -8,11 +8,10 @@ public class NewHealth : MonoBehaviour
     [SerializeField] private bool useStatsDirectly = true;
     [SerializeField] private Animator anim;
 
-    //  Add reference for sprite renderer
     [Header("Damage Flash")]
     [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Color flashColor = Color.red;
-    [SerializeField] private float flashDuration = 1.0f;
+    [SerializeField] private Color defaultFlashColor = Color.red; // fallback color
+    [SerializeField] private float flashDuration = 0.25f;
     private Color originalColor;
     private Coroutine flashRoutine;
 
@@ -33,7 +32,6 @@ public class NewHealth : MonoBehaviour
     {
         if (stats != null) ApplyStats(stats);
 
-        //  Try to auto-grab a SpriteRenderer
         if (!spriteRenderer) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         if (spriteRenderer) originalColor = spriteRenderer.color;
     }
@@ -54,22 +52,16 @@ public class NewHealth : MonoBehaviour
 
     private IEnumerator SpawnFloatingDamageWithDelay(int final, bool wasCrit)
     {
-        // prevent multiple floating texts at once
         canSpawnDamage = false;
+        Vector3 spawnPos = damageSpawnPoint ? damageSpawnPoint.position : transform.position + Vector3.up * 1.5f;
 
-        // spawn position
-        Vector3 spawnPos = damageSpawnPoint
-            ? damageSpawnPoint.position
-            : transform.position + Vector3.up * 1.5f;
-
-        // create floating damage text
         var dmgObj = Instantiate(floatingDamagePrefab, spawnPos, Quaternion.identity);
         dmgObj.GetComponent<FloatingDamage>()?.Initialize(final, wasCrit);
 
-        // wait before next one can appear
         yield return new WaitForSeconds(0.15f);
         canSpawnDamage = true;
     }
+
     public void TakeDamage(int rawDamage, BaseStats attacker, NewElementType skillElement = NewElementType.None)
     {
         if (stats == null) return;
@@ -80,53 +72,64 @@ public class NewHealth : MonoBehaviour
             ? skillElement
             : (attacker != null ? attacker.attackElement : NewElementType.None);
 
-        // --- 1) Flat defense BEFORE multipliers ---
+        // --- 1) Flat defense ---
         float def = Mathf.Max(0f, stats.attackreduction);
         float dmg = baseAtk - def;
         if (dmg < 0f) dmg = 0f;
 
         // --- 2) Crit ---
-        if (attacker != null && UnityEngine.Random.value < Mathf.Clamp01(attacker.critRate))
+        bool wasCrit = false;
+        if (attacker != null && Random.value < Mathf.Clamp01(attacker.critRate))
         {
-            float critBonus = Mathf.Max(0f, attacker.critDamage);
-            float critMult = 1f + critBonus;
+            wasCrit = true;
+            float critMult = 1f + Mathf.Max(0f, attacker.critDamage);
             dmg *= critMult;
-            Debug.Log($"{attacker?.name ?? "Unknown"} CRIT x{critMult:0.##}!");
         }
 
-        // --- 3) Element triangle + resistance ---
+        // --- 3) Elemental multiplier ---
         float tri = GetElementTriangleMultiplier(atkElem, stats.defenseElement);
         float res = stats.GetResistance(atkElem);
         dmg *= (tri * res);
 
-        // --- 4) Final clamp & apply ---
+        // --- 4) Final ---
         int final = Mathf.Max(1, Mathf.RoundToInt(dmg));
         currentHp = Mathf.Max(0, currentHp - final);
 
         Debug.Log($"{gameObject.name} took {final} {atkElem} damage. HP = {currentHp}/{GetMaxHealth()}");
 
         if (floatingDamagePrefab && canSpawnDamage)
-        {
-            bool wasCrit = attacker != null && UnityEngine.Random.value < Mathf.Clamp01(attacker.critRate);
             StartCoroutine(SpawnFloatingDamageWithDelay(final, wasCrit));
-        }
 
-        //  Trigger damage flash
+        // --- 5) Trigger damage flash depending on attacker ---
         if (spriteRenderer)
         {
             if (flashRoutine != null) StopCoroutine(flashRoutine);
-            flashRoutine = StartCoroutine(FlashDamage());
+            Color flash = GetFlashColor(attacker);
+            flashRoutine = StartCoroutine(FlashDamage(flash));
         }
 
         OnHealthChanged?.Invoke(this);
         if (currentHp <= 0) Die();
     }
 
-    private IEnumerator FlashDamage()
+    private IEnumerator FlashDamage(Color color)
     {
-        spriteRenderer.color = flashColor;
+        spriteRenderer.color = color;
         yield return new WaitForSeconds(flashDuration);
         spriteRenderer.color = originalColor;
+    }
+
+    private Color GetFlashColor(BaseStats attacker)
+    {
+        if (attacker == null) return defaultFlashColor;
+
+        //  Example logic — you can customize this freely:
+        if (attacker.attackElement == NewElementType.Fire) return new Color(1f, 0.3f, 0.3f); // red
+        if (attacker.attackElement == NewElementType.Water) return new Color(0.3f, 0.6f, 1f); // blue
+        if (attacker.attackElement == NewElementType.Grass) return new Color(0.3f, 1f, 0.3f); // green
+        if (attacker.attackElement == NewElementType.Dark) return new Color(0.5f, 0f, 0.8f);  // purple
+        if (attacker.attackElement == NewElementType.Light) return new Color(1f, 1f, 0.6f);   // yellowish
+        return defaultFlashColor;
     }
 
     private float GetElementTriangleMultiplier(NewElementType attack, NewElementType defense)
@@ -149,7 +152,6 @@ public class NewHealth : MonoBehaviour
     {
         Debug.Log(gameObject.name + " has died.");
         if (anim) anim.SetTrigger("death");
-
         OnHealthChanged?.Invoke(this);
     }
 
