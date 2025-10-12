@@ -59,6 +59,10 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 settingsBtn.onClick.RemoveAllListeners();
                 settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
                 creditsBtn.onClick.RemoveAllListeners();
+                creditsBtn.onClick.AddListener(() =>
+                {
+                    GameManager.instance.ChangeScene("Credits");
+                });
                 exitBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.AddListener(() => Application.Quit());
             }
