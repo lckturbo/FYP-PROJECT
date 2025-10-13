@@ -48,6 +48,8 @@ public class DialogueManager : MonoBehaviour
     public void StartDialogue(DialogueData dialogueData)
     {
         dialogueUI.SetActive(true);
+        PauseManager.instance.canPause = false;
+
         if (playerMovement != null)
             playerMovement.GetComponent<PlayerInput>().enabled = false;
 
@@ -119,6 +121,8 @@ public class DialogueManager : MonoBehaviour
     private void EndDialogue()
     {
         dialogueUI.SetActive(false);
+        PauseManager.instance.canPause = true;
+
         if (playerMovement != null)
             playerMovement.GetComponent<PlayerInput>().enabled = true;
     }
