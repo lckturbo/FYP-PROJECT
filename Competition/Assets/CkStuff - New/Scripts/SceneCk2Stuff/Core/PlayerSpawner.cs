@@ -37,27 +37,17 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         var data = SaveLoadSystem.instance.GetGameData();
         if (data != null)
         {
-            if (data.hasCheckpoint)
+            if (data.hasSavedPosition)
+                position = data.playerPosition;
+            else if (data.hasCheckpoint)
             {
                 var cp = CheckpointManager.instance.GetCheckpointByID(data.lastCheckpointID);
                 if (cp)
                     position = cp.transform.position;
             }
             else
-            {
                 position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
-            }
         }
-
-        //if (data != null && data.hasSavedPosition)
-        //{
-        //    position = data.playerPosition;
-        //    Debug.Log("[PlayerSpawner] Loaded saved position.");
-        //}
-        //else
-        //{
-        //    position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
-        //}
 
         Quaternion rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
         var go = Instantiate(prefab, position, rot);

@@ -99,10 +99,13 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("Defeated"); // TODO: GAME OVER UI
 
+            if (data != null) 
+                data.hasSavedPosition = false;
+
             if (QuestManager.Instance != null)
                 QuestManager.Instance.ResetAllQuests();
 
-            SaveLoadSystem.instance.NewGame(true);
+           // SaveLoadSystem.instance.NewGame(true);
             SaveLoadSystem.instance.SaveGame(false, false);
         }
         OnGlobalBattleEnd?.Invoke(enemyPartyID, playerWon);
