@@ -12,6 +12,7 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private Button menuBtn;
 
     private bool isPaused = false;
+    [HideInInspector] public bool canPause = true;
     private bool isOpen = false;
     private void Awake()
     {
@@ -48,22 +49,20 @@ public class PauseManager : MonoBehaviour
             pauseUI.SetActive(false);
         }
     }
-
     private void Update()
     {
         if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby") return;
+        if (!canPause) return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
             Pause(!isPaused);
     }
-
     private void Pause(bool v)
     {
         isPaused = v;
         pauseUI.SetActive(v);
         Time.timeScale = v ? 0 : 1;
     }
-
     private void QuitToMenu()
     {
         Time.timeScale = 1f;
