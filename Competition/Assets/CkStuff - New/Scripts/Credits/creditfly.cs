@@ -161,7 +161,9 @@ Lam Cheng Kel",
                 body =
 @"Bonotan Faith Ann
 Chua Ke En Chloe
-Matias XinXin Rose Ye",
+Matias XinXin Rose Ye
+Lam Cheng Kel
+Jaslin Joo Chui Hoon",
                 holdSeconds = 3.0f
             },
             new Section{
@@ -220,7 +222,7 @@ I GOT SUCKED INTO THIS DUNGEON AND NOW IM FORCED TO PLAY THIS is a trademark of 
             },
             new Section{
                 title = "Platform Partners",
-                body = @"itch.io",
+                body = @"",
                 holdSeconds = 2.0f
             },
             new Section{
