@@ -22,8 +22,8 @@ public class SaveLoadSystem : MonoBehaviour
         else
             Destroy(gameObject);
 
+        DontDestroyOnLoad(gameObject);
         fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
-
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -35,12 +35,8 @@ public class SaveLoadSystem : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         dataPersistenceObjs = FindAllDataPersistenceObjects();
-        Debug.Log("IM LOADING");
 
-        if (!isNewGame)
-            LoadGame();
-        else
-            Debug.Log("[SaveLoadSystem] Skipped LoadGame() because this is a New Game.");
+        if (!isNewGame) LoadGame();
     }
 
     public void RegisterDataPersistenceObjects(IDataPersistence obj)
@@ -55,14 +51,24 @@ public class SaveLoadSystem : MonoBehaviour
 
         int savedIndex = -1;
 
+        fileDataHandler.DeleteSaveFile();
+        Debug.Log("[SaveLoadSystem] Old save file deleted.");
+        gameData = new GameData();
+        fileDataHandler.Save(gameData);
+
         if (keepCharIndex && gameData != null)
             savedIndex = gameData.selectedCharacterIndex;
 
-        gameData = new GameData();
-
+        //if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
+        //gameData.playerPosition = Vector2.zero;
+        //gameData.hasSavedPosition = false;
+        //gameData.hasCheckpoint = false;
+        
         if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
         gameData.playerPosition = Vector2.zero;
         gameData.hasSavedPosition = false;
+        gameData.hasCheckpoint = false;
+        gameData.lastCheckpointID = 0;
 
         if (keepCharIndex)
             gameData.selectedCharacterIndex = savedIndex;

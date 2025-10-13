@@ -61,7 +61,9 @@ public class BattleManager : MonoBehaviour
         //}
 
         SaveLoadSystem.instance.SaveGame();
+        if (CheckpointManager.instance != null) CheckpointManager.instance.ClearCheckpoints();
         GameManager.instance.ChangeScene("jasBattle");
+
     }
 
     public void HandleBattleEnd(bool playerWon)

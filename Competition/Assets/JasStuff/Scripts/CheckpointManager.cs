@@ -69,10 +69,6 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
                 Debug.LogWarning($"[CheckpointManager] Could not find checkpoint ID {data.lastCheckpointID}");
             }
         }
-        else
-        {
-            Debug.Log("[CheckpointManager] No saved checkpoint in data.");
-        }
     }
 
     public void SaveData(ref GameData data)
@@ -93,5 +89,11 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
     public Checkpoint GetCheckpointByID(int id)
     {
         return checkpointList.FirstOrDefault(c => c.GetID() == id);
+    }
+
+    public void ClearCheckpoints()
+    {
+        checkpointList?.Clear();
+        activeCheckpoint = null;
     }
 }
