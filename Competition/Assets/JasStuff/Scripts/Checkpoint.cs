@@ -19,6 +19,7 @@ public class Checkpoint : MonoBehaviour
         if (isActive) return;
 
         isActive = true;
+        Debug.Log("isactivated");
         CheckpointManager.instance.SetActiveCheckpoint(this);
     }
 }

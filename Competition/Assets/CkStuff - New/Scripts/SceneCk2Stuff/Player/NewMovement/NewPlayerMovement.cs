@@ -165,4 +165,17 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         data.playerPosition = (Vector2)transform.position;
         data.hasSavedPosition = true;
     }
+
+    public void SaveEncounterPosition()
+    {
+        if (SaveLoadSystem.instance == null) return;
+        var data = SaveLoadSystem.instance.GetGameData();
+        if (data == null) return;
+
+        data.lastEncounterPosition = transform.position;
+        data.hasEncounterPosition = true;
+
+        Debug.Log($"[NewPlayerMovement] Saved encounter position at {transform.position}");
+        SaveLoadSystem.instance.SaveGame(savePlayer: false);
+    }
 }
