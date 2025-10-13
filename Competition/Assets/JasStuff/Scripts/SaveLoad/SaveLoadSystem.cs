@@ -64,7 +64,6 @@ public class SaveLoadSystem : MonoBehaviour
         gameData.playerPosition = Vector2.zero;
         gameData.hasSavedPosition = false;
 
-
         if (keepCharIndex)
             gameData.selectedCharacterIndex = savedIndex;
     }

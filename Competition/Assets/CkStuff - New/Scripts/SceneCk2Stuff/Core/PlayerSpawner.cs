@@ -34,36 +34,46 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         if (!prefab) return;
 
         var data = SaveLoadSystem.instance.GetGameData();
-        if (data != null)
+
+        if (data != null && data.hasSavedPosition)
         {
-            if (data.hasEncounterPosition)
-            {
-                position = data.lastEncounterPosition;
-                Debug.Log("[PlayerSpawner] Spawning at last encounter position.");
-                // Reset so it doesn't trigger again after respawn
-                data.hasEncounterPosition = false;
-            }
-            else if (data.hasCheckpoint)
-            {
-                var checkpoint = CheckpointManager.instance.GetCheckpointByID(data.lastCheckpointID);
-                if (checkpoint)
-                {
-                    position = checkpoint.transform.position;
-                    Debug.Log($"[PlayerSpawner] Spawning at checkpoint: {checkpoint.GetID()}");
-                }
-                else
-                {
-                    position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
-                    Debug.Log("[PlayerSpawner] Checkpoint not found, using default spawn point.");
-                }
-            }
-            else
-            {
-                position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
-                Debug.Log("[PlayerSpawner] No saved or checkpoint data, using default spawn.");
-            }
+            position = data.playerPosition;
+            Debug.Log("[PlayerSpawner] Loaded saved position.");
+        }
+        else
+        {
+            position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
         }
 
+        //if (data != null)
+        //{
+        //    if (data.hasEncounterPosition)
+        //    {
+        //        position = data.lastEncounterPosition;
+        //        Debug.Log("[PlayerSpawner] Spawning at last encounter position.");
+        //        // Reset so it doesn't trigger again after respawn
+        //        data.hasEncounterPosition = false;
+        //    }
+        //    else if (data.hasCheckpoint)
+        //    {
+        //        var checkpoint = CheckpointManager.instance.GetCheckpointByID(data.lastCheckpointID);
+        //        if (checkpoint)
+        //        {
+        //            position = checkpoint.transform.position;
+        //            Debug.Log($"[PlayerSpawner] Spawning at checkpoint: {checkpoint.GetID()}");
+        //        }
+        //        else
+        //        {
+        //            position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
+        //            Debug.Log("[PlayerSpawner] Checkpoint not found, using default spawn point.");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        position = spawnPoint ? (Vector2)spawnPoint.position : Vector2.zero;
+        //        Debug.Log("[PlayerSpawner] No saved or checkpoint data, using default spawn.");
+        //    }
+        //}
 
         Quaternion rot = spawnPoint ? spawnPoint.rotation : Quaternion.identity;
         var go = Instantiate(prefab, position, rot);

@@ -17,11 +17,8 @@ public class GameData
     public float sfxVolume;
 
     // checkpoints //
-    public int lastCheckpointID;
     public bool hasCheckpoint;
-
-    public Vector2 lastEncounterPosition;
-    public bool hasEncounterPosition;
+    public int lastCheckpointID;
 
     public GameData()
     {
@@ -34,10 +31,7 @@ public class GameData
         bgmVolume = 1f;
         sfxVolume = 1f;
 
-        lastCheckpointID = -1;
         hasCheckpoint = false;
-
-        hasEncounterPosition = false;
-        lastEncounterPosition = Vector2.zero;
+        lastCheckpointID = 0;
     }
 }

@@ -3,23 +3,46 @@ using UnityEngine;
 public class Checkpoint : MonoBehaviour
 {
     [SerializeField] private int checkpointID;
+    private bool isActive;
+    private bool isLocked;
     public int GetID() => checkpointID;
-    [SerializeField] private bool isActive = false;
+    public bool IsActive() => isActive;
+    public bool IsLocked() => isLocked;
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void Awake()
     {
-        if (other.CompareTag("Player"))
-        {
-            ActivateCheckpoint();
-        }
+        if (CheckpointManager.instance != null)
+            CheckpointManager.instance.RegisterCheckpoint(this);
     }
-
-    public void ActivateCheckpoint()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (isActive) return;
+        if (collision.CompareTag("Player"))
+            Activate();
+    }
+    public void Activate()
+    {
+        if (isLocked) return;
 
         isActive = true;
-        Debug.Log("isactivated");
+        isLocked = true;
+
         CheckpointManager.instance.SetActiveCheckpoint(this);
+
+        Debug.Log($"Checkpoint {checkpointID} activated and locked.");
+    }
+
+    public void Deactivate()
+    {
+        isActive = false;
+    }
+
+    public void Lock()
+    {
+        isLocked = true;
+    }
+
+    public void Unlock()
+    {
+        isLocked = false;
     }
 }
