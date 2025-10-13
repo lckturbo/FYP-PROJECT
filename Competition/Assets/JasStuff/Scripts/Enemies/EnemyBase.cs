@@ -44,13 +44,12 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] private Collider2D hitboxCollider;
 
     [Header("Waypoints Settings")]
-    protected WayPointArea patrolArea;
+    //protected WayPointArea patrolArea;
     protected int currId = 0;
     protected Vector2 currTarget;
     protected List<Transform> waypoints;
 
     [Header("Patrol Settings")]
-    [SerializeField] protected PatrolDirection patrolDir = PatrolDirection.Forward;
     protected int dirStep = 1;
 
     public event Action<EnemyParty> OnAttackPlayer;
@@ -82,17 +81,17 @@ public abstract class EnemyBase : MonoBehaviour
         if (!health) health = GetComponent<NewHealth>();
         health.ApplyStats(enemyStats);
 
-        patrolArea = WaypointManager.instance.GetAreaByID(areaID);
-        if (patrolArea)
-        {
-            waypoints = patrolArea.GetWaypoints();
-            if (waypoints.Count > 0)
-            {
-                currId = patrolDir == PatrolDirection.Forward ? 0 : waypoints.Count - 1;
-                dirStep = patrolDir == PatrolDirection.Forward ? 1 : -1;
-                currTarget = waypoints[currId].position;
-            }
-        }
+        //patrolArea = WaypointManager.instance.GetAreaByID(areaID);
+        //if (patrolArea)
+        //{
+        //    waypoints = patrolArea.GetWaypoints();
+        //    if (waypoints.Count > 0)
+        //    {
+        //        currId = patrolDir == PatrolDirection.Forward ? 0 : waypoints.Count - 1;
+        //        dirStep = patrolDir == PatrolDirection.Forward ? 1 : -1;
+        //        currTarget = waypoints[currId].position;
+        //    }
+        //}
 
         if (attackHitbox)
         {
