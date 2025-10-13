@@ -86,7 +86,7 @@ public class BattleManager : MonoBehaviour
 
             if (InventoryManager.Instance != null && InventoryManager.Instance.PlayerInventory != null)
             {
-                InventoryManager.Instance.PlayerInventory.AddMoney(100);
+                InventoryManager.Instance.PlayerInventory.AddMoney(1000);
                 Debug.Log($"[Battle Reward] +100 Money. Total: {InventoryManager.Instance.PlayerInventory.Money}");
             }
             else
