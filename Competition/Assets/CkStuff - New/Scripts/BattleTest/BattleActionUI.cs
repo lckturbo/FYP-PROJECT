@@ -41,6 +41,10 @@ public class BattleActionUI : MonoBehaviour
         selector?.Clear();
         ShowMessage(null);
         if (panel) panel.SetActive(true);
+
+        attackBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().basicAtk;
+        skillBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill1;
+        skill2Btn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill2;
     }
 
     private void HandleSelectionChanged(Combatant c)

@@ -21,6 +21,11 @@ public class NewCharacterDefinition : ScriptableObject
 
     [Header("Prefab")]
     public GameObject playerPrefab;
+
+    [Header("Battle UIs")]
+    public Sprite basicAtk;
+    public Sprite skill1;
+    public Sprite skill2;
 }
 
 //if we planning to add
