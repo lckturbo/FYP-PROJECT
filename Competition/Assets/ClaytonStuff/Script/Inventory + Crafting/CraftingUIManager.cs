@@ -59,7 +59,13 @@ public class CraftingUIManager : MonoBehaviour
         // Toggle UI with C key
         if (Input.GetKeyDown(KeyCode.C))
         {
-            craftingPanel.SetActive(!craftingPanel.activeSelf);
+            if (PauseManager.instance != null && PauseManager.instance.IsPaused()) return;
+
+            bool newState = !craftingPanel.activeSelf;
+            craftingPanel.SetActive(newState);
+
+            if (PauseManager.instance != null)
+                PauseManager.instance.canPause = !newState;
         }
     }
 

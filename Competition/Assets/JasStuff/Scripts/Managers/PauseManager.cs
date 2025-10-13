@@ -12,6 +12,7 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private Button menuBtn;
 
     private bool isPaused = false;
+    public bool IsPaused() => isPaused;
     [HideInInspector] public bool canPause = true;
     private bool isOpen = false;
     private void Awake()

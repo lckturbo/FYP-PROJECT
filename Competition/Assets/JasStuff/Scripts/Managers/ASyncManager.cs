@@ -30,7 +30,14 @@ public class ASyncManager : MonoBehaviour
         QuestUIManager questUI = FindObjectOfType<QuestUIManager>();
         if (questUI) questUI.gameObject.SetActive(false);
 
-        if(mainScreen) mainScreen.SetActive(false);
+        var inventoryUI = FindObjectOfType<InventoryUIManager>();
+        if (inventoryUI) inventoryUI.gameObject.SetActive(false);
+
+        var craftingUI = FindObjectOfType<CraftingUIManager>();
+        if (craftingUI != null)
+            craftingUI.gameObject.SetActive(false);
+
+        if (mainScreen) mainScreen.SetActive(false);
         loadingScreen.SetActive(true);
 
         StartCoroutine(LoadLevelAsync(levelToLoad));
