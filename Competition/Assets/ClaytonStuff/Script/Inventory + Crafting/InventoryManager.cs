@@ -8,6 +8,7 @@ public class InventoryManager : MonoBehaviour
 
     void Awake()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
