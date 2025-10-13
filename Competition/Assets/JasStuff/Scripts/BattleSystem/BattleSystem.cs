@@ -199,6 +199,7 @@ public class BattleSystem : MonoBehaviour
         allPlayers.Add(playerLeader);
         allPlayers.AddRange(playerAllies);
 
+        // ===== Player Health Setup =====
         for (int i = 0; i < allPlayers.Count && i < playerHealth.Length; i++)
         {
             var h = allPlayers[i] ? allPlayers[i].GetComponent<NewHealth>() : null;
@@ -213,9 +214,18 @@ public class BattleSystem : MonoBehaviour
                     playerHealth[idx].maxValue = nh.GetMaxHealth();
                     playerHealth[idx].value = nh.GetCurrHealth();
                 };
+
+                //  Disable health/ATB when dead
+                h.OnDeathComplete += (nh) =>
+                {
+                    playerHealth[idx].gameObject.SetActive(false);
+                    if (idx < playerATB.Length && playerATB[idx])
+                        playerATB[idx].gameObject.SetActive(false);
+                };
             }
         }
 
+        // ===== Enemy Health Setup =====
         for (int i = 0; i < enemies.Count && i < enemyHealth.Length; i++)
         {
             var h = enemies[i] ? enemies[i].GetComponent<NewHealth>() : null;
@@ -230,9 +240,18 @@ public class BattleSystem : MonoBehaviour
                     enemyHealth[idx].maxValue = nh.GetMaxHealth();
                     enemyHealth[idx].value = nh.GetCurrHealth();
                 };
+
+                //  Disable health/ATB when enemy dies
+                h.OnDeathComplete += (nh) =>
+                {
+                    enemyHealth[idx].gameObject.SetActive(false);
+                    if (idx < enemyATB.Length && enemyATB[idx])
+                        enemyATB[idx].gameObject.SetActive(false);
+                };
             }
         }
     }
+
 
     private void SetUpATBBars()
     {
