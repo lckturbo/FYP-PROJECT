@@ -11,26 +11,31 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
 
     private void Awake()
     {
-        if (instance) instance = this;
-        else Destroy(gameObject);
+        if (instance == null)
+            instance = this;
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
 
     private void Start()
     {
         checkpointList = FindObjectsOfType<Checkpoint>().ToList();
     }
+
     public void SetActiveCheckpoint(Checkpoint newCheckpoint)
     {
         activeCheckpoint = newCheckpoint;
         SaveLoadSystem.instance.SaveGame();
     }
+
     public void LoadData(GameData data)
     {
         if (data.hasCheckpoint)
         {
             activeCheckpoint = checkpointList.FirstOrDefault(c => c.GetID() == data.lastCheckpointID);
-
-            if (activeCheckpoint) Debug.Log($"Loaded checkpoint: {data.lastCheckpointID}");
         }
     }
 
@@ -41,5 +46,14 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
             data.lastCheckpointID = activeCheckpoint.GetID();
             data.hasCheckpoint = true;
         }
+        else
+        {
+            data.hasCheckpoint = false;
+        }
+    }
+
+    public Checkpoint GetCheckpointByID(int id)
+    {
+        return checkpointList.FirstOrDefault(c => c.GetID() == id);
     }
 }

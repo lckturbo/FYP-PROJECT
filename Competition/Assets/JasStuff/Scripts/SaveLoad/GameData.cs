@@ -20,6 +20,9 @@ public class GameData
     public int lastCheckpointID;
     public bool hasCheckpoint;
 
+    public Vector2 lastEncounterPosition;
+    public bool hasEncounterPosition;
+
     public GameData()
     {
         selectedCharacterIndex = -1;
@@ -33,5 +36,8 @@ public class GameData
 
         lastCheckpointID = -1;
         hasCheckpoint = false;
+
+        hasEncounterPosition = false;
+        lastEncounterPosition = Vector2.zero;
     }
 }
