@@ -73,7 +73,7 @@ public class BattleManager : MonoBehaviour
 
         if (playerWon)
         {
-            Debug.Log("Victory"); // TODO: HANDLE XP UI
+            Debug.Log("Victory");
 
             if (!string.IsNullOrEmpty(enemyPartyID))
             {
