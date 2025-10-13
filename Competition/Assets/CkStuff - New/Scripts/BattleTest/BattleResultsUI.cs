@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -45,8 +46,20 @@ public class BattleResultsUI : MonoBehaviour
     [SerializeField] private TMP_Text xpBarValueLine;
     [SerializeField] private TMP_Text xpToNextLine;
 
+    [Header("XP Animation")]
+    [SerializeField] private bool animateXpBar = true;
+    [SerializeField, Min(0.01f)] private float xpBarSegmentDuration = 2.0f;
+     
+    [SerializeField] private bool autoScaleSpeed = true;
+    [SerializeField, Min(0.01f)] private float minSegmentDuration = 1.2f;
+    [SerializeField, Min(0.01f)] private float maxSegmentDuration = 3.0f;
+    [SerializeField, Min(0.25f)] private float levelsForMaxDuration = 4.0f;
+
+    [SerializeField] private AnimationCurve xpBarCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
     private System.Action _onContinue;
     private Color _defaultTitleColor;
+    private Coroutine _xpAnimCo;
 
     void Awake()
     {
@@ -55,6 +68,11 @@ public class BattleResultsUI : MonoBehaviour
         if (panel) panel.SetActive(false);
         if (continueBtn) continueBtn.onClick.AddListener(() =>
         {
+            if (_xpAnimCo != null)
+            {
+                StopCoroutine(_xpAnimCo);
+                _xpAnimCo = null;
+            }
             if (panel) panel.SetActive(false);
             _onContinue?.Invoke();
             _onContinue = null;
@@ -67,30 +85,22 @@ public class BattleResultsUI : MonoBehaviour
         if (!panel) return;
         panel.SetActive(true);
 
-        // Title (no color switching)
         if (title)
         {
             title.text = p.playerWon ? "Victory" : "Defeat";
             title.color = _defaultTitleColor;
         }
 
-        // Title panel & backdrop sprites
         if (titlePanelImage) SetSprite(titlePanelImage, p.playerWon ? victoryTitlePanelSprite : defeatTitlePanelSprite);
         if (backdropImage) SetSprite(backdropImage, p.playerWon ? victoryBackdropSprite : defeatBackdropSprite);
 
-        // XP bar background (NOT the fill)
         if (xpBarBackground) SetSprite(xpBarBackground, p.playerWon ? victoryXpBarBG : defeatXpBarBG);
 
-        // XP gained line
         if (xpLine) xpLine.text = "Gained " + p.xpGained + " XP";
-
-        // Level line
         if (levelLine) levelLine.text = "Level " + p.oldLevel + " -> Level " + p.newLevel;
 
-        // XP bar
         BindXpBar(p);
 
-        // Clear old stat rows (keep the disabled template if it's a child)
         if (statsContainer)
         {
             for (int i = statsContainer.childCount - 1; i >= 0; i--)
@@ -101,13 +111,11 @@ public class BattleResultsUI : MonoBehaviour
             }
         }
 
-        // Add stat rows
         if (statsContainer && statRowPrefab != null && p.stats != null)
         {
             for (int i = 0; i < p.stats.Count; i++) AddStatRow(p.stats[i], i);
         }
 
-        // Enemy warning
         if (enemyWarning)
         {
             if (p.enemyScaledToLevel > 0)
@@ -119,9 +127,10 @@ public class BattleResultsUI : MonoBehaviour
         }
     }
 
+    // ---------- XP bar binding & animation ----------
+
     private void BindXpBar(BattleResultsPayload p)
     {
-        // If we don't have XP data, hide XP UI elements gracefully
         if (!xpBar)
         {
             SafeSetActive(xpBarValueLine, false);
@@ -129,36 +138,136 @@ public class BattleResultsUI : MonoBehaviour
             return;
         }
 
-        if (p.xpRequiredForNext <= 0)
+        if (p.xpRequiredForNext <= 0 || p.newLevel < 1)
         {
-            // Missing threshold -> hide bar & companion texts
             xpBar.gameObject.SetActive(false);
             SafeSetActive(xpBarValueLine, false);
             SafeSetActive(xpToNextLine, false);
             return;
         }
 
-        // Clamp xpAfter to [0, xpRequiredForNext]
-        int clampedAfter = Mathf.Clamp(p.xpAfter, 0, p.xpRequiredForNext);
+        if (_xpAnimCo != null)
+        {
+            StopCoroutine(_xpAnimCo);
+            _xpAnimCo = null;
+        }
 
+        if (!animateXpBar || p.oldLevel <= 0)
+        {
+            int clampedAfter = Mathf.Clamp(p.xpAfter, 0, p.xpRequiredForNext);
+            ApplyXpBarVisuals(clampedAfter, p.xpRequiredForNext);
+            return;
+        }
+
+        _xpAnimCo = StartCoroutine(AnimateXpFill(p));
+    }
+
+    private IEnumerator AnimateXpFill(BattleResultsPayload p)
+    {
+        xpBar.gameObject.SetActive(true);
+
+        int Req(int lvl) => Mathf.Max(1, LevelSystem.GetRequiredXPForLevel(Mathf.Max(1, lvl)));
+
+        int startLevel = Mathf.Max(1, p.oldLevel);
+        int endLevel = Mathf.Max(1, p.newLevel);
+
+        if (endLevel < startLevel)
+        {
+            ApplyXpBarVisuals(Mathf.Clamp(p.xpAfter, 0, p.xpRequiredForNext), Mathf.Max(1, p.xpRequiredForNext));
+            yield break;
+        }
+
+        float baseDur = autoScaleSpeed ? ComputeAutoBaseDuration(p, Req) : xpBarSegmentDuration;
+
+        int segStartLevel = startLevel;
+        int segStartFrom = Mathf.Clamp(p.xpBefore, 0, Req(segStartLevel));
+        int segTarget = Req(segStartLevel);
+        float fracFirst = Mathf.Clamp01((segTarget - segStartFrom) / (float)segTarget);
+        if (endLevel > startLevel || segStartFrom < segTarget)
+        {
+            yield return AnimateSegment(segStartLevel, segStartFrom, segTarget, baseDur * Mathf.Max(0.15f, fracFirst));
+        }
+
+        for (int lvl = startLevel + 1; lvl < endLevel; lvl++)
+        {
+            yield return AnimateSegment(lvl, 0, Req(lvl), baseDur);
+        }
+
+        int finalReq = Req(endLevel);
+        int finalTo = Mathf.Clamp(p.xpAfter, 0, finalReq);
+        float fracLast = Mathf.Clamp01(finalTo / (float)finalReq);
+        yield return AnimateSegment(endLevel, 0, finalTo, baseDur * Mathf.Max(0.15f, fracLast));
+
+        _xpAnimCo = null;
+    }
+
+    private float ComputeAutoBaseDuration(BattleResultsPayload p, System.Func<int, int> reqFn)
+    {
+        int startLevel = Mathf.Max(1, p.oldLevel);
+        int endLevel = Mathf.Max(1, p.newLevel);
+
+        float firstReq = reqFn(startLevel);
+        float firstPart = Mathf.Clamp01((firstReq - Mathf.Clamp(p.xpBefore, 0, (int)firstReq)) / firstReq);
+
+        float intermediates = Mathf.Max(0, endLevel - startLevel - 1);
+
+        float lastReq = reqFn(endLevel);
+        float lastPart = (endLevel >= startLevel)
+            ? Mathf.Clamp01(Mathf.Clamp(p.xpAfter, 0, (int)lastReq) / lastReq)
+            : 0f;
+
+        float levelEquivalents = firstPart + intermediates + lastPart;
+
+        float t = Mathf.Clamp01(levelEquivalents / Mathf.Max(0.0001f, levelsForMaxDuration));
+        return Mathf.Lerp(minSegmentDuration, maxSegmentDuration, t);
+    }
+
+    private IEnumerator AnimateSegment(int level, int from, int to, float duration)
+    {
+        int req = Mathf.Max(1, LevelSystem.GetRequiredXPForLevel(level));
+
+        xpBar.minValue = 0;
+        xpBar.maxValue = req;
+
+        float t = 0f;
+        ApplyXpBarVisuals(from, req);
+
+        float dur = Mathf.Max(0.01f, duration);
+
+        while (t < 1f)
+        {
+            t += (Time.unscaledDeltaTime / dur);
+            float tt = xpBarCurve != null ? Mathf.Clamp01(xpBarCurve.Evaluate(Mathf.Clamp01(t))) : Mathf.Clamp01(t);
+            int v = Mathf.RoundToInt(Mathf.Lerp(from, to, tt));
+            ApplyXpBarVisuals(v, req);
+            yield return null;
+        }
+
+        ApplyXpBarVisuals(to, req);
+    }
+
+    private void ApplyXpBarVisuals(int current, int required)
+    {
         xpBar.gameObject.SetActive(true);
         xpBar.minValue = 0;
-        xpBar.maxValue = p.xpRequiredForNext;
-        xpBar.value = clampedAfter;
+        xpBar.maxValue = required;
+        xpBar.value = Mathf.Clamp(current, 0, required);
 
         if (xpBarValueLine)
         {
             xpBarValueLine.gameObject.SetActive(true);
-            xpBarValueLine.text = clampedAfter + " / " + p.xpRequiredForNext + " XP";
+            xpBarValueLine.text = current + " / " + required + " XP";
         }
 
         if (xpToNextLine)
         {
             xpToNextLine.gameObject.SetActive(true);
-            int remaining = Mathf.Max(0, p.xpRequiredForNext - clampedAfter);
+            int remaining = Mathf.Max(0, required - current);
             xpToNextLine.text = remaining + " XP to next level";
         }
     }
+
+    // ---------- helpers ----------
 
     private static void SafeSetActive(Graphic g, bool active)
     {
@@ -168,7 +277,6 @@ public class BattleResultsUI : MonoBehaviour
     private static void SetSprite(Image image, Sprite sprite)
     {
         if (!image) return;
-
         if (sprite)
         {
             image.enabled = true;
@@ -180,7 +288,6 @@ public class BattleResultsUI : MonoBehaviour
         }
     }
 
-    // ---- Manual placement helper ----
     public void AddStatRow(BattleResultsStat stat, int index)
     {
         var go = Instantiate(statRowPrefab, statsContainer);
@@ -199,7 +306,7 @@ public class BattleResultsUI : MonoBehaviour
     }
 }
 
-// ----- payload models -----
+// ----- payload -----
 [System.Serializable]
 public struct BattleResultsStat
 {
