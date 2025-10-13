@@ -94,6 +94,23 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 });
             }
         }
+        else if (scnName == "Credits")
+        {
+            AudioManager.instance.StopAllSounds();
+            //AudioManager.instance.PlaySound("bgm");
+            AudioManager.instance.PlaySound("MainMenuBGM");
+
+            exitBtn = GameObject.Find("Black").GetComponent<Button>();
+
+            if (exitBtn)
+            {
+                exitBtn.onClick.RemoveAllListeners();
+                exitBtn.onClick.AddListener(() =>
+                {
+                    GameManager.instance.ChangeScene("Main");
+                });
+            }
+        }
     }
 
     public void SetSettings()
