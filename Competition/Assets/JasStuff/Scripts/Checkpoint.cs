@@ -27,7 +27,6 @@ public class Checkpoint : MonoBehaviour
         isLocked = true;
 
         CheckpointManager.instance.SetActiveCheckpoint(this);
-
         Debug.Log($"Checkpoint {checkpointID} activated and locked.");
     }
 

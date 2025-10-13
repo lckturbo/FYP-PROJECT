@@ -78,10 +78,7 @@ public class BattleManager : MonoBehaviour
             if (!string.IsNullOrEmpty(enemyPartyID))
             {
                 if (EnemyTracker.instance)
-                {
                     EnemyTracker.instance.MarkDefeated(enemyPartyID);
-                    SaveLoadSystem.instance.SaveGame(false, true);
-                }
             }
 
             if (InventoryManager.Instance != null && InventoryManager.Instance.PlayerInventory != null)
@@ -93,6 +90,8 @@ public class BattleManager : MonoBehaviour
             {
                 Debug.LogWarning("No InventoryManager or PlayerInventory found when trying to reward money!");
             }
+
+            SaveLoadSystem.instance.SaveGame(false, true);
         }
         else
         {
