@@ -54,13 +54,10 @@ public class BattleManager : MonoBehaviour
         enemypartyRef = enemyParty;
         enemyPartyID = enemypartyRef.GetID();
 
-        //var player = GameObject.FindGameObjectWithTag("Player");
+        //NewPlayerMovement player = GameObject.FindGameObjectWithTag("Player").GetComponent<NewPlayerMovement>();
         //if (player != null)
         //{
-        //    var data = SaveLoadSystem.instance.GetGameData();
-        //    data.playerPosition = player.transform.position;
-        //    data.hasSavedPosition = true;
-        //    Debug.Log($"[BattleManager] Saved pre-battle position: {data.playerPosition}");
+        //    player.SaveEncounterPosition();
         //}
 
         SaveLoadSystem.instance.SaveGame();
@@ -72,6 +69,7 @@ public class BattleManager : MonoBehaviour
         inBattle = false;
 
         OnClearAllBuffs?.Invoke();
+        var data = SaveLoadSystem.instance.GetGameData();
 
         if (playerWon)
         {
@@ -95,12 +93,6 @@ public class BattleManager : MonoBehaviour
             {
                 Debug.LogWarning("No InventoryManager or PlayerInventory found when trying to reward money!");
             }
-
-            //if (data != null)
-            //{
-            //    data.hasCheckpoint = false; // disable checkpoint override
-            //    data.hasSavedPosition = true;
-            //}
         }
         else
         {
@@ -109,7 +101,6 @@ public class BattleManager : MonoBehaviour
             if (QuestManager.Instance != null)
                 QuestManager.Instance.ResetAllQuests();
 
-            // TODO: go back sample scene (reset every progress) -> when leader died // FOR ALPHA
             SaveLoadSystem.instance.NewGame(true);
             SaveLoadSystem.instance.SaveGame(false, false);
         }
