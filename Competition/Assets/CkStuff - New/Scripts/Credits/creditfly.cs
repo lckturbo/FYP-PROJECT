@@ -198,8 +198,7 @@ Lam Cheng Kel",
 @"Steven Melin - Across The Distance
 Steven Melin - Battle For Peace,
 Steven Melin - Warrior's Pride
-Steven Melin - New Adventure
-Steven Melin - Mysterious Cave",
+Steven Melin - New Adventure",
                 holdSeconds = 2.5f
             },
             new Section{
