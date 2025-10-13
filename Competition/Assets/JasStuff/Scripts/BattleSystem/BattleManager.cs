@@ -54,6 +54,15 @@ public class BattleManager : MonoBehaviour
         enemypartyRef = enemyParty;
         enemyPartyID = enemypartyRef.GetID();
 
+        //var player = GameObject.FindGameObjectWithTag("Player");
+        //if (player != null)
+        //{
+        //    var data = SaveLoadSystem.instance.GetGameData();
+        //    data.playerPosition = player.transform.position;
+        //    data.hasSavedPosition = true;
+        //    Debug.Log($"[BattleManager] Saved pre-battle position: {data.playerPosition}");
+        //}
+
         SaveLoadSystem.instance.SaveGame();
         GameManager.instance.ChangeScene("jasBattle");
     }
@@ -86,6 +95,12 @@ public class BattleManager : MonoBehaviour
             {
                 Debug.LogWarning("No InventoryManager or PlayerInventory found when trying to reward money!");
             }
+
+            //if (data != null)
+            //{
+            //    data.hasCheckpoint = false; // disable checkpoint override
+            //    data.hasSavedPosition = true;
+            //}
         }
         else
         {
