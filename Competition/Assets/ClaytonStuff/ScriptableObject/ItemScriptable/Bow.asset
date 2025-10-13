@@ -19,7 +19,12 @@ MonoBehaviour:
   healing: 0
   worldPrefab: {fileID: 2732506854163364474, guid: 54cf91f5384674d43b86839b3cacc2bd, type: 3}
   isWeapon: 1
+  WeaponAttack: 0
   isBow: 1
-  type: 3
+  BowAttack: 0
+  type: 5
   description: bow of destruction
   price: 100
+  isBuff: 0
+  attackBuffAmount: 0
+  buffDuration: 0
