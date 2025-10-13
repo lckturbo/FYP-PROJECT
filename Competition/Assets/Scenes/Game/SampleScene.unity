@@ -603,7 +603,7 @@ GameObject:
   m_Component:
   - component: {fileID: 78408827}
   m_Layer: 0
-  m_Name: Area_1-Enemies
+  m_Name: Area_1-Enemies [Static]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1708,6 +1708,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 387609339254942090, guid: 5399b071fb27a994eb4041a5b09bed0d, type: 3}
       propertyPath: patrolDir
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 387609339254942090, guid: 5399b071fb27a994eb4041a5b09bed0d, type: 3}
+      propertyPath: startingFacingDir.y
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4015835877819868307, guid: 5399b071fb27a994eb4041a5b09bed0d, type: 3}
