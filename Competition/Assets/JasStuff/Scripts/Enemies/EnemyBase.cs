@@ -69,11 +69,11 @@ public abstract class EnemyBase : MonoBehaviour
 
     private void Awake()
     {
-        //if (!enemyStats || !aiPath || !rb2d || !seeker) return;
-        if (!enemyStats) return;
+        if (!enemyStats || !aiPath || !rb2d || !seeker) return;
+        //if (!enemyStats) return;
         enemyStates = EnemyStates.Idle;
         aiPath.maxSpeed = enemyStats.Speed;
-        //hitboxCollider.enabled = false;
+        hitboxCollider.enabled = false;
     }
 
     protected virtual void Start()
@@ -144,13 +144,6 @@ public abstract class EnemyBase : MonoBehaviour
             enemyStates = EnemyStates.Chase;
             return;
         }
-
-        idleTimer -= Time.deltaTime;
-        if (idleTimer < 0 && waypoints != null && waypoints.Count > 0)
-        {
-            enemyStates = EnemyStates.Patrol;
-            idleTimer = 2;
-        }
     }
 
     // ---- PATROL ---- //
@@ -183,7 +176,23 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     // ---- ATTACK ---- //
-    protected abstract void Attack();
+    protected virtual void Attack()
+    {
+        if (isAttacking) return;
+
+        if (player)
+        {
+            Vector2 lookDir = (player.position - transform.position).normalized;
+            anim.SetFloat("moveX", lookDir.x);
+            anim.SetFloat("moveY", lookDir.y);
+            lastMoveDir = lookDir;
+        }
+
+        aiPath.canMove = false;
+        isAttacking = true;
+
+        anim.SetTrigger("attack");
+    }
 
     protected void UpdateHitboxDirection()
     {
@@ -213,8 +222,6 @@ public abstract class EnemyBase : MonoBehaviour
             enemyStates = EnemyStates.Chase;
         else
             enemyStates = EnemyStates.Idle;
-
-        //Debug.Log("[enemybase] endattack");
     }
 
     public virtual void TriggerAttack()

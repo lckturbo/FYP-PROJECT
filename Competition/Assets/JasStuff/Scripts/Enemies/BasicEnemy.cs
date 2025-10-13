@@ -2,22 +2,15 @@ using UnityEngine;
 
 public class BasicEnemy : EnemyBase
 {
-    protected override void Attack()
+    protected override void Idle()
     {
-        if (isAttacking) return;
+        base.Idle();
 
-        if (player)
+        idleTimer -= Time.deltaTime;
+        if (idleTimer < 0 && waypoints != null && waypoints.Count > 0)
         {
-            Vector2 lookDir = (player.position - transform.position).normalized;
-            anim.SetFloat("moveX", lookDir.x);
-            anim.SetFloat("moveY", lookDir.y);
-            lastMoveDir = lookDir;
+            enemyStates = EnemyStates.Patrol;
+            idleTimer = 2;
         }
-
-        aiPath.canMove = false;
-        isAttacking = true;
-
-        anim.SetTrigger("attack");
     }
-
 }
