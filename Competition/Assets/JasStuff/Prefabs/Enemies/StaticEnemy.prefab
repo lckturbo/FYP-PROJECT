@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 3155570419431485268}
   - component: {fileID: 7636331182219502014}
   - component: {fileID: 3633728211733584536}
+  - component: {fileID: 5784852523265819840}
   m_Layer: 9
   m_Name: StaticEnemy
   m_TagString: Enemy
@@ -214,7 +215,7 @@ MonoBehaviour:
   leftOffset: {x: -0.5, y: 0}
   rightOffset: {x: 0.5, y: 0}
   hitboxCollider: {fileID: 6107887541759429330}
-  patrolDir: 0
+  startingFacingDir: {x: 0, y: -1}
 --- !u!114 &2745995694369271051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,6 +333,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyGrowth: {fileID: 11400000, guid: ef9b76e14dc386645a65cad6f9120bee, type: 2}
+--- !u!114 &5784852523265819840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4015835877819868307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 334815209170a1c41a20a19fdabd8e07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4790083141406613916
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,7 +373,7 @@ Transform:
   m_GameObject: {fileID: 4790083141406613916}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.39, z: 0}
+  m_LocalPosition: {x: 0, y: -1.2, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

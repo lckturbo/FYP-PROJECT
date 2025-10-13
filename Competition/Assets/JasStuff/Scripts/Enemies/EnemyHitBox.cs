@@ -4,7 +4,7 @@ public class EnemyHitbox : MonoBehaviour
 {
     private EnemyBase owner;
 
-    public void init(EnemyBase enemy)
+    public void Init(EnemyBase enemy)
     {
         owner = enemy;
     }
@@ -15,7 +15,6 @@ public class EnemyHitbox : MonoBehaviour
         {
             Debug.Log("Enemy hit player!");
             owner?.TriggerAttack();
-            
         }
     }
 }

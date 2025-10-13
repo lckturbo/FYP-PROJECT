@@ -96,8 +96,8 @@ public abstract class EnemyBase : MonoBehaviour
         if (attackHitbox)
         {
             EnemyHitbox enemyHitBox = attackHitbox.GetComponent<EnemyHitbox>();
-            if (enemyHitBox) 
-                enemyHitBox.init(this);
+            if (enemyHitBox)
+                enemyHitBox.Init(this);
         }
     }
 
@@ -209,18 +209,12 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     public void EndAttack()
-    {   
+    {
         isAttacking = false;
         attackCooldownTimer = 1f;
 
         aiPath.canMove = true;
-
-        if (player && Vector2.Distance(transform.position, player.position) < enemyStats.atkRange)
-            enemyStates = EnemyStates.Attack;
-        else if (Vector2.Distance(transform.position, player.position) < enemyStats.chaseRange)
-            enemyStates = EnemyStates.Chase;
-        else
-            enemyStates = EnemyStates.Idle;
+        enemyStates = EnemyStates.Idle;
     }
 
     public virtual void TriggerAttack()
@@ -247,7 +241,7 @@ public abstract class EnemyBase : MonoBehaviour
         aiPath.destination = player.position;
 
         if (dist < enemyStats.atkRange && !isAttacking && attackCooldownTimer <= 0f)
-            enemyStates = EnemyStates.Attack; 
+            enemyStates = EnemyStates.Attack;
 
         UpdateAnim();
     }
