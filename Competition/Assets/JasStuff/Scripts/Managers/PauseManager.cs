@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -11,6 +12,7 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private Button menuBtn;
 
     private bool isPaused = false;
+    private bool isOpen = false;
     private void Awake()
     {
         if (!instance) instance = this;
@@ -28,13 +30,23 @@ public class PauseManager : MonoBehaviour
     {
         if (scn.name == "Main" || scn.name == "Lobby" || scn.name == "CharSelection") return;
 
-        pauseUI = GameObject.Find("PauseUI");
-        resumeBtn = GameObject.Find("ResumeBtn").GetComponent<Button>();
-        if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
-        settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
-        menuBtn = GameObject.Find("MainMenuBtn").GetComponent<Button>();
-        if(menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
-        pauseUI.SetActive(false);
+        pauseUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "PauseUI");
+        if (pauseUI)
+        {
+            resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
+            if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
+
+            settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
+            if (settingsBtn) settingsBtn.onClick.AddListener(() =>
+            {
+                UIManager.instance.ToggleSettings(!isOpen);
+            });
+
+            menuBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "MainMenuBtn");
+            if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
+
+            pauseUI.SetActive(false);
+        }
     }
 
     private void Update()
@@ -57,8 +69,6 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 1f;
         isPaused = false;
         pauseUI.SetActive(false);
-        //GameManager.instance.ChangeScene("Main");
-        // TODO: loading scn back to menu
         ASyncManager.instance.LoadLevelBtn("Main");
     }
 }

@@ -39,30 +39,31 @@ public class UIManager : MonoBehaviour, IDataPersistence
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
+    { 
         string scnName = scene.name;
+
+        SetSettings();
 
         if (scnName == "Main")
         {
             AudioManager.instance.StopAllSounds();
-            //AudioManager.instance.PlaySound("bgm");
             AudioManager.instance.PlaySound("MainMenuBGM");
 
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ExitBtn").GetComponent<Button>();
 
-            SetSettings();
-
             if (settingsBtn || creditsBtn || exitBtn)
             {
                 settingsBtn.onClick.RemoveAllListeners();
                 settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
+
                 creditsBtn.onClick.RemoveAllListeners();
                 creditsBtn.onClick.AddListener(() =>
                 {
                     GameManager.instance.ChangeScene("Credits");
                 });
+
                 exitBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.AddListener(() => Application.Quit());
             }
@@ -77,14 +78,14 @@ public class UIManager : MonoBehaviour, IDataPersistence
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
             exitBtn = GameObject.Find("ReturnBtn").GetComponent<Button>();
 
-            SetSettings();
-
             if (playBtn || settingsBtn || exitBtn)
             {
                 playBtn.onClick.RemoveAllListeners();
                 playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
+
                 settingsBtn.onClick.RemoveAllListeners();
                 settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
+
                 exitBtn.onClick.RemoveAllListeners();
                 exitBtn.onClick.AddListener(() =>
                 {
@@ -95,7 +96,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    private void SetSettings()
+    public void SetSettings()
     {
         settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
 
@@ -124,7 +125,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    private void ToggleSettings(bool v)
+    public void ToggleSettings(bool v)
     {
         isOpen = v;
         settingsUI.SetActive(v);
