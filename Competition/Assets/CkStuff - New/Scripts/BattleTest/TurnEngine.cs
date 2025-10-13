@@ -195,8 +195,12 @@ public class TurnEngine : MonoBehaviour
         }
         else
         {
-            if (UnityEngine.Random.value < 0.5f) actor.BasicAttack(target);
-            else actor.Skill1(target);
+            //===  DO NOT DELETED ===
+            //if (UnityEngine.Random.value < 0.5f) actor.BasicAttack(target);
+            //else actor.Skill1(target);
+
+            //BASIC ATTACK ONLY
+            actor.BasicAttack(target);
         }
 
         Debug.Log($"[TURN] {actor.name} auto-acted on {target.name}");

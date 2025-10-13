@@ -192,7 +192,12 @@ Lam Cheng Kel",
             },
             new Section{
                 title = "Music & Sound Credits",
-                body = @"Steven Melin",
+                body =
+@"Steven Melin - Across The Distance
+Steven Melin - Battle For Peace,
+Steven Melin - Warrior's Pride
+Steven Melin - New Adventure
+Steven Melin - Mysterious Cave",
                 holdSeconds = 2.5f
             },
             new Section{

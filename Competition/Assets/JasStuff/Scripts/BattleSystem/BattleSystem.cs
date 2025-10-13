@@ -89,11 +89,11 @@ public class BattleSystem : MonoBehaviour
 
         // Build runtime stats for leader at party level, apply to Health/Movement & Combatant
         var leaderRT = StatsRuntimeBuilder.BuildRuntimeStats(leader.stats, _preBattlePartyLevel, playerGrowth);
-        ApplyRuntimeStats(leaderObj, leaderRT); // sets NewHealth & movement
+        ApplyRuntimeStats(leaderObj, leaderRT);
         var cL = leaderObj.AddComponent<Combatant>();
         cL.isPlayerTeam = true;
         cL.isLeader = true;
-        cL.stats = leaderRT; // IMPORTANT: Combatant uses leveled stats for ATB/attack
+        cL.stats = leaderRT;
         turnEngine.Register(cL);
         _playerCombatants.Add(cL);
 

@@ -48,6 +48,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         {
             AudioManager.instance.StopAllSounds();
             AudioManager.instance.PlaySound("MainMenuBGM");
+            //AudioManager.instance.PlaySound("bgm");
 
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
@@ -71,8 +72,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
         else if (scnName == "Lobby")
         {
             AudioManager.instance.StopAllSounds();
-            AudioManager.instance.PlaySound("bgm");
             //AudioManager.instance.PlaySound("MainMenuBGM");
+            AudioManager.instance.PlaySound("bgm");
 
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
@@ -97,8 +98,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
         else if (scnName == "Credits")
         {
             AudioManager.instance.StopAllSounds();
-            //AudioManager.instance.PlaySound("bgm");
             AudioManager.instance.PlaySound("MainMenuBGM");
+            //AudioManager.instance.PlaySound("bgm");
 
             exitBtn = GameObject.Find("Black").GetComponent<Button>();
 
@@ -110,6 +111,24 @@ public class UIManager : MonoBehaviour, IDataPersistence
                     GameManager.instance.ChangeScene("Main");
                 });
             }
+        }
+        else if (scnName == "CharSelection")
+        {
+            AudioManager.instance.StopAllSounds();
+            AudioManager.instance.PlaySound("MainMenuBGM");
+            //AudioManager.instance.PlaySound("bgm");
+        }
+        else if (scnName == "SampleScene")
+        {
+            AudioManager.instance.StopAllSounds();
+            AudioManager.instance.PlaySound("MainMenuBGM");
+            //AudioManager.instance.PlaySound("bgm");
+        }
+        else if (scnName == "JasBattle")
+        {
+            AudioManager.instance.StopAllSounds();
+            AudioManager.instance.PlaySound("MainMenuBGM");
+            //AudioManager.instance.PlaySound("bgm");
         }
     }
 
