@@ -15,14 +15,23 @@ public class GameData
     // audio //
     public float bgmVolume;
     public float sfxVolume;
-    
+
+    // checkpoints //
+    public int lastCheckpointID;
+    public bool hasCheckpoint;
+
     public GameData()
     {
         selectedCharacterIndex = -1;
         playerPosition = Vector2.zero;
         hasSavedPosition = false;
+
         defeatedEnemies = new List<string>();
+
         bgmVolume = 1f;
         sfxVolume = 1f;
+
+        lastCheckpointID = -1;
+        hasCheckpoint = false;
     }
 }

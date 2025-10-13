@@ -31,23 +31,32 @@ public class PauseManager : MonoBehaviour
     {
         if (scn.name == "Main" || scn.name == "Lobby" || scn.name == "CharSelection") return;
 
-        pauseUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "PauseUI");
-        if (pauseUI)
-        {
-            resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
-            if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
+        //pauseUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "PauseUI");
+        //if (pauseUI)
+        //{
+        //    resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
+        //    if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
 
-            settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
-            if (settingsBtn) settingsBtn.onClick.AddListener(() =>
-            {
-                UIManager.instance.ToggleSettings(!isOpen);
-            });
+        //    settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
+        //    if (settingsBtn) settingsBtn.onClick.AddListener(() =>
+        //    {
+        //        UIManager.instance.ToggleSettings(!isOpen);
+        //    });
 
-            menuBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "MainMenuBtn");
-            if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
+        //    menuBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "MainMenuBtn");
+        //    if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
 
-            pauseUI.SetActive(false);
-        }
+        //    pauseUI.SetActive(false);
+        //}
+
+        pauseUI = GameObject.Find("PauseUI");
+        resumeBtn = GameObject.Find("ResumeBtn").GetComponent<Button>();
+        if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
+        settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
+        if (settingsBtn) settingsBtn.onClick.AddListener(() => UIManager.instance.ToggleSettings(!isOpen));
+        menuBtn = GameObject.Find("MainMenuBtn").GetComponent<Button>();
+        if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
+        pauseUI.SetActive(false);
     }
     private void Update()
     {
