@@ -42,7 +42,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
     { 
         string scnName = scene.name;
 
-        SetSettings();
+       // SetSettings();
 
         if (scnName == "Main")
         {
@@ -56,6 +56,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
             if (settingsBtn || creditsBtn || exitBtn)
             {
+                Debug.Log("testing");
                 settingsBtn.onClick.RemoveAllListeners();
                 settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
 
@@ -163,8 +164,14 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
     public void ToggleSettings(bool v)
     {
-        isOpen = v;
-        settingsUI.SetActive(v);
+        if (settingsUI == null)
+            SetSettings();
+
+        if (settingsUI != null)
+        {
+            isOpen = v;
+            settingsUI.SetActive(v);
+        }
     }
 
     public bool isSettingsOpen()
