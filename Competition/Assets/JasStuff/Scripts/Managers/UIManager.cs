@@ -101,7 +101,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             AudioManager.instance.PlaySound("MainMenuBGM");
             //AudioManager.instance.PlaySound("bgm");
 
-            exitBtn = GameObject.Find("BlackBtn").GetComponent<Button>();
+            exitBtn = GameObject.Find("Black").GetComponent<Button>();
 
             if (exitBtn)
             {
