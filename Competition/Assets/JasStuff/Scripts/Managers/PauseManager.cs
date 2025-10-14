@@ -30,7 +30,7 @@ public class PauseManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scn, LoadSceneMode mode)
     {
-        if (scn.name == "Main" || scn.name == "Lobby" || scn.name == "CharSelection") return;
+        if (scn.name == "Main" || scn.name == "Lobby" || scn.name == "CharSelection" || scn.name == "Credits") return;
 
         //pauseUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "PauseUI");
         //if (pauseUI)
