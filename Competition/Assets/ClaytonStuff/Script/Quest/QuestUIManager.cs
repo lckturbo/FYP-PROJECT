@@ -12,9 +12,9 @@ public class QuestUIManager : MonoBehaviour
     [Header("Quest Complete Popup")]
     [SerializeField] private GameObject questCompletePrefab; // prefab for popup
     [SerializeField] private Transform popupParent; // usually a Canvas
-  //  [SerializeField] private float popupDuration = 2f;
 
     private Dictionary<Quest, GameObject> activeQuestEntries = new Dictionary<Quest, GameObject>();
+    private HashSet<string> shownPopups = new HashSet<string>(); // <-- new tracker
 
     private QuestManager questManager;
 
@@ -22,15 +22,19 @@ public class QuestUIManager : MonoBehaviour
     {
         questManager = FindObjectOfType<QuestManager>();
 
-        //  Replay Quest Complete popups for already finished quests
-        if (questManager != null)
+        //  Show popups only for quests that were just completed before scene change
+        if (questManager != null && questManager.recentlyCompletedQuests.Count > 0)
         {
-            foreach (var questData in questManager.completedQuests)
+            foreach (var questData in questManager.recentlyCompletedQuests)
             {
                 ShowQuestComplete(questData.questName);
             }
+
+            // Clear once shown, so they don’t replay again later
+            questManager.ClearRecentCompletions();
         }
     }
+
 
     private void Update()
     {
@@ -40,62 +44,61 @@ public class QuestUIManager : MonoBehaviour
         foreach (var quest in questManager.activeQuests)
         {
             if (!activeQuestEntries.ContainsKey(quest))
-            {
                 CreateQuestEntry(quest);
-            }
         }
 
-        //  Update quest entries for any quest that has progress text
+        // Update quest entries
         foreach (var entry in activeQuestEntries)
         {
             TextMeshProUGUI text = entry.Value.GetComponentInChildren<TextMeshProUGUI>();
             if (text != null)
             {
-                string progress = entry.Key.GetProgressText(); // may return empty if not implemented
+                string progress = entry.Key.GetProgressText();
                 text.text = $"{entry.Key.questData.questName}\n<size=80%>{entry.Key.questData.description}";
-
                 if (!string.IsNullOrEmpty(progress))
                     text.text += $"\n<color=#CCCCCC><size=75%>{progress}</size></color>";
             }
         }
 
-
-        // Remove completed quests
+        // Handle completed quests
         List<Quest> toRemove = new List<Quest>();
         foreach (var entry in activeQuestEntries)
         {
             if (entry.Key.isCompleted)
             {
-                //  Show quest complete popup
-                ShowQuestComplete(entry.Key.questData.questName);
+                string questName = entry.Key.questData.questName;
+
+                // Show popup only once per quest
+                if (!shownPopups.Contains(questName))
+                {
+                    ShowQuestComplete(questName);
+                    shownPopups.Add(questName);
+                }
 
                 Destroy(entry.Value);
                 toRemove.Add(entry.Key);
             }
         }
+
+        // Clean up finished quests
         foreach (var quest in toRemove)
-        {
             activeQuestEntries.Remove(quest);
-        }
+
+        // If all active quests are gone, clear UI
         if (questManager.activeQuests.Count == 0 && activeQuestEntries.Count > 0)
         {
             foreach (var entry in activeQuestEntries.Values)
                 Destroy(entry);
             activeQuestEntries.Clear();
         }
-
     }
-
 
     private void CreateQuestEntry(Quest quest)
     {
         GameObject entry = Instantiate(questPanelPrefab, questListParent);
         TextMeshProUGUI text = entry.GetComponentInChildren<TextMeshProUGUI>();
-
         if (text != null)
-        {
             text.text = $"{quest.questData.questName}\n<size=80%>{quest.questData.description}</size>";
-        }
 
         activeQuestEntries.Add(quest, entry);
     }
@@ -105,14 +108,10 @@ public class QuestUIManager : MonoBehaviour
         GameObject popup = Instantiate(questCompletePrefab, popupParent);
         TextMeshProUGUI text = popup.GetComponentInChildren<TextMeshProUGUI>();
         if (text != null)
-        {
             text.text = $"<b>Quest Complete!</b>\n{questName}";
-        }
 
-        // Start animation coroutine
         StartCoroutine(PopupAnimation(popup));
     }
-
 
     private System.Collections.IEnumerator PopupAnimation(GameObject popup)
     {
@@ -121,13 +120,12 @@ public class QuestUIManager : MonoBehaviour
         if (canvasGroup == null) canvasGroup = popup.AddComponent<CanvasGroup>();
 
         Vector3 startPos = rect.anchoredPosition;
-        Vector3 endPos = startPos + Vector3.down * 100f; // move downward
+        Vector3 endPos = startPos + Vector3.down * 100f;
 
-        float slideDuration = 0.5f; // time to slide down
-        float holdDuration = 1f;    // time to stay in place
-        float fadeDuration = 1f;    // time to fade out
+        float slideDuration = 0.5f;
+        float holdDuration = 1f;
+        float fadeDuration = 1f;
 
-        // --- Slide down ---
         float elapsed = 0f;
         while (elapsed < slideDuration)
         {
@@ -137,10 +135,8 @@ public class QuestUIManager : MonoBehaviour
             yield return null;
         }
 
-        // --- Hold in place ---
         yield return new WaitForSeconds(holdDuration);
 
-        // --- Fade out ---
         elapsed = 0f;
         while (elapsed < fadeDuration)
         {
@@ -152,5 +148,4 @@ public class QuestUIManager : MonoBehaviour
 
         Destroy(popup);
     }
-
 }

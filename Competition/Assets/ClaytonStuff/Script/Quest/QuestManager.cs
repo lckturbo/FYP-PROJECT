@@ -11,6 +11,8 @@ public class QuestManager : MonoBehaviour
     private Dictionary<string, int> npcQuestStages = new Dictionary<string, int>();
     public List<QuestData> completedQuests = new List<QuestData>();
 
+    public List<QuestData> recentlyCompletedQuests = new List<QuestData>();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -39,7 +41,17 @@ public class QuestManager : MonoBehaviour
 
         if (!completedQuests.Contains(quest.questData))
             completedQuests.Add(quest.questData);
+
+        //  Add to recent completions (for popup display)
+        if (!recentlyCompletedQuests.Contains(quest.questData))
+            recentlyCompletedQuests.Add(quest.questData);
     }
+
+    public void ClearRecentCompletions()
+    {
+        recentlyCompletedQuests.Clear();
+    }
+
 
     private void Update()
     {
