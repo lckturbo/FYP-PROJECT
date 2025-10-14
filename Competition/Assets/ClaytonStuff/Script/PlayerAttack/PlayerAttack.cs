@@ -133,6 +133,7 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
+        animator.SetBool("attack1", true);
         GameObject arrowObj = arrowPool.Get();
         arrowObj.transform.position = attackPoint.position;
 

@@ -57,6 +57,9 @@ public class ASyncManager : MonoBehaviour
         var questUI = FindObjectOfType<QuestUIManager>();
         if (questUI) questUI.gameObject.SetActive(false);
 
+        var inventoryUI = FindObjectOfType<InventoryUIManager>();
+        if(inventoryUI) inventoryUI.gameObject.SetActive(false);
+
         if (mainScreen) mainScreen.SetActive(false);
         if (loadingScreen) loadingScreen.SetActive(true);
 
@@ -65,7 +68,7 @@ public class ASyncManager : MonoBehaviour
 
     private IEnumerator LoadLevelAsync(string levelToLoad)
     {
-        float minLoadTime = 8f;
+        float minLoadTime = 6f;
         float elapsedTime = 0f;
 
         AsyncOperation op = SceneManager.LoadSceneAsync(levelToLoad);
