@@ -8,19 +8,23 @@ using UnityEngine;
 public class PlayerBuffHandler : MonoBehaviour
 {
     [SerializeField] private NewCharacterStats stats;
+    [SerializeField] private GameObject buffEffect; //  Assign your particle effect here
 
     private int currentAttackBuff = 0;
     private bool buffActive = false;
     private float buffEndTime = 0f;
 
     public bool IsBuffActive => buffActive;
+    private void Start()
+    {
+        UpdateBuffEffect();
+    }
 
     private void OnEnable()
     {
         BattleManager.OnClearAllBuffs += RemoveStoredBuff;
-
-        // Auto-assign leader stats
         AssignLeaderStats();
+        UpdateBuffEffect(); // keep state correct after reload
     }
 
     private void OnDisable()
@@ -28,9 +32,6 @@ public class PlayerBuffHandler : MonoBehaviour
         BattleManager.OnClearAllBuffs -= RemoveStoredBuff;
     }
 
-    /// <summary>
-    /// Finds the current party leader and assigns their runtime stats.
-    /// </summary>
     public void AssignLeaderStats()
     {
         if (PlayerParty.instance == null)
@@ -46,7 +47,6 @@ public class PlayerBuffHandler : MonoBehaviour
             return;
         }
 
-        // Pull runtime stats from leader's PlayerLevelApplier
         var levelApplier = leaderDef.GetComponent<PlayerLevelApplier>();
         if (levelApplier != null && levelApplier.runtimeStats != null)
         {
@@ -59,9 +59,6 @@ public class PlayerBuffHandler : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Apply a direct attack buff to the leader's runtime stats.
-    /// </summary>
     public void ApplyAttackBuff(int amount, float duration)
     {
         if (stats == null)
@@ -80,11 +77,11 @@ public class PlayerBuffHandler : MonoBehaviour
         stats.atkDmg += amount;
         buffActive = true;
 
-        // Store reference in BuffData for persistence
         BuffData.instance?.StoreBuff(amount, stats);
-
         buffEndTime = (duration > 0f) ? Time.time + duration : 0f;
+
         Debug.Log($"Buff applied: +{amount} ATK to {stats.name} for {(duration > 0 ? duration + "s" : "permanent")}");
+        UpdateBuffEffect(); //  turn on visual
     }
 
     private void Update()
@@ -95,9 +92,6 @@ public class PlayerBuffHandler : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Manually remove the stored buff.
-    /// </summary>
     public void RemoveStoredBuff()
     {
         if (BuffData.instance != null && BuffData.instance.hasBuff)
@@ -114,12 +108,10 @@ public class PlayerBuffHandler : MonoBehaviour
             currentAttackBuff = 0;
             buffActive = false;
             BuffData.instance.ClearBuff();
+            UpdateBuffEffect(); //  turn off visual
         }
     }
 
-    /// <summary>
-    /// Internal helper to expire timed buffs.
-    /// </summary>
     private void ExpireBuff()
     {
         stats.atkDmg -= currentAttackBuff;
@@ -128,5 +120,15 @@ public class PlayerBuffHandler : MonoBehaviour
         currentAttackBuff = 0;
         buffActive = false;
         BuffData.instance?.ClearBuff();
+        UpdateBuffEffect(); //  turn off visual
+    }
+
+    /// <summary>
+    ///  Enable or disable the particle effect depending on buff state.
+    /// </summary>
+    private void UpdateBuffEffect()
+    {
+        if (buffEffect != null)
+            buffEffect.SetActive(BuffData.instance.hasBuff);
     }
 }
