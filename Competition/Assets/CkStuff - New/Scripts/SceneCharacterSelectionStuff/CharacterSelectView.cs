@@ -142,8 +142,8 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     private void Confirm()
     {
         SaveLoadSystem.instance.SaveGame();
-        GameManager.instance.ChangeScene("SampleScene");
-        //GameManager.instance.ChangeScene("jas");
+       // GameManager.instance.ChangeScene("SampleScene");
+        GameManager.instance.ChangeScene("jas");
     }
 
     public int GetCurrentIndex() => currentIndex;
