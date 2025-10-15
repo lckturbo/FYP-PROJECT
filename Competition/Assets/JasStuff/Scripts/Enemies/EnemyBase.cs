@@ -64,7 +64,10 @@ public abstract class EnemyBase : MonoBehaviour
 
     private void OnEnable() { PlayerSpawner.OnPlayerSpawned += HandlePlayerSpawned; }
     private void OnDisable() { PlayerSpawner.OnPlayerSpawned -= HandlePlayerSpawned; }
-    private void HandlePlayerSpawned(Transform playerTransform) { player = playerTransform; }
+    private void HandlePlayerSpawned(Transform playerTransform)
+    {
+        player = playerTransform;
+    }
 
     private void Awake()
     {

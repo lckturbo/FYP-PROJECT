@@ -1,3 +1,4 @@
+using System.Net;
 using TMPro;
 using UnityEngine;
 
@@ -14,5 +15,14 @@ public class StatRowUI : MonoBehaviour
         if (oldValue) { oldValue.text = oldText; oldValue.color = valueColor; }
         if (arrow) arrow.text = "->";
         if (newValue) { newValue.text = newText; newValue.color = valueColor; }
+    }
+
+    public void Bind(string labelText, string newText)
+    {
+        if (oldValue) oldValue.gameObject.SetActive(false);
+        if (arrow) arrow.text = "->";
+
+        if (label) label.text = labelText;
+        if(newValue) newValue.text = newText;
     }
 }

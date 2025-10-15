@@ -18,9 +18,10 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
     [Header("Settings")]
     [SerializeField] private Slider BGMSlider;
-    [SerializeField] private Slider SFXSlider;
+    [SerializeField] private Slider SFXSlider;  
     [SerializeField] private Button backBtn;
     private bool isOpen;
+    public bool isSettingsOpen() => isOpen;
 
     private void Awake()
     {
@@ -42,13 +43,10 @@ public class UIManager : MonoBehaviour, IDataPersistence
     { 
         string scnName = scene.name;
 
-       // SetSettings();
-
         if (scnName == "Main")
         {
             AudioManager.instance.StopAllSounds();
             AudioManager.instance.PlaySound("MainMenuBGM");
-            //AudioManager.instance.PlaySound("bgm");
 
             settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
             creditsBtn = GameObject.Find("CreditsBtn").GetComponent<Button>();
@@ -73,7 +71,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
         else if (scnName == "Lobby")
         {
             AudioManager.instance.StopAllSounds();
-            //AudioManager.instance.PlaySound("MainMenuBGM");
             AudioManager.instance.PlaySound("bgm");
 
             playBtn = GameObject.Find("PlayBtn").GetComponent<Button>();
@@ -93,6 +90,9 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 {
                     GameManager.instance.ChangeScene("Main");
                     SaveLoadSystem.instance.SaveGame();
+
+                    if (PauseManager.instance && PauseManager.instance.IsPaused())
+                        PauseManager.instance.ShowPauseUI(true);
                 });
             }
         }
@@ -100,7 +100,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
         {
             AudioManager.instance.StopAllSounds();
             AudioManager.instance.PlaySound("MainMenuBGM");
-            //AudioManager.instance.PlaySound("bgm");
 
             exitBtn = GameObject.Find("Black").GetComponent<Button>();
 
@@ -157,6 +156,9 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 {
                     ToggleSettings(false);
                     SaveLoadSystem.instance.SaveGame();
+
+                    if (PauseManager.instance != null && PauseManager.instance.IsPaused())
+                        PauseManager.instance.ShowPauseUI(true);
                 });
             }
         }
@@ -172,11 +174,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
             isOpen = v;
             settingsUI.SetActive(v);
         }
-    }
-
-    public bool isSettingsOpen()
-    {
-        return isOpen;
     }
 
     public void LoadData(GameData data)

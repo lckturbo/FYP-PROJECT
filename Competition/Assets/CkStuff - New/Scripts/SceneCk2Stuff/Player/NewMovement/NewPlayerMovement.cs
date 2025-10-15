@@ -7,7 +7,8 @@ using UnityEngine.InputSystem;
 public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 {
     [Header("Stats (provides walkSpeed)")]
-    [SerializeField] private BaseStats stats;
+    [SerializeField] private NewCharacterStats stats;
+    public NewCharacterStats GetStats() => stats;
     [SerializeField] private bool useStatsDirectly = true;
 
     [Header("Input Action Name")]
@@ -44,7 +45,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
     }
 
-    public void ApplyStats(BaseStats newStats)
+    public void ApplyStats(NewCharacterStats newStats)
     {
         stats = newStats;
         if (!useStatsDirectly && stats != null)
@@ -57,7 +58,6 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             atk.ApplyStats(charStats);
         }
     }
-
     void Update()
     {
         // Disable movement when dialogue is open

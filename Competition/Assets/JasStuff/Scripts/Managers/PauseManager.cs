@@ -15,6 +15,12 @@ public class PauseManager : MonoBehaviour
     public bool IsPaused() => isPaused;
     [HideInInspector] public bool canPause = true;
     private bool isOpen = false;
+
+    [Header("Stats UI")]
+    [SerializeField] private StatsDisplay statsDisplay;
+    [SerializeField] private RectTransform statsContainer;
+    [SerializeField] private GameObject statRowPrefab;
+
     private void Awake()
     {
         if (!instance) instance = this;
@@ -32,32 +38,19 @@ public class PauseManager : MonoBehaviour
     {
         if (scn.name == "Main" || scn.name == "Lobby" || scn.name == "CharSelection" || scn.name == "Credits") return;
 
-        //pauseUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "PauseUI");
-        //if (pauseUI)
-        //{
-        //    resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
-        //    if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
-
-        //    settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
-        //    if (settingsBtn) settingsBtn.onClick.AddListener(() =>
-        //    {
-        //        UIManager.instance.ToggleSettings(!isOpen);
-        //    });
-
-        //    menuBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "MainMenuBtn");
-        //    if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
-
-        //    pauseUI.SetActive(false);
-        //}
-
         pauseUI = GameObject.Find("PauseUI");
         resumeBtn = GameObject.Find("ResumeBtn").GetComponent<Button>();
         if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
         settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
-        if (settingsBtn) settingsBtn.onClick.AddListener(() => UIManager.instance.ToggleSettings(!isOpen));
+        if (settingsBtn) settingsBtn.onClick.AddListener(() =>
+        {
+            //UIManager.instance.ToggleSettings(!isOpen);
+            ToggleSettingsMenu();
+        });
         menuBtn = GameObject.Find("MainMenuBtn").GetComponent<Button>();
         if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
-        pauseUI.SetActive(false);
+        if (statsDisplay == null) statsDisplay = FindObjectOfType<StatsDisplay>();
+        ShowPauseUI(false);
     }
     private void Update()
     {
@@ -67,11 +60,31 @@ public class PauseManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
             Pause(!isPaused);
     }
+
+    private void ToggleSettingsMenu()
+    {
+        isOpen = !isOpen; 
+        UIManager.instance.ToggleSettings(isOpen);
+
+        ShowPauseUI(!isOpen);
+    }
+
     private void Pause(bool v)
     {
         isPaused = v;
-        pauseUI.SetActive(v);
+        ShowPauseUI(v);
         Time.timeScale = v ? 0 : 1;
+    }
+    public void ShowPauseUI(bool v)
+    {
+        if (pauseUI != null)
+            pauseUI.SetActive(v);
+
+        if (v)
+        {
+            if (statsDisplay)
+                statsDisplay.DisplayStats();
+        }
     }
     private void QuitToMenu()
     {
