@@ -77,13 +77,12 @@ public class PauseManager : MonoBehaviour
     }
     public void ShowPauseUI(bool v)
     {
-        if (pauseUI != null)
-            pauseUI.SetActive(v);
+        if (!pauseUI) return;
+        pauseUI.SetActive(v);
 
         if (v)
         {
-            if (statsDisplay)
-                statsDisplay.DisplayStats();
+            if (statsDisplay) statsDisplay.DisplayStats();
         }
     }
     private void QuitToMenu()

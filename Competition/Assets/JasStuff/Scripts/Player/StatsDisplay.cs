@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.Animations;
 using UnityEngine;
 
 public class StatsDisplay : MonoBehaviour
@@ -20,6 +21,9 @@ public class StatsDisplay : MonoBehaviour
     public void DisplayStats()
     {
         if (!playerStats) return;
+
+        foreach (Transform child in container)
+            Destroy(child.gameObject);
 
         List<(string label, string value)> statList = new()
         {
