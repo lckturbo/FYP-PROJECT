@@ -5,6 +5,9 @@ public class BattleQuest : Quest
     private BattleQuestData battleData;
     private bool[] completedTargets;
 
+    //  Static flag for scene reload popup control
+    public static bool ShouldShowBattlePopupAfterReload { get; private set; } = false;
+
     public override void StartQuest()
     {
         battleData = (BattleQuestData)questData;
@@ -48,10 +51,12 @@ public class BattleQuest : Quest
         if (allCompleted)
         {
             CompleteQuest();
+
+            //  Mark for popup on next scene load
+            ShouldShowBattlePopupAfterReload = true;
         }
     }
 
-    //  New: Report progress like "1/2 defeated"
     public override string GetProgressText()
     {
         if (completedTargets == null || completedTargets.Length == 0)
@@ -69,5 +74,11 @@ public class BattleQuest : Quest
     private void OnDestroy()
     {
         BattleManager.OnGlobalBattleEnd -= HandleGlobalBattleEnd;
+    }
+
+    //  Called after popup has shown, to reset flag
+    public static void ClearBattlePopupFlag()
+    {
+        ShouldShowBattlePopupAfterReload = false;
     }
 }

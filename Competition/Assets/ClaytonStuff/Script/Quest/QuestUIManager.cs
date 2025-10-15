@@ -22,18 +22,24 @@ public class QuestUIManager : MonoBehaviour
     {
         questManager = FindObjectOfType<QuestManager>();
 
-        //  Show popups only for quests that were just completed before scene change
-        if (questManager != null && questManager.recentlyCompletedQuests.Count > 0)
+        //  Only show popup if a BattleQuest just finished before this scene
+        if (BattleQuest.ShouldShowBattlePopupAfterReload && questManager != null)
         {
-            foreach (var questData in questManager.recentlyCompletedQuests)
+            foreach (var questData in questManager.completedQuests)
             {
-                ShowQuestComplete(questData.questName);
+                // Only show popup for battle quests (optional name check)
+                if (questData is BattleQuestData)
+                {
+                    ShowQuestComplete(questData.questName);
+                    break; // only once
+                }
             }
 
-            // Clear once shown, so they don’t replay again later
-            questManager.ClearRecentCompletions();
+            // Reset flag so it doesn’t trigger again
+            BattleQuest.ClearBattlePopupFlag();
         }
     }
+
 
 
     private void Update()
@@ -56,7 +62,7 @@ public class QuestUIManager : MonoBehaviour
                 string progress = entry.Key.GetProgressText();
                 text.text = $"{entry.Key.questData.questName}\n<size=80%>{entry.Key.questData.description}";
                 if (!string.IsNullOrEmpty(progress))
-                    text.text += $"\n<color=#CCCCCC><size=75%>{progress}</size></color>";
+                    text.text += $"\n<color=#FF0000><size=75%>{progress}</size></color>";
             }
         }
 
