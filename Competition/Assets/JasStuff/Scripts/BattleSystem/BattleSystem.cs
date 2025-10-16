@@ -87,7 +87,6 @@ public class BattleSystem : MonoBehaviour
         if (leaderPI) leaderPI.enabled = false;
         SetAnimatorBattleLayer(leaderObj);
 
-        // Build runtime stats for leader at party level, apply to Health/Movement & Combatant
         var leaderRT = StatsRuntimeBuilder.BuildRuntimeStats(leader.stats, _preBattlePartyLevel, playerGrowth);
         ApplyRuntimeStats(leaderObj, leaderRT);
         var cL = leaderObj.AddComponent<Combatant>();
@@ -134,7 +133,7 @@ public class BattleSystem : MonoBehaviour
                 var cA = allyObj.AddComponent<Combatant>();
                 cA.isPlayerTeam = true;
                 cA.isLeader = false;
-                cA.stats = allyRT; // IMPORTANT
+                cA.stats = allyRT;
                 turnEngine.Register(cA);
                 _playerCombatants.Add(cA);
 
@@ -160,10 +159,8 @@ public class BattleSystem : MonoBehaviour
 
             var eb = enemy.GetComponent<EnemyBase>();
 
-            // Get whatever the enemy uses (EnemyStats/BaseStats)
             BaseStats baseEnemyStats = eb ? eb.GetEnemyStats() : null;
 
-            // Build leveled runtime stats from BaseStats via the generic overload
             BaseStats enemyRT = null;
             if (baseEnemyStats != null)
                 enemyRT = StatsRuntimeBuilder.BuildRuntimeStats(baseEnemyStats, _preBattlePartyLevel, enemyGrowth);
@@ -174,11 +171,11 @@ public class BattleSystem : MonoBehaviour
             var cE = enemy.AddComponent<Combatant>();
             cE.isPlayerTeam = false;
             cE.isLeader = false;
-            cE.stats = enemyRT ?? baseEnemyStats; // use leveled runtime if available, else fallback
+            cE.stats = enemyRT ?? baseEnemyStats;
             turnEngine.Register(cE);
             _enemyCombatants.Add(cE);
 
-            AddEnemyScaler(enemy); // keeps them synced if party levels mid-battle, optional
+            AddEnemyScaler(enemy);
         }
 
         SetUpHealth();
@@ -199,7 +196,6 @@ public class BattleSystem : MonoBehaviour
         allPlayers.Add(playerLeader);
         allPlayers.AddRange(playerAllies);
 
-        // ===== Player Health Setup =====
         for (int i = 0; i < allPlayers.Count && i < playerHealth.Length; i++)
         {
             var h = allPlayers[i] ? allPlayers[i].GetComponent<NewHealth>() : null;
@@ -215,7 +211,6 @@ public class BattleSystem : MonoBehaviour
                     playerHealth[idx].value = nh.GetCurrHealth();
                 };
 
-                //  Disable health/ATB when dead
                 h.OnDeathComplete += (nh) =>
                 {
                     playerHealth[idx].gameObject.SetActive(false);
@@ -225,7 +220,6 @@ public class BattleSystem : MonoBehaviour
             }
         }
 
-        // ===== Enemy Health Setup =====
         for (int i = 0; i < enemies.Count && i < enemyHealth.Length; i++)
         {
             var h = enemies[i] ? enemies[i].GetComponent<NewHealth>() : null;
@@ -241,7 +235,6 @@ public class BattleSystem : MonoBehaviour
                     enemyHealth[idx].value = nh.GetCurrHealth();
                 };
 
-                //  Disable health/ATB when enemy dies
                 h.OnDeathComplete += (nh) =>
                 {
                     enemyHealth[idx].gameObject.SetActive(false);
@@ -251,7 +244,6 @@ public class BattleSystem : MonoBehaviour
             }
         }
     }
-
 
     private void SetUpATBBars()
     {
@@ -273,7 +265,6 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
-    // apply a (leveled) runtime stats asset to health & movement
     private void ApplyRuntimeStats(GameObject go, NewCharacterStats rt)
     {
         if (!go || rt == null) return;
@@ -314,16 +305,13 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
-    // ========= UPDATED: now provides XP fields for results UI =========
     private void HandleBattleEnd(bool playerWon)
     {
         if (_ended) return;
         _ended = true;
 
-        // Access level system
         var ls = (PartyLevelSystem.Instance != null) ? PartyLevelSystem.Instance.levelSystem : null;
 
-        // BEFORE awarding
         int preLevel = (ls != null) ? ls.level : _preBattlePartyLevel;
         int xpBeforeIntoLevel = (ls != null) ? ls.currXP : 0;
 
@@ -334,7 +322,6 @@ public class BattleSystem : MonoBehaviour
             PartyLevelSystem.Instance?.AddXP(xpAwarded);
         }
 
-        // AFTER awarding
         int postLevel = (ls != null) ? ls.level : preLevel;
         int xpAfterIntoLevel = (ls != null) ? ls.currXP : xpBeforeIntoLevel;
         int xpRequiredForNext = (ls != null) ? ls.xpNextLevel : 0;
@@ -365,7 +352,6 @@ public class BattleSystem : MonoBehaviour
         resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
     }
 
-    // ========= UPDATED: signature + fills XP bar fields =========
     private BattleResultsPayload BuildResultsPayload(
         bool playerWon,
         int xp,
@@ -402,10 +388,9 @@ public class BattleSystem : MonoBehaviour
             oldLevel = preLevel,
             newLevel = postLevel,
 
-            // >>> New fields for XP bar UI <<<
-            xpBefore = xpBeforeIntoLevel,          // XP inside preLevel before battle
-            xpAfter = xpAfterIntoLevel,            // XP inside postLevel after battle
-            xpRequiredForNext = xpRequiredForNext, // postLevel -> next threshold
+            xpBefore = xpBeforeIntoLevel,
+            xpAfter = xpAfterIntoLevel,
+            xpRequiredForNext = xpRequiredForNext,
 
             enemyScaledToLevel = (postLevel > preLevel) ? postLevel : 0,
             stats = stats

@@ -14,7 +14,7 @@ public class Combatant : MonoBehaviour
     [HideInInspector] public float atb;
     private Animator anim;
 
-    // === Action lifecycle ===
+    // TurnEngine pauses while an action runs
     public event System.Action ActionBegan;
     public event System.Action ActionEnded;
 
@@ -27,7 +27,7 @@ public class Combatant : MonoBehaviour
     public float Speed => stats ? Mathf.Max(0.01f, stats.actionvaluespeed) : 0.01f;
     public bool IsAlive => health == null || health.GetCurrHealth() > 0;
 
-    // === Approach / movement settings ===
+    // --- Approach / movement settings ---
     [Header("Approach")]
     [SerializeField] private Transform visualRoot;
     [SerializeField] private float approachDistance = 0.7f;
@@ -35,7 +35,19 @@ public class Combatant : MonoBehaviour
     [SerializeField] private float backSpeed = 8f;
     [SerializeField] private float hopArcHeight = 0.15f;
 
-    // === Skill cooldowns ===
+    // --- Animator state names to wait for ---
+    [Header("Animator State Names")]
+    [SerializeField] private string attackStateName = "attack";
+    [SerializeField] private string skill1StateName = "skill1";
+    [SerializeField] private string skill2StateName = "skill2";
+    [SerializeField] private int animLayer = 0;
+
+    [Header("Animation Wait Settings")]
+    [SerializeField] private float animEnterTimeout = 0.5f;
+    [SerializeField] private float animMaxWait = 3.0f;
+    [SerializeField] private float animFallbackSeconds = 0.4f;
+
+    // --- Skill cooldowns ---
     [Header("Skill Cooldowns")]
     [SerializeField] public int skill1CooldownTurns = 3;
     [SerializeField] public int skill2CooldownTurns = 4;
@@ -58,14 +70,14 @@ public class Combatant : MonoBehaviour
     public void BasicAttack(Combatant target)
     {
         if (!stats || !target || !target.health) return;
-        StartCoroutine(MoveRoutine(target, DoBasicAttackDamage));
+        StartCoroutine(MoveRoutine(target, DoBasicAttackDamage, attackStateName));
     }
 
     public bool TryUseSkill1(Combatant target)
     {
         if (!IsSkill1Ready || !stats || !target || !target.health) return false;
         _skill1CD = Mathf.Max(1, skill1CooldownTurns);
-        StartCoroutine(MoveRoutine(target, DoSkill1Damage));
+        StartCoroutine(MoveRoutine(target, DoSkill1Damage, skill1StateName));
         return true;
     }
 
@@ -73,20 +85,21 @@ public class Combatant : MonoBehaviour
     {
         if (!IsSkill2Ready || !stats || !target || !target.health) return false;
         _skill2CD = Mathf.Max(1, skill2CooldownTurns);
-        StartCoroutine(MoveRoutine(target, DoSkill2Damage));
+        StartCoroutine(MoveRoutine(target, DoSkill2Damage, skill2StateName));
         return true;
     }
 
+    // Kept for compatibility
     public void Skill1(Combatant target)
     {
         if (!stats || !target || !target.health) return;
-        StartCoroutine(MoveRoutine(target, DoSkill1Damage));
+        StartCoroutine(MoveRoutine(target, DoSkill1Damage, skill1StateName));
     }
 
     public void Skill2(Combatant target)
     {
         if (!stats || !target || !target.health) return;
-        StartCoroutine(MoveRoutine(target, DoSkill2Damage));
+        StartCoroutine(MoveRoutine(target, DoSkill2Damage, skill2StateName));
     }
 
     // === Damage payloads ===
@@ -113,12 +126,11 @@ public class Combatant : MonoBehaviour
         Debug.Log($"[ACTION] {name} used SKILL 2 on {target.name} (raw {rawDamage})");
     }
 
-    // === Movement routine ===
-    private IEnumerator MoveRoutine(Combatant target, System.Action<Combatant> doHit)
+    // === Movement + wait-for-animation routine ===
+    private IEnumerator MoveRoutine(Combatant target, System.Action<Combatant> doHit, string stateToWait)
     {
         if (target == null || !target.IsAlive) yield break;
 
-        // tell the TurnEngine to pause turn processing
         ActionBegan?.Invoke();
 
         Transform mover = visualRoot ? visualRoot : transform;
@@ -128,15 +140,20 @@ public class Combatant : MonoBehaviour
 
         yield return SmoothMove(mover, startPos, tgtPos, goSpeed, hopArcHeight);
 
+        // play animation + apply damage
         doHit?.Invoke(target);
 
-        yield return new WaitForSeconds(0.05f);
+        // Let Animator process the trigger
+        yield return null;
 
+        // Wait until the attack/skill animation actually finishes (with timeouts/fallbacks)
+        yield return WaitForAnimationRobust(anim, stateToWait);
+
+        // then move back
         yield return SmoothMove(mover, tgtPos, startPos, backSpeed, hopArcHeight);
 
         mover.position = startPos;
 
-        // finished – TurnEngine may resume
         ActionEnded?.Invoke();
     }
 
@@ -164,14 +181,107 @@ public class Combatant : MonoBehaviour
 
             if (arc > 0f)
             {
-                // simple parabola: peak at mid-point
-                float hop = arc * 4f * u * (1f - u);
+                float hop = arc * 4f * u * (1f - u); // parabola, peak at 0.5
                 pos.y += hop;
             }
 
             mover.position = pos;
             yield return null;
         }
+    }
+
+    // ---- ROBUST ANIM WAITER ----
+    private IEnumerator WaitForAnimationRobust(Animator a, string stateName)
+    {
+        if (!a)
+        {
+            yield return new WaitForSeconds(animFallbackSeconds);
+            yield break;
+        }
+
+        // 1) Try the configured layer first
+        if (!string.IsNullOrEmpty(stateName))
+        {
+            bool entered = false;
+            float t = 0f;
+            while (t < animEnterTimeout)
+            {
+                var st = a.GetCurrentAnimatorStateInfo(animLayer);
+                if (st.IsName(stateName)) { entered = true; break; }
+                t += Time.deltaTime;
+                yield return null;
+            }
+
+            // 2) If not entered, scan all layers quickly
+            if (!entered)
+            {
+                int layers = a.layerCount;
+                float scanT = 0f;
+                while (scanT < animEnterTimeout && !entered)
+                {
+                    for (int L = 0; L < layers; L++)
+                    {
+                        var st = a.GetCurrentAnimatorStateInfo(L);
+                        if (st.IsName(stateName)) { entered = true; break; }
+                    }
+                    scanT += Time.deltaTime;
+                    yield return null;
+                }
+            }
+
+            // 3) If still not found, fall back to clip time or fixed wait
+            if (!entered)
+            {
+                float len = FirstClipLength(a);
+                yield return new WaitForSeconds(len > 0f ? Mathf.Min(len, animMaxWait) : animFallbackSeconds);
+                yield break;
+            }
+
+            // 4) We’re in the right state on some layer – wait until it finishes or we time out
+            float waited = 0f;
+            while (waited < animMaxWait)
+            {
+                bool anyTransition = false;
+                bool finishedAll = true;
+
+                int layers = a.layerCount;
+                for (int L = 0; L < layers; L++)
+                {
+                    var st = a.GetCurrentAnimatorStateInfo(L);
+                    if (st.IsName(stateName))
+                    {
+                        if (a.IsInTransition(L)) { anyTransition = true; finishedAll = false; break; }
+                        if (st.loop) // looping state: consider done after one cycle
+                        {
+                            if (st.normalizedTime >= 1f) { /* ok */ }
+                            else { finishedAll = false; break; }
+                        }
+                        else
+                        {
+                            if (st.normalizedTime < 1f) { finishedAll = false; break; }
+                        }
+                    }
+                }
+
+                if (finishedAll && !anyTransition) break;
+
+                waited += Time.deltaTime;
+                yield return null;
+            }
+
+            yield break;
+        }
+
+        // No state name provided: try clip length or fallback
+        float fallback = FirstClipLength(a);
+        yield return new WaitForSeconds(fallback > 0f ? Mathf.Min(fallback, animMaxWait) : animFallbackSeconds);
+    }
+
+    private float FirstClipLength(Animator a)
+    {
+        var info = a.GetCurrentAnimatorClipInfo(animLayer);
+        if (info != null && info.Length > 0 && info[0].clip) return info[0].clip.length;
+        return 0f;
     }
 
     private float EaseInOut(float x)

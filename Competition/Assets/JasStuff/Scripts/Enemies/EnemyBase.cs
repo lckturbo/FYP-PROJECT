@@ -190,7 +190,7 @@ public abstract class EnemyBase : MonoBehaviour
         aiPath.canMove = false;
         isAttacking = true;
 
-        anim.SetTrigger("attack");
+        anim.SetTrigger("attack1");
     }
 
     protected void UpdateHitboxDirection()
@@ -222,6 +222,7 @@ public abstract class EnemyBase : MonoBehaviour
         BattleManager.instance.RegisterEnemy(this);
         OnAttackPlayer.Invoke(GetComponent<EnemyParty>());
         BattleManager.instance.SetBattleMode(true);
+        Debug.Log("battle");
     }
 
     // ---- CHASE ---- //

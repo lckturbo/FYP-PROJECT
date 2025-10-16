@@ -24,8 +24,11 @@ public class TurnEngine : MonoBehaviour
     // Round-robin pointer for fair turn order among ties
     private int _nextIndex = 0;
 
-    // NEW: while true, an action animation/coroutine is running
+    // While true, an action animation/coroutine is running
     private bool _resolvingAction = false;
+
+    // ==== NEW: guard to prevent double end-of-battle firing ====
+    private bool _ended = false; // prevents re-entrancy
 
     public void Register(Combatant c)
     {
@@ -39,15 +42,20 @@ public class TurnEngine : MonoBehaviour
         _currentLeader = null;
         _nextIndex = 0;
         _resolvingAction = false;
+        _ended = false; // reset end guard for fresh battle
 
         // small random stagger so identical speeds don't pop together
         for (int i = 0; i < _units.Count; i++)
             if (_units[i])
-                _units[i].atb = UnityEngine.Random.Range(0.05f, 1.5f);
+                _units[i].atb = UnityEngine.Random.Range(0.05f, 0.45f);
     }
 
     public void ForceEnd(bool playerWon)
     {
+        // guard: only end once
+        if (_ended) return;
+        _ended = true;
+
         if (!_running) return;
 
         _running = false;
@@ -157,7 +165,11 @@ public class TurnEngine : MonoBehaviour
     }
 
     private void OnActorActionBegan() { _resolvingAction = true; }
-    private void OnActorActionEnded() { _resolvingAction = false; }
+    private void OnActorActionEnded()
+    {
+        // if battle already ended, do nothing special; just clear the lock
+        _resolvingAction = false;
+    }
 
     // === Leader actions ===
     public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
