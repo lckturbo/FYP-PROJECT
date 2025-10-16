@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TurnEngine : MonoBehaviour
 {
-    //Seconds to fill ATB from 0 -> 1 when Speed = 1
+    // Seconds to fill ATB from 0 -> 1 when Speed = 1
     [SerializeField] private float atbFillSeconds = 3f;
 
     public bool autoBattle = false;
@@ -21,6 +21,15 @@ public class TurnEngine : MonoBehaviour
 
     public event Action<bool> OnBattleEnd;
 
+    // Round-robin pointer for fair turn order among ties
+    private int _nextIndex = 0;
+
+    // While true, an action animation/coroutine is running
+    private bool _resolvingAction = false;
+
+    // ==== NEW: guard to prevent double end-of-battle firing ====
+    private bool _ended = false; // prevents re-entrancy
+
     public void Register(Combatant c)
     {
         if (c != null && !_units.Contains(c)) _units.Add(c);
@@ -31,18 +40,28 @@ public class TurnEngine : MonoBehaviour
         _running = true;
         _waitingForLeader = false;
         _currentLeader = null;
+        _nextIndex = 0;
+        _resolvingAction = false;
+        _ended = false; // reset end guard for fresh battle
 
+        // small random stagger so identical speeds don't pop together
         for (int i = 0; i < _units.Count; i++)
-            if (_units[i]) _units[i].atb = 0f;
+            if (_units[i])
+                _units[i].atb = UnityEngine.Random.Range(0.05f, 0.45f);
     }
 
     public void ForceEnd(bool playerWon)
     {
+        // guard: only end once
+        if (_ended) return;
+        _ended = true;
+
         if (!_running) return;
 
         _running = false;
         _waitingForLeader = false;
         _currentLeader = null;
+        _resolvingAction = false;
 
         targetSelector?.Disable();
         OnBattleEnd?.Invoke(playerWon);
@@ -52,6 +71,10 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running) return;
 
+        // Pause the loop if an action is resolving
+        if (_resolvingAction) return;
+
+        // If leader died, end battle immediately
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
         {
@@ -63,52 +86,89 @@ public class TurnEngine : MonoBehaviour
 
         float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
+        // PASS 1: fill everyone's ATB
         for (int i = 0; i < _units.Count; i++)
         {
             var u = _units[i];
             if (u == null || !u.IsAlive) continue;
-
             u.atb += u.Speed * step;
-            if (u.atb < 1f) continue;
+        }
 
-            // Unit gets a turn
-            u.atb = 0f;
+        // PASS 2: pick exactly ONE ready unit to act (round-robin from _nextIndex)
+        int count = _units.Count;
+        for (int s = 0; s < count; s++)
+        {
+            int i = (_nextIndex + s) % count;
+            var u = _units[i];
+            if (u == null || !u.IsAlive) continue;
 
-            u.OnTurnStarted();
-
-            if (u.isPlayerTeam && u.isLeader)
+            if (u.atb >= 1f)
             {
-                if (autoBattle)
+                // consume turn and tick per-turn systems (cooldowns)
+                u.atb = 0f;
+                u.OnTurnStarted();
+
+                if (u.isPlayerTeam && u.isLeader)
                 {
-                    AutoAct(u, true);
+                    if (autoBattle)
+                    {
+                        HookActionLock(u); // lock while action plays
+                        AutoAct(u, true);
+                    }
+                    else
+                    {
+                        _waitingForLeader = true;
+                        _currentLeader = u;
+                        OnLeaderTurnStart?.Invoke(u);
+
+                        if (targetSelector)
+                        {
+                            targetSelector.EnableForLeaderTurn();
+                            targetSelector.Clear();
+                        }
+
+                        _nextIndex = (i + 1) % count;
+                        return; // exactly one actor per frame
+                    }
                 }
                 else
                 {
-                    _waitingForLeader = true;
-                    _currentLeader = u;
-                    OnLeaderTurnStart?.Invoke(u);
-
-                    if (targetSelector)
-                    {
-                        targetSelector.EnableForLeaderTurn();
-                        targetSelector.Clear();
-                    }
-                    return; // wait for player decision
+                    HookActionLock(u); // lock while action plays
+                    AutoAct(u, false);
                 }
-            }
-            else
-            {
-                AutoAct(u, false);
-            }
 
-            // After any action, check for wipe and end cleanly
-            if (IsTeamWiped(true) || IsTeamWiped(false))
-            {
-                bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-                ForceEnd(playerWon);
-                return;
+                // After any action, check for wipe and end cleanly
+                if (IsTeamWiped(true) || IsTeamWiped(false))
+                {
+                    bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+                    ForceEnd(playerWon);
+                    return;
+                }
+
+                _nextIndex = (i + 1) % count; // advance RR pointer
+                return; // exactly one actor per frame
             }
         }
+    }
+
+    // === Action lock wiring ===
+    private void HookActionLock(Combatant actor)
+    {
+        if (actor == null) return;
+
+        // avoid double-subscribe
+        actor.ActionBegan -= OnActorActionBegan;
+        actor.ActionEnded -= OnActorActionEnded;
+
+        actor.ActionBegan += OnActorActionBegan;
+        actor.ActionEnded += OnActorActionEnded;
+    }
+
+    private void OnActorActionBegan() { _resolvingAction = true; }
+    private void OnActorActionEnded()
+    {
+        // if battle already ended, do nothing special; just clear the lock
+        _resolvingAction = false;
     }
 
     // === Leader actions ===
@@ -123,6 +183,7 @@ public class TurnEngine : MonoBehaviour
             return;
         }
 
+        HookActionLock(_currentLeader);
         _currentLeader.BasicAttack(target);
         Debug.Log($"[TURN] Leader {_currentLeader.name} used BASIC ATTACK on {target.name}");
         EndLeaderDecisionAndCheck();
@@ -139,12 +200,15 @@ public class TurnEngine : MonoBehaviour
             return;
         }
 
+        HookActionLock(_currentLeader);
         bool used = false;
         if (skillIndex == 0) used = _currentLeader.TryUseSkill1(target);
         else if (skillIndex == 1) used = _currentLeader.TryUseSkill2(target);
 
         if (!used)
         {
+            // no ActionBegan fired (skill refused), ensure we’re not locked
+            _resolvingAction = false;
             Debug.LogWarning("[TURN] Skill on cooldown.");
             return;
         }
@@ -176,7 +240,6 @@ public class TurnEngine : MonoBehaviour
         {
             return explicitTarget;
         }
-
         return _currentLeader != null ? FindRandomAlive(!_currentLeader.isPlayerTeam) : null;
     }
 
@@ -191,31 +254,20 @@ public class TurnEngine : MonoBehaviour
             {
                 int roll = UnityEngine.Random.Range(0, 3);
                 if (roll == 0) actor.BasicAttack(target);
-                else if (roll == 1)
-                {
-                    if (!actor.TryUseSkill1(target)) actor.BasicAttack(target);
-                }
-                else
-                {
-                    if (!actor.TryUseSkill2(target)) actor.BasicAttack(target);
-                }
+                else if (roll == 1) { if (!actor.TryUseSkill1(target)) actor.BasicAttack(target); }
+                else { if (!actor.TryUseSkill2(target)) actor.BasicAttack(target); }
             }
             else
             {
                 float r = UnityEngine.Random.value;
                 if (r < 0.6f) actor.BasicAttack(target);
-                else if (r < 0.8f)
-                {
-                    if (!actor.TryUseSkill1(target)) actor.BasicAttack(target);
-                }
-                else
-                {
-                    if (!actor.TryUseSkill2(target)) actor.BasicAttack(target);
-                }
+                else if (r < 0.8f) { if (!actor.TryUseSkill1(target)) actor.BasicAttack(target); }
+                else { if (!actor.TryUseSkill2(target)) actor.BasicAttack(target); }
             }
         }
         else
         {
+            // simple enemy logic with cooldown-aware usage of skill1
             if (UnityEngine.Random.value < 0.5f || !actor.IsSkill1Ready)
                 actor.BasicAttack(target);
             else
@@ -227,12 +279,10 @@ public class TurnEngine : MonoBehaviour
 
     private Combatant FindRandomAlive(bool playerTeam)
     {
-        List<Combatant> alive = new List<Combatant>();
+        List<Combatant> alive = new();
         foreach (var u in _units)
-        {
             if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
                 alive.Add(u);
-        }
 
         if (alive.Count == 0) return null;
         return alive[UnityEngine.Random.Range(0, alive.Count)];
@@ -241,10 +291,8 @@ public class TurnEngine : MonoBehaviour
     private bool IsTeamWiped(bool playerTeam)
     {
         foreach (var u in _units)
-        {
             if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
                 return false;
-        }
         return true;
     }
 }
