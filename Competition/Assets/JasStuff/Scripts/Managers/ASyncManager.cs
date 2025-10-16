@@ -65,7 +65,7 @@ public class ASyncManager : MonoBehaviour
 
     private IEnumerator LoadLevelAsync(string levelToLoad)
     {
-        float minLoadTime = 8f;
+        float minLoadTime = 3.5f;
         float elapsedTime = 0f;
 
         AsyncOperation op = SceneManager.LoadSceneAsync(levelToLoad);

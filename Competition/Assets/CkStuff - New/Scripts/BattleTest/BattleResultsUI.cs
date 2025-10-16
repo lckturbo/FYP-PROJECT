@@ -49,7 +49,7 @@ public class BattleResultsUI : MonoBehaviour
     [Header("XP Animation")]
     [SerializeField] private bool animateXpBar = true;
     [SerializeField, Min(0.01f)] private float xpBarSegmentDuration = 2.0f;
-     
+
     [SerializeField] private bool autoScaleSpeed = true;
     [SerializeField, Min(0.01f)] private float minSegmentDuration = 1.2f;
     [SerializeField, Min(0.01f)] private float maxSegmentDuration = 3.0f;
@@ -128,7 +128,6 @@ public class BattleResultsUI : MonoBehaviour
     }
 
     // ---------- XP bar binding & animation ----------
-
     private void BindXpBar(BattleResultsPayload p)
     {
         if (!xpBar)
@@ -138,7 +137,8 @@ public class BattleResultsUI : MonoBehaviour
             return;
         }
 
-        if (p.xpRequiredForNext <= 0 || p.newLevel < 1)
+        // if new level invalid, hide
+        if (p.newLevel < 1)
         {
             xpBar.gameObject.SetActive(false);
             SafeSetActive(xpBarValueLine, false);
@@ -154,8 +154,10 @@ public class BattleResultsUI : MonoBehaviour
 
         if (!animateXpBar || p.oldLevel <= 0)
         {
-            int clampedAfter = Mathf.Clamp(p.xpAfter, 0, p.xpRequiredForNext);
-            ApplyXpBarVisuals(clampedAfter, p.xpRequiredForNext);
+            // snap to final
+            int req = RequiredXP(p.newLevel);
+            int clampedAfter = Mathf.Clamp(p.xpAfter, 0, req);
+            ApplyXpBarVisuals(clampedAfter, req);
             return;
         }
 
@@ -166,34 +168,52 @@ public class BattleResultsUI : MonoBehaviour
     {
         xpBar.gameObject.SetActive(true);
 
-        int Req(int lvl) => Mathf.Max(1, LevelSystem.GetRequiredXPForLevel(Mathf.Max(1, lvl)));
-
         int startLevel = Mathf.Max(1, p.oldLevel);
         int endLevel = Mathf.Max(1, p.newLevel);
 
         if (endLevel < startLevel)
         {
-            ApplyXpBarVisuals(Mathf.Clamp(p.xpAfter, 0, p.xpRequiredForNext), Mathf.Max(1, p.xpRequiredForNext));
+            // weird edge case: snap and exit
+            int reqSnap = RequiredXP(p.newLevel);
+            ApplyXpBarVisuals(Mathf.Clamp(p.xpAfter, 0, reqSnap), reqSnap);
+            _xpAnimCo = null;
             yield break;
         }
 
-        float baseDur = autoScaleSpeed ? ComputeAutoBaseDuration(p, Req) : xpBarSegmentDuration;
+        float baseDur = autoScaleSpeed ? ComputeAutoBaseDuration(p) : xpBarSegmentDuration;
 
+        // 1) First segment: from current XP within startLevel to either level-up or final if no level change
         int segStartLevel = startLevel;
-        int segStartFrom = Mathf.Clamp(p.xpBefore, 0, Req(segStartLevel));
-        int segTarget = Req(segStartLevel);
-        float fracFirst = Mathf.Clamp01((segTarget - segStartFrom) / (float)segTarget);
-        if (endLevel > startLevel || segStartFrom < segTarget)
+        int segStartFrom = Mathf.Clamp(p.xpBefore, 0, RequiredXP(segStartLevel));
+
+        if (endLevel == startLevel)
         {
-            yield return AnimateSegment(segStartLevel, segStartFrom, segTarget, baseDur * Mathf.Max(0.15f, fracFirst));
+            // animate within the same level from xpBefore -> xpAfter
+            int to = Mathf.Clamp(p.xpAfter, 0, RequiredXP(segStartLevel));
+            float frac = Mathf.Clamp01(Mathf.Abs(to - segStartFrom) / (float)Mathf.Max(1, RequiredXP(segStartLevel)));
+            yield return AnimateSegment(segStartLevel, segStartFrom, to, baseDur * Mathf.Max(0.15f, frac));
+            _xpAnimCo = null;
+            yield break;
+        }
+        else
+        {
+            // fill to level-up
+            int segTarget = RequiredXP(segStartLevel);
+            float fracFirst = Mathf.Clamp01((segTarget - segStartFrom) / (float)segTarget);
+            if (segStartFrom < segTarget)
+            {
+                yield return AnimateSegment(segStartLevel, segStartFrom, segTarget, baseDur * Mathf.Max(0.15f, fracFirst));
+            }
         }
 
+        // 2) Intermediate full levels (if any)
         for (int lvl = startLevel + 1; lvl < endLevel; lvl++)
         {
-            yield return AnimateSegment(lvl, 0, Req(lvl), baseDur);
+            yield return AnimateSegment(lvl, 0, RequiredXP(lvl), baseDur);
         }
 
-        int finalReq = Req(endLevel);
+        // 3) Final partial on endLevel from 0 -> xpAfter
+        int finalReq = RequiredXP(endLevel);
         int finalTo = Mathf.Clamp(p.xpAfter, 0, finalReq);
         float fracLast = Mathf.Clamp01(finalTo / (float)finalReq);
         yield return AnimateSegment(endLevel, 0, finalTo, baseDur * Mathf.Max(0.15f, fracLast));
@@ -201,19 +221,19 @@ public class BattleResultsUI : MonoBehaviour
         _xpAnimCo = null;
     }
 
-    private float ComputeAutoBaseDuration(BattleResultsPayload p, System.Func<int, int> reqFn)
+    private float ComputeAutoBaseDuration(BattleResultsPayload p)
     {
         int startLevel = Mathf.Max(1, p.oldLevel);
         int endLevel = Mathf.Max(1, p.newLevel);
 
-        float firstReq = reqFn(startLevel);
-        float firstPart = Mathf.Clamp01((firstReq - Mathf.Clamp(p.xpBefore, 0, (int)firstReq)) / firstReq);
+        float firstReq = RequiredXP(startLevel);
+        float firstPart = Mathf.Clamp01((firstReq - Mathf.Clamp(p.xpBefore, 0, (int)firstReq)) / Mathf.Max(1f, firstReq));
 
         float intermediates = Mathf.Max(0, endLevel - startLevel - 1);
 
-        float lastReq = reqFn(endLevel);
+        float lastReq = RequiredXP(endLevel);
         float lastPart = (endLevel >= startLevel)
-            ? Mathf.Clamp01(Mathf.Clamp(p.xpAfter, 0, (int)lastReq) / lastReq)
+            ? Mathf.Clamp01(Mathf.Clamp(p.xpAfter, 0, (int)lastReq) / Mathf.Max(1f, lastReq))
             : 0f;
 
         float levelEquivalents = firstPart + intermediates + lastPart;
@@ -224,7 +244,7 @@ public class BattleResultsUI : MonoBehaviour
 
     private IEnumerator AnimateSegment(int level, int from, int to, float duration)
     {
-        int req = Mathf.Max(1, LevelSystem.GetRequiredXPForLevel(level));
+        int req = Mathf.Max(1, RequiredXP(level));
 
         xpBar.minValue = 0;
         xpBar.maxValue = req;
@@ -268,6 +288,11 @@ public class BattleResultsUI : MonoBehaviour
     }
 
     // ---------- helpers ----------
+    private static int RequiredXP(int level)
+    {
+        level = Mathf.Max(1, level);
+        return 50 + (level * level * 20);
+    }
 
     private static void SafeSetActive(Graphic g, bool active)
     {

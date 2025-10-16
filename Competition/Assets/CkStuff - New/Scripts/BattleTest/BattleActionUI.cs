@@ -13,6 +13,10 @@ public class BattleActionUI : MonoBehaviour
 
     [Header("Feedback")]
     [SerializeField] private TMP_Text infoLabel;
+    [SerializeField] private TMP_Text skill1CdText;
+    [SerializeField] private TMP_Text skill2CdText;
+
+    private Combatant _currentLeader;
 
     private void Awake()
     {
@@ -20,7 +24,6 @@ public class BattleActionUI : MonoBehaviour
         if (attackBtn) attackBtn.onClick.AddListener(OnAttack);
         if (skillBtn) skillBtn.onClick.AddListener(OnSkill1);
         if (skill2Btn) skill2Btn.onClick.AddListener(OnSkill2);
-
         ShowMessage(null);
     }
 
@@ -38,30 +41,37 @@ public class BattleActionUI : MonoBehaviour
 
     private void ShowForLeader(Combatant leader)
     {
+        _currentLeader = leader;
         selector?.Clear();
         ShowMessage(null);
         if (panel) panel.SetActive(true);
 
-        attackBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().basicAtk;
-        skillBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill1;
-        skill2Btn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill2;
-
-        ResetAllSpriteColors();
-    }
-
-    private void ResetAllSpriteColors()
-    {
-        // Find all active NewHealth components in the scene
-        var allHealths = FindObjectsOfType<NewHealth>();
-        foreach (var health in allHealths)
+        // NEW: update buttons by cooldown
+        if (_currentLeader)
         {
-            var sr = health.GetComponentInChildren<SpriteRenderer>();
-            if (sr != null)
+            bool s1Ready = _currentLeader.IsSkill1Ready;
+            bool s2Ready = _currentLeader.IsSkill2Ready;
+
+            if (skillBtn) skillBtn.interactable = s1Ready;
+            if (skill2Btn) skill2Btn.interactable = s2Ready;
+
+            if (skill1CdText)
             {
-                sr.color = Color.white; // restore to default (you can also store & use health.originalColor if you prefer)
+                if (s1Ready) { skill1CdText.gameObject.SetActive(false); }
+                else { skill1CdText.gameObject.SetActive(true); skill1CdText.text = $"CD: {_currentLeader.Skill1Remaining}"; }
             }
+            if (skill2CdText)
+            {
+                if (s2Ready) { skill2CdText.gameObject.SetActive(false); }
+                else { skill2CdText.gameObject.SetActive(true); skill2CdText.text = $"CD: {_currentLeader.Skill2Remaining}"; }
+            }
+
+            attackBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().basicAtk;
+            skillBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill1;
+            skill2Btn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill2;
         }
     }
+
     private void HandleSelectionChanged(Combatant c)
     {
         if (c != null) ShowMessage(null);
@@ -70,13 +80,7 @@ public class BattleActionUI : MonoBehaviour
     private void OnAttack()
     {
         var target = selector ? selector.Current : null;
-
-        if (target == null)
-        {
-            ShowMessage(infoLabel.text);
-            return;
-        }
-
+        if (target == null) { ShowMessage(infoLabel.text); return; }
         if (panel) panel.SetActive(false);
         engine.LeaderChooseBasicAttackTarget(target);
     }
@@ -84,13 +88,8 @@ public class BattleActionUI : MonoBehaviour
     private void OnSkill1()
     {
         var target = selector ? selector.Current : null;
-
-        if (target == null)
-        {
-            ShowMessage(infoLabel.text);
-            return;
-        }
-
+        if (target == null) { ShowMessage(infoLabel.text); return; }
+        if (_currentLeader && !_currentLeader.IsSkill1Ready) return;
         if (panel) panel.SetActive(false);
         engine.LeaderChooseSkillTarget(0, target);
     }
@@ -98,30 +97,16 @@ public class BattleActionUI : MonoBehaviour
     private void OnSkill2()
     {
         var target = selector ? selector.Current : null;
-
-        if (target == null)
-        {
-            ShowMessage(infoLabel.text);
-            return;
-        }
-
+        if (target == null) { ShowMessage(infoLabel.text); return; }
+        if (_currentLeader && !_currentLeader.IsSkill2Ready) return;
         if (panel) panel.SetActive(false);
         engine.LeaderChooseSkillTarget(1, target);
     }
 
-    // --- helpers ---
     private void ShowMessage(string msg)
     {
         if (!infoLabel) return;
-
-        if (string.IsNullOrEmpty(msg))
-        {
-            infoLabel.gameObject.SetActive(false);
-        }
-        else
-        {
-            infoLabel.text = msg;
-            infoLabel.gameObject.SetActive(true);
-        }
+        if (string.IsNullOrEmpty(msg)) { infoLabel.gameObject.SetActive(false); }
+        else { infoLabel.text = msg; infoLabel.gameObject.SetActive(true); }
     }
 }
