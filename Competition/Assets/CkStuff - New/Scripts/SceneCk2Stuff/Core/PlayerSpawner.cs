@@ -91,6 +91,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
             SetLayerRecursively(followerObj, LayerMask.NameToLayer("Ally"));
 
             followerObj.GetComponentInChildren<PlayerHeldItem>().handPoint.gameObject.SetActive(false);
+            followerObj.tag = "Untagged";
             Destroy(followerObj.GetComponentInChildren<NewPlayerMovement>());
             Destroy(followerObj.GetComponentInChildren<PlayerHeldItem>());
             Destroy(followerObj.GetComponentInChildren<PlayerAttack>());
