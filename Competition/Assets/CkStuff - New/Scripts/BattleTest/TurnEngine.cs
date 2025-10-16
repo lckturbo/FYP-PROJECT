@@ -24,6 +24,9 @@ public class TurnEngine : MonoBehaviour
     // Round-robin pointer for fair turn order among ties
     private int _nextIndex = 0;
 
+    // NEW: while true, an action animation/coroutine is running
+    private bool _resolvingAction = false;
+
     public void Register(Combatant c)
     {
         if (c != null && !_units.Contains(c)) _units.Add(c);
@@ -35,15 +38,12 @@ public class TurnEngine : MonoBehaviour
         _waitingForLeader = false;
         _currentLeader = null;
         _nextIndex = 0;
+        _resolvingAction = false;
 
-        // Extra smoothing: tiny random stagger so identical speeds don't pop together
+        // small random stagger so identical speeds don't pop together
         for (int i = 0; i < _units.Count; i++)
-        {
             if (_units[i])
-            {
                 _units[i].atb = UnityEngine.Random.Range(0.05f, 1.5f);
-            }
-        }
     }
 
     public void ForceEnd(bool playerWon)
@@ -53,6 +53,7 @@ public class TurnEngine : MonoBehaviour
         _running = false;
         _waitingForLeader = false;
         _currentLeader = null;
+        _resolvingAction = false;
 
         targetSelector?.Disable();
         OnBattleEnd?.Invoke(playerWon);
@@ -61,6 +62,9 @@ public class TurnEngine : MonoBehaviour
     private void Update()
     {
         if (!_running) return;
+
+        // Pause the loop if an action is resolving
+        if (_resolvingAction) return;
 
         // If leader died, end battle immediately
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
@@ -74,7 +78,7 @@ public class TurnEngine : MonoBehaviour
 
         float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
-        // --- PASS 1: fill everyone's ATB
+        // PASS 1: fill everyone's ATB
         for (int i = 0; i < _units.Count; i++)
         {
             var u = _units[i];
@@ -82,7 +86,7 @@ public class TurnEngine : MonoBehaviour
             u.atb += u.Speed * step;
         }
 
-        // --- PASS 2: pick exactly ONE ready unit to act (round-robin from _nextIndex)
+        // PASS 2: pick exactly ONE ready unit to act (round-robin from _nextIndex)
         int count = _units.Count;
         for (int s = 0; s < count; s++)
         {
@@ -92,7 +96,7 @@ public class TurnEngine : MonoBehaviour
 
             if (u.atb >= 1f)
             {
-                // Consume turn and tick any per-turn systems (e.g., cooldowns)
+                // consume turn and tick per-turn systems (cooldowns)
                 u.atb = 0f;
                 u.OnTurnStarted();
 
@@ -100,6 +104,7 @@ public class TurnEngine : MonoBehaviour
                 {
                     if (autoBattle)
                     {
+                        HookActionLock(u); // lock while action plays
                         AutoAct(u, true);
                     }
                     else
@@ -114,12 +119,13 @@ public class TurnEngine : MonoBehaviour
                             targetSelector.Clear();
                         }
 
-                        _nextIndex = (i + 1) % count; // advance RR pointer
+                        _nextIndex = (i + 1) % count;
                         return; // exactly one actor per frame
                     }
                 }
                 else
                 {
+                    HookActionLock(u); // lock while action plays
                     AutoAct(u, false);
                 }
 
@@ -135,9 +141,23 @@ public class TurnEngine : MonoBehaviour
                 return; // exactly one actor per frame
             }
         }
-
-        // If nobody is ready this frame, do nothing.
     }
+
+    // === Action lock wiring ===
+    private void HookActionLock(Combatant actor)
+    {
+        if (actor == null) return;
+
+        // avoid double-subscribe
+        actor.ActionBegan -= OnActorActionBegan;
+        actor.ActionEnded -= OnActorActionEnded;
+
+        actor.ActionBegan += OnActorActionBegan;
+        actor.ActionEnded += OnActorActionEnded;
+    }
+
+    private void OnActorActionBegan() { _resolvingAction = true; }
+    private void OnActorActionEnded() { _resolvingAction = false; }
 
     // === Leader actions ===
     public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
@@ -151,6 +171,7 @@ public class TurnEngine : MonoBehaviour
             return;
         }
 
+        HookActionLock(_currentLeader);
         _currentLeader.BasicAttack(target);
         Debug.Log($"[TURN] Leader {_currentLeader.name} used BASIC ATTACK on {target.name}");
         EndLeaderDecisionAndCheck();
@@ -167,12 +188,15 @@ public class TurnEngine : MonoBehaviour
             return;
         }
 
+        HookActionLock(_currentLeader);
         bool used = false;
         if (skillIndex == 0) used = _currentLeader.TryUseSkill1(target);
         else if (skillIndex == 1) used = _currentLeader.TryUseSkill2(target);
 
         if (!used)
         {
+            // no ActionBegan fired (skill refused), ensure we’re not locked
+            _resolvingAction = false;
             Debug.LogWarning("[TURN] Skill on cooldown.");
             return;
         }
@@ -204,7 +228,6 @@ public class TurnEngine : MonoBehaviour
         {
             return explicitTarget;
         }
-
         return _currentLeader != null ? FindRandomAlive(!_currentLeader.isPlayerTeam) : null;
     }
 
@@ -219,27 +242,15 @@ public class TurnEngine : MonoBehaviour
             {
                 int roll = UnityEngine.Random.Range(0, 3);
                 if (roll == 0) actor.BasicAttack(target);
-                else if (roll == 1)
-                {
-                    if (!actor.TryUseSkill1(target)) actor.BasicAttack(target);
-                }
-                else
-                {
-                    if (!actor.TryUseSkill2(target)) actor.BasicAttack(target);
-                }
+                else if (roll == 1) { if (!actor.TryUseSkill1(target)) actor.BasicAttack(target); }
+                else { if (!actor.TryUseSkill2(target)) actor.BasicAttack(target); }
             }
             else
             {
                 float r = UnityEngine.Random.value;
                 if (r < 0.6f) actor.BasicAttack(target);
-                else if (r < 0.8f)
-                {
-                    if (!actor.TryUseSkill1(target)) actor.BasicAttack(target);
-                }
-                else
-                {
-                    if (!actor.TryUseSkill2(target)) actor.BasicAttack(target);
-                }
+                else if (r < 0.8f) { if (!actor.TryUseSkill1(target)) actor.BasicAttack(target); }
+                else { if (!actor.TryUseSkill2(target)) actor.BasicAttack(target); }
             }
         }
         else
@@ -258,10 +269,8 @@ public class TurnEngine : MonoBehaviour
     {
         List<Combatant> alive = new();
         foreach (var u in _units)
-        {
             if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
                 alive.Add(u);
-        }
 
         if (alive.Count == 0) return null;
         return alive[UnityEngine.Random.Range(0, alive.Count)];
@@ -270,10 +279,8 @@ public class TurnEngine : MonoBehaviour
     private bool IsTeamWiped(bool playerTeam)
     {
         foreach (var u in _units)
-        {
             if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
                 return false;
-        }
         return true;
     }
 }

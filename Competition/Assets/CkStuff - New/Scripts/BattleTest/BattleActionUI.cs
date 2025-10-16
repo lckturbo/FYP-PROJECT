@@ -46,7 +46,6 @@ public class BattleActionUI : MonoBehaviour
         ShowMessage(null);
         if (panel) panel.SetActive(true);
 
-        // NEW: update buttons by cooldown
         if (_currentLeader)
         {
             bool s1Ready = _currentLeader.IsSkill1Ready;

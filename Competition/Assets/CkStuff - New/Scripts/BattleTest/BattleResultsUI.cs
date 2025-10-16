@@ -137,7 +137,6 @@ public class BattleResultsUI : MonoBehaviour
             return;
         }
 
-        // if new level invalid, hide
         if (p.newLevel < 1)
         {
             xpBar.gameObject.SetActive(false);
@@ -154,7 +153,6 @@ public class BattleResultsUI : MonoBehaviour
 
         if (!animateXpBar || p.oldLevel <= 0)
         {
-            // snap to final
             int req = RequiredXP(p.newLevel);
             int clampedAfter = Mathf.Clamp(p.xpAfter, 0, req);
             ApplyXpBarVisuals(clampedAfter, req);
@@ -180,7 +178,7 @@ public class BattleResultsUI : MonoBehaviour
             yield break;
         }
 
-        float baseDur = autoScaleSpeed ? ComputeAutoBaseDuration(p) : xpBarSegmentDuration;
+        float baseDur = autoScaleSpeed ? AutoBaseDuration(p) : xpBarSegmentDuration;
 
         // 1) First segment: from current XP within startLevel to either level-up or final if no level change
         int segStartLevel = startLevel;
@@ -221,7 +219,7 @@ public class BattleResultsUI : MonoBehaviour
         _xpAnimCo = null;
     }
 
-    private float ComputeAutoBaseDuration(BattleResultsPayload p)
+    private float AutoBaseDuration(BattleResultsPayload p)
     {
         int startLevel = Mathf.Max(1, p.oldLevel);
         int endLevel = Mathf.Max(1, p.newLevel);
