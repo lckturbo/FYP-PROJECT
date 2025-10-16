@@ -18,13 +18,7 @@ public class PushableBlock : MonoBehaviour
     private bool isMoving = false;
     private Rigidbody2D rb;
     private Collider2D col;
-
     private Vector2 originalPosition;
-
-    private void Start()
-    {
-        originalPosition = rb.position;
-    }
 
     private void Awake()
     {
@@ -34,7 +28,30 @@ public class PushableBlock : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
-        rb.drag = 1000f; // prevent sliding
+        rb.drag = 1000f;
+    }
+
+    private void Start()
+    {
+        originalPosition = rb.position;
+
+        // Handle possible overlap with player on scene load
+        CheckInitialOverlap();
+    }
+
+    private void CheckInitialOverlap()
+    {
+        Collider2D hit = Physics2D.OverlapBox(rb.position, col.bounds.size, 0f, LayerMask.GetMask("Player"));
+        if (hit)
+        {
+            Debug.Log($"[{name}] Player overlapping on load, resolving...");
+            PlayerPush player = hit.GetComponent<PlayerPush>();
+            if (player != null)
+            {
+                Vector2 dir = (rb.position - (Vector2)player.transform.position).normalized;
+                TryPush(dir);
+            }
+        }
     }
 
     public void ResetToOriginal()
@@ -51,13 +68,10 @@ public class PushableBlock : MonoBehaviour
     {
         if (isMoving) return false;
 
-        // Only accept clean cardinal input
         Vector2 dir = GetCardinal(direction);
         if (dir == Vector2.zero) return false;
 
-        // Snap this block to the grid before checking
         SnapToGrid();
-
         if (!CanPushChain(this, dir)) return false;
 
         DoPushChain(this, dir);
@@ -69,7 +83,6 @@ public class PushableBlock : MonoBehaviour
         Bounds b = block.col.bounds;
         Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
 
-        // Check one grid step in that direction
         RaycastHit2D hit = Physics2D.BoxCast(block.rb.position, size, 0f, dir, gridSize, obstacleMask);
         if (!hit.collider) return true;
 
@@ -81,7 +94,6 @@ public class PushableBlock : MonoBehaviour
     {
         block.SnapToGrid();
 
-        // Chain push next block if needed
         Bounds b = block.col.bounds;
         Vector2 size = new Vector2(b.size.x - checkPadding, b.size.y - checkPadding);
         RaycastHit2D hit = Physics2D.BoxCast(block.rb.position, size, 0f, dir, gridSize, obstacleMask);
@@ -93,7 +105,6 @@ public class PushableBlock : MonoBehaviour
                 DoPushChain(other, dir);
         }
 
-        // Push this block
         Vector2 target = block.rb.position + dir * gridSize;
         block.StartCoroutine(block.MoveTo(target));
     }
@@ -103,15 +114,13 @@ public class PushableBlock : MonoBehaviour
         isMoving = true;
         rb.isKinematic = true;
 
-        Vector2 start = rb.position;
-
         while ((rb.position - target).sqrMagnitude > 0.001f)
         {
             rb.position = Vector2.MoveTowards(rb.position, target, moveSpeed * Time.deltaTime);
             yield return null;
         }
 
-        rb.position = target; // Snap exactly
+        rb.position = target;
         rb.isKinematic = false;
         rb.velocity = Vector2.zero;
         isMoving = false;
@@ -119,7 +128,6 @@ public class PushableBlock : MonoBehaviour
 
     private Vector2 GetCardinal(Vector2 dir)
     {
-        // Pick the dominant axis, ignore diagonal slop
         if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
             return dir.x > 0 ? Vector2.right : Vector2.left;
         else if (Mathf.Abs(dir.y) > 0)
@@ -136,23 +144,21 @@ public class PushableBlock : MonoBehaviour
         );
     }
 
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    // Only react if colliding with the player
+    //    if (collision.collider.GetComponent<PlayerPush>() == null)
+    //        return;
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        PlayerPush player = collision.collider.GetComponent<PlayerPush>();
-        if (player == null) return; // ignore everything else
+    //    if (collision.contactCount == 0) return;
+    //    ContactPoint2D contact = collision.GetContact(0);
+    //    Vector2 dir = -contact.normal;
 
-        // Now you know it's the player
-        ContactPoint2D contact = collision.GetContact(0);
-        Vector2 dir = -contact.normal;
+    //    if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+    //        dir = dir.x > 0 ? Vector2.right : Vector2.left;
+    //    else
+    //        dir = dir.y > 0 ? Vector2.up : Vector2.down;
 
-        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
-            dir = dir.x > 0 ? Vector2.right : Vector2.left;
-        else
-            dir = dir.y > 0 ? Vector2.up : Vector2.down;
-
-        Debug.Log($"Pushing block {name} in {dir}");
-        TryPush(dir);
-    }
-
+    //    TryPush(dir);
+    //}
 }
