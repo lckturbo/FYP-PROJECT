@@ -70,6 +70,22 @@ public class BattleActionUI : MonoBehaviour
             skillBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill1;
             skill2Btn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill2;
         }
+
+        ResetAllSpriteColors();
+    }
+
+    private void ResetAllSpriteColors()
+    {
+        // Find all active NewHealth components in the scene
+        var allHealths = FindObjectsOfType<NewHealth>();
+        foreach (var health in allHealths)
+        {
+            var sr = health.GetComponentInChildren<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.color = Color.white; // restore to default (you can also store & use health.originalColor if you prefer)
+            }
+        }
     }
 
     private void HandleSelectionChanged(Combatant c)
