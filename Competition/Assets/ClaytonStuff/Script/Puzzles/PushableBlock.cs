@@ -12,9 +12,19 @@ public class PushableBlock : MonoBehaviour
     [Header("Safety")]
     public float checkPadding = 0.05f;
 
+    [Header("Grid Settings")]
+    public Vector2 gridOffset = Vector2.zero;
+
     private bool isMoving = false;
     private Rigidbody2D rb;
     private Collider2D col;
+
+    private Vector2 originalPosition;
+
+    private void Start()
+    {
+        originalPosition = rb.position;
+    }
 
     private void Awake()
     {
@@ -25,6 +35,16 @@ public class PushableBlock : MonoBehaviour
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
         rb.drag = 1000f; // prevent sliding
+    }
+
+    public void ResetToOriginal()
+    {
+        StopAllCoroutines();
+        isMoving = false;
+        rb.isKinematic = false;
+        rb.velocity = Vector2.zero;
+        rb.position = originalPosition;
+        SnapToGrid();
     }
 
     public bool TryPush(Vector2 direction)
@@ -111,19 +131,28 @@ public class PushableBlock : MonoBehaviour
     private void SnapToGrid()
     {
         rb.position = new Vector2(
-            Mathf.Round(rb.position.x / gridSize) * gridSize,
-            Mathf.Round(rb.position.y / gridSize) * gridSize
+            Mathf.Round((rb.position.x - gridOffset.x) / gridSize) * gridSize + gridOffset.x,
+            Mathf.Round((rb.position.y - gridOffset.y) / gridSize) * gridSize + gridOffset.y
         );
     }
 
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (isMoving)
-        {
-            StopAllCoroutines();
-            rb.velocity = Vector2.zero;
-            SnapToGrid();
-            isMoving = false;
-        }
+        PlayerPush player = collision.collider.GetComponent<PlayerPush>();
+        if (player == null) return; // ignore everything else
+
+        // Now you know it's the player
+        ContactPoint2D contact = collision.GetContact(0);
+        Vector2 dir = -contact.normal;
+
+        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+            dir = dir.x > 0 ? Vector2.right : Vector2.left;
+        else
+            dir = dir.y > 0 ? Vector2.up : Vector2.down;
+
+        Debug.Log($"Pushing block {name} in {dir}");
+        TryPush(dir);
     }
+
 }
