@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TurnEngine : MonoBehaviour
 {
-    //Seconds to fill ATB from 0 -> 1 when Speed = 1
+    // Seconds to fill ATB from 0 -> 1 when Speed = 1
     [SerializeField] private float atbFillSeconds = 3f;
 
     public bool autoBattle = false;
@@ -21,6 +21,9 @@ public class TurnEngine : MonoBehaviour
 
     public event Action<bool> OnBattleEnd;
 
+    // Round-robin pointer for fair turn order among ties
+    private int _nextIndex = 0;
+
     public void Register(Combatant c)
     {
         if (c != null && !_units.Contains(c)) _units.Add(c);
@@ -31,9 +34,16 @@ public class TurnEngine : MonoBehaviour
         _running = true;
         _waitingForLeader = false;
         _currentLeader = null;
+        _nextIndex = 0;
 
+        // Extra smoothing: tiny random stagger so identical speeds don't pop together
         for (int i = 0; i < _units.Count; i++)
-            if (_units[i]) _units[i].atb = 0f;
+        {
+            if (_units[i])
+            {
+                _units[i].atb = UnityEngine.Random.Range(0.05f, 1.5f);
+            }
+        }
     }
 
     public void ForceEnd(bool playerWon)
@@ -52,6 +62,7 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running) return;
 
+        // If leader died, end battle immediately
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
         {
@@ -63,52 +74,69 @@ public class TurnEngine : MonoBehaviour
 
         float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
+        // --- PASS 1: fill everyone's ATB
         for (int i = 0; i < _units.Count; i++)
         {
             var u = _units[i];
             if (u == null || !u.IsAlive) continue;
-
             u.atb += u.Speed * step;
-            if (u.atb < 1f) continue;
+        }
 
-            // Unit gets a turn
-            u.atb = 0f;
+        // --- PASS 2: pick exactly ONE ready unit to act (round-robin from _nextIndex)
+        int count = _units.Count;
+        for (int s = 0; s < count; s++)
+        {
+            int i = (_nextIndex + s) % count;
+            var u = _units[i];
+            if (u == null || !u.IsAlive) continue;
 
-            u.OnTurnStarted();
-
-            if (u.isPlayerTeam && u.isLeader)
+            if (u.atb >= 1f)
             {
-                if (autoBattle)
+                // Consume turn and tick any per-turn systems (e.g., cooldowns)
+                u.atb = 0f;
+                u.OnTurnStarted();
+
+                if (u.isPlayerTeam && u.isLeader)
                 {
-                    AutoAct(u, true);
+                    if (autoBattle)
+                    {
+                        AutoAct(u, true);
+                    }
+                    else
+                    {
+                        _waitingForLeader = true;
+                        _currentLeader = u;
+                        OnLeaderTurnStart?.Invoke(u);
+
+                        if (targetSelector)
+                        {
+                            targetSelector.EnableForLeaderTurn();
+                            targetSelector.Clear();
+                        }
+
+                        _nextIndex = (i + 1) % count; // advance RR pointer
+                        return; // exactly one actor per frame
+                    }
                 }
                 else
                 {
-                    _waitingForLeader = true;
-                    _currentLeader = u;
-                    OnLeaderTurnStart?.Invoke(u);
-
-                    if (targetSelector)
-                    {
-                        targetSelector.EnableForLeaderTurn();
-                        targetSelector.Clear();
-                    }
-                    return; // wait for player decision
+                    AutoAct(u, false);
                 }
-            }
-            else
-            {
-                AutoAct(u, false);
-            }
 
-            // After any action, check for wipe and end cleanly
-            if (IsTeamWiped(true) || IsTeamWiped(false))
-            {
-                bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-                ForceEnd(playerWon);
-                return;
+                // After any action, check for wipe and end cleanly
+                if (IsTeamWiped(true) || IsTeamWiped(false))
+                {
+                    bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+                    ForceEnd(playerWon);
+                    return;
+                }
+
+                _nextIndex = (i + 1) % count; // advance RR pointer
+                return; // exactly one actor per frame
             }
         }
+
+        // If nobody is ready this frame, do nothing.
     }
 
     // === Leader actions ===
@@ -216,6 +244,7 @@ public class TurnEngine : MonoBehaviour
         }
         else
         {
+            // simple enemy logic with cooldown-aware usage of skill1
             if (UnityEngine.Random.value < 0.5f || !actor.IsSkill1Ready)
                 actor.BasicAttack(target);
             else
@@ -227,7 +256,7 @@ public class TurnEngine : MonoBehaviour
 
     private Combatant FindRandomAlive(bool playerTeam)
     {
-        List<Combatant> alive = new List<Combatant>();
+        List<Combatant> alive = new();
         foreach (var u in _units)
         {
             if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
