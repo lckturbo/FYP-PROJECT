@@ -122,6 +122,23 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &86822525 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3200289770863024659, guid: 6e17d00d752e7bf49b335da7f5ce5e5a, type: 3}
+  m_PrefabInstance: {fileID: 1796993003}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &86822540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86822525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b0a192ae406b7049bff22b1f61d565d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &206620669
 GameObject:
   m_ObjectHideFlags: 0
@@ -3843,7 +3860,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 103a43eeb9b16d1418bcd8bc854fcf2e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4727,8 +4744,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardTileMap: {fileID: 316543380}
-  lightTile: {fileID: 11400000, guid: 762059cf14fa1bf46aa36d42c650cedc, type: 2}
-  darkTile: {fileID: 11400000, guid: 14f1fbc43626e98498b6f61fc4998e15, type: 2}
+  lightTile: {fileID: 11400000, guid: 4a593103eeb7531418002dbc18e76fea, type: 2}
+  darkTile: {fileID: 11400000, guid: ceaf88b9efe22814b85ca1ecedd4a715, type: 2}
 --- !u!1 &675674071
 GameObject:
   m_ObjectHideFlags: 0
@@ -4845,28 +4862,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d97a7a995798e64fb4e3b0cfbf313cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  puzzleDB: {fileID: 11400000, guid: 262211f46861a6b4a98bb1f4d2e98053, type: 2}
   boardTileMap: {fileID: 316543380}
   piecePrefab: {fileID: 7207532352724595391, guid: 104a0c7848b09004280d1d3639510e58, type: 3}
   highlightTileMap: {fileID: 981993270}
   highlightTile: {fileID: 11400000, guid: 091529866bf2b7943ba879ff351f8e2c, type: 2}
   whitePieceSprites:
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
-  - {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
+  - {fileID: 21300000, guid: 66ca20a5c5bc21e419817f0e9e79466a, type: 3}
+  - {fileID: 21300000, guid: 6dd1171e5aa2f2548a1556ab588524d4, type: 3}
+  - {fileID: 21300000, guid: 434632cbe135b9646832172270ff3867, type: 3}
+  - {fileID: 21300000, guid: 81da884e1bec072478f66e9c2f9ca35e, type: 3}
+  - {fileID: 21300000, guid: b08e8ebf08ec74149adbe6c218d86c39, type: 3}
+  - {fileID: 21300000, guid: 86ce513abd8b95e4fa3c7aea5f5c1135, type: 3}
   blackPieceSprites:
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
-  - {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
+  - {fileID: 21300000, guid: 89f77ecf093bbf94c85658569e57cc17, type: 3}
+  - {fileID: 21300000, guid: 4e93960d6e75663498c29989f0b89255, type: 3}
+  - {fileID: 21300000, guid: 2de3180498f00494ba28241672aee3af, type: 3}
+  - {fileID: 21300000, guid: 0f2f713327722bd47a0ff58ca44bb872, type: 3}
+  - {fileID: 21300000, guid: bdf0d4d1dd1277f42aca936c6445e0be, type: 3}
+  - {fileID: 21300000, guid: 5a760d4482c637b4a9ff32eb3f4b3127, type: 3}
 --- !u!4 &711749857
 Transform:
   m_ObjectHideFlags: 0
@@ -5102,7 +5116,7 @@ TilemapRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
   m_MaxChunkCount: 16
@@ -5498,10 +5512,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cameraman (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 3885687507173974879, guid: 6e17d00d752e7bf49b335da7f5ce5e5a, type: 3}
+      propertyPath: m_Size.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3885687507173974879, guid: 6e17d00d752e7bf49b335da7f5ce5e5a, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 730360617, guid: f418bfeaf40dd24448acce164dbabba3, type: 3}
+    - target: {fileID: 3885687507173974879, guid: 6e17d00d752e7bf49b335da7f5ce5e5a, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3200289770863024659, guid: 6e17d00d752e7bf49b335da7f5ce5e5a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 86822540}
   m_SourcePrefab: {fileID: 100100000, guid: 6e17d00d752e7bf49b335da7f5ce5e5a, type: 3}
 --- !u!1 &1880929968
 GameObject:
