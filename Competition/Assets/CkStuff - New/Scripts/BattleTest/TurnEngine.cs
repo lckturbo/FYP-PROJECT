@@ -74,6 +74,8 @@ public class TurnEngine : MonoBehaviour
             // Unit gets a turn
             u.atb = 0f;
 
+            u.OnTurnStarted();
+
             if (u.isPlayerTeam && u.isLeader)
             {
                 if (autoBattle)
@@ -137,8 +139,15 @@ public class TurnEngine : MonoBehaviour
             return;
         }
 
-        if (skillIndex == 0) _currentLeader.Skill1(target);
-        else if (skillIndex == 1) _currentLeader.Skill2(target);
+        bool used = false;
+        if (skillIndex == 0) used = _currentLeader.TryUseSkill1(target);
+        else if (skillIndex == 1) used = _currentLeader.TryUseSkill2(target);
+
+        if (!used)
+        {
+            Debug.LogWarning("[TURN] Skill on cooldown.");
+            return;
+        }
 
         Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL {skillIndex + 1} on {target.name}");
         EndLeaderDecisionAndCheck();
@@ -182,21 +191,35 @@ public class TurnEngine : MonoBehaviour
             {
                 int roll = UnityEngine.Random.Range(0, 3);
                 if (roll == 0) actor.BasicAttack(target);
-                else if (roll == 1) actor.Skill1(target);
-                else actor.Skill2(target);
+                else if (roll == 1)
+                {
+                    if (!actor.TryUseSkill1(target)) actor.BasicAttack(target);
+                }
+                else
+                {
+                    if (!actor.TryUseSkill2(target)) actor.BasicAttack(target);
+                }
             }
             else
             {
                 float r = UnityEngine.Random.value;
                 if (r < 0.6f) actor.BasicAttack(target);
-                else if (r < 0.8f) actor.Skill1(target);
-                else actor.Skill2(target);
+                else if (r < 0.8f)
+                {
+                    if (!actor.TryUseSkill1(target)) actor.BasicAttack(target);
+                }
+                else
+                {
+                    if (!actor.TryUseSkill2(target)) actor.BasicAttack(target);
+                }
             }
         }
         else
         {
-            if (UnityEngine.Random.value < 0.5f) actor.BasicAttack(target);
-            else actor.Skill1(target);
+            if (UnityEngine.Random.value < 0.5f || !actor.IsSkill1Ready)
+                actor.BasicAttack(target);
+            else
+                actor.TryUseSkill1(target);
         }
 
         Debug.Log($"[TURN] {actor.name} auto-acted on {target.name}");
