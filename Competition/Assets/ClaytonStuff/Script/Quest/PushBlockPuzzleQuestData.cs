@@ -3,7 +3,11 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Quests/Push Block Puzzle Quest")]
 public class PushBlockPuzzleQuestData : QuestData
 {
-    public PuzzleManager puzzlePrefab; // assign a prefab that has PuzzleManager + goals
+    [Tooltip("The PuzzleManager in the scene controlling this puzzle.")]
+    public PuzzleManager puzzleManager;
+
+    [Tooltip("Which puzzle group index this quest tracks (0-based).")]
+    public int puzzleGroupIndex = 0;
 
     public override Quest CreateQuestInstance(GameObject questHolder)
     {
