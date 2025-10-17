@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Piece : MonoBehaviour
+public class Piece : BoardEntity
 {
     public enum PieceType
     {
@@ -14,63 +13,17 @@ public class Piece : MonoBehaviour
         Queen,
         King
     }
-    public PieceType pieceType;
-    private bool canMove = true;
-    public void SetMove(bool v) => canMove = v;
-    [SerializeField] private bool isWhite;
-    public void SetWhite(bool v) => isWhite = v;
-    public bool IsWhite() => isWhite;
-    private List<Vector3Int> currentValidMoves = new List<Vector3Int>();
 
-    private Tilemap boardTileMap;
-    private Tilemap highlightTileMap;
-    private TileBase highlightTile;
-    private bool isHighlighted = false;
-    private Vector3 previousPosition;
+    public PieceType pieceType;
     private PieceManager manager;
 
     public void Init(Tilemap board, Tilemap highlight, TileBase tile, PieceManager mgr)
     {
-        boardTileMap = board;
-        highlightTileMap = highlight;
-        highlightTile = tile;
+        base.Init(board, highlight, tile);
         manager = mgr;
     }
 
-    public void ToggleHighlight()
-    {
-        if (!isWhite || !canMove) return;
-
-        if (isHighlighted)
-        {
-            highlightTileMap.ClearAllTiles();
-            isHighlighted = false;
-        }
-        else
-        {
-            HighlightMoves();
-            isHighlighted = true;
-        }
-    }
-
-
-    public void HighlightMoves()
-    {
-        highlightTileMap.ClearAllTiles();
-        currentValidMoves.Clear();
-
-        Vector3Int currCell = boardTileMap.WorldToCell(transform.position);
-        List<Vector3Int> validMoves = GetValidMoves(currCell);
-
-        foreach (var move in validMoves)
-        {
-            if (move.x >= 0 && move.x < 8 && move.y >= 0 && move.y < 8)
-                highlightTileMap.SetTile(move, highlightTile);
-        }
-
-        currentValidMoves = validMoves;
-    }
-    public List<Vector3Int> GetValidMoves(Vector3Int currCell)
+    public override List<Vector3Int> GetValidMoves(Vector3Int currCell)
     {
         List<Vector3Int> validMoves = new();
 
@@ -190,7 +143,8 @@ public class Piece : MonoBehaviour
 
         return validMoves;
     }
-    public bool TryMoveTo(Vector3 worldPos)
+
+    public override bool TryMoveTo(Vector3 worldPos)
     {
         if (!canMove) return false;
 
@@ -219,7 +173,7 @@ public class Piece : MonoBehaviour
 
         Vector3Int fromCell = boardTileMap.WorldToCell(previousPosition);
         Vector3Int toCell = boardTileMap.WorldToCell(transform.position);
-        manager.OnPieceMoved(this, fromCell, toCell);
+        manager.OnMove(this.gameObject, fromCell, toCell);
 
         return true;
     }
