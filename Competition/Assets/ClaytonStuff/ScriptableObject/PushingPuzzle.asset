@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9806af13cd617994a81aaf8afaeed895, type: 3}
   m_Name: PushingPuzzle
   m_EditorClassIdentifier: 
+  questID: 
   questName: Pushblock quest
   description: Push block A and B
-  puzzlePrefab: {fileID: 5887573502687217278, guid: 8e072f06d62602d48b402f945803ee79, type: 3}
+  puzzleManager: {fileID: 0}
+  puzzleGroupIndex: 1
