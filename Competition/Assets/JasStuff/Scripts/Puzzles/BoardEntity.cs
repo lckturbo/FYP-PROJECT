@@ -26,6 +26,7 @@ public abstract class BoardEntity : MonoBehaviour
         boardTileMap = board;
         highlightTileMap = highlight;
         highlightTile = tile;
+        currentCell = board.WorldToCell(transform.position);
     }
     public virtual void ToggleHighlight()
     {
@@ -61,4 +62,8 @@ public abstract class BoardEntity : MonoBehaviour
 
     public abstract List<Vector3Int> GetValidMoves(Vector3Int currCell);
     public abstract bool TryMoveTo(Vector3 worldPos);
+    public void UpdateCell(Vector3Int newCell)
+    {
+        currentCell = newCell;
+    }
 }

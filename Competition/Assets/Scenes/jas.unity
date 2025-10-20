@@ -5754,6 +5754,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardTileMap: {fileID: 316543380}
+  spawnedObjs: []
   highlightTileMap: {fileID: 981993270}
   highlightTile: {fileID: 11400000, guid: 091529866bf2b7943ba879ff351f8e2c, type: 2}
   piecePrefab: {fileID: 7207532352724595391, guid: 104a0c7848b09004280d1d3639510e58, type: 3}
@@ -7436,8 +7437,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardTileMap: {fileID: 827448581}
-  highlightTileMap: {fileID: 0}
-  highlightTile: {fileID: 0}
+  spawnedObjs: []
+  highlightTileMap: {fileID: 981993270}
+  highlightTile: {fileID: 11400000, guid: 3e1563464ee77b24e9d30e2fcb1bfb34, type: 2}
   whiteStatuePrefab: {fileID: 535576554967550264, guid: ce4b97a5d937b7b499df4bae0e6cb7dd, type: 3}
   blackStatuePrefab: {fileID: 7527228350419252702, guid: 43f76cff5c4aae34f974d958a4d7dd63, type: 3}
 --- !u!1 &1743417467
