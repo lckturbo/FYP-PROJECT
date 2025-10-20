@@ -18,10 +18,28 @@ public class Combatant : MonoBehaviour
     public event System.Action ActionBegan;
     public event System.Action ActionEnded;
 
+    // --- Physics we’ll toggle while lunging ---
+    [Header("Collision Control While Acting")]
+    [Tooltip("If enabled, set body to Kinematic and colliders to Trigger during the attack hop, then restore.")]
+    [SerializeField] private bool disablePhysicsWhileActing = true;
+
+    private Rigidbody2D rb;
+    private Collider2D[] cols;
+    private RigidbodyType2D _rbOriginalType;
+    private bool[] _colOriginalIsTrigger;
+    private bool _collisionDisabledActive = false;
+
     private void Awake()
     {
         if (!health) health = GetComponentInChildren<NewHealth>();
         if (!anim) anim = GetComponent<Animator>();
+
+        rb = GetComponent<Rigidbody2D>();
+        cols = GetComponentsInChildren<Collider2D>(includeInactive: true);
+        if (cols == null) cols = System.Array.Empty<Collider2D>();
+        _colOriginalIsTrigger = new bool[cols.Length];
+        for (int i = 0; i < cols.Length; i++) _colOriginalIsTrigger[i] = cols[i].isTrigger;
+        if (rb) _rbOriginalType = rb.bodyType;
     }
 
     public float Speed => stats ? Mathf.Max(0.01f, stats.actionvaluespeed) : 0.01f;
@@ -133,8 +151,10 @@ public class Combatant : MonoBehaviour
 
         ActionBegan?.Invoke();
 
-        Transform mover = visualRoot ? visualRoot : transform;
+        // Disable collisions for the duration of the lunge (and return)
+        if (disablePhysicsWhileActing) EnterNonColliding();
 
+        Transform mover = visualRoot ? visualRoot : transform;
         Vector3 startPos = mover.position;
         Vector3 tgtPos = ApproachPoint(target);
 
@@ -142,17 +162,16 @@ public class Combatant : MonoBehaviour
 
         // play animation + apply damage
         doHit?.Invoke(target);
+        yield return null; // let Animator process trigger
 
-        // Let Animator process the trigger
-        yield return null;
-
-        // Wait until the attack/skill animation actually finishes (with timeouts/fallbacks)
+        // wait until the specific state finishes (with timeouts/fallbacks)
         yield return WaitForAnimationRobust(anim, stateToWait);
 
         // then move back
         yield return SmoothMove(mover, tgtPos, startPos, backSpeed, hopArcHeight);
-
         mover.position = startPos;
+
+        if (disablePhysicsWhileActing) ExitNonColliding();
 
         ActionEnded?.Invoke();
     }
@@ -181,7 +200,7 @@ public class Combatant : MonoBehaviour
 
             if (arc > 0f)
             {
-                float hop = arc * 4f * u * (1f - u); // parabola, peak at 0.5
+                float hop = arc * 4f * u * (1f - u);
                 pos.y += hop;
             }
 
@@ -190,7 +209,7 @@ public class Combatant : MonoBehaviour
         }
     }
 
-    // ---- ROBUST ANIM WAITER ----
+    // ---- ANIM WAITER ----
     private IEnumerator WaitForAnimationRobust(Animator a, string stateName)
     {
         if (!a)
@@ -199,7 +218,6 @@ public class Combatant : MonoBehaviour
             yield break;
         }
 
-        // 1) Try the configured layer first
         if (!string.IsNullOrEmpty(stateName))
         {
             bool entered = false;
@@ -212,7 +230,6 @@ public class Combatant : MonoBehaviour
                 yield return null;
             }
 
-            // 2) If not entered, scan all layers quickly
             if (!entered)
             {
                 int layers = a.layerCount;
@@ -229,7 +246,6 @@ public class Combatant : MonoBehaviour
                 }
             }
 
-            // 3) If still not found, fall back to clip time or fixed wait
             if (!entered)
             {
                 float len = FirstClipLength(a);
@@ -237,24 +253,20 @@ public class Combatant : MonoBehaviour
                 yield break;
             }
 
-            // 4) We’re in the right state on some layer – wait until it finishes or we time out
             float waited = 0f;
             while (waited < animMaxWait)
             {
-                bool anyTransition = false;
                 bool finishedAll = true;
-
                 int layers = a.layerCount;
                 for (int L = 0; L < layers; L++)
                 {
                     var st = a.GetCurrentAnimatorStateInfo(L);
                     if (st.IsName(stateName))
                     {
-                        if (a.IsInTransition(L)) { anyTransition = true; finishedAll = false; break; }
-                        if (st.loop) // looping state: consider done after one cycle
+                        if (a.IsInTransition(L)) { finishedAll = false; break; }
+                        if (st.loop)
                         {
-                            if (st.normalizedTime >= 1f) { /* ok */ }
-                            else { finishedAll = false; break; }
+                            if (st.normalizedTime < 1f) { finishedAll = false; break; }
                         }
                         else
                         {
@@ -263,8 +275,7 @@ public class Combatant : MonoBehaviour
                     }
                 }
 
-                if (finishedAll && !anyTransition) break;
-
+                if (finishedAll) break;
                 waited += Time.deltaTime;
                 yield return null;
             }
@@ -272,7 +283,6 @@ public class Combatant : MonoBehaviour
             yield break;
         }
 
-        // No state name provided: try clip length or fallback
         float fallback = FirstClipLength(a);
         yield return new WaitForSeconds(fallback > 0f ? Mathf.Min(fallback, animMaxWait) : animFallbackSeconds);
     }
@@ -288,5 +298,42 @@ public class Combatant : MonoBehaviour
     {
         return (x < 0.5f) ? 4f * x * x * x
                           : 1f - Mathf.Pow(-2f * x + 2f, 3f) / 2f;
+    }
+
+    // ===== Collision toggling =====
+    private void EnterNonColliding()
+    {
+        if (_collisionDisabledActive) return;
+        _collisionDisabledActive = true;
+
+        if (rb)
+        {
+            _rbOriginalType = rb.bodyType;
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            rb.bodyType = RigidbodyType2D.Kinematic;
+        }
+
+        for (int i = 0; i < cols.Length; i++)
+        {
+            if (!cols[i]) continue;
+            _colOriginalIsTrigger[i] = cols[i].isTrigger;
+            cols[i].isTrigger = true;
+        }
+    }
+
+    private void ExitNonColliding()
+    {
+        if (!_collisionDisabledActive) return;
+        _collisionDisabledActive = false;
+
+        if (rb)
+            rb.bodyType = _rbOriginalType;
+
+        for (int i = 0; i < cols.Length; i++)
+        {
+            if (!cols[i]) continue;
+            cols[i].isTrigger = _colOriginalIsTrigger[i];
+        }
     }
 }

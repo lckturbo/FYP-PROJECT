@@ -5,14 +5,9 @@ using System.Collections.Generic;
 
 public class TargetSelector : MonoBehaviour
 {
-    [Header("Pick Settings")]
     [SerializeField] private LayerMask selectableLayers;
     [SerializeField] private Color highlight;
     [SerializeField] private bool clickEmptyClears = true;
-
-    [Header("Debug")]
-    [SerializeField] private bool debugForceActive = false;
-    [SerializeField] private bool debugLogs = true;
 
     private bool _active;
     private Combatant _current;
@@ -26,19 +21,17 @@ public class TargetSelector : MonoBehaviour
     public void EnableForLeaderTurn()
     {
         _active = true;
-        if (debugLogs) Debug.Log("[TargetSelector] ENABLED");
     }
 
     public void Disable()
     {
         _active = false;
-        if (debugLogs) Debug.Log("[TargetSelector] DISABLED");
         Clear();
     }
 
     private void Update()
     {
-        if (!(debugForceActive || _active)) return;
+        if (!_active) return;
 
         if (_current != null && !_current.IsAlive)
             Clear();
@@ -50,13 +43,10 @@ public class TargetSelector : MonoBehaviour
     private void TryPickUnderMouse()
     {
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
-        {
-            if (debugLogs) Debug.Log("[TargetSelector] Click over UI — ignored");
             return;
-        }
 
         var cam = Camera.main;
-        if (!cam) { if (debugLogs) Debug.LogWarning("[TargetSelector] No MainCamera"); return; }
+        if (!cam) return;
 
         var ray = cam.ScreenPointToRay(Input.mousePosition);
         var hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity, selectableLayers);
@@ -69,17 +59,15 @@ public class TargetSelector : MonoBehaviour
             if (!col)
             {
                 if (clickEmptyClears) Clear();
-                if (debugLogs) Debug.Log("[TargetSelector] No collider under mouse");
                 return;
             }
         }
 
         var c = col.GetComponentInParent<Combatant>();
-        if (c == null) { if (debugLogs) Debug.Log("[TargetSelector] Collider has no Combatant"); return; }
-        if (c.isPlayerTeam) { if (debugLogs) Debug.Log("[TargetSelector] Clicked a player, ignoring"); return; }
-        if (!c.IsAlive) { if (debugLogs) Debug.Log("[TargetSelector] Target dead, ignoring"); return; }
-
-        if (c == _current) { if (debugLogs) Debug.Log("[TargetSelector] Same target clicked, ignoring"); return; }
+        if (c == null) return;
+        if (c.isPlayerTeam) return;
+        if (!c.IsAlive) return;
+        if (c == _current) return;
 
         Unhighlight();
 
@@ -87,7 +75,6 @@ public class TargetSelector : MonoBehaviour
         CacheAndHighlight(_current);
 
         OnSelectionChanged?.Invoke(_current);
-        if (debugLogs) Debug.Log($"[TARGET] Selected {_current.name}");
     }
 
     public void Clear()
@@ -96,7 +83,6 @@ public class TargetSelector : MonoBehaviour
         Unhighlight();
         _current = null;
         OnSelectionChanged?.Invoke(null);
-        if (debugLogs) Debug.Log("[TARGET] Cleared");
     }
 
     private void CacheAndHighlight(Combatant c)
@@ -105,11 +91,7 @@ public class TargetSelector : MonoBehaviour
         _originalColors.Clear();
 
         c.GetComponentsInChildren(true, _renderers);
-        if (_renderers.Count == 0)
-        {
-            if (debugLogs) Debug.LogWarning($"[TargetSelector] No SpriteRenderer found under {c.name}");
-            return;
-        }
+        if (_renderers.Count == 0) return;
 
         for (int i = 0; i < _renderers.Count; i++)
         {

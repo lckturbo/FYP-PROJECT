@@ -21,14 +21,11 @@ public class TurnEngine : MonoBehaviour
 
     public event Action<bool> OnBattleEnd;
 
-    // Round-robin pointer for fair turn order among ties
     private int _nextIndex = 0;
 
-    // While true, an action animation/coroutine is running
     private bool _resolvingAction = false;
 
-    // ==== NEW: guard to prevent double end-of-battle firing ====
-    private bool _ended = false; // prevents re-entrancy
+    private bool _ended = false;
 
     public void Register(Combatant c)
     {
@@ -44,7 +41,7 @@ public class TurnEngine : MonoBehaviour
         _resolvingAction = false;
         _ended = false; // reset end guard for fresh battle
 
-        // small random stagger so identical speeds don't pop together
+        // small random stagger
         for (int i = 0; i < _units.Count; i++)
             if (_units[i])
                 _units[i].atb = UnityEngine.Random.Range(0.05f, 0.45f);
@@ -94,7 +91,7 @@ public class TurnEngine : MonoBehaviour
             u.atb += u.Speed * step;
         }
 
-        // PASS 2: pick exactly ONE ready unit to act (round-robin from _nextIndex)
+        // PASS 2: pick exactly ONE ready unit to act
         int count = _units.Count;
         for (int s = 0; s < count; s++)
         {
@@ -104,7 +101,6 @@ public class TurnEngine : MonoBehaviour
 
             if (u.atb >= 1f)
             {
-                // consume turn and tick per-turn systems (cooldowns)
                 u.atb = 0f;
                 u.OnTurnStarted();
 
@@ -112,7 +108,7 @@ public class TurnEngine : MonoBehaviour
                 {
                     if (autoBattle)
                     {
-                        HookActionLock(u); // lock while action plays
+                        HookActionLock(u);
                         AutoAct(u, true);
                     }
                     else
@@ -128,16 +124,15 @@ public class TurnEngine : MonoBehaviour
                         }
 
                         _nextIndex = (i + 1) % count;
-                        return; // exactly one actor per frame
+                        return;
                     }
                 }
                 else
                 {
-                    HookActionLock(u); // lock while action plays
+                    HookActionLock(u);
                     AutoAct(u, false);
                 }
 
-                // After any action, check for wipe and end cleanly
                 if (IsTeamWiped(true) || IsTeamWiped(false))
                 {
                     bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
@@ -145,8 +140,8 @@ public class TurnEngine : MonoBehaviour
                     return;
                 }
 
-                _nextIndex = (i + 1) % count; // advance RR pointer
-                return; // exactly one actor per frame
+                _nextIndex = (i + 1) % count;
+                return;
             }
         }
     }
@@ -164,10 +159,12 @@ public class TurnEngine : MonoBehaviour
         actor.ActionEnded += OnActorActionEnded;
     }
 
-    private void OnActorActionBegan() { _resolvingAction = true; }
+    private void OnActorActionBegan() 
+    { 
+        _resolvingAction = true; 
+    }
     private void OnActorActionEnded()
     {
-        // if battle already ended, do nothing special; just clear the lock
         _resolvingAction = false;
     }
 
@@ -207,7 +204,6 @@ public class TurnEngine : MonoBehaviour
 
         if (!used)
         {
-            // no ActionBegan fired (skill refused), ensure we’re not locked
             _resolvingAction = false;
             Debug.LogWarning("[TURN] Skill on cooldown.");
             return;
