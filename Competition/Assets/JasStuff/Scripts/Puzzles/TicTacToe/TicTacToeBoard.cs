@@ -20,6 +20,7 @@ public class TicTacToeBoard : BoardBase
         new(3,6,0), // top middle
         new(5,5,0), // top right
     };
+    public Vector3Int[] GetAllCells() => circlePositions;
 
     protected override void GenerateBoard()
     {

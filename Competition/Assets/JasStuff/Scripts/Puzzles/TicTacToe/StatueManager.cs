@@ -36,23 +36,40 @@ public class StatueManager : BoardManager
 
     protected override void SetupPuzzle()
     {
+        var ticTacToeBoard = FindObjectOfType<TicTacToeBoard>();
+        if (ticTacToeBoard == null)
+        {
+            Debug.LogError("TicTacToeBoard not found!");
+            return;
+        }
+
+        // Get all valid board cells
+        var availableCells = new List<Vector3Int>(ticTacToeBoard.GetAllCells());
+
+        // Shuffle the list randomly
+        availableCells = availableCells.OrderBy(_ => Random.value).ToList();
+
+        // Pick first 3 for white, next 3 for black
+        whitePositions = availableCells.Take(3).ToArray();
+        blackPositions = availableCells.Skip(3).Take(3).ToArray();
+
+        // Spawn White Statues
         foreach (var pos in whitePositions)
         {
             GameObject statue = SpawnOnBoard(whiteStatuePrefab, pos);
             var s = statue.GetComponent<Statue>();
             s.SetWhite(true);
             spawnedObjs.Add(statue);
-
             s.Init(boardTileMap, highlightTileMap, highlightTile, this);
         }
 
+        // Spawn Black Statues
         foreach (var pos in blackPositions)
         {
             GameObject statue = SpawnOnBoard(blackStatuePrefab, pos);
             var s = statue.GetComponent<Statue>();
             s.SetWhite(false);
             spawnedObjs.Add(statue);
-
             s.Init(boardTileMap, highlightTileMap, highlightTile, this);
         }
 
