@@ -12,19 +12,8 @@ public class StatueManager : BoardManager
 
     private bool whiteTurn;
 
-    private Vector3Int[] whitePositions =
-    {
-        new(3, 3, 0),
-        new(6, 3, 0),
-        new(3, 0, 0)
-    };
-
-    private Vector3Int[] blackPositions =
-    {
-        new(5, 5, 0),
-        new(0, 3, 0),
-        new(5, 1, 0)
-    };
+    private Vector3Int[] whitePositions;
+    private Vector3Int[] blackPositions;
 
     private static Vector3Int[][] WinningLines = new Vector3Int[][]
   {
@@ -37,23 +26,26 @@ public class StatueManager : BoardManager
     protected override void SetupPuzzle()
     {
         var ticTacToeBoard = FindObjectOfType<TicTacToeBoard>();
-        if (ticTacToeBoard == null)
+        if (ticTacToeBoard == null) return;
+
+        var availableCells = new List<Vector3Int>(ticTacToeBoard.GetAllCells());
+        availableCells.Remove(new Vector3Int(3, 3, 0));
+
+        bool validSetup = false;
+        int attempts = 0;
+
+        while (!validSetup && attempts < 50)
         {
-            Debug.LogError("TicTacToeBoard not found!");
-            return;
+            attempts++;
+            availableCells = availableCells.OrderBy(_ => Random.value).ToList();
+
+            whitePositions = availableCells.Take(3).ToArray();
+            blackPositions = availableCells.Skip(3).Take(3).ToArray();
+
+            if (!HasLine(whitePositions.ToList()) && !HasLine(blackPositions.ToList()))
+                validSetup = true;
         }
 
-        // Get all valid board cells
-        var availableCells = new List<Vector3Int>(ticTacToeBoard.GetAllCells());
-
-        // Shuffle the list randomly
-        availableCells = availableCells.OrderBy(_ => Random.value).ToList();
-
-        // Pick first 3 for white, next 3 for black
-        whitePositions = availableCells.Take(3).ToArray();
-        blackPositions = availableCells.Skip(3).Take(3).ToArray();
-
-        // Spawn White Statues
         foreach (var pos in whitePositions)
         {
             GameObject statue = SpawnOnBoard(whiteStatuePrefab, pos);
@@ -63,7 +55,6 @@ public class StatueManager : BoardManager
             s.Init(boardTileMap, highlightTileMap, highlightTile, this);
         }
 
-        // Spawn Black Statues
         foreach (var pos in blackPositions)
         {
             GameObject statue = SpawnOnBoard(blackStatuePrefab, pos);
@@ -72,9 +63,9 @@ public class StatueManager : BoardManager
             spawnedObjs.Add(statue);
             s.Init(boardTileMap, highlightTileMap, highlightTile, this);
         }
-
         whiteTurn = true;
     }
+
 
     public override void OnMove(GameObject moved, Vector3Int fromCell, Vector3Int toCell)
     {
