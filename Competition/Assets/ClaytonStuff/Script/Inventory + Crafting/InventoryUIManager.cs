@@ -254,6 +254,23 @@ public class InventoryUIManager : MonoBehaviour
                 }
             }
         }
+        else if (slot.item.isDefenseBuff)
+        {
+            var buffHandler = FindObjectOfType<PlayerBuffHandler>();
+            if (buffHandler != null)
+            {
+                if (!buffHandler.IsBuffActive)
+                {
+                    buffHandler.ApplyDefenseBuff(slot.item.defenseBuffAmount, slot.item.defenseBuffDuration);
+                    inventoryManager.RemoveItemFromInventory(slot.item, 1);
+                    Debug.Log("Defense buff applied!");
+                }
+                else
+                {
+                    Debug.Log("Buff already active — cannot consume another until it expires!");
+                }
+            }
+        }
 
 
         if (slot.item.itemName == "Heal Potion")
