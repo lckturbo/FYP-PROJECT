@@ -2983,7 +2983,7 @@ GameObject:
   m_Component:
   - component: {fileID: 211616734}
   m_Layer: 0
-  m_Name: =====DDL_Managers======
+  m_Name: ====DDL_Managers====
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -55004,8 +55004,12 @@ PrefabInstance:
       value: PuzzleManager
       objectReference: {fileID: 0}
     - target: {fileID: 5973287520608423779, guid: 9654b7dc6e6cd4f4dad78f38c3aff5bc, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5973287520608423779, guid: 9654b7dc6e6cd4f4dad78f38c3aff5bc, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 40.47
+      value: 41
       objectReference: {fileID: 0}
     - target: {fileID: 5973287520608423779, guid: 9654b7dc6e6cd4f4dad78f38c3aff5bc, type: 3}
       propertyPath: m_LocalPosition.y
