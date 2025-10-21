@@ -9,6 +9,12 @@ public class InventoryManager : MonoBehaviour
 
     void Awake()
     {
+        // If this GameObject is a child
+        if (transform.parent != null)
+        {
+            // Detach from its parent first
+            transform.SetParent(null);
+        }
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
