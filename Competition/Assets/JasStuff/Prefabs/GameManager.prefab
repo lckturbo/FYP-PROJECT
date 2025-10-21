@@ -119,14 +119,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sounds:
-  - clip: {fileID: 8300000, guid: 3a13251797f0ab84d8b4cf073084c2b1, type: 3}
-    volume: 1
+  - clip: {fileID: 8300000, guid: 145d6ba0f58dd274e902dc6ba87e164d, type: 3}
+    volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
     audioSource: {fileID: 0}
-  - clip: {fileID: 8300000, guid: 145d6ba0f58dd274e902dc6ba87e164d, type: 3}
-    volume: 1
+  - clip: {fileID: 8300000, guid: 3a13251797f0ab84d8b4cf073084c2b1, type: 3}
+    volume: 0.35
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+    audioSource: {fileID: 0}
+  - clip: {fileID: 8300000, guid: e76382a825efe3145bf2ed95d066a096, type: 3}
+    volume: 0.35
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+    audioSource: {fileID: 0}
+  - clip: {fileID: 8300000, guid: fd1292787d1126a4bb3895568c80abde, type: 3}
+    volume: 0.35
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+    audioSource: {fileID: 0}
+  - clip: {fileID: 8300000, guid: 2c7a1969716106346a64052c23762561, type: 3}
+    volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
@@ -193,6 +211,9 @@ MonoBehaviour:
   settingsBtn: {fileID: 0}
   menuBtn: {fileID: 0}
   canPause: 1
+  statsDisplay: {fileID: 0}
+  statsContainer: {fileID: 0}
+  statRowPrefab: {fileID: 0}
 --- !u!114 &4066129514252676507
 MonoBehaviour:
   m_ObjectHideFlags: 0
