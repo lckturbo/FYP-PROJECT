@@ -27,6 +27,13 @@ public class TurnEngine : MonoBehaviour
 
     private bool _ended = false;
 
+    [SerializeField, Range(0.5f, 4f)] private float battleSpeed = 1f;
+    public float BattleSpeed
+    {
+        get => battleSpeed;
+        set => battleSpeed = Mathf.Clamp(value, 0.5f, 4f);
+    }
+
     public void Register(Combatant c)
     {
         if (c != null && !_units.Contains(c)) _units.Add(c);
@@ -81,7 +88,7 @@ public class TurnEngine : MonoBehaviour
 
         if (_waitingForLeader) return;
 
-        float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
+        float step = (Time.deltaTime * battleSpeed) / Mathf.Max(0.01f, atbFillSeconds);
 
         // PASS 1: fill everyone's ATB
         for (int i = 0; i < _units.Count; i++)
@@ -175,14 +182,10 @@ public class TurnEngine : MonoBehaviour
 
         var target = ValidateOrFallback(explicitTarget);
         if (target == null)
-        {
-            Debug.LogWarning("[TURN] No valid target for basic attack");
             return;
-        }
 
         HookActionLock(_currentLeader);
         _currentLeader.BasicAttack(target);
-        Debug.Log($"[TURN] Leader {_currentLeader.name} used BASIC ATTACK on {target.name}");
         EndLeaderDecisionAndCheck();
     }
 
@@ -192,10 +195,7 @@ public class TurnEngine : MonoBehaviour
 
         var target = ValidateOrFallback(explicitTarget);
         if (target == null)
-        {
-            Debug.LogWarning($"[TURN] No valid target for skill {skillIndex + 1}");
             return;
-        }
 
         HookActionLock(_currentLeader);
         bool used = false;
@@ -205,11 +205,8 @@ public class TurnEngine : MonoBehaviour
         if (!used)
         {
             _resolvingAction = false;
-            Debug.LogWarning("[TURN] Skill on cooldown.");
             return;
         }
-
-        Debug.Log($"[TURN] Leader {_currentLeader.name} used SKILL {skillIndex + 1} on {target.name}");
         EndLeaderDecisionAndCheck();
     }
 
@@ -269,8 +266,6 @@ public class TurnEngine : MonoBehaviour
             else
                 actor.TryUseSkill1(target);
         }
-
-        Debug.Log($"[TURN] {actor.name} auto-acted on {target.name}");
     }
 
     private Combatant FindRandomAlive(bool playerTeam)

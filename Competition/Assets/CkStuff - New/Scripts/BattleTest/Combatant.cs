@@ -29,6 +29,8 @@ public class Combatant : MonoBehaviour
     private bool[] _colOriginalIsTrigger;
     private bool _collisionDisabledActive = false;
 
+    private int turns;
+
     private void Awake()
     {
         if (!health) health = GetComponentInChildren<NewHealth>();
@@ -82,6 +84,9 @@ public class Combatant : MonoBehaviour
     {
         if (_skill1CD > 0) _skill1CD--;
         if (_skill2CD > 0) _skill2CD--;
+
+        turns++;
+        Debug.Log("turns: " + turns);
     }
 
     // === Public actions ===
@@ -138,10 +143,25 @@ public class Combatant : MonoBehaviour
 
     private void DoSkill2Damage(Combatant target)
     {
-        if (anim) anim.SetTrigger("skill2");
+        if (anim)
+        {
+            if (turns >= 3 && HasAnimatorParameter("skill3", AnimatorControllerParameterType.Trigger))
+                anim.SetTrigger("skill3");
+            else
+                anim.SetTrigger("skill2");
+        }
         int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
         target.health.TakeDamage(rawDamage, stats, NewElementType.None);
         Debug.Log($"[ACTION] {name} used SKILL 2 on {target.name} (raw {rawDamage})");
+    }
+
+    private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
+    {
+        if (!anim) return false;
+        foreach (var param in anim.parameters)
+            if (param.type == type && param.name == name)
+                return true;
+        return false;
     }
 
     // === Movement + wait-for-animation routine ===
