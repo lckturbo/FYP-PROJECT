@@ -1,30 +1,34 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerBuffHandler : MonoBehaviour
 {
-    [SerializeField] private NewCharacterStats stats;
-    [SerializeField] private GameObject buffEffect; // for attack buff
-    [SerializeField] private GameObject defenseBuffEffect; // optional separate VFX
+    [Header("VFX")]
+    [SerializeField] private GameObject attackBuffVFX;
+    [SerializeField] private GameObject defenseBuffVFX;
+
+    private PlayerLevelApplier levelApplier;
+    private NewCharacterStats runtimeStats => levelApplier != null ? levelApplier.runtimeStats : null;
 
     private int currentAttackBuff = 0;
     private int currentDefenseBuff = 0;
-    private bool attackBuffActive = false;
-    private bool defenseBuffActive = false;
+
     private float attackBuffEndTime = 0f;
     private float defenseBuffEndTime = 0f;
 
-    public bool IsBuffActive => attackBuffActive || defenseBuffActive;
+    public bool IsBuffActive => currentAttackBuff > 0 || currentDefenseBuff > 0;
 
-    private void Start()
+    private void Awake()
     {
-        UpdateBuffEffects();
+        levelApplier = GetComponent<PlayerLevelApplier>();
+        if (levelApplier == null)
+            Debug.LogWarning($"{name}: No PlayerLevelApplier found for runtime stats.");
     }
+
+    private void Start() => UpdateBuffVFX();
 
     private void OnEnable()
     {
         BattleManager.OnClearAllBuffs += RemoveStoredBuffs;
-        AssignLeaderStats();
     }
 
     private void OnDisable()
@@ -32,114 +36,96 @@ public class PlayerBuffHandler : MonoBehaviour
         BattleManager.OnClearAllBuffs -= RemoveStoredBuffs;
     }
 
-    public void AssignLeaderStats()
-    {
-        if (PlayerParty.instance == null)
-        {
-            Debug.LogWarning($"{name}: No PlayerParty found.");
-            return;
-        }
-
-        var leaderDef = PlayerParty.instance.GetLeader();
-        if (leaderDef == null)
-        {
-            Debug.LogWarning($"{name}: No leader assigned in PlayerParty!");
-            return;
-        }
-
-        var levelApplier = leaderDef.GetComponent<PlayerLevelApplier>();
-        if (levelApplier != null && levelApplier.runtimeStats != null)
-        {
-            stats = levelApplier.runtimeStats;
-        }
-    }
-
     public void ApplyAttackBuff(int amount, float duration)
     {
-        if (stats == null || attackBuffActive) return;
+        if (runtimeStats == null) return;
+
+        if (currentAttackBuff != 0)
+            RemoveAttackBuff();
 
         currentAttackBuff = amount;
-        stats.atkDmg += amount;
-        attackBuffActive = true;
+        runtimeStats.atkDmg += amount;
         attackBuffEndTime = duration > 0 ? Time.time + duration : 0f;
 
-        BuffData.instance?.StoreAttackBuff(amount, stats);
+        BuffData.instance?.StoreAttackBuff(amount, runtimeStats);
+        UpdateBuffVFX();
         Debug.Log($"Applied +{amount} ATK for {duration}s.");
-        UpdateBuffEffects();
     }
 
     public void ApplyDefenseBuff(int amount, float duration)
     {
-        if (stats == null || defenseBuffActive) return;
+        if (runtimeStats == null) return;
+
+        if (currentDefenseBuff != 0)
+            RemoveDefenseBuff();
 
         currentDefenseBuff = amount;
-        stats.attackreduction += amount;
-        defenseBuffActive = true;
+        runtimeStats.attackreduction += amount;
         defenseBuffEndTime = duration > 0 ? Time.time + duration : 0f;
 
-        BuffData.instance?.StoreDefenseBuff(amount, stats);
+        BuffData.instance?.StoreDefenseBuff(amount, runtimeStats);
+        UpdateBuffVFX();
         Debug.Log($"Applied +{amount} DEF for {duration}s.");
-        UpdateBuffEffects();
     }
 
     private void Update()
     {
-        if (attackBuffActive && attackBuffEndTime > 0 && Time.time >= attackBuffEndTime)
-            ExpireAttackBuff();
-        if (defenseBuffActive && defenseBuffEndTime > 0 && Time.time >= defenseBuffEndTime)
-            ExpireDefenseBuff();
+        if (currentAttackBuff != 0 && attackBuffEndTime > 0 && Time.time >= attackBuffEndTime)
+            RemoveAttackBuff();
+
+        if (currentDefenseBuff != 0 && defenseBuffEndTime > 0 && Time.time >= defenseBuffEndTime)
+            RemoveDefenseBuff();
     }
 
-    private void ExpireAttackBuff()
+    private void RemoveAttackBuff()
     {
-        stats.atkDmg -= currentAttackBuff;
+        if (runtimeStats != null)
+            runtimeStats.atkDmg -= currentAttackBuff;
+
         currentAttackBuff = 0;
-        attackBuffActive = false;
         BuffData.instance?.ClearAttackBuff();
+        UpdateBuffVFX();
         Debug.Log("Attack buff expired.");
-        UpdateBuffEffects();
     }
 
-    private void ExpireDefenseBuff()
+    private void RemoveDefenseBuff()
     {
-        stats.attackreduction -= currentDefenseBuff;
+        if (runtimeStats != null)
+            runtimeStats.attackreduction -= currentDefenseBuff;
+
         currentDefenseBuff = 0;
-        defenseBuffActive = false;
         BuffData.instance?.ClearDefenseBuff();
+        UpdateBuffVFX();
         Debug.Log("Defense buff expired.");
-        UpdateBuffEffects();
     }
 
     public void RemoveStoredBuffs()
     {
-        if (BuffData.instance != null)
+        if (runtimeStats == null || BuffData.instance == null) return;
+
+        if (BuffData.instance.hasAttackBuff)
         {
-            if (BuffData.instance.hasAttackBuff)
-            {
-                stats.atkDmg -= BuffData.instance.latestAttackBuff;
-                BuffData.instance.ClearAttackBuff();
-            }
-
-            if (BuffData.instance.hasDefenseBuff)
-            {
-                stats.attackreduction -= BuffData.instance.latestDefenseBuff;
-                BuffData.instance.ClearDefenseBuff();
-            }
-
+            runtimeStats.atkDmg -= BuffData.instance.latestAttackBuff;
+            BuffData.instance.ClearAttackBuff();
             currentAttackBuff = 0;
-            currentDefenseBuff = 0;
-            attackBuffActive = false;
-            defenseBuffActive = false;
-            UpdateBuffEffects();
         }
+
+        if (BuffData.instance.hasDefenseBuff)
+        {
+            runtimeStats.attackreduction -= BuffData.instance.latestDefenseBuff;
+            BuffData.instance.ClearDefenseBuff();
+            currentDefenseBuff = 0;
+        }
+
+        UpdateBuffVFX();
     }
 
-    private void UpdateBuffEffects()
+    private void UpdateBuffVFX()
     {
-        if (buffEffect != null)
-            buffEffect.SetActive(BuffData.instance.hasAttackBuff);
+        if (attackBuffVFX != null)
+            attackBuffVFX.SetActive(BuffData.instance.hasAttackBuff);
 
-        if (defenseBuffEffect != null)
-            defenseBuffEffect.SetActive(BuffData.instance.hasDefenseBuff);
+        if (defenseBuffVFX != null)
+            defenseBuffVFX.SetActive(BuffData.instance.hasDefenseBuff);
     }
 }

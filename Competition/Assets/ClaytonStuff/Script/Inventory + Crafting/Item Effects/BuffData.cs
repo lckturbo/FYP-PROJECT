@@ -4,12 +4,10 @@ public class BuffData : MonoBehaviour
 {
     public static BuffData instance;
 
-    // Attack buff
     public int latestAttackBuff;
     public NewCharacterStats attackTarget;
     public bool hasAttackBuff;
 
-    // Defense buff
     public int latestDefenseBuff;
     public NewCharacterStats defenseTarget;
     public bool hasDefenseBuff;
@@ -30,17 +28,17 @@ public class BuffData : MonoBehaviour
         }
     }
 
-    public void StoreAttackBuff(int amount, NewCharacterStats stats)
+    public void StoreAttackBuff(int amount, NewCharacterStats target)
     {
         latestAttackBuff = amount;
-        attackTarget = stats;
+        attackTarget = target;
         hasAttackBuff = true;
     }
 
-    public void StoreDefenseBuff(int amount, NewCharacterStats stats)
+    public void StoreDefenseBuff(int amount, NewCharacterStats target)
     {
         latestDefenseBuff = amount;
-        defenseTarget = stats;
+        defenseTarget = target;
         hasDefenseBuff = true;
     }
 

@@ -41,6 +41,8 @@ public class Combatant : MonoBehaviour
 
     private int turns;
 
+    [SerializeField]private NewCharacterStats runtimeStats;
+
     private void Awake()
     {
         if (!health) health = GetComponentInChildren<NewHealth>();
@@ -52,6 +54,8 @@ public class Combatant : MonoBehaviour
         _colOriginalIsTrigger = new bool[cols.Length];
         for (int i = 0; i < cols.Length; i++) _colOriginalIsTrigger[i] = cols[i].isTrigger;
         if (rb) _rbOriginalType = rb.bodyType;
+
+        runtimeStats = GetComponent<PlayerLevelApplier>()?.runtimeStats;
     }
 
     public float Speed => stats ? Mathf.Max(0.01f, stats.actionvaluespeed) : 0.01f;
@@ -177,23 +181,41 @@ public class Combatant : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        int rawDamage = 0;
+        // Use runtime stats if available, fallback to base stats
+        float attackPower = 0f;
+        float defensePower = 0f;
+
+        // --- Get attacker’s attack value ---
+        if (runtimeStats != null)
+            attackPower = runtimeStats.atkDmg;
+        else if (stats != null)
+            attackPower = stats.atkDmg;
+
+        // --- Get target’s defense value ---
+        var targetRuntimeStats = currentTarget.GetComponent<PlayerLevelApplier>()?.runtimeStats;
+        if (targetRuntimeStats != null)
+            defensePower = targetRuntimeStats.attackreduction;
+        else if (currentTarget.stats != null)
+            defensePower = currentTarget.stats.attackreduction;
+
+        // --- Base damage multiplier depending on attack type ---
+        float multiplier = 1f;
         switch (currentAttackType)
         {
-            case AttackType.Basic:
-                rawDamage = Mathf.RoundToInt(stats.atkDmg);
-                break;
-            case AttackType.Skill1:
-                rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.2f);
-                break;
-            case AttackType.Skill2:
-                rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
-                break;
+            case AttackType.Basic: multiplier = 1.0f; break;
+            case AttackType.Skill1: multiplier = 1.2f; break;
+            case AttackType.Skill2: multiplier = 1.5f; break;
         }
 
-        currentTarget.health.TakeDamage(rawDamage, stats, NewElementType.None);
-        Debug.Log($"[HIT] {name} dealt {rawDamage} to {currentTarget.name}");
+        // --- Final damage formula ---
+        float rawDamage = attackPower * multiplier - defensePower;
+        int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
+
+        currentTarget.health.TakeDamage(finalDamage, stats, NewElementType.None);
+
+        Debug.Log($"[HIT] {name} dealt {finalDamage} dmg to {currentTarget.name} (Atk={attackPower}, Def={defensePower}, x{multiplier})");
     }
+
 
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
     {
