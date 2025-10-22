@@ -62,6 +62,7 @@ public class BattleManager : MonoBehaviour
 
         SaveLoadSystem.instance.SaveGame();
         if (CheckpointManager.instance != null) CheckpointManager.instance.ClearCheckpoints();
+        Debug.Log("changing to battle");
         GameManager.instance.ChangeScene("jasBattle");
 
     }
