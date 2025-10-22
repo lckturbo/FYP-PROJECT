@@ -49,4 +49,9 @@ public class Item : ScriptableObject
     public int attackBuffAmount;   // flat atk increase
     public float buffDuration;     // seconds
 
+    [Header("Defense Buff Settings")]
+    public bool isDefenseBuff;     // new toggle
+    public int defenseBuffAmount;  // flat def increase
+    public float defenseBuffDuration; // duration in seconds
+
 }

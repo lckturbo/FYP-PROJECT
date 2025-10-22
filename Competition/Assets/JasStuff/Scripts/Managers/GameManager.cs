@@ -9,6 +9,12 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        // If this GameObject is a child
+        if (transform.parent != null)
+        {
+            // Detach from its parent first
+            transform.SetParent(null);
+        }
         if (instance == null)
             instance = this;
         else

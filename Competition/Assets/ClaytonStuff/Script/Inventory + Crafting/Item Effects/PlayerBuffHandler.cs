@@ -1,35 +1,35 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-/// <summary>
-/// Handles applying attack buffs to the current leader's runtime stats.
-/// Buffs are automatically tracked via BuffData.
-/// </summary>
 public class PlayerBuffHandler : MonoBehaviour
 {
     [SerializeField] private NewCharacterStats stats;
-    [SerializeField] private GameObject buffEffect; //  Assign your particle effect here
+    [SerializeField] private GameObject buffEffect; // for attack buff
+    [SerializeField] private GameObject defenseBuffEffect; // optional separate VFX
 
     private int currentAttackBuff = 0;
-    private bool buffActive = false;
-    private float buffEndTime = 0f;
+    private int currentDefenseBuff = 0;
+    private bool attackBuffActive = false;
+    private bool defenseBuffActive = false;
+    private float attackBuffEndTime = 0f;
+    private float defenseBuffEndTime = 0f;
 
-    public bool IsBuffActive => buffActive;
+    public bool IsBuffActive => attackBuffActive || defenseBuffActive;
+
     private void Start()
     {
-        UpdateBuffEffect();
+        UpdateBuffEffects();
     }
 
     private void OnEnable()
     {
-        BattleManager.OnClearAllBuffs += RemoveStoredBuff;
+        BattleManager.OnClearAllBuffs += RemoveStoredBuffs;
         AssignLeaderStats();
-        UpdateBuffEffect(); // keep state correct after reload
     }
 
     private void OnDisable()
     {
-        BattleManager.OnClearAllBuffs -= RemoveStoredBuff;
+        BattleManager.OnClearAllBuffs -= RemoveStoredBuffs;
     }
 
     public void AssignLeaderStats()
@@ -51,84 +51,95 @@ public class PlayerBuffHandler : MonoBehaviour
         if (levelApplier != null && levelApplier.runtimeStats != null)
         {
             stats = levelApplier.runtimeStats;
-            Debug.Log($"[{name}] Assigned leader stats: {stats.name} (ATK {stats.atkDmg}, HP {stats.maxHealth})");
-        }
-        else
-        {
-            Debug.LogWarning($"{name}: Leader has no runtimeStats available!");
         }
     }
 
     public void ApplyAttackBuff(int amount, float duration)
     {
-        if (stats == null)
-        {
-            Debug.LogWarning($"{name}: Cannot apply buff, stats not assigned!");
-            return;
-        }
-
-        if (buffActive)
-        {
-            Debug.LogWarning($"{name}: Buff already active, cannot stack!");
-            return;
-        }
+        if (stats == null || attackBuffActive) return;
 
         currentAttackBuff = amount;
         stats.atkDmg += amount;
-        buffActive = true;
+        attackBuffActive = true;
+        attackBuffEndTime = duration > 0 ? Time.time + duration : 0f;
 
-        BuffData.instance?.StoreBuff(amount, stats);
-        buffEndTime = (duration > 0f) ? Time.time + duration : 0f;
+        BuffData.instance?.StoreAttackBuff(amount, stats);
+        Debug.Log($"Applied +{amount} ATK for {duration}s.");
+        UpdateBuffEffects();
+    }
 
-        Debug.Log($"Buff applied: +{amount} ATK to {stats.name} for {(duration > 0 ? duration + "s" : "permanent")}");
-        UpdateBuffEffect(); //  turn on visual
+    public void ApplyDefenseBuff(int amount, float duration)
+    {
+        if (stats == null || defenseBuffActive) return;
+
+        currentDefenseBuff = amount;
+        stats.attackreduction += amount;
+        defenseBuffActive = true;
+        defenseBuffEndTime = duration > 0 ? Time.time + duration : 0f;
+
+        BuffData.instance?.StoreDefenseBuff(amount, stats);
+        Debug.Log($"Applied +{amount} DEF for {duration}s.");
+        UpdateBuffEffects();
     }
 
     private void Update()
     {
-        if (buffActive && buffEndTime > 0f && Time.time >= buffEndTime)
-        {
-            ExpireBuff();
-        }
+        if (attackBuffActive && attackBuffEndTime > 0 && Time.time >= attackBuffEndTime)
+            ExpireAttackBuff();
+        if (defenseBuffActive && defenseBuffEndTime > 0 && Time.time >= defenseBuffEndTime)
+            ExpireDefenseBuff();
     }
 
-    public void RemoveStoredBuff()
+    private void ExpireAttackBuff()
     {
-        if (BuffData.instance != null && BuffData.instance.hasBuff)
-        {
-            int amount = BuffData.instance.latestAttackBuff;
-            NewCharacterStats target = BuffData.instance.targetStats;
+        stats.atkDmg -= currentAttackBuff;
+        currentAttackBuff = 0;
+        attackBuffActive = false;
+        BuffData.instance?.ClearAttackBuff();
+        Debug.Log("Attack buff expired.");
+        UpdateBuffEffects();
+    }
 
-            if (target != null)
+    private void ExpireDefenseBuff()
+    {
+        stats.attackreduction -= currentDefenseBuff;
+        currentDefenseBuff = 0;
+        defenseBuffActive = false;
+        BuffData.instance?.ClearDefenseBuff();
+        Debug.Log("Defense buff expired.");
+        UpdateBuffEffects();
+    }
+
+    public void RemoveStoredBuffs()
+    {
+        if (BuffData.instance != null)
+        {
+            if (BuffData.instance.hasAttackBuff)
             {
-                target.atkDmg -= amount;
-                Debug.LogWarning($"[Buff Removed] {target.name} lost {amount} ATK, new ATK: {target.atkDmg}");
+                stats.atkDmg -= BuffData.instance.latestAttackBuff;
+                BuffData.instance.ClearAttackBuff();
+            }
+
+            if (BuffData.instance.hasDefenseBuff)
+            {
+                stats.attackreduction -= BuffData.instance.latestDefenseBuff;
+                BuffData.instance.ClearDefenseBuff();
             }
 
             currentAttackBuff = 0;
-            buffActive = false;
-            BuffData.instance.ClearBuff();
-            UpdateBuffEffect(); //  turn off visual
+            currentDefenseBuff = 0;
+            attackBuffActive = false;
+            defenseBuffActive = false;
+            UpdateBuffEffects();
         }
     }
 
-    private void ExpireBuff()
-    {
-        stats.atkDmg -= currentAttackBuff;
-        Debug.Log($"Buff expired: -{currentAttackBuff} ATK from {stats.name}");
-
-        currentAttackBuff = 0;
-        buffActive = false;
-        BuffData.instance?.ClearBuff();
-        UpdateBuffEffect(); //  turn off visual
-    }
-
-    /// <summary>
-    ///  Enable or disable the particle effect depending on buff state.
-    /// </summary>
-    private void UpdateBuffEffect()
+    private void UpdateBuffEffects()
     {
         if (buffEffect != null)
-            buffEffect.SetActive(BuffData.instance.hasBuff);
+            buffEffect.SetActive(BuffData.instance.hasAttackBuff);
+
+        if (defenseBuffEffect != null)
+            defenseBuffEffect.SetActive(BuffData.instance.hasDefenseBuff);
     }
 }
