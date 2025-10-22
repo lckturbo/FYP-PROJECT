@@ -139,6 +139,8 @@ public class BattleSystem : MonoBehaviour
 
                 AddPlayerLevelApplier(allyObj, member);
                 SnapshotChar(member);
+
+                Destroy(allyObj.GetComponentInChildren<PlayerBuffHandler>());
             }
         }
 
