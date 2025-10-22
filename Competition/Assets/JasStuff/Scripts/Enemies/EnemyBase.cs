@@ -1,5 +1,6 @@
 ﻿using Pathfinding;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ public abstract class EnemyBase : MonoBehaviour
     {
         Idle,
         Patrol,
+        Alert,
         Attack,
         Chase
     }
@@ -59,6 +61,8 @@ public abstract class EnemyBase : MonoBehaviour
     public bool IsAttacking() => isAttacking;
     protected float attackCooldownTimer = 0f;
 
+    protected bool isAlerting = false;
+
     public void EnableHitBox() => hitboxCollider.enabled = true;
     public void DisableHitBox() => hitboxCollider.enabled = false;
 
@@ -83,18 +87,6 @@ public abstract class EnemyBase : MonoBehaviour
         if (!anim) anim = GetComponent<Animator>();
         if (!health) health = GetComponent<NewHealth>();
         health.ApplyStats(enemyStats);
-
-        //patrolArea = WaypointManager.instance.GetAreaByID(areaID);
-        //if (patrolArea)
-        //{
-        //    waypoints = patrolArea.GetWaypoints();
-        //    if (waypoints.Count > 0)
-        //    {
-        //        currId = patrolDir == PatrolDirection.Forward ? 0 : waypoints.Count - 1;
-        //        dirStep = patrolDir == PatrolDirection.Forward ? 1 : -1;
-        //        currTarget = waypoints[currId].position;
-        //    }
-        //}
 
         if (attackHitbox)
         {
@@ -123,6 +115,9 @@ public abstract class EnemyBase : MonoBehaviour
             case EnemyStates.Patrol:
                 Patrol();
                 break;
+            case EnemyStates.Alert:
+                Alert();
+                break;
             case EnemyStates.Chase:
                 Chase();
                 break;
@@ -143,7 +138,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (CanSeePlayer())
         {
-            enemyStates = EnemyStates.Chase;
+            enemyStates = EnemyStates.Alert;
             return;
         }
     }
@@ -159,7 +154,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (CanSeePlayer())
         {
-            enemyStates = EnemyStates.Chase;
+            enemyStates = EnemyStates.Alert;
             return;
         }
 
@@ -175,6 +170,36 @@ public abstract class EnemyBase : MonoBehaviour
             currTarget = waypoints[currId].position;
             enemyStates = EnemyStates.Idle;
         }
+    }
+
+    // ---- ALERT ---- //
+    protected virtual void Alert()
+    {
+        if (isAlerting) return;
+        isAlerting = true;
+
+        aiPath.canMove = false;
+        rb2d.velocity = Vector2.zero;
+
+        if (player)
+        {
+            Vector2 lookDir = (player.position - transform.position).normalized;
+            anim.SetFloat("moveX", lookDir.x);
+            anim.SetFloat("moveY", lookDir.y);
+            lastMoveDir = lookDir;
+        }
+
+        if (anim) anim.SetTrigger("alert");
+
+        StartCoroutine(AlertDelay());
+    }
+
+    private IEnumerator AlertDelay()
+    {
+        yield return new WaitForSeconds(1.0f);
+
+        isAlerting = false;
+        enemyStates = EnemyStates.Chase;
     }
 
     // ---- ATTACK ---- //
@@ -202,7 +227,6 @@ public abstract class EnemyBase : MonoBehaviour
 
         Vector2 offset = Vector2.zero;
 
-        // Choose offset based on last facing direction
         if (Mathf.Abs(lastMoveDir.x) > Mathf.Abs(lastMoveDir.y))
             offset = lastMoveDir.x > 0 ? rightOffset : leftOffset;
         else
@@ -217,7 +241,7 @@ public abstract class EnemyBase : MonoBehaviour
         attackCooldownTimer = 1f;
 
         aiPath.canMove = true;
-        enemyStates = EnemyStates.Idle;
+        enemyStates = EnemyStates.Chase;
     }
 
     public virtual void TriggerAttack()
@@ -232,7 +256,6 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Chase()
     {
         if (!player) return;
-
         float dist = Vector2.Distance(rb2d.position, player.position);
         if (dist > enemyStats.chaseRange)
         {
