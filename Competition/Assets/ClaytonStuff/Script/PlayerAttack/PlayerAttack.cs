@@ -127,57 +127,76 @@ public class PlayerAttack : MonoBehaviour
 
     private void FireArrow()
     {
-        if (arrowPool == null)
-        {
-            Debug.LogWarning("Arrow pool not assigned!");
-            return;
-        }
+        if (arrowPool == null) return;
 
         animator.SetBool("attack1", true);
-        GameObject arrowObj = arrowPool.Get();
-        arrowObj.transform.position = attackPoint.position;
+        //GameObject arrowObj = arrowPool.Get();
+        //arrowObj.transform.position = attackPoint.position;
 
-        // Determine direction based on attackPoint local position
-        Vector2 dir = attackPoint.localPosition.normalized;
+        //// Determine direction based on attackPoint local position
+        //Vector2 dir = attackPoint.localPosition.normalized;
 
-        // Default fallback
-        if (dir == Vector2.zero)
-            dir = Vector2.right;
+        //// Default fallback
+        //if (dir == Vector2.zero)
+        //    dir = Vector2.right;
 
-        // Fire arrow
-        Arrow arrow = arrowObj.GetComponent<Arrow>();
-        if (arrow != null)
-            arrow.Fire(dir);
+        //// Fire arrow
+        //Arrow arrow = arrowObj.GetComponent<Arrow>();
+        //if (arrow != null)
+        //    arrow.Fire(dir);
 
-        // Rotate arrow to face direction
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        arrowObj.transform.rotation = Quaternion.Euler(0, 0, angle);
+        //// Rotate arrow to face direction
+        //float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        //arrowObj.transform.rotation = Quaternion.Euler(0, 0, angle);
 
-        // Debug log which direction
-        if (dir == Vector2.up)
-            Debug.Log("Arrow fired UP!");
-        else if (dir == Vector2.down)
-            Debug.Log("Arrow fired DOWN!");
-        else if (dir == Vector2.left)
-            Debug.Log("Arrow fired LEFT!");
-        else if (dir == Vector2.right)
-            Debug.Log("Arrow fired RIGHT!");
-        else
-            Debug.Log("Arrow fired diagonally: " + dir);
+        //// Debug log which direction
+        //if (dir == Vector2.up)
+        //    Debug.Log("Arrow fired UP!");
+        //else if (dir == Vector2.down)
+        //    Debug.Log("Arrow fired DOWN!");
+        //else if (dir == Vector2.left)
+        //    Debug.Log("Arrow fired LEFT!");
+        //else if (dir == Vector2.right)
+        //    Debug.Log("Arrow fired RIGHT!");
+        //else
+        //    Debug.Log("Arrow fired diagonally: " + dir);
     }
     private void AttackMelee()
     {
         if (isAttacking) return;
         isAttacking = true;
-        //animator.SetTrigger("attack"); 
         animator.SetBool("attack1", true);
+    }
 
+    private void UpdateAttackPoint()
+    {
+        if (animator == null) return;
+
+        float moveX = animator.GetFloat("moveX");
+        float moveY = animator.GetFloat("moveY");
+        Vector2 baseOffset = Vector2.zero;
+
+        if (Mathf.Abs(moveX) > Mathf.Abs(moveY))
+            baseOffset = moveX > 0 ? rightAttackOffset : leftAttackOffset;
+        else if (Mathf.Abs(moveY) > 0.01f)
+            baseOffset = moveY > 0 ? upAttackOffset : downAttackOffset;
+        else
+            baseOffset = rightAttackOffset;
+
+        if (attackPoint == null) return;
+
+        // Push attack point outward relative to current range
+        attackPoint.localPosition = baseOffset.normalized * CurrentAttackRange;
+    }
+
+    // ---- ANIMATION EVENTS ---- //
+    public void PerformAttack()
+    {
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
-            attackPoint.position,
-            CurrentAttackRange,
-            enemyLayer
-        );
-
+         attackPoint.position,
+         CurrentAttackRange,
+         enemyLayer
+         );
         foreach (var enemyCollider in hitEnemies)
         {
             Debug.Log($"Melee hit {enemyCollider.name}, dealt {attackDamage}");
@@ -203,40 +222,34 @@ public class PlayerAttack : MonoBehaviour
                 Debug.Log($"Hit breakable object: {hit.name}");
             }
         }
-
     }
 
-
-    private void UpdateAttackPoint()
+    public void PerformShoot()
     {
-        if (animator == null) return;
+        GameObject arrowObj = arrowPool.Get();
+        arrowObj.transform.position = attackPoint.position;
 
-        float moveX = animator.GetFloat("moveX");
-        float moveY = animator.GetFloat("moveY");
-        Vector2 baseOffset = Vector2.zero;
+        // Determine direction based on attackPoint local position
+        Vector2 dir = attackPoint.localPosition.normalized;
 
-        if (Mathf.Abs(moveX) > Mathf.Abs(moveY))
-            baseOffset = moveX > 0 ? rightAttackOffset : leftAttackOffset;
-        else if (Mathf.Abs(moveY) > 0.01f)
-            baseOffset = moveY > 0 ? upAttackOffset : downAttackOffset;
-        else
-            baseOffset = rightAttackOffset;
+        // Default fallback
+        if (dir == Vector2.zero)
+            dir = Vector2.right;
 
-        if (attackPoint == null) return;
-        
-        // Push attack point outward relative to current range
-        attackPoint.localPosition = baseOffset.normalized * CurrentAttackRange;
+        // Fire arrow
+        Arrow arrow = arrowObj.GetComponent<Arrow>();
+        if (arrow != null)
+            arrow.Fire(dir);
 
-       
+        // Rotate arrow to face direction
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        arrowObj.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
     public void EndAttack()
     {
-        //animator.ResetTrigger("attack");
         isAttacking = false;
-        // animator.ResetTrigger("attack");
         animator.SetBool("attack1", false);
-        //GetComponent<PlayerInput>().enabled = true;
     }
 
     private void OnDrawGizmosSelected()
