@@ -37,15 +37,15 @@ public class PauseManager : MonoBehaviour
         if (scn.name == "Main" || scn.name == "Lobby" || scn.name == "CharSelection" || scn.name == "Credits") return;
 
         pauseUI = GameObject.Find("PauseUI");
-        resumeBtn = GameObject.Find("ResumeBtn").GetComponent<Button>();
+        resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
         if (resumeBtn) resumeBtn.onClick.AddListener(() => Pause(false));
-        settingsBtn = GameObject.Find("SettingsBtn").GetComponent<Button>();
+        settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s=>s.name == "SettingsBtn");
         if (settingsBtn) settingsBtn.onClick.AddListener(() =>
         {
             //UIManager.instance.ToggleSettings(!isOpen);
             ToggleSettingsMenu();
         });
-        menuBtn = GameObject.Find("MainMenuBtn").GetComponent<Button>();
+        menuBtn = pauseUI.GetComponent<Button>();
         if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
         if (statsDisplay == null) 
             statsDisplay = FindObjectOfType<StatsDisplay>();

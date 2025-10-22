@@ -4,6 +4,16 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class Combatant : MonoBehaviour
 {
+    private enum AttackType
+    {
+        Basic,
+        Skill1,
+        Skill2
+    }
+
+    private Combatant currentTarget;
+    private AttackType currentAttackType;
+
     public bool isPlayerTeam;
     public bool isLeader;
 
@@ -28,6 +38,8 @@ public class Combatant : MonoBehaviour
     private RigidbodyType2D _rbOriginalType;
     private bool[] _colOriginalIsTrigger;
     private bool _collisionDisabledActive = false;
+
+    private int turns;
 
     private void Awake()
     {
@@ -82,6 +94,9 @@ public class Combatant : MonoBehaviour
     {
         if (_skill1CD > 0) _skill1CD--;
         if (_skill2CD > 0) _skill2CD--;
+
+        turns++;
+        Debug.Log("turns: " + turns);
     }
 
     // === Public actions ===
@@ -123,25 +138,70 @@ public class Combatant : MonoBehaviour
     // === Damage payloads ===
     private void DoBasicAttackDamage(Combatant target)
     {
+        currentTarget = target;
+        currentAttackType = AttackType.Basic;
         if (anim) anim.SetTrigger("attack");
-        target.health.TakeDamage(0, stats, NewElementType.None);
-        Debug.Log($"[ACTION] {name} used BASIC ATTACK on {target.name}");
+        //target.health.TakeDamage(0, stats, NewElementType.None);
+        //Debug.Log($"[ACTION] {name} used BASIC ATTACK on {target.name}");
     }
 
     private void DoSkill1Damage(Combatant target)
     {
+        currentTarget = target;
+        currentAttackType = AttackType.Skill1;
+
         if (anim) anim.SetTrigger("skill1");
-        int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.2f);
-        target.health.TakeDamage(rawDamage, stats, NewElementType.None);
-        Debug.Log($"[ACTION] {name} used SKILL 1 on {target.name} (raw {rawDamage})");
+        //int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.2f);
+        //target.health.TakeDamage(rawDamage, stats, NewElementType.None);
+       // Debug.Log($"[ACTION] {name} used SKILL 1 on {target.name} (raw {rawDamage})");
     }
 
     private void DoSkill2Damage(Combatant target)
     {
-        if (anim) anim.SetTrigger("skill2");
-        int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
-        target.health.TakeDamage(rawDamage, stats, NewElementType.None);
-        Debug.Log($"[ACTION] {name} used SKILL 2 on {target.name} (raw {rawDamage})");
+        currentTarget = target;
+        currentAttackType = AttackType.Skill2;
+
+        if (anim)
+        {
+            if (turns >= 3 && HasAnimatorParameter("skill3", AnimatorControllerParameterType.Trigger))
+                anim.SetTrigger("skill3");
+            else
+                anim.SetTrigger("skill2");
+        }
+        //int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
+        //target.health.TakeDamage(rawDamage, stats, NewElementType.None);
+       // Debug.Log($"[ACTION] {name} used SKILL 2 on {target.name} (raw {rawDamage})");
+    }
+
+    public void DealDamage()
+    {
+        if (currentTarget == null) return;
+
+        int rawDamage = 0;
+        switch (currentAttackType)
+        {
+            case AttackType.Basic:
+                rawDamage = Mathf.RoundToInt(stats.atkDmg);
+                break;
+            case AttackType.Skill1:
+                rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.2f);
+                break;
+            case AttackType.Skill2:
+                rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
+                break;
+        }
+
+        currentTarget.health.TakeDamage(rawDamage, stats, NewElementType.None);
+        Debug.Log($"[HIT] {name} dealt {rawDamage} to {currentTarget.name}");
+    }
+
+    private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
+    {
+        if (!anim) return false;
+        foreach (var param in anim.parameters)
+            if (param.type == type && param.name == name)
+                return true;
+        return false;
     }
 
     // === Movement + wait-for-animation routine ===
