@@ -18,8 +18,6 @@ public class PauseManager : MonoBehaviour
 
     [Header("Stats UI")]
     [SerializeField] private StatsDisplay statsDisplay;
-    [SerializeField] private RectTransform statsContainer;
-    [SerializeField] private GameObject statRowPrefab;
 
     private void Awake()
     {
@@ -49,7 +47,8 @@ public class PauseManager : MonoBehaviour
         });
         menuBtn = GameObject.Find("MainMenuBtn").GetComponent<Button>();
         if (menuBtn) menuBtn.onClick.AddListener(() => QuitToMenu());
-        if (statsDisplay == null) statsDisplay = FindObjectOfType<StatsDisplay>();
+        if (statsDisplay == null) 
+            statsDisplay = FindObjectOfType<StatsDisplay>();
         ShowPauseUI(false);
     }
     private void Update()
