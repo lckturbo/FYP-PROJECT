@@ -75,12 +75,19 @@ public class PlayerLevelApplier : MonoBehaviour
 
     public void ApplyForLevel(int level)
     {
-        if (!definition || !definition.stats) return;
-
         runtimeStats = StatsRuntimeBuilder.BuildRuntimeStats(definition.stats, level, growth);
-
         health?.ApplyStats(runtimeStats);
         movement?.ApplyStats(runtimeStats);
         if (combatant) combatant.stats = runtimeStats;
+
+        // Reapply buffs from BuffData
+        if (BuffData.instance != null)
+        {
+            if (BuffData.instance.hasAttackBuff && BuffData.instance.attackTarget == runtimeStats)
+                runtimeStats.atkDmg += BuffData.instance.latestAttackBuff;
+            if (BuffData.instance.hasDefenseBuff && BuffData.instance.defenseTarget == runtimeStats)
+                runtimeStats.attackreduction += BuffData.instance.latestDefenseBuff;
+        }
     }
+
 }
