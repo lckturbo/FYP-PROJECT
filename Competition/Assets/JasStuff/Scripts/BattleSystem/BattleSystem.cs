@@ -41,6 +41,8 @@ public class BattleSystem : MonoBehaviour
     private readonly List<Combatant> _playerCombatants = new List<Combatant>();
     private readonly List<Combatant> _enemyCombatants = new List<Combatant>();
 
+    public static event Action<GameObject> OnLeaderSpawned;
+
     private struct PreBattleSnapshot
     {
         public NewCharacterDefinition def;
@@ -95,6 +97,7 @@ public class BattleSystem : MonoBehaviour
         cL.stats = leaderRT;
         turnEngine.Register(cL);
         _playerCombatants.Add(cL);
+        OnLeaderSpawned?.Invoke(leaderObj);
 
         var leaderHealth = leaderObj.GetComponent<NewHealth>();
         if (leaderHealth)

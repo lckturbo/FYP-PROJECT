@@ -148,6 +148,16 @@ public class NewHealth : MonoBehaviour
         return 1f;
     }
 
+    public void Heal(int amount)
+    {
+        if (stats == null) return;
+
+        currentHp = Mathf.Min(currentHp + amount, stats.maxHealth);
+        Debug.Log($"{gameObject.name} healed {amount} HP. Current HP = {currentHp}/{stats.maxHealth}");
+        OnHealthChanged?.Invoke(this);
+    }
+
+
     private void Die()
     {
         Debug.Log(gameObject.name + " has died.");

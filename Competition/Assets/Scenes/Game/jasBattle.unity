@@ -339,7 +339,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 23851547}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 579761204}
+        m_TargetAssemblyTypeName: BattleItemButtonHandler, Assembly-CSharp
+        m_MethodName: UseDefenseBuff
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &23851547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2685,6 +2697,9 @@ MonoBehaviour:
   healButton: {fileID: 965686826}
   buffButton: {fileID: 996780256}
   defenseButton: {fileID: 23851546}
+  healCountText: {fileID: 495388802}
+  buffCountText: {fileID: 504324249}
+  defenseCountText: {fileID: 1678065113}
   healItem: {fileID: 11400000, guid: 20ff7fd9c30151d4f8e836720dbe7439, type: 2}
   attackBuffItem: {fileID: 11400000, guid: d2c97b0f4dbd12a4fa99b6c03b2f7f5f, type: 2}
   defenseBuffItem: {fileID: 11400000, guid: 02831ec2b29f2d449a16dfcea3ccb53f, type: 2}
@@ -4684,7 +4699,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 965686827}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 579761204}
+        m_TargetAssemblyTypeName: BattleItemButtonHandler, Assembly-CSharp
+        m_MethodName: UseHealItem
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &965686827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4883,7 +4910,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 996780257}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 579761204}
+        m_TargetAssemblyTypeName: BattleItemButtonHandler, Assembly-CSharp
+        m_MethodName: UseAttackBuff
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &996780257
 MonoBehaviour:
   m_ObjectHideFlags: 0
