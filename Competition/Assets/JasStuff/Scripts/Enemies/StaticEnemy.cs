@@ -24,6 +24,24 @@ public class StaticEnemy : EnemyBase
         UpdateHitboxDirection();
     }
 
+    protected override void Patrol()
+    {
+        aiPath.canMove = true;
+        aiPath.destination = originalPosition;
+        UpdateAnim();
+
+        if (Vector2.Distance(transform.position, originalPosition) < 0.2f)
+        {
+            aiPath.canMove = false;
+            enemyStates = EnemyStates.Idle;
+
+            anim.SetFloat("moveX", originalFacingDir.x);
+            anim.SetFloat("moveY", originalFacingDir.y);
+            lastMoveDir = originalFacingDir;
+            UpdateHitboxDirection();
+        }
+    }
+
     protected override void Chase()
     {
         if (!player) return;
@@ -43,22 +61,5 @@ public class StaticEnemy : EnemyBase
             enemyStates = EnemyStates.Attack;
 
         UpdateAnim();
-    }
-    protected override void Patrol()
-    {
-        aiPath.canMove = true;
-        aiPath.destination = originalPosition;
-        UpdateAnim();
-
-        if (Vector2.Distance(transform.position, originalPosition) < 0.2f)
-        {
-            aiPath.canMove = false;
-            enemyStates = EnemyStates.Idle;
-
-            anim.SetFloat("moveX", originalFacingDir.x);
-            anim.SetFloat("moveY", originalFacingDir.y);
-            lastMoveDir = originalFacingDir;
-            UpdateHitboxDirection();
-        }
     }
 }

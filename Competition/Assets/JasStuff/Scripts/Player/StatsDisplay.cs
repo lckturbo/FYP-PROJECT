@@ -8,18 +8,19 @@ public class StatsDisplay : MonoBehaviour
     [SerializeField] private RectTransform container; 
     [SerializeField] private GameObject statRowPrefab;
 
-    private void Start()
+    public void DisplayStats()
     {
         if (!playerStats)
         {
             GameObject player = GameObject.FindWithTag("Player");
             if (player)
-                playerStats = player.GetComponent<NewPlayerMovement>().GetStats();
+            {
+                var movement = player.GetComponent<NewPlayerMovement>();
+                if (movement)
+                    playerStats = movement.GetStats();
+            }
         }
-    }
 
-    public void DisplayStats()
-    {
         if (!playerStats) return;
 
         foreach (Transform child in container)
