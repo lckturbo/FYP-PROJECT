@@ -81,11 +81,11 @@ public class InventoryManager : MonoBehaviour
                 Debug.Log($"{slot.item.itemName} x{slot.quantity}");
         }
 
-        if (Input.GetKeyDown(KeyCode.O))
-            GameManager.instance.ChangeScene("jas");
+        //if (Input.GetKeyDown(KeyCode.O))
+        //    GameManager.instance.ChangeScene("jas");
 
-        if (Input.GetKeyDown(KeyCode.L))
-            GameManager.instance.ChangeScene("ClaytonTestScene");
+        //if (Input.GetKeyDown(KeyCode.L))
+        //    GameManager.instance.ChangeScene("ClaytonTestScene");
     }
 
     public void AddItemToInventory(Item item, int amount = 1)

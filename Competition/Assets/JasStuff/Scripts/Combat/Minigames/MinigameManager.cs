@@ -25,7 +25,7 @@ public class MinigameManager : MonoBehaviour
     {
         Debug.Log($"[MINIGAME] Starting {id}...");
         TurnEngine engine = FindObjectOfType<TurnEngine>();
-        if (engine) engine.Pause(true);
+        //if (engine) engine.Pause(true);
 
         GameObject minigamePrefab = Resources.Load<GameObject>($"Minigames/{id}");
         if (minigamePrefab == null)

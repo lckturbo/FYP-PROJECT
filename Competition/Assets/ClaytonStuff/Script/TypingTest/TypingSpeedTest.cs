@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
-public class TypingSpeedTest : MonoBehaviour
+public class TypingSpeedTest : BaseMinigame
 {
     [Header("UI References")]
     [SerializeField] private TMP_Text typingText; // Single text like Monkeytype
@@ -140,6 +141,19 @@ public class TypingSpeedTest : MonoBehaviour
             $"<color=#AAAAAA>Press R to retry</color>";
 
         timerText.text = "0.0s";
+
+        if(score < 1)
+        {
+            Result = MinigameManager.ResultType.Fail;
+        }
+        else if (score <= 4 ) 
+        {
+            Result = MinigameManager.ResultType.Success;
+        }
+        else
+        {
+            Result = MinigameManager.ResultType.Perfect;
+        }
     }
 
     private void LateUpdate()
@@ -148,5 +162,12 @@ public class TypingSpeedTest : MonoBehaviour
         {
             StartNewTest();
         }
+    }
+
+    public override IEnumerator Run()
+    {
+        Result = MinigameManager.ResultType.Fail;
+
+        yield return new WaitForSeconds(1);
     }
 }
