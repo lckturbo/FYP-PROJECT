@@ -17,7 +17,7 @@ public class ToggleableBlock : MonoBehaviour
     public Animator animator;
 
     [Header("Collider")]
-    public Collider[] blockColliders;
+    public Collider2D[] blockColliders;
 
     [Header("Visuals")]
     public Renderer[] visuals;
