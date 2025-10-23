@@ -95,7 +95,7 @@ public class NewHealth : MonoBehaviour
         int final = Mathf.Max(1, Mathf.RoundToInt(dmg));
         currentHp = Mathf.Max(0, currentHp - final);
 
-        Debug.Log($"{gameObject.name} took {final} {atkElem} damage. HP = {currentHp}/{GetMaxHealth()}");
+        //Debug.Log($"{gameObject.name} took {final} {atkElem} damage. HP = {currentHp}/{GetMaxHealth()}");
 
         if (floatingDamagePrefab && canSpawnDamage)
             StartCoroutine(SpawnFloatingDamageWithDelay(final, wasCrit));
@@ -153,14 +153,14 @@ public class NewHealth : MonoBehaviour
         if (stats == null) return;
 
         currentHp = Mathf.Min(currentHp + amount, stats.maxHealth);
-        Debug.Log($"{gameObject.name} healed {amount} HP. Current HP = {currentHp}/{stats.maxHealth}");
+       // Debug.Log($"{gameObject.name} healed {amount} HP. Current HP = {currentHp}/{stats.maxHealth}");
         OnHealthChanged?.Invoke(this);
     }
 
 
     private void Die()
     {
-        Debug.Log(gameObject.name + " has died.");
+       // Debug.Log(gameObject.name + " has died.");
         if (anim) anim.SetTrigger("death");
         OnHealthChanged?.Invoke(this);
     }

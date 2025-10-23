@@ -42,7 +42,7 @@ public class Combatant : MonoBehaviour
 
     private int turns;
 
-    [SerializeField]private NewCharacterStats runtimeStats;
+    [SerializeField] private NewCharacterStats runtimeStats;
 
     private void Awake()
     {
@@ -184,33 +184,25 @@ public class Combatant : MonoBehaviour
         float attackPower = 0f;
         float defensePower = 0f;
 
-        // --- Get attacker’s base attack ---
-        if (stats != null)
-            attackPower = stats.atkDmg;
+        if (stats != null) attackPower = stats.atkDmg;
 
-        // --- Check if attacker has a BuffHandler ---
         PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
         if (BuffData.instance != null && attackerBuffHandler != null && BuffData.instance.hasAttackBuff)
         {
-            // Ensure the buff actually belongs to THIS attacker
             if (BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
                 attackPower += BuffData.instance.latestAttackBuff;
         }
 
-        // --- Get target’s base defense ---
         if (currentTarget.stats != null)
             defensePower = currentTarget.stats.attackreduction;
 
-        // --- Check if target has a BuffHandler ---
         PlayerBuffHandler targetBuffHandler = currentTarget.GetComponent<PlayerBuffHandler>();
         if (BuffData.instance != null && targetBuffHandler != null && BuffData.instance.hasDefenseBuff)
         {
-            // Ensure the buff actually belongs to THIS defender
             if (BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
                 defensePower += BuffData.instance.latestDefenseBuff;
         }
 
-        // --- Base damage multiplier ---
         float multiplier = 1f;
         switch (currentAttackType)
         {
@@ -219,20 +211,11 @@ public class Combatant : MonoBehaviour
             case AttackType.Skill2: multiplier = 1.5f; break;
         }
 
-        // --- Final damage formula ---
         float rawDamage = attackPower * multiplier - defensePower;
         int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
 
         currentTarget.health.TakeDamage(finalDamage, stats, NewElementType.None);
-
-        Debug.Log(
-            $"[HIT] {name} dealt {finalDamage} dmg to {currentTarget.name} " +
-            $"(Atk={attackPower}, Def={defensePower}, x{multiplier}) " +
-            $"[Buffs: +{BuffData.instance.latestAttackBuff} ATK, +{BuffData.instance.latestDefenseBuff} DEF]"
-        );
     }
-
-
 
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
     {
@@ -433,6 +416,25 @@ public class Combatant : MonoBehaviour
         {
             if (!cols[i]) continue;
             cols[i].isTrigger = _colOriginalIsTrigger[i];
+        }
+    }
+
+    public void OnMinigameResult(MinigameManager.ResultType result)
+    {
+        switch (result)
+        {
+            case MinigameManager.ResultType.Fail:
+                currentTarget?.health.TakeDamage(1, stats, NewElementType.None);
+                break;
+
+            case MinigameManager.ResultType.Success:
+                int dmg = Mathf.RoundToInt(stats.atkDmg * 1.02f);
+                currentTarget?.health.TakeDamage(dmg, stats, NewElementType.None);
+                break;
+
+            case MinigameManager.ResultType.Perfect:
+                currentTarget?.health.TakeDamage(currentTarget.health.GetCurrHealth(), stats, NewElementType.None);
+                break;
         }
     }
 }
