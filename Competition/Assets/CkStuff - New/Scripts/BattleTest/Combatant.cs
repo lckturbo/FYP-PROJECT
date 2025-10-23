@@ -38,6 +38,7 @@ public class Combatant : MonoBehaviour
     private RigidbodyType2D _rbOriginalType;
     private bool[] _colOriginalIsTrigger;
     private bool _collisionDisabledActive = false;
+    private BattleParodyEffect parodyEffect;
 
     private int turns;
 
@@ -45,6 +46,7 @@ public class Combatant : MonoBehaviour
     {
         if (!health) health = GetComponentInChildren<NewHealth>();
         if (!anim) anim = GetComponent<Animator>();
+        if (!parodyEffect) parodyEffect = FindObjectOfType<BattleParodyEffect>();
 
         rb = GetComponent<Rigidbody2D>();
         cols = GetComponentsInChildren<Collider2D>(includeInactive: true);
@@ -141,8 +143,6 @@ public class Combatant : MonoBehaviour
         currentTarget = target;
         currentAttackType = AttackType.Basic;
         if (anim) anim.SetTrigger("attack");
-        //target.health.TakeDamage(0, stats, NewElementType.None);
-        //Debug.Log($"[ACTION] {name} used BASIC ATTACK on {target.name}");
     }
 
     private void DoSkill1Damage(Combatant target)
@@ -151,9 +151,6 @@ public class Combatant : MonoBehaviour
         currentAttackType = AttackType.Skill1;
 
         if (anim) anim.SetTrigger("skill1");
-        //int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.2f);
-        //target.health.TakeDamage(rawDamage, stats, NewElementType.None);
-       // Debug.Log($"[ACTION] {name} used SKILL 1 on {target.name} (raw {rawDamage})");
     }
 
     private void DoSkill2Damage(Combatant target)
@@ -168,9 +165,12 @@ public class Combatant : MonoBehaviour
             else
                 anim.SetTrigger("skill2");
         }
-        //int rawDamage = Mathf.RoundToInt(stats.atkDmg * 1.5f);
-        //target.health.TakeDamage(rawDamage, stats, NewElementType.None);
-       // Debug.Log($"[ACTION] {name} used SKILL 2 on {target.name} (raw {rawDamage})");
+    }
+
+    public void OnZoom()
+    {
+        if (parodyEffect != null)
+            parodyEffect.PlayParody(BattleParodyEffect.ParodyType.ZoomEffect, this, currentTarget);
     }
 
     public void DealDamage()
