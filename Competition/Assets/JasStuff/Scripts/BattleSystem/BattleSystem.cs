@@ -92,6 +92,7 @@ public class BattleSystem : MonoBehaviour
         var leaderRT = StatsRuntimeBuilder.BuildRuntimeStats(leader.stats, _preBattlePartyLevel, playerGrowth);
         ApplyRuntimeStats(leaderObj, leaderRT);
         var cL = leaderObj.AddComponent<Combatant>();
+        var conL = leaderObj.AddComponent<MinigameController>();
         cL.isPlayerTeam = true;
         cL.isLeader = true;
         cL.stats = leaderRT;
@@ -134,6 +135,7 @@ public class BattleSystem : MonoBehaviour
                 var allyRT = StatsRuntimeBuilder.BuildRuntimeStats(member.stats, _preBattlePartyLevel, playerGrowth);
                 ApplyRuntimeStats(allyObj, allyRT);
                 var cA = allyObj.AddComponent<Combatant>();
+                var conA = allyObj.AddComponent<MinigameController>();
                 cA.isPlayerTeam = true;
                 cA.isLeader = false;
                 cA.stats = allyRT;
@@ -174,6 +176,7 @@ public class BattleSystem : MonoBehaviour
             if (eh && enemyRT != null) eh.ApplyStats(enemyRT);
 
             var cE = enemy.AddComponent<Combatant>();
+            var conE = enemy.AddComponent<MinigameController>();
             cE.isPlayerTeam = false;
             cE.isLeader = false;
             cE.stats = enemyRT ?? baseEnemyStats;

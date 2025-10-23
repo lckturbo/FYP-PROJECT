@@ -26,6 +26,14 @@ public class TurnEngine : MonoBehaviour
     private bool _resolvingAction = false;
 
     private bool _ended = false;
+    private bool _paused = false;
+    public bool IsPaused => _paused;
+    public void Pause(bool v)
+    {
+        _paused = v;
+        Time.timeScale = _paused ? 0f : 1f;
+        Debug.Log($"[TurnEngine] Battle paused = {v}");
+    }
 
     [SerializeField, Range(0.5f, 4f)] private float battleSpeed = 1f;
     public float BattleSpeed
@@ -74,7 +82,7 @@ public class TurnEngine : MonoBehaviour
     private void Update()
     {
         if (!_running) return;
-
+        if (_paused) return;
         // Pause the loop if an action is resolving
         if (_resolvingAction) return;
 
