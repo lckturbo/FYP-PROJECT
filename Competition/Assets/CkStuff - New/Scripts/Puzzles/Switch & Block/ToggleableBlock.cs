@@ -7,19 +7,22 @@ public class ToggleableBlock : MonoBehaviour
     public SwitchChannelData channelData;
     public int channelIndex = 0;
 
+    [Header("Input Sources")]
+    public bool useSwitchBus = true;
+
     [Header("State")]
     public bool startOpen = false;
 
-    [Tooltip("If true, inverts the meaning: OPEN will behave as CLOSED.")]
+    [Tooltip("If true, inverts the meaning: OPEN behaves as CLOSED.")]
     public bool invert = false;
 
     [Header("Animation")]
     public Animator animator;
 
-    [Header("Collider")]
+    [Header("Collider (blocks the player when CLOSED)")]
     public Collider2D[] blockColliders;
 
-    [Header("Visuals")]
+    [Header("Visuals (hide when OPEN)")]
     public Renderer[] visuals;
 
     private bool _isOpen;
@@ -28,30 +31,48 @@ public class ToggleableBlock : MonoBehaviour
     private void OnEnable()
     {
         _resolvedChannel = (channelData != null) ? channelData.channelIndex : channelIndex;
-        SwitchBus.Subscribe(_resolvedChannel, OnToggle, OnSetState);
+        if (useSwitchBus)
+            SwitchBus.Subscribe(_resolvedChannel, OnToggle, OnSetState);
     }
 
     private void Start()
     {
-        SetOpen(startOpen, applyInvert: true);
+        SetOpenInternal(startOpen, applyInvert: true);
     }
 
     private void OnDisable()
     {
-        SwitchBus.Unsubscribe(_resolvedChannel, OnToggle, OnSetState);
+        if (useSwitchBus)
+            SwitchBus.Unsubscribe(_resolvedChannel, OnToggle, OnSetState);
     }
 
     private void OnToggle()
     {
-        SetOpen(!_isOpen, applyInvert: false);
+        SetOpenInternal(!_isOpen, applyInvert: false);
     }
 
     private void OnSetState(bool open)
     {
-        SetOpen(open, applyInvert: false);
+        SetOpenInternal(open, applyInvert: false);
     }
 
-    private void SetOpen(bool open, bool applyInvert)
+    public void Open()
+    {
+        SetOpenInternal(true, applyInvert: false);
+    }
+
+    public void Close()
+    {
+        SetOpenInternal(false, applyInvert: false);
+    }
+
+    public void SetOpen(bool open)
+    {
+        SetOpenInternal(open, applyInvert: false);
+    }
+
+    // ===== Core =====
+    private void SetOpenInternal(bool open, bool applyInvert)
     {
         _isOpen = open;
         bool effectiveOpen = invert ? !open : open;
@@ -60,28 +81,25 @@ public class ToggleableBlock : MonoBehaviour
 
     private void ApplyState(bool effectiveOpen)
     {
-        // Colliders enabled when CLOSED (so they block), disabled when OPEN
         if (blockColliders != null)
         {
             for (int i = 0; i < blockColliders.Length; i++)
             {
-                if (blockColliders[i])
+                if (blockColliders[i] != null)
                     blockColliders[i].enabled = !effectiveOpen;
             }
         }
 
-        //visible when CLOSED by default; hidden when OPEN
         if (visuals != null)
         {
             for (int i = 0; i < visuals.Length; i++)
             {
-                if (visuals[i])
+                if (visuals[i] != null)
                     visuals[i].enabled = !effectiveOpen;
             }
         }
 
-        // Animator triggers
-        if (animator)
+        if (animator != null)
         {
             if (effectiveOpen) animator.SetTrigger("Open");
             else animator.SetTrigger("Close");
