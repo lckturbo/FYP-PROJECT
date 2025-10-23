@@ -6,7 +6,7 @@ public class NewCharacterDefinition : ScriptableObject
     [Header("General")]
     public string id;
     public string displayName;
-    public NewCharacterStats runtimeStats; //  ensure this exists
+    public NewCharacterStats runtimeStats;
 
     [TextArea] public string description;
 
