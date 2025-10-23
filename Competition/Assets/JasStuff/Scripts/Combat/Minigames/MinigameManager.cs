@@ -24,14 +24,14 @@ public class MinigameManager : MonoBehaviour
     public IEnumerator RunMinigame(string id, Action<ResultType> onComplete)
     {
         Debug.Log($"[MINIGAME] Starting {id}...");
-        TurnEngine engine = FindObjectOfType<TurnEngine>();
-        if (engine) engine.Pause(true);
+        //TurnEngine engine = FindObjectOfType<TurnEngine>();
+        //if (engine) engine.Pause(true);
 
         GameObject minigamePrefab = Resources.Load<GameObject>($"Minigames/{id}");
         if (minigamePrefab == null)
         {
             Debug.LogWarning($"[MINIGAME] No prefab found for ID {id}");
-            if (engine) engine.Pause(false);
+            //if (engine) engine.Pause(false);
             onComplete?.Invoke(ResultType.Fail);
             yield break;
         }
@@ -41,7 +41,7 @@ public class MinigameManager : MonoBehaviour
         if (minigame != null)
         {
             yield return minigame.Run();
-            if (engine) engine.Pause(false);
+            //if (engine) engine.Pause(false);
             onComplete?.Invoke(minigame.Result);
         }
 

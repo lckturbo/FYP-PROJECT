@@ -27,9 +27,6 @@ public class TakeABreak : BaseMinigame
         else
             Result = MinigameManager.ResultType.Fail;
 
-        //TurnEngine engine = FindObjectOfType<TurnEngine>();
-        //if (engine) engine.Pause(false);
-
         rolled = true;
     }
     public override IEnumerator Run()
