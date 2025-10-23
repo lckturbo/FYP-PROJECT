@@ -181,24 +181,36 @@ public class Combatant : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        // Use runtime stats if available, fallback to base stats
         float attackPower = 0f;
         float defensePower = 0f;
 
-        // --- Get attacker’s attack value ---
-        if (runtimeStats != null)
-            attackPower = runtimeStats.atkDmg;
-        else if (stats != null)
+        // --- Get attacker’s base attack ---
+        if (stats != null)
             attackPower = stats.atkDmg;
 
-        // --- Get target’s defense value ---
-        var targetRuntimeStats = currentTarget.GetComponent<PlayerLevelApplier>()?.runtimeStats;
-        if (targetRuntimeStats != null)
-            defensePower = targetRuntimeStats.attackreduction;
-        else if (currentTarget.stats != null)
+        // --- Check if attacker has a BuffHandler ---
+        PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
+        if (BuffData.instance != null && attackerBuffHandler != null && BuffData.instance.hasAttackBuff)
+        {
+            // Ensure the buff actually belongs to THIS attacker
+            if (BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
+                attackPower += BuffData.instance.latestAttackBuff;
+        }
+
+        // --- Get target’s base defense ---
+        if (currentTarget.stats != null)
             defensePower = currentTarget.stats.attackreduction;
 
-        // --- Base damage multiplier depending on attack type ---
+        // --- Check if target has a BuffHandler ---
+        PlayerBuffHandler targetBuffHandler = currentTarget.GetComponent<PlayerBuffHandler>();
+        if (BuffData.instance != null && targetBuffHandler != null && BuffData.instance.hasDefenseBuff)
+        {
+            // Ensure the buff actually belongs to THIS defender
+            if (BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
+                defensePower += BuffData.instance.latestDefenseBuff;
+        }
+
+        // --- Base damage multiplier ---
         float multiplier = 1f;
         switch (currentAttackType)
         {
@@ -213,8 +225,13 @@ public class Combatant : MonoBehaviour
 
         currentTarget.health.TakeDamage(finalDamage, stats, NewElementType.None);
 
-        Debug.Log($"[HIT] {name} dealt {finalDamage} dmg to {currentTarget.name} (Atk={attackPower}, Def={defensePower}, x{multiplier})");
+        Debug.Log(
+            $"[HIT] {name} dealt {finalDamage} dmg to {currentTarget.name} " +
+            $"(Atk={attackPower}, Def={defensePower}, x{multiplier}) " +
+            $"[Buffs: +{BuffData.instance.latestAttackBuff} ATK, +{BuffData.instance.latestDefenseBuff} DEF]"
+        );
     }
+
 
 
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)

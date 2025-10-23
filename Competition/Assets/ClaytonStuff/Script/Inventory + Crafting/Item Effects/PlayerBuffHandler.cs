@@ -6,7 +6,7 @@ public class PlayerBuffHandler : MonoBehaviour
     [SerializeField] private GameObject attackBuffVFX;
     [SerializeField] private GameObject defenseBuffVFX;
 
-    private PlayerLevelApplier levelApplier;
+    public PlayerLevelApplier levelApplier { get; private set; }
     private NewCharacterStats runtimeStats => levelApplier != null ? levelApplier.runtimeStats : null;
 
     private int currentAttackBuff = 0;
