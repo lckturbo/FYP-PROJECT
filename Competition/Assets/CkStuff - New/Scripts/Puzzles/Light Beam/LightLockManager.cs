@@ -5,9 +5,9 @@ using UnityEngine;
 public class LightLockManager : MonoBehaviour
 {
     public List<BeamReceiver> receivers = new();
-    public ToggleableBlock doorBlock;   // or:
+    public ToggleableBlock doorBlock;
     public Animator doorAnimator;
-    public bool latchOpen = true;       // keep open once solved
+    public bool latchOpen = true;
 
     private bool opened;
 

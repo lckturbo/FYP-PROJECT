@@ -4,17 +4,16 @@ using UnityEngine;
 public class BeamCornerRedirector : MonoBehaviour
 {
     [Header("Port pairs in LOCAL space")]
-    public Vector2 inputA_Local = Vector2.left;   // comes FROM left
-    public Vector2 outputA_Local = Vector2.up;     // goes TO up
+    public Vector2 inputA_Local = Vector2.left;
+    public Vector2 outputA_Local = Vector2.up;
 
-    public Vector2 inputB_Local = Vector2.down;   // comes FROM down
-    public Vector2 outputB_Local = Vector2.right;  // goes TO right
+    public Vector2 inputB_Local = Vector2.down;
+    public Vector2 outputB_Local = Vector2.right;
 
     [Range(0.5f, 0.999f)]
     public float matchDot = 0.85f;
 
     [Header("Pass point")]
-    [Tooltip("Optional: where the beam should pass through inside this object. If null, collider center is used.")]
     public Transform passPoint;
 
     public bool TryGetOutput(Vector2 incomingWorldDir, out Vector2 outWorldDir)
@@ -36,9 +35,6 @@ public class BeamCornerRedirector : MonoBehaviour
         return false;
     }
 
-    // Returns the position the beam should pass through (center of the object),
-    // using an explicit child Transform if assigned, otherwise the collider bounds center,
-    // otherwise this transform's position.
     public Vector2 GetPassPoint()
     {
         if (passPoint) return passPoint.position;

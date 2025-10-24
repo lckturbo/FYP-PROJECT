@@ -63,21 +63,18 @@ public class BeamSource : MonoBehaviour
                 break;
             }
 
-            // draw to surface hit
             points.Add(hit.point);
 
-            // 1) Router redirector: go into center, then emit out
             BeamCornerRedirector corner = hit.collider.GetComponent<BeamCornerRedirector>();
             if (corner && corner.TryGetOutput(curDir, out Vector2 newDir))
             {
-                Vector2 pass = corner.GetPassPoint(); // center or custom passPoint
-                points.Add(pass);                     // show beam entering the object
+                Vector2 pass = corner.GetPassPoint();
+                points.Add(pass);
                 curDir = newDir.normalized;
-                curPos = pass + curDir * 0.02f;      // start next cast from inside, nudged out
+                curPos = pass + curDir * 0.02f;
                 continue;
             }
 
-            // 2) Receiver (absorbs beam)
             BeamReceiver receiver = hit.collider.GetComponent<BeamReceiver>();
             if (receiver)
             {
@@ -85,7 +82,6 @@ public class BeamSource : MonoBehaviour
                 break;
             }
 
-            // 3) Any other collider stops the beam
             break;
         }
 
