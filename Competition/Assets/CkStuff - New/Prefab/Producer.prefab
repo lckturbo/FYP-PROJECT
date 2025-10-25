@@ -4932,7 +4932,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2296735049579791613}
   - {fileID: 3829610355123149510}
@@ -5080,7 +5080,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
   useStatsDirectly: 1
-  moveActionName: Move
   moveDir: {x: 0, y: 0}
 --- !u!114 &4877032309203510786
 MonoBehaviour:
@@ -5256,7 +5255,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f803e7b734caa9e48b8f940a40812935, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runtimeStats: {fileID: 11400000, guid: b3284bbf05b740846858c0672efe062c, type: 2}
   attackBuffVFX: {fileID: 6170377856783073694}
   defenseBuffVFX: {fileID: 3135705346956363848}
 --- !u!114 &7752421716775085802

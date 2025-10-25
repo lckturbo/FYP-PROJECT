@@ -7,6 +7,19 @@ using UnityEngine.UI;
 
 public class BattleSystem : MonoBehaviour
 {
+
+    private sealed class UpTimer
+    {
+        public bool Running { get; private set; }
+        public float Elapsed { get; private set; }
+
+        public void Start() { Running = true; }
+        public void Stop() { Running = false; }
+        public void Reset() { Elapsed = 0f; }
+        public void Restart() { Elapsed = 0f; Running = true; }
+        public void Tick(float dt) { if (Running) Elapsed += dt; }
+    }
+
     [Header("SpawnPoints")]
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
@@ -34,6 +47,15 @@ public class BattleSystem : MonoBehaviour
     [Header("Results UI")]
     [SerializeField] private BattleResultsUI resultsUI;
 
+    // ===== Battle timer settings =====
+    [Header("Battle Timer")]
+    [SerializeField] private bool trackBattleElapsed = true;
+    [SerializeField] private bool resetTimerOnBattleEnd = true;
+
+    private readonly UpTimer _battleTimer = new UpTimer();
+    private bool _pausedForMenu = false;
+    public float BattleElapsed => _battleTimer.Elapsed;
+
     private int _preBattlePartyLevel;
     private List<PreBattleSnapshot> _snapshots = new();
     private bool _ended = false;
@@ -53,12 +75,16 @@ public class BattleSystem : MonoBehaviour
     {
         if (turnEngine)
             turnEngine.OnBattleEnd += HandleBattleEnd;
+
+        //Pause?? (For timer)
     }
 
     private void OnDisable()
     {
         if (turnEngine)
             turnEngine.OnBattleEnd -= HandleBattleEnd;
+
+        //Pause?? (For timer)
     }
 
     private void Start()
@@ -69,6 +95,12 @@ public class BattleSystem : MonoBehaviour
             OnBattleEnd += BattleManager.instance.HandleBattleEnd;
     }
 
+    private void Update()
+    {
+        if (trackBattleElapsed && !_ended && !_pausedForMenu)
+            _battleTimer.Tick(Time.deltaTime);
+    }
+
     private void SetupBattle()
     {
         List<NewCharacterDefinition> fullParty = PlayerParty.instance.GetFullParty();
@@ -76,6 +108,14 @@ public class BattleSystem : MonoBehaviour
         if (fullParty == null || fullParty.Count < 1 || leader == null) return;
 
         _ended = false;
+
+        // reset and start timer at battle begin
+        if (trackBattleElapsed)
+        {
+            _pausedForMenu = false;
+            _battleTimer.Restart();
+        }
+
         _preBattlePartyLevel = (PartyLevelSystem.Instance != null) ? PartyLevelSystem.Instance.levelSystem.level : 1;
         _snapshots.Clear();
         _playerCombatants.Clear();
@@ -165,7 +205,6 @@ public class BattleSystem : MonoBehaviour
             if (seeker) seeker.enabled = false;
 
             var eb = enemy.GetComponent<EnemyBase>();
-
             BaseStats baseEnemyStats = eb ? eb.GetEnemyStats() : null;
 
             BaseStats enemyRT = null;
@@ -315,6 +354,13 @@ public class BattleSystem : MonoBehaviour
 
     private void HandleBattleEnd(bool playerWon)
     {
+        // stop (and optionally reset) timer on battle end
+        if (trackBattleElapsed)
+        {
+            _battleTimer.Stop();
+            if (resetTimerOnBattleEnd) _battleTimer.Reset();
+        }
+
         if (_ended) return;
         _ended = true;
 
@@ -360,6 +406,16 @@ public class BattleSystem : MonoBehaviour
         resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
     }
 
+    private void HandlePauseStateChanged(bool paused)
+    {
+        _pausedForMenu = paused;
+        if (trackBattleElapsed)
+        {
+            if (paused) _battleTimer.Stop();
+            else if (!_ended) _battleTimer.Start();
+        }
+    }
+
     private BattleResultsPayload BuildResultsPayload(
         bool playerWon,
         int xp,
@@ -385,21 +441,18 @@ public class BattleSystem : MonoBehaviour
             stats.Add(MakeStat("Defense", pre.attackreduction, post.attackreduction, false, ""));
             stats.Add(MakeStat("Action Speed", pre.actionvaluespeed, post.actionvaluespeed, false, ""));
             stats.Add(MakeStat("Crit Rate", pre.critRate, post.critRate, true, ""));
-            stats.Add(MakeStat("Crit Damage", pre.critDamage, post.critDamage, false, "×"));
+            stats.Add(MakeStat("Crit Damage", pre.critDamage, post.critDamage, false, "x"));
         }
 
         return new BattleResultsPayload
         {
             playerWon = playerWon,
             xpGained = xp,
-
             oldLevel = preLevel,
             newLevel = postLevel,
-
             xpBefore = xpBeforeIntoLevel,
             xpAfter = xpAfterIntoLevel,
             xpRequiredForNext = xpRequiredForNext,
-
             enemyScaledToLevel = (postLevel > preLevel) ? postLevel : 0,
             stats = stats
         };

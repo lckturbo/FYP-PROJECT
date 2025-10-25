@@ -4963,7 +4963,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1023903524803100834}
   - {fileID: 5121671051559209895}
@@ -5014,7 +5014,7 @@ SpriteRenderer:
   m_SortingLayerID: 1076961029
   m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: -607919275, guid: 560bd592848f4ec43b9dc0540a99f267, type: 3}
+  m_Sprite: {fileID: 1613144085, guid: a6ce0402e5b581649a09491b57b8db55, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -5111,7 +5111,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
   useStatsDirectly: 1
-  moveActionName: Move
   moveDir: {x: 0, y: 0}
 --- !u!114 &4877032309203510786
 MonoBehaviour:
@@ -5287,7 +5286,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f803e7b734caa9e48b8f940a40812935, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runtimeStats: {fileID: 11400000, guid: afedffbe4652cdb459b80bac67094ea3, type: 2}
   attackBuffVFX: {fileID: 2043889293699458008}
   defenseBuffVFX: {fileID: 7300332521615313728}
 --- !u!114 &5250839774030710301

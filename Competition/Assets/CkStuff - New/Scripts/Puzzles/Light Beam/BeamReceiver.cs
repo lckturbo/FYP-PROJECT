@@ -10,7 +10,7 @@ public class BeamReceiver : MonoBehaviour
     public Animator doorAnimator;
 
     [Header("Behavior")]
-    public bool latchOpen = false;      // true = open once and stay
+    public bool latchOpen = false;
     [Min(0f)] public float graceSeconds = 0.15f;
 
     [Header("Visual")]
@@ -18,16 +18,14 @@ public class BeamReceiver : MonoBehaviour
     public Color activeColor = Color.cyan;
     public Color idleColor = Color.gray;
 
-    // ==== Cinematic Camera (same style as SwitchInteract) ====
     [Header("Cinematic Camera")]
-    public Transform blockFocus;             // door or mechanism focus
+    public Transform blockFocus;
     public Animator blockAnimator;
-    public Transform returnFocus;            // usually player; auto-filled
+    public Transform returnFocus;
 
     [Header("First Pan (Receiver)")]
-    [Tooltip("If null, will use this receiver's transform.")]
-    public Transform receiverFocus;          // new: where to pan first (the receiver)
-    public float receiverHold = 0.15f;       // small hold on the receiver
+    public Transform receiverFocus;
+    public float receiverHold = 0.15f;
     public float receiverAnimFallback = 0.25f;
 
     [Header("Timings")]
@@ -38,15 +36,17 @@ public class BeamReceiver : MonoBehaviour
     [Header("Spam Control")]
     public float cooldown = 0.25f;
 
+    // NEW: delay opening until the camera has panned to the door
+    [Header("Timing Options")]
+    public bool openDuringCinematic = true;
+
     public bool IsActive => _active;
 
     public event System.Action<BeamReceiver> OnActivated;
     public event System.Action<BeamReceiver> OnDeactivated;
 
-    // runtime
     private bool _active;
     private float _timer;
-
     private bool _coolingDown;
     private bool _playedOnce;
 
@@ -56,15 +56,11 @@ public class BeamReceiver : MonoBehaviour
     private void Awake()
     {
         TryBindPlayerInput();
-        if (receiverFocus == null) receiverFocus = transform; // default to this receiver
+        if (receiverFocus == null) receiverFocus = transform;
     }
 
-    private void Start()
-    {
-        SetVisual(false);
-    }
+    private void Start() { SetVisual(false); }
 
-    // Call this every frame the beam is hitting the receiver
     public void OnBeamStay()
     {
         _timer = Mathf.Max(_timer, graceSeconds);
@@ -74,10 +70,8 @@ public class BeamReceiver : MonoBehaviour
     private void Update()
     {
         if (!_active || latchOpen) return;
-
         _timer -= Time.deltaTime;
-        if (_timer <= 0f)
-            Deactivate();
+        if (_timer <= 0f) Deactivate();
     }
 
     private void Activate()
@@ -85,10 +79,14 @@ public class BeamReceiver : MonoBehaviour
         _active = true;
         SetVisual(true);
 
-        if (doorBlock) doorBlock.Open();
-        else if (doorAnimator) doorAnimator.SetTrigger("Open");
+        // OLD: opened immediately here (causing the pop before pan)
+        // NEW: open now only if we are NOT delaying to cinematic
+        if (!openDuringCinematic)
+        {
+            if (doorBlock) doorBlock.Open();
+            else if (doorAnimator) doorAnimator.SetTrigger("Open");
+        }
 
-        // Start cinematic once
         if (!_coolingDown && !_playedOnce)
             StartCoroutine(UseSequence());
 
@@ -112,32 +110,37 @@ public class BeamReceiver : MonoBehaviour
     private IEnumerator UseSequence()
     {
         _coolingDown = true;
-
         SetPlayerControl(false);
 
         NewCameraController cam = FindObjectOfType<NewCameraController>();
 
-        // 1) PAN TO RECEIVER FIRST
+        // 1) Pan to the receiver first
         if (cam && receiverFocus)
         {
             yield return cam.PanTo(receiverFocus, panDuration);
             yield return new WaitForSeconds(panDuration);
 
-            // optional receiver wait (use fallback timing; no animator by default)
             if (receiverAnimFallback > 0f)
                 yield return new WaitForSeconds(receiverAnimFallback);
-
             if (receiverHold > 0f)
                 yield return new WaitForSeconds(receiverHold);
         }
 
-        // 2) THEN PAN TO BLOCK/DOOR FOCUS (same as switch flow)
+        // 2) Pan to the door/block focus
         if (cam && blockFocus)
         {
             yield return cam.PanTo(blockFocus, panDuration);
             yield return new WaitForSeconds(panDuration);
         }
 
+        // 3) OPEN the door now (so the player sees it during the focus shot)
+        if (openDuringCinematic)
+        {
+            if (doorBlock) doorBlock.Open();
+            else if (doorAnimator) doorAnimator.SetTrigger("Open");
+        }
+
+        // 4) Wait for the door animation or fallback
         if (blockAnimator)
             yield return WaitForCurrentAnimOrFallback(blockAnimator, blockAnimFallback);
         else
@@ -146,7 +149,7 @@ public class BeamReceiver : MonoBehaviour
         if (holdOnBlock > 0f)
             yield return new WaitForSeconds(holdOnBlock);
 
-        // 3) PAN BACK TO PLAYER
+        // 5) Pan back to the player
         if (cam)
         {
             yield return cam.ReturnToPlayer(panDuration);
@@ -159,7 +162,7 @@ public class BeamReceiver : MonoBehaviour
             yield return new WaitForSeconds(cooldown);
 
         _coolingDown = false;
-        _playedOnce = true; // play once per activation lifecycle
+        _playedOnce = true;
     }
 
     private void SetPlayerControl(bool enabled)
@@ -193,7 +196,6 @@ public class BeamReceiver : MonoBehaviour
         {
             if (_playerInput == null)
                 _playerInput = _playerMove.GetComponent<PlayerInput>();
-
             if (!returnFocus) returnFocus = _playerMove.transform;
         }
     }
