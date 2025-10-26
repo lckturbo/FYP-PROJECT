@@ -30,12 +30,9 @@ public class GameManager : MonoBehaviour
     public void Update()
     {
         // for testing
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.P))
-            SceneManager.LoadScene("jas");
-
         if (SceneManager.GetActiveScene().name == "Main")
         {
-            bool settingsOpen = UIManager.instance != null && UIManager.instance.isSettingsOpen();
+            bool settingsOpen = UIManager.instance != null && UIManager.instance.IsSettingsOpen();
 
             if (!settingsOpen && (Input.anyKeyDown || Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject())
                 ASyncManager.instance.LoadLevelBtn("Lobby");
