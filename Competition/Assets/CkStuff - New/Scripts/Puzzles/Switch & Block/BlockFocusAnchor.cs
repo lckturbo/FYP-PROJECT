@@ -4,7 +4,6 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class BlockFocusAnchor : MonoBehaviour
 {
-    [Tooltip("If empty, will search up the hierarchy.")]
     public Collider2D sourceCollider;
     public Renderer sourceRenderer;
 

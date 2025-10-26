@@ -206,9 +206,15 @@ public class Combatant : MonoBehaviour
         float multiplier = 1f;
         switch (currentAttackType)
         {
-            case AttackType.Basic: multiplier = 1.0f; break;
-            case AttackType.Skill1: multiplier = 1.2f; break;
-            case AttackType.Skill2: multiplier = 1.5f; break;
+            case AttackType.Basic: 
+                multiplier = 1.0f; 
+                break;
+            case AttackType.Skill1: 
+                multiplier = 1.2f; 
+                break;
+            case AttackType.Skill2: 
+                multiplier = 1.5f; 
+                break;
         }
 
         float rawDamage = attackPower * multiplier - defensePower;

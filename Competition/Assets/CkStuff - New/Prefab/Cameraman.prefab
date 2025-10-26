@@ -9814,15 +9814,15 @@ SpriteRenderer:
   m_SortingLayerID: 1076961029
   m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: -244838190, guid: 46d95854dad097c46aa468a0e675c39f, type: 3}
+  m_Sprite: {fileID: 730360617, guid: f418bfeaf40dd24448acce164dbabba3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 2, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!50 &351879853698235413
@@ -9889,7 +9889,7 @@ BoxCollider2D:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 2, y: 2}
-    newSize: {x: 1, y: 2}
+    newSize: {x: 2, y: 2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -9911,7 +9911,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
   useStatsDirectly: 1
-  moveActionName: Move
   moveDir: {x: 0, y: 0}
 --- !u!114 &4877032309203510786
 MonoBehaviour:
@@ -10087,7 +10086,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f803e7b734caa9e48b8f940a40812935, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runtimeStats: {fileID: 11400000, guid: 809ab4e15286b4b40813635ef86e5215, type: 2}
   attackBuffVFX: {fileID: 1192683802646172693}
   defenseBuffVFX: {fileID: 1966009099372115472}
 --- !u!114 &7827928779246245682
