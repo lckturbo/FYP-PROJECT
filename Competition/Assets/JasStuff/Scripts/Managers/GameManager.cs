@@ -1,20 +1,17 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+    private bool initialized = false;
 
     private void Awake()
     {
-        // If this GameObject is a child
         if (transform.parent != null)
-        {
-            // Detach from its parent first
             transform.SetParent(null);
-        }
+
         if (instance == null)
             instance = this;
         else
@@ -24,8 +21,13 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        //if (!initialized && SceneManager.GetActiveScene().name == "Main")
+        //{
         SaveLoadSystem.instance.NewGame();
+        //    initialized = true;
+        //}
     }
+
 
     public void Update()
     {

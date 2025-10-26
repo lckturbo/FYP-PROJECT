@@ -82,6 +82,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 return;
             case "jasBattle":
                 AudioManager.instance.PlaySound("Pride");
+                SetupBattleMenu();
                 return;
             case "Credits":
                 AudioManager.instance.PlaySound("MainMenuBGM");
@@ -149,6 +150,12 @@ public class UIManager : MonoBehaviour, IDataPersistence
             else
                 statsDisplay = null;
         }
+    }
+    private void SetupBattleMenu()
+    {
+        SetupPauseUI();
+        settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
+        if (settingsUI) SetupSettingUI();
     }
     private void SetupCreditsMenu()
     {

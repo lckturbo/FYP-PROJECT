@@ -20,7 +20,7 @@ public class Paper : MonoBehaviour
     {
         if (caught) return;
 
-        rect.anchoredPosition -= new Vector2(0, speed * Time.deltaTime);
+        rect.anchoredPosition -= new Vector2(0, speed * Time.unscaledDeltaTime);
 
         if (RectOverlaps(rect, basket))
         {

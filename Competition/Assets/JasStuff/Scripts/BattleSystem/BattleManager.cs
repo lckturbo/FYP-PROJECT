@@ -66,7 +66,6 @@ public class BattleManager : MonoBehaviour
         GameManager.instance.ChangeScene("jasBattle");
 
     }
-
     public void HandleBattleEnd(bool playerWon)
     {
         inBattle = false;
@@ -113,5 +112,11 @@ public class BattleManager : MonoBehaviour
 
 
         GameManager.instance.ChangeScene("SampleScene");
+    }
+    public void SetBattlePaused(bool paused)
+    {
+        var turnEngine = FindObjectOfType<TurnEngine>();
+        if (turnEngine)
+            turnEngine.SetPaused(paused);
     }
 }

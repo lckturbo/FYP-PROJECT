@@ -26,20 +26,21 @@ public class TurnEngine : MonoBehaviour
     private bool _resolvingAction = false;
 
     private bool _ended = false;
-    private bool _paused = false;
-    public bool IsPaused => _paused;
-    public void Pause(bool v)
-    {
-        _paused = v;
-        Time.timeScale = _paused ? 0f : 1f;
-        Debug.Log($"[TurnEngine] Battle paused = {v}");
-    }
 
-    [SerializeField, Range(0.5f, 4f)] private float battleSpeed = 1f;
+    // JAS ADDED //
+    private float battleSpeed = 1f;
     public float BattleSpeed
     {
         get => battleSpeed;
         set => battleSpeed = Mathf.Clamp(value, 0.5f, 4f);
+    }
+    private bool _paused = false;
+    public bool IsPaused => _paused;
+
+    public void SetPaused(bool paused)
+    {
+        _paused = paused;
+        Time.timeScale = paused ? 0f : battleSpeed;
     }
 
     public void Register(Combatant c)
@@ -67,6 +68,7 @@ public class TurnEngine : MonoBehaviour
         // guard: only end once
         if (_ended) return;
         _ended = true;
+        Time.timeScale = 1f;
 
         if (!_running) return;
 
@@ -81,8 +83,10 @@ public class TurnEngine : MonoBehaviour
 
     private void Update()
     {
-        if (!_running) return;
-        if (_paused) return;
+        if (!_running || _paused) return;
+
+        Time.timeScale = battleSpeed;
+
         // Pause the loop if an action is resolving
         if (_resolvingAction) return;
 
@@ -96,7 +100,7 @@ public class TurnEngine : MonoBehaviour
 
         if (_waitingForLeader) return;
 
-        float step = (Time.deltaTime * battleSpeed) / Mathf.Max(0.01f, atbFillSeconds);
+        float step = Time.deltaTime  / Mathf.Max(0.01f, atbFillSeconds);
 
         // PASS 1: fill everyone's ATB
         for (int i = 0; i < _units.Count; i++)
