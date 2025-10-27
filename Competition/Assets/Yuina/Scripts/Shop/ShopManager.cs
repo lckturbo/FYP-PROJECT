@@ -284,7 +284,7 @@ public class ShopManager : MonoBehaviour
     {
         if (isSellOpen)
         {
-            PauseManager.instance.canPause = false;
+            UIManager.instance.canPause = false;
             CloseSellMenu();
             OpenShop();
         }
@@ -298,7 +298,7 @@ public class ShopManager : MonoBehaviour
 
     public void OpenSellMenu()
     {
-        PauseManager.instance.canPause = false;
+        UIManager.instance.canPause = false;
         if (sellUI != null) sellUI.SetActive(true);
 
         isSellOpen = true;
@@ -517,7 +517,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void OpenShop()
     {
-        PauseManager.instance.canPause = false;
+        UIManager.instance.canPause = false;
         if (shopUI != null)
             shopUI.SetActive(true);
 
@@ -538,7 +538,7 @@ public class ShopManager : MonoBehaviour
         isOpen = false;
         ClearMessage();
 
-        PauseManager.instance.canPause = true;
+        UIManager.instance.canPause = true;
     }
 
 

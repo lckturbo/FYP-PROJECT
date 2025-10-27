@@ -86,7 +86,7 @@ public class InventoryUIManager : MonoBehaviour
         // --- Input Handling ---
         if (Input.GetKeyDown(KeyCode.I))
         {
-            if (PauseManager.instance != null && PauseManager.instance.IsPaused()) return;
+            if (UIManager.instance != null && UIManager.instance.IsPaused()) return;
             ToggleSubInventory();
         }
 
@@ -297,7 +297,7 @@ public class InventoryUIManager : MonoBehaviour
 
         if (subInventoryOpen)
         {
-            PauseManager.instance.canPause = false;
+            UIManager.instance.canPause = false;
             selectedSubSlot = 0;
             UpdateSubHighlight();
             mainInventoryPanel.SetActive(false);
@@ -306,7 +306,7 @@ public class InventoryUIManager : MonoBehaviour
         }
         else
         {
-            PauseManager.instance.canPause = true;
+            UIManager.instance.canPause = true;
             selectedSubSlot = -1;
             subInventoryPanel.SetActive(false);
             mainInventoryPanel.SetActive(true);

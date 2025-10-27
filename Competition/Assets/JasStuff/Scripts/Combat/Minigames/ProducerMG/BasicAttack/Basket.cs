@@ -14,7 +14,7 @@ public class Basket : MonoBehaviour
     private void Update()
     {
         float moveX = Input.GetAxisRaw("Horizontal"); 
-        rect.anchoredPosition += new Vector2(moveX * moveSpeed * Time.deltaTime, 0);
+        rect.anchoredPosition += new Vector2(moveX * moveSpeed * Time.unscaledDeltaTime, 0);
 
         if (movementBounds)
         {

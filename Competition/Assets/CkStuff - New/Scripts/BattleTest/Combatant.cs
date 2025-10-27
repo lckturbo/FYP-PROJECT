@@ -181,46 +181,16 @@ public class Combatant : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        float attackPower = 0f;
-        float defensePower = 0f;
-
-        if (stats != null) attackPower = stats.atkDmg;
-
-        PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
-        if (BuffData.instance != null && attackerBuffHandler != null && BuffData.instance.hasAttackBuff)
-        {
-            if (BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
-                attackPower += BuffData.instance.latestAttackBuff;
-        }
-
-        if (currentTarget.stats != null)
-            defensePower = currentTarget.stats.attackreduction;
-
-        PlayerBuffHandler targetBuffHandler = currentTarget.GetComponent<PlayerBuffHandler>();
-        if (BuffData.instance != null && targetBuffHandler != null && BuffData.instance.hasDefenseBuff)
-        {
-            if (BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
-                defensePower += BuffData.instance.latestDefenseBuff;
-        }
-
-        float multiplier = 1f;
+        float baseMultiplier = 1f;
         switch (currentAttackType)
         {
-            case AttackType.Basic: 
-                multiplier = 1.0f; 
-                break;
-            case AttackType.Skill1: 
-                multiplier = 1.2f; 
-                break;
-            case AttackType.Skill2: 
-                multiplier = 1.5f; 
-                break;
+            case AttackType.Basic: baseMultiplier = 1.0f; break;
+            case AttackType.Skill1: baseMultiplier = 1.2f; break;
+            case AttackType.Skill2: baseMultiplier = 1.5f; break;
         }
 
-        float rawDamage = attackPower * multiplier - defensePower;
-        int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
-
-        currentTarget.health.TakeDamage(finalDamage, stats, NewElementType.None);
+        int damage = CalculateDamage(currentTarget, baseMultiplier);
+        currentTarget.health.TakeDamage(damage, stats, NewElementType.None);
     }
 
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
@@ -443,4 +413,31 @@ public class Combatant : MonoBehaviour
                 break;
         }
     }
+    private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
+    {
+        if (target == null || target.health == null) return 0;
+
+        float attackPower = stats ? stats.atkDmg : 0f;
+        float defensePower = target.stats ? target.stats.attackreduction : 0f;
+
+        // Apply buffs (if you have BuffData, keep this logic)
+        PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
+        PlayerBuffHandler targetBuffHandler = target.GetComponent<PlayerBuffHandler>();
+
+        if (BuffData.instance != null)
+        {
+            if (BuffData.instance.hasAttackBuff && attackerBuffHandler != null &&
+                BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
+                attackPower += BuffData.instance.latestAttackBuff;
+
+            if (BuffData.instance.hasDefenseBuff && targetBuffHandler != null &&
+                BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
+                defensePower += BuffData.instance.latestDefenseBuff;
+        }
+
+        float rawDamage = (attackPower * multiplierOverride) - defensePower;
+        int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
+        return finalDamage;
+    }
+
 }

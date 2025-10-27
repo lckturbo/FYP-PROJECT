@@ -37,6 +37,7 @@ public class SaveLoadSystem : MonoBehaviour
         dataPersistenceObjs = FindAllDataPersistenceObjects();
 
         if (!isNewGame) LoadGame();
+        else isNewGame = false;
     }
 
     public void RegisterDataPersistenceObjects(IDataPersistence obj)

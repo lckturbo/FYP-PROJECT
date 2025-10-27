@@ -18,7 +18,7 @@ public class Deadline : BaseMinigame
     private int missed = 0;
     public override IEnumerator Run()
     {
-        Debug.Log("[Minigame] Deadline Rush started!");
+        BattleManager.instance?.SetBattlePaused(true);
 
         timer = 5.0f;
         running = true;
@@ -26,7 +26,7 @@ public class Deadline : BaseMinigame
 
         while (timer > 0f)
         {
-            timer -= Time.deltaTime;
+            timer -= Time.unscaledDeltaTime;
             if (timerText) timerText.text = $"{timer:F1}s";
             yield return null;
         }
@@ -39,7 +39,10 @@ public class Deadline : BaseMinigame
             Result = MinigameManager.ResultType.Perfect;
         else
             Result = MinigameManager.ResultType.Success;
+
+        BattleManager.instance?.SetBattlePaused(false);
     }
+
     private void SpawnPaper()
     {
         RectTransform area = paperParent[Random.Range(0, paperParent.Length)];
@@ -58,10 +61,9 @@ public class Deadline : BaseMinigame
         while (running)
         {
             SpawnPaper();
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSecondsRealtime(0.3f);
         }
     }
-
 
     public void OnCatch()
     {
