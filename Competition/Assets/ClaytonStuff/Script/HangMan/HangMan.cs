@@ -2,16 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class HangMan : BaseMinigame
 {
     [Header("UI References")]
-    public TMP_Text wordDisplayText;
-    public TMP_Text wrongLettersText;
-    public TMP_Text messageText;
-    public TMP_InputField inputField;
-    public Button guessButton;
+    public TMP_Text wordDisplayText;       // Shows current word progress
+    public TMP_Text wrongLettersText;      // Shows wrong guesses
+    public TMP_Text messageText;           // Feedback / win-loss messages
+    public TMP_Text playerInputText;       // Displays letters as player types
+    public TMP_Text timerText;             // Countdown timer
 
     [Header("Hangman Drawing Parts")]
     public List<GameObject> hangmanParts;
@@ -19,41 +18,88 @@ public class HangMan : BaseMinigame
     [Header("Game Settings")]
     public string secretWord = "UNITY";
     public int maxAttempts = 6;
-    public int maxPoints = 100; // Maximum points for guessing perfectly
+    public float attemptTime = 10f;        // Time per guess
+    public int maxPoints = 100;
 
     private List<char> guessedLetters = new List<char>();
     private List<char> wrongLetters = new List<char>();
+    private string currentInput = "";
     private int remainingAttempts;
+    private float timer;
     private bool gameOver = false;
 
     void Start()
     {
         secretWord = secretWord.ToUpper();
         remainingAttempts = maxAttempts;
+        timer = attemptTime;
 
         foreach (var part in hangmanParts)
             part.SetActive(false);
 
         UpdateWordDisplay();
-        guessButton.onClick.AddListener(OnGuessSubmitted);
+        playerInputText.text = "";
         messageText.text = "";
+        UpdateTimerUI();
     }
 
-    void OnGuessSubmitted()
+    void Update()
     {
         if (gameOver) return;
 
-        string input = inputField.text.ToUpper();
-        inputField.text = "";
+        HandleTyping();
+        HandleTimer();
+    }
 
-        if (string.IsNullOrEmpty(input) || input.Length > 1)
+    void HandleTyping()
+    {
+        foreach (char c in Input.inputString)
         {
-            messageText.text = "Enter one letter!";
-            return;
+            if (char.IsLetter(c))
+            {
+                if (currentInput.Length < 1) // Only allow one letter at a time
+                {
+                    currentInput = char.ToUpper(c).ToString();
+                    playerInputText.text = currentInput;
+                }
+            }
+            else if (c == '\b') // Backspace
+            {
+                currentInput = "";
+                playerInputText.text = currentInput;
+            }
+            else if (c == '\n' || c == '\r') // Enter
+            {
+                if (!string.IsNullOrEmpty(currentInput))
+                {
+                    SubmitGuess(currentInput[0]);
+                    currentInput = "";
+                    playerInputText.text = "";
+                    timer = attemptTime; // Reset timer for next letter
+                }
+            }
         }
+    }
 
-        char guessedChar = input[0];
+    void HandleTimer()
+    {
+        timer -= Time.deltaTime;
+        UpdateTimerUI();
 
+        if (timer <= 0f)
+        {
+            messageText.text = "? Time's up! Moving to next attempt.";
+            remainingAttempts--;
+            UpdateHangmanDrawing();
+            currentInput = "";
+            playerInputText.text = "";
+            timer = attemptTime;
+            CheckGameStatus();
+        }
+    }
+
+    void SubmitGuess(char guessedChar)
+    {
         if (guessedLetters.Contains(guessedChar) || wrongLetters.Contains(guessedChar))
         {
             messageText.text = "Already guessed that!";
@@ -81,11 +127,9 @@ public class HangMan : BaseMinigame
     {
         string display = "";
         foreach (char c in secretWord)
-        {
             display += guessedLetters.Contains(c) ? c + " " : "_ ";
-        }
-
         wordDisplayText.text = display.Trim();
+
         wrongLettersText.text = "Wrong: " + string.Join(", ", wrongLetters);
     }
 
@@ -93,9 +137,12 @@ public class HangMan : BaseMinigame
     {
         int wrongCount = wrongLetters.Count;
         for (int i = 0; i < hangmanParts.Count; i++)
-        {
             hangmanParts[i].SetActive(i < wrongCount);
-        }
+    }
+
+    void UpdateTimerUI()
+    {
+        timerText.text = $"? {timer:F1}s";
     }
 
     void CheckGameStatus()
@@ -113,23 +160,16 @@ public class HangMan : BaseMinigame
         if (allRevealed)
         {
             gameOver = true;
-            guessButton.interactable = false;
-
             int points = Mathf.Max(0, maxPoints - (wrongLetters.Count * (maxPoints / maxAttempts)));
-            messageText.text = $"?? You Win! Points: {points}";
-
+            messageText.text = $"? You Win! Points: {points}";
             Result = points >= maxPoints * 0.8f ? MinigameManager.ResultType.Perfect :
                      points >= maxPoints * 0.5f ? MinigameManager.ResultType.Success :
                      MinigameManager.ResultType.Fail;
-
-            return;
         }
-
-        if (remainingAttempts <= 0)
+        else if (remainingAttempts <= 0)
         {
             gameOver = true;
-            guessButton.interactable = false;
-            messageText.text = $"?? Game Over! The word was: {secretWord}. Points: 0";
+            messageText.text = $"? Game Over! The word was: {secretWord}. Points: 0";
             Result = MinigameManager.ResultType.Fail;
         }
     }
