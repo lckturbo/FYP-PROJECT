@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
-  m_Name: BasicEnemy
+  m_Name: Boss
   m_EditorClassIdentifier: 
   Speed: 2.5
-  maxHealth: 60
+  maxHealth: 10000
   attackreduction: 5
   atkDmg: 10
   actionvaluespeed: 0.8
@@ -26,8 +26,8 @@ MonoBehaviour:
   grassRes: 1
   darkRes: 1.5
   lightRes: 1.5
-  type: 0
-  enemyPrefab: {fileID: 4249954731921599678, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
+  type: 1
+  enemyPrefab: {fileID: 4249954731921599678, guid: 3e3e9d948203af342927a0ef1a049ebe, type: 3}
   bossPrefab: {fileID: 4249954731921599678, guid: 3e3e9d948203af342927a0ef1a049ebe, type: 3}
   basicEnemyPrefab: {fileID: 4249954731921599678, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
   atkRange: 1

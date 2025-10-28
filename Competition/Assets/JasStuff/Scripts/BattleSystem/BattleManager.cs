@@ -54,12 +54,6 @@ public class BattleManager : MonoBehaviour
         enemypartyRef = enemyParty;
         enemyPartyID = enemypartyRef.GetID();
 
-        //NewPlayerMovement player = GameObject.FindGameObjectWithTag("Player").GetComponent<NewPlayerMovement>();
-        //if (player != null)
-        //{
-        //    player.SaveEncounterPosition();
-        //}
-
         SaveLoadSystem.instance.SaveGame();
         if (CheckpointManager.instance != null) CheckpointManager.instance.ClearCheckpoints();
         Debug.Log("changing to battle");

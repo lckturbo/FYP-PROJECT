@@ -75,16 +75,12 @@ public class BattleSystem : MonoBehaviour
     {
         if (turnEngine)
             turnEngine.OnBattleEnd += HandleBattleEnd;
-
-        //Pause?? (For timer)
     }
 
     private void OnDisable()
     {
         if (turnEngine)
             turnEngine.OnBattleEnd -= HandleBattleEnd;
-
-        //Pause?? (For timer)
     }
 
     private void Start()
@@ -123,6 +119,7 @@ public class BattleSystem : MonoBehaviour
 
         // ===== LEADER =====
         GameObject leaderObj = Instantiate(leader.playerPrefab, allySpawnPt[0].position, Quaternion.identity);
+        leaderObj.transform.localScale = new Vector2(1.5f, 1.5f);
         playerLeader = leaderObj;
         leaderObj.name = "Leader_" + leader.name;
         var leaderPI = leaderObj.GetComponent<PlayerInput>();
@@ -166,6 +163,7 @@ public class BattleSystem : MonoBehaviour
             if (allyIndex < allySpawnPt.Length)
             {
                 GameObject allyObj = Instantiate(member.playerPrefab, allySpawnPt[allyIndex].position, Quaternion.identity);
+                allyObj.transform.localScale = new Vector2(1.5f, 1.5f);
                 allyObj.name = "Ally_" + member.name;
                 var allyPI = allyObj.GetComponent<PlayerInput>();
                 if (allyPI) allyPI.enabled = false;
@@ -194,6 +192,7 @@ public class BattleSystem : MonoBehaviour
         for (int i = 0; i < spawnList.Count; i++)
         {
             GameObject enemy = Instantiate(spawnList[i], enemySpawnPt[i].position, Quaternion.identity);
+            enemy.transform.localScale = new Vector2(1.5f, 1.5f);
             enemy.name = "Enemy_" + i;
             enemies.Add(enemy);
 
