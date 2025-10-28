@@ -20,6 +20,19 @@ public class Deadline : BaseMinigame
     {
         BattleManager.instance?.SetBattlePaused(true);
 
+        instructionPanel.SetActive(true);
+        minigamePanel.SetActive(false);
+
+        while (instructionTime > 0)
+        {
+            instructionTime -= Time.unscaledDeltaTime;
+            if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
+            yield return null;
+        }
+
+        instructionPanel.SetActive(false);
+        minigamePanel.SetActive(true);
+
         timer = 5.0f;
         running = true;
         StartCoroutine(SpawnPapers());
