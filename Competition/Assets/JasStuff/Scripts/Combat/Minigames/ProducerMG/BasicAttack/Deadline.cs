@@ -33,7 +33,7 @@ public class Deadline : BaseMinigame
         instructionPanel.SetActive(false);
         minigamePanel.SetActive(true);
 
-        timer = 5.0f;
+        timer = 10.0f;
         running = true;
         StartCoroutine(SpawnPapers());
 

@@ -24,8 +24,16 @@ public class BasicEnemy : EnemyBase
     protected override void Idle()
     {
         base.Idle();
-
+        aiPath.canMove = false;
+        UpdateAnim();
         idleTimer -= Time.deltaTime;
+
+        if (CanSeePlayer())
+        {
+            enemyStates = EnemyStates.Alert;
+            return;
+        }
+
         if (idleTimer < 0 && waypoints != null && waypoints.Count > 0)
         {
             enemyStates = EnemyStates.Patrol;

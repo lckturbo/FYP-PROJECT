@@ -232,7 +232,7 @@ public class PlayerAttack : MonoBehaviour
         // Determine direction based on attackPoint local position
         Vector2 dir = attackPoint.localPosition.normalized;
 
-        // Default fallback
+        // Default fallback 
         if (dir == Vector2.zero)
             dir = Vector2.right;
 

@@ -57,9 +57,7 @@ public class Arrow : MonoBehaviour
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
                 if (party != null)
                 {
-                    BattleManager.instance.HandleBattleTransition(
-                        party
-                    );
+                    BattleManager.instance.HandleBattleTransition(party);
                     BattleManager.instance.SetBattleMode(true);
                 }
             }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class MinigameManager : MonoBehaviour
 {
     public static MinigameManager instance;
+    [SerializeField] private GameObject minigameParent;
     public enum ResultType
     {
         Fail, 
@@ -36,7 +37,7 @@ public class MinigameManager : MonoBehaviour
             yield break;
         }
 
-        GameObject instance = Instantiate(minigamePrefab, this.transform);
+        GameObject instance = Instantiate(minigamePrefab, minigameParent.transform);
         var minigame = instance.GetComponent<BaseMinigame>();
         if (minigame != null)
         {
