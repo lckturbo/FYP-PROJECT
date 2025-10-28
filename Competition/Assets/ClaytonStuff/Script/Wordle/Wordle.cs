@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class Wordle : BaseMinigame
 {
@@ -14,7 +15,7 @@ public class Wordle : BaseMinigame
     [Header("Game Settings")]
     [SerializeField] private int maxAttempts = 6;
     [SerializeField] private string[] wordList = { "APPLE", "CHAIR", "UNITY", "PLANT", "GAMES", "CLOUD" };
-    [SerializeField] private float attemptTime = 10f;
+    [SerializeField] private float attemptTime = 3f;
 
     private string targetWord;
     private int currentAttempt = 0;
@@ -38,7 +39,6 @@ public class Wordle : BaseMinigame
 
         grid.Clear();
 
-        // Create 6 rows × 5 columns of letter boxes
         for (int i = 0; i < maxAttempts; i++)
         {
             List<TMP_Text> row = new List<TMP_Text>();
@@ -81,7 +81,6 @@ public class Wordle : BaseMinigame
 
     void HandleTyping()
     {
-        // Loop through all characters typed this frame
         foreach (char c in Input.inputString)
         {
             if (char.IsLetter(c))
@@ -89,22 +88,22 @@ public class Wordle : BaseMinigame
                 if (currentGuess.Length < 5)
                 {
                     currentGuess += char.ToUpper(c);
-                    UpdateLetterRow(); // instantly show letter
+                    UpdateLetterRow();
                 }
             }
-            else if (c == '\b') // Backspace
+            else if (c == '\b')
             {
                 if (currentGuess.Length > 0)
                 {
                     currentGuess = currentGuess.Substring(0, currentGuess.Length - 1);
-                    UpdateLetterRow(); // instantly update after backspace
+                    UpdateLetterRow();
                 }
             }
-            else if (c == '\n' || c == '\r') // Enter key
+            else if (c == '\n' || c == '\r')
             {
                 if (currentGuess.Length == 5)
                 {
-                    OnSubmitGuess();
+                    StartCoroutine(CheckWordValidity(currentGuess));
                 }
                 else
                 {
@@ -116,7 +115,7 @@ public class Wordle : BaseMinigame
 
     void HandleTimer()
     {
-        timer -= Time.deltaTime;
+        timer -= Time.unscaledDeltaTime;
         UpdateTimerUI();
 
         if (timer <= 0f)
@@ -131,29 +130,46 @@ public class Wordle : BaseMinigame
         if (currentAttempt >= grid.Count) return;
 
         var row = grid[currentAttempt];
-
         for (int i = 0; i < row.Count; i++)
         {
-            if (i < currentGuess.Length)
-            {
-                row[i].text = currentGuess[i].ToString(); // show typed letter
-            }
-            else
-            {
-                row[i].text = ""; // clear unused boxes
-            }
-
-            // ?? Change color to black while typing
+            row[i].text = i < currentGuess.Length ? currentGuess[i].ToString() : "";
             row[i].color = Color.black;
         }
-
-        Canvas.ForceUpdateCanvases();
     }
-
 
     void UpdateTimerUI()
     {
         timerText.text = $"? {timer:F1}s";
+    }
+
+    IEnumerator CheckWordValidity(string guess)
+    {
+        resultText.text = $"Checking if '{guess}' is a real word...";
+
+        string url = $"https://api.dictionaryapi.dev/api/v2/entries/en/{guess.ToLower()}";
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError ||
+                request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                resultText.text = $"?? Network error checking '{guess}'";
+                yield break;
+            }
+
+            string json = request.downloadHandler.text;
+            if (json.Contains("\"word\"")) // means valid word found
+            {
+                OnSubmitGuess(false);
+            }
+            else
+            {
+                resultText.text = $"? '{guess}' is not a valid English word!";
+                currentGuess = "";
+                UpdateLetterRow();
+            }
+        }
     }
 
     void OnSubmitGuess(bool forceFail = false)
@@ -165,7 +181,7 @@ public class Wordle : BaseMinigame
         if (!forceFail)
             DisplayGuess(guess);
         else
-            DisplayGuess("     "); // blank for timeout
+            DisplayGuess("     ");
 
         if (guess == targetWord && !forceFail)
         {
@@ -201,18 +217,18 @@ public class Wordle : BaseMinigame
             letterText.text = guess[i].ToString();
 
             if (guess[i] == targetWord[i])
-                letterText.color = Color.green; // Correct spot
+                letterText.color = Color.green;
             else if (targetWord.Contains(guess[i].ToString()))
-                letterText.color = Color.yellow; // Wrong spot
+                letterText.color = Color.yellow;
             else
-                letterText.color = Color.gray; // Not in word
+                letterText.color = Color.gray;
         }
     }
 
     void CalculateScore()
     {
         int baseScore = 60;
-        int deduction = (currentAttempt) * 10;
+        int deduction = currentAttempt * 10;
         score = Mathf.Max(baseScore - deduction, 10);
     }
 
@@ -230,10 +246,11 @@ public class Wordle : BaseMinigame
 
     public override IEnumerator Run()
     {
-        Result = MinigameManager.ResultType.Fail;
-        StartNewGame();
-
+        BattleManager.instance?.SetBattlePaused(true);
+;
         while (!gameOver)
             yield return null;
+
+        BattleManager.instance?.SetBattlePaused(false);
     }
 }

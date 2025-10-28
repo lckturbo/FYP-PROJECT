@@ -55,7 +55,7 @@ public class Scramble : BaseMinigame
         if (gameOver) return;
 
         // Countdown timer
-        timeLeft -= Time.deltaTime;
+        timeLeft -= Time.unscaledDeltaTime;
         timerText.text = $"Time: {timeLeft:F1}s";
         if (timeLeft <= 0f)
         {
@@ -151,7 +151,11 @@ public class Scramble : BaseMinigame
 
     public override IEnumerator Run()
     {
-        Result = MinigameManager.ResultType.Fail;
-        yield return new WaitForSeconds(1);
+        BattleManager.instance?.SetBattlePaused(true);
+        ;
+        while (!gameOver)
+            yield return null;
+
+        BattleManager.instance?.SetBattlePaused(false);
     }
 }
