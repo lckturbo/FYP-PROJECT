@@ -166,7 +166,7 @@ public class TypingSpeedTest : BaseMinigame
 
     public override IEnumerator Run()
     {
-        Result = MinigameManager.ResultType.Fail;
+        Result = MinigameManager.ResultType.Perfect;
 
         yield return new WaitForSeconds(1);
     }
