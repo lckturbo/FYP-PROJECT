@@ -44,6 +44,11 @@ public class Combatant : MonoBehaviour
 
     [SerializeField] private NewCharacterStats runtimeStats;
 
+    // --- Minigame control ---
+    private bool minigameTriggered = false;
+    private bool waitingForMinigameResult = false;
+    private int pendingMinigameDamage = -1;
+
     private void Awake()
     {
         if (!health) health = GetComponentInChildren<NewHealth>();
@@ -180,6 +185,19 @@ public class Combatant : MonoBehaviour
     public void DealDamage()
     {
         if (currentTarget == null) return;
+
+        if (waitingForMinigameResult)
+        {
+            Debug.Log("Waiting for minigame result — skipping base damage.");
+            return;
+        }
+
+        if (pendingMinigameDamage > 0)
+        {
+            currentTarget.health.TakeDamage(pendingMinigameDamage, stats, NewElementType.None);
+            pendingMinigameDamage = -1;
+            return;
+        }
 
         float baseMultiplier = 1f;
         switch (currentAttackType)
@@ -397,22 +415,27 @@ public class Combatant : MonoBehaviour
 
     public void OnMinigameResult(MinigameManager.ResultType result)
     {
+        waitingForMinigameResult = false;
+
+        int dmg = 0;
         switch (result)
         {
             case MinigameManager.ResultType.Fail:
-                currentTarget?.health.TakeDamage(1, stats, NewElementType.None);
+                dmg = 1;
                 break;
 
             case MinigameManager.ResultType.Success:
-                int dmg = Mathf.RoundToInt(stats.atkDmg * 1.02f);
-                currentTarget?.health.TakeDamage(dmg, stats, NewElementType.None);
+                dmg = Mathf.RoundToInt(stats.atkDmg * 1.02f);
                 break;
 
             case MinigameManager.ResultType.Perfect:
-                currentTarget?.health.TakeDamage(currentTarget.health.GetCurrHealth(), stats, NewElementType.None);
+                dmg = currentTarget?.health.GetCurrHealth() ?? 0;
                 break;
         }
+
+        pendingMinigameDamage = dmg;
     }
+
     private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
     {
         if (target == null || target.health == null) return 0;
