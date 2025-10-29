@@ -21770,6 +21770,37 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &419535515
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 419535516}
+  m_Layer: 0
+  m_Name: GameObject - Switch
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &419535516
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419535515}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 4.9865456, y: 2.9920974, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1680380902}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &425389605
 GameObject:
   m_ObjectHideFlags: 0
@@ -22031,6 +22062,7 @@ Transform:
   m_Children:
   - {fileID: 69809572}
   - {fileID: 1040659431}
+  - {fileID: 1607299450}
   - {fileID: 1931250627}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -22686,7 +22718,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 537191286}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 14d5a21aa9d52f14ebb294f9d34a1671, type: 3}
   m_Name: 
@@ -46358,7 +46390,7 @@ MonoBehaviour:
   indicator: {fileID: 739530452}
   activeColor: {r: 0, g: 1, b: 1, a: 1}
   idleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  blockFocus: {fileID: 537191287}
+  blockFocus: {fileID: 1607299450}
   blockAnimator: {fileID: 788996006}
   returnFocus: {fileID: 770365766}
   receiverFocus: {fileID: 770365766}
@@ -55372,6 +55404,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1603693338}
   m_CullTransparentMesh: 1
+--- !u!1 &1607299449
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1607299450}
+  m_Layer: 0
+  m_Name: GameObject - Beam
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1607299450
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1607299449}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 115.55654, y: 105.0121, z: 0.0375687}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 450020682}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1617511233
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -56039,6 +56102,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1303465025}
+  - {fileID: 419535516}
   m_Father: {fileID: 69809572}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1680380903
@@ -56056,7 +56120,7 @@ MonoBehaviour:
   channelData: {fileID: 11400000, guid: 3927b3231811f0848b1e9b7fad0a371d, type: 2}
   channelIndex: 0
   switchAnimator: {fileID: 1680380906}
-  blockFocus: {fileID: 1838651853}
+  blockFocus: {fileID: 419535516}
   blockAnimator: {fileID: 1066656537}
   returnFocus: {fileID: 1680380902}
   panDuration: 0.6
@@ -74977,7 +75041,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1838651852}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 14d5a21aa9d52f14ebb294f9d34a1671, type: 3}
   m_Name: 

@@ -30,6 +30,9 @@ public class MirrorInteract : MonoBehaviour
 
     private void Update()
     {
+        if (GameInputLock.inputLocked)
+            return;
+
         if (!inRange || Keyboard.current == null) return;
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
