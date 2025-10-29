@@ -48,6 +48,7 @@ public class SwitchInteract : MonoBehaviour
     {
         _resolvedChannel = (channelData != null) ? channelData.channelIndex : channelIndex;
         TryBindPlayerInput();
+        if (!returnFocus) returnFocus = transform;
     }
 
     private void Update()
@@ -105,38 +106,58 @@ public class SwitchInteract : MonoBehaviour
         _coolingDown = true;
         SetPlayerControl(false);
 
-        //TO DO IN ANIMATOR
-        if (switchAnimator)
-        {
-            switchAnimator.ResetTrigger("Use");
-            switchAnimator.SetTrigger("Use");
-            yield return WaitForCurrentAnimOrFallback(switchAnimator, switchAnimFallback);
-        }
-
         NewCameraController cam = FindObjectOfType<NewCameraController>();
-        if (cam && blockFocus)
+
+        Vector3 switchPos = (returnFocus ? returnFocus.position : transform.position);
+        Transform switchAnchor = CreateTempAnchor(switchPos, "CamTemp_Switch");
+
+        Transform blockAnchor = null;
+        if (blockFocus)
+            blockAnchor = CreateTempAnchor(blockFocus.position, "CamTemp_Block");
+
+        try
         {
-            yield return cam.PanTo(blockFocus, panDuration);
-            yield return new WaitForSeconds(panDuration);
+            // 1) SHOW SWITCH ANIM (camera settles on switch)
+            if (cam && switchAnchor)
+                yield return cam.PanTo(switchAnchor, panDuration);
+
+            if (switchAnimator)
+            {
+                switchAnimator.ResetTrigger("Use");
+                switchAnimator.SetTrigger("Use");
+                yield return WaitForCurrentAnimOrFallback(switchAnimator, switchAnimFallback);
+            }
+
+            // 2) PAN TO BLOCK
+            if (cam && blockAnchor)
+                yield return cam.PanTo(blockAnchor, panDuration);
+
+            // 3) Toggle AFTER we've framed the block (target can safely disable now)
+            SwitchBus.Toggle(_resolvedChannel);
+
+            // 4) Wait for block anim or fallback, then optional hold
+            if (blockAnimator)
+                yield return WaitForCurrentAnimOrFallback(blockAnimator, blockAnimFallback);
+            else
+                yield return new WaitForSeconds(blockAnimFallback);
+
+            if (holdOnBlock > 0f)
+                yield return new WaitForSeconds(holdOnBlock);
+
+            // 5) PAN BACK TO SWITCH
+            if (cam && switchAnchor)
+                yield return cam.PanTo(switchAnchor, panDuration);
+
+            // 6) RETURN / RECONNECT TO PLAYER
+            if (cam)
+                yield return cam.ReturnToPlayer(panDuration);
         }
-
-        SwitchBus.Toggle(_resolvedChannel);
-
-        if (blockAnimator)
-            yield return WaitForCurrentAnimOrFallback(blockAnimator, blockAnimFallback);
-        else
-            yield return new WaitForSeconds(blockAnimFallback);
-
-        if (holdOnBlock > 0f)
-            yield return new WaitForSeconds(holdOnBlock);
-
-        if (cam)
+        finally
         {
-            yield return cam.ReturnToPlayer(panDuration);
-            yield return new WaitForSeconds(panDuration);
+            if (switchAnchor) Destroy(switchAnchor.gameObject);
+            if (blockAnchor) Destroy(blockAnchor.gameObject);
+            SetPlayerControl(true);
         }
-
-        SetPlayerControl(true);
 
         if (cooldown > 0f)
             yield return new WaitForSeconds(cooldown);
@@ -202,6 +223,13 @@ public class SwitchInteract : MonoBehaviour
     {
         if (_interactAction != null)
             _interactAction.performed -= OnInteractPerformed;
+    }
+
+    private Transform CreateTempAnchor(Vector3 worldPos, string name)
+    {
+        var go = new GameObject(name);
+        go.transform.position = worldPos;
+        return go.transform;
     }
 
 #if UNITY_EDITOR
