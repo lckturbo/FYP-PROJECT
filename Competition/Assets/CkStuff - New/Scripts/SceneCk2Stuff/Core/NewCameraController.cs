@@ -14,10 +14,12 @@ public class NewCameraController : MonoBehaviour
     private bool _isPanning;
     private Transform _panTarget;
     private Transform _originalTarget;
+    private Camera _cam;
 
     private void Awake()
     {
         _originalTarget = target;
+        _cam = GetComponent<Camera>();
     }
 
     private void LateUpdate()
@@ -32,10 +34,8 @@ public class NewCameraController : MonoBehaviour
     public IEnumerator PanTo(Transform newTarget, float duration)
     {
         if (!newTarget) yield break;
-
         _isPanning = true;
         _panTarget = newTarget;
-
         float t = 0f;
         while (t < duration)
         {
@@ -47,19 +47,34 @@ public class NewCameraController : MonoBehaviour
     public IEnumerator ReturnToPlayer(float duration)
     {
         if (!_originalTarget) _originalTarget = target;
-
         _isPanning = false;
         _panTarget = null;
         target = _originalTarget;
-
         float t = 0f;
         while (t < duration)
         {
             t += Time.unscaledDeltaTime;
             yield return null;
         }
-
         if (_originalTarget)
             target = _originalTarget;
+    }
+
+    public IEnumerator ZoomTo(float targetSize, float duration)
+    {
+        if (!_cam) yield break;
+
+        float startSize = _cam.orthographicSize;
+        float t = 0f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float progress = t / duration;
+            _cam.orthographicSize = Mathf.Lerp(startSize, targetSize, progress);
+            yield return null;
+        }
+
+        _cam.orthographicSize = targetSize;
     }
 }
