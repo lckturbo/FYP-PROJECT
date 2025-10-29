@@ -49,8 +49,6 @@ public class Arrow : MonoBehaviour
         // Hit Enemy
         if (collision.CompareTag("Enemy"))
         {
-            Debug.Log($"Arrow hit enemy {collision.name}, dealt {damage}");
-
             EnemyBase enemy = collision.GetComponent<EnemyBase>();
             if (enemy != null)
             {

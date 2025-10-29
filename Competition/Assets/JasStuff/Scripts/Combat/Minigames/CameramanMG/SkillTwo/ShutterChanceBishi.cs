@@ -72,6 +72,11 @@ public class ShutterChanceBishi : BaseMinigame
 
     private Vector2 cameramanBasePos;
 
+    [Header("Cameraman Sprite Swap")]
+    [SerializeField] private Image cameramanImage;
+    [SerializeField] private Sprite cameramanDefaultSprite;
+    [SerializeField] private Sprite cameramanThumbsSprite;
+
     [Header("Cameraman Hop")]
     [SerializeField] private float camHopHeight = 32f;
     [SerializeField] private float camHopSeconds = 0.24f;
@@ -459,8 +464,8 @@ public class ShutterChanceBishi : BaseMinigame
         yield return Flash(); // white flash for end
 
         ShowCameraman(false);
-        if (resultPanel) resultPanel.SetActive(true);
         if (scoreText) scoreText.gameObject.SetActive(false);
+        if (resultPanel) resultPanel.SetActive(true);
         if (resultText) resultText.text = $"RESULT\nRank: {rank}\nScore: {score}";
 
         float rt = 0f;
@@ -630,6 +635,36 @@ public class ShutterChanceBishi : BaseMinigame
         backgroundImage.sprite = target;
         var c = backgroundImage.color; c.a = 1f; backgroundImage.color = c;
     }
+
+    private IEnumerator CameramanThumbsUpFor(float seconds)
+    {
+        if (!cameramanImage || !cameramanThumbsSprite) yield break;
+
+        var original = cameramanImage.sprite;
+
+        cameramanImage.sprite = cameramanThumbsSprite;
+
+        if (cameraman)
+        {
+            var start = cameraman.localScale;
+            var peak = start * 1.07f;
+            float t = 0f, up = 0.08f, down = 0.10f;
+
+            while (t < up) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(start, peak, t / up); yield return null; }
+            float hold = Mathf.Max(0f, seconds - up - down);
+            if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
+            t = 0f;
+            while (t < down) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(peak, start, t / down); yield return null; }
+            cameraman.localScale = start;
+        }
+        else
+        {
+            yield return new WaitForSecondsRealtime(seconds);
+        }
+
+        cameramanImage.sprite = cameramanDefaultSprite ? cameramanDefaultSprite : original;
+    }
+
 
     // ---------- Bonus visuals helpers ----------
     private void EnterBonusVisuals()
@@ -1078,6 +1113,8 @@ public class ShutterChanceBishi : BaseMinigame
 
         okayCenterText.text = "OKAY!";
         okayCenterText.gameObject.SetActive(true);
+
+        StartCoroutine(CameramanThumbsUpFor(okayDisplayTime));
 
         yield return new WaitForSecondsRealtime(okayDisplayTime);
 

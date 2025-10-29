@@ -541,6 +541,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4bf8866faef05f44aa61c10415203ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  instructionPanel: {fileID: 0}
+  instructionTimerText: {fileID: 0}
+  minigamePanel: {fileID: 0}
+  instructionTime: 5
   scoreText: {fileID: 4291108266535313826}
   goldenHint: {fileID: 244636880855937136}
   flashOverlay: {fileID: 5718758931303376195}
@@ -575,15 +579,18 @@ MonoBehaviour:
   flipTrash: 0
   flipTrashChance: 0.25
   backgroundImage: {fileID: 661828675481276163}
-  bgRuleIntro1: {fileID: 21300000, guid: 619f4bbad39b2384abd04a928526adc0, type: 3}
-  bgRuleIntro2: {fileID: 21300000, guid: afa9c92b3aa511c4ca5729dc66feeb43, type: 3}
-  bgRuleIntro3: {fileID: 21300000, guid: d65fcaad7557f564aa7e027929598b7a, type: 3}
+  bgRuleIntro1: {fileID: 0}
+  bgRuleIntro2: {fileID: 0}
+  bgRuleIntro3: {fileID: 0}
   bgPhoto: {fileID: 21300000, guid: 65f29d9e58b39b44a8677bc74c7b369f, type: 3}
   bgTransition: {fileID: 21300000, guid: bf4c95dc228048f43837b8d2a305e409, type: 3}
   bgResult: {fileID: 21300000, guid: 50ab847e0c7b2d045863d415dfc6cc84, type: 3}
   cameraman: {fileID: 6843098728325062924}
   camWiggleDegrees: 12
   camWiggleSeconds: 0.22
+  cameramanImage: {fileID: 1389243311398608971}
+  cameramanDefaultSprite: {fileID: 21300000, guid: dac262e0803d47d42a008852f844ad00, type: 3}
+  cameramanThumbsSprite: {fileID: 21300000, guid: 5df106b075219b840b12243da9cff6ae, type: 3}
   camHopHeight: 32
   camHopSeconds: 0.24
   shakeRoot: {fileID: 4250193371225946859}
@@ -1407,8 +1414,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
