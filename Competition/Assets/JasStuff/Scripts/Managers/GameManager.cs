@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
             bool settingsOpen = UIManager.instance != null && UIManager.instance.IsSettingsOpen();
 
             if (!settingsOpen && (Input.anyKeyDown || Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject())
-                ASyncManager.instance.LoadLevelBtn("Lobby");
+                ASyncManager.instance.LoadLevelBtn("CharSelection");
         }
     }
     public void ChangeScene(string scn)
