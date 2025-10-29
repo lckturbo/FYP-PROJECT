@@ -58,10 +58,12 @@ public class MinigameManager : MonoBehaviour
             yield break;
         }
 
-        // Pick a random one from this frame’s triggers
-        int randomIndex = UnityEngine.Random.Range(0, 2);
+        // Use System.Random for better randomness
+        var rng = new System.Random(Guid.NewGuid().GetHashCode());
+        int randomIndex = rng.Next(frameTriggers.Count);
+
         var (chosenID, chosenCallback) = frameTriggers[randomIndex];
-        Debug.Log($"[MINIGAME] Randomly selected '{chosenID}' from {frameTriggers.Count} triggers this frame.");
+        Debug.Log($"[MINIGAME] Truly randomly selected '{chosenID}' from {frameTriggers.Count} triggers this frame.");
 
         // Start the chosen minigame
         yield return RunMinigameInternal(chosenID, chosenCallback);
@@ -69,6 +71,7 @@ public class MinigameManager : MonoBehaviour
         frameTriggers.Clear();
         isSelecting = false;
     }
+
 
     private IEnumerator RunMinigameInternal(string id, Action<ResultType> onComplete)
     {
