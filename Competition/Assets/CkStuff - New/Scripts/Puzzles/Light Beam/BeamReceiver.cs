@@ -79,15 +79,13 @@ public class BeamReceiver : MonoBehaviour
         _active = true;
         SetVisual(true);
 
-        // OLD: opened immediately here (causing the pop before pan)
-        // NEW: open now only if we are NOT delaying to cinematic
         if (!openDuringCinematic)
         {
             if (doorBlock) doorBlock.Open();
             else if (doorAnimator) doorAnimator.SetTrigger("Open");
         }
 
-        if (!_coolingDown && !_playedOnce)
+        if (!_coolingDown)
             StartCoroutine(UseSequence());
 
         OnActivated?.Invoke(this);
@@ -162,7 +160,6 @@ public class BeamReceiver : MonoBehaviour
             yield return new WaitForSeconds(cooldown);
 
         _coolingDown = false;
-        _playedOnce = true;
     }
 
     private void SetPlayerControl(bool enabled)
