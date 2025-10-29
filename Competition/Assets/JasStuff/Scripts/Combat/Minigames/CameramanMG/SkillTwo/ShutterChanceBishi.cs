@@ -94,14 +94,6 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private GameObject instructionsPanel;
     [SerializeField] private TMP_Text instructionsText;
 
-    [Header("Result Sequence Overlays")]
-    [SerializeField] private TMP_Text resultHeaderText;   // shows "RESULT"
-    [SerializeField] private TMP_Text calculatingText;    // shows "CALCULATING..."
-    [SerializeField] private float resultHeaderHold = 0.7f;
-    [SerializeField] private float calculatingHold = 1.2f;
-    [SerializeField] private float resultFadeSeconds = 0.2f;
-    private Coroutine calcDotsCo;
-
     [Header("Result UI")]
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private TMP_Text resultText;
@@ -125,9 +117,9 @@ public class ShutterChanceBishi : BaseMinigame
 
     // -------- BONUS ----------
     [Header("BONUS: Timing")]
-    [SerializeField] private float bonusPhaseSeconds = 8.0f;
+    [SerializeField] private float bonusPhaseSeconds = 6.0f;
     [SerializeField] private float bonusIntroDelay = 0.75f;
-    [SerializeField] private float goldenRopeDelay = 5.2f;
+    [SerializeField] private float goldenRopeDelay = 4.75f;
 
     [Header("BONUS: Reaction Scoring")]
     [SerializeField] private int goldenReactionMaxPoints = 250;
@@ -217,9 +209,6 @@ public class ShutterChanceBishi : BaseMinigame
         if (resultPanel) resultPanel.SetActive(false);
         if (finishText) finishText.gameObject.SetActive(false);
 
-        // NEW: ensure result sequence overlays are hidden/reset
-        if (resultHeaderText) resultHeaderText.gameObject.SetActive(false);
-        if (calculatingText) calculatingText.gameObject.SetActive(false);
 
         ShowCameraman(false);
 
@@ -244,6 +233,10 @@ public class ShutterChanceBishi : BaseMinigame
             shakeRootBasePos = shakeRoot.anchoredPosition;
             shakeRoot.anchoredPosition = shakeRootBasePos;
         }
+
+        if (leftImage) leftBaseScale = leftImage.rectTransform.localScale;
+        if (midImage) midBaseScale = midImage.rectTransform.localScale;
+        if (rightImage) rightBaseScale = rightImage.rectTransform.localScale;
 
         waveActive = false;
         goldenWindowActive = false;
@@ -457,41 +450,6 @@ public class ShutterChanceBishi : BaseMinigame
             finishText.gameObject.SetActive(false);
         }
 
-        // ===== RESULT SEQUENCE: "RESULT" -> "CALCULATING..." =====
-        if (resultHeaderText)
-        {
-            resultHeaderText.rectTransform.SetAsLastSibling();
-            resultHeaderText.text = "RESULT";
-            var c = resultHeaderText.color; resultHeaderText.color = new Color(c.r, c.g, c.b, 0f);
-            resultHeaderText.gameObject.SetActive(true);
-            yield return FadeTMPAlpha(resultHeaderText, 0f, 1f, resultFadeSeconds);
-            yield return new WaitForSecondsRealtime(resultHeaderHold);
-            yield return FadeTMPAlpha(resultHeaderText, 1f, 0f, resultFadeSeconds);
-            resultHeaderText.gameObject.SetActive(false);
-        }
-
-        if (calculatingText)
-        {
-            calculatingText.rectTransform.SetAsLastSibling();
-            var c = calculatingText.color; calculatingText.color = new Color(c.r, c.g, c.b, 0f);
-            calculatingText.gameObject.SetActive(true);
-            // fade in
-            yield return FadeTMPAlpha(calculatingText, 0f, 1f, resultFadeSeconds);
-
-            // start animated dots
-            if (calcDotsCo != null) { StopCoroutine(calcDotsCo); calcDotsCo = null; }
-            calculatingText.text = "CALCULATING";
-            calcDotsCo = StartCoroutine(DotsLoop(calculatingText, "CALCULATING", 0.25f));
-
-            // hold during "calculating"
-            yield return new WaitForSecondsRealtime(calculatingHold);
-
-            // stop dots, fade out
-            if (calcDotsCo != null) { StopCoroutine(calcDotsCo); calcDotsCo = null; }
-            yield return FadeTMPAlpha(calculatingText, 1f, 0f, resultFadeSeconds);
-            calculatingText.gameObject.SetActive(false);
-        }
-
         // ===== END / RESULT =====
         var rank = JudgeRank(score);
         Result = (rank == Rank.SSS) ? MinigameManager.ResultType.Perfect
@@ -529,19 +487,6 @@ public class ShutterChanceBishi : BaseMinigame
             yield return null;
         }
         txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, aTo);
-    }
-
-    // Animated "..." helper for CALCULATING
-    private IEnumerator DotsLoop(TMP_Text t, string baseWord = "CALCULATING", float interval = 0.25f)
-    {
-        int dots = 0;
-        while (true)
-        {
-            if (!t) yield break;
-            t.text = baseWord + new string('.', dots);
-            dots = (dots + 1) % 4; // "", ".", "..", "..."
-            yield return new WaitForSecondsRealtime(interval);
-        }
     }
 
     private IEnumerator WaveClearedSequence()
@@ -1014,6 +959,9 @@ public class ShutterChanceBishi : BaseMinigame
             if (rightImage) rightImage.gameObject.SetActive(false);
 
             ExitBonusVisuals();
+
+            resultPhase = true;
+
             EnsureBackground(bgResult);
 
             return true;
@@ -1162,11 +1110,6 @@ public class ShutterChanceBishi : BaseMinigame
         if (camHopCo != null) StopCoroutine(camHopCo);
         if (camWiggleCo != null) StopCoroutine(camWiggleCo);
         if (shakeCo != null) StopCoroutine(shakeCo);
-
-        if (calcDotsCo != null) { StopCoroutine(calcDotsCo); calcDotsCo = null; }
-
-        if (resultHeaderText) resultHeaderText.gameObject.SetActive(false);
-        if (calculatingText) calculatingText.gameObject.SetActive(false);
     }
 
     // ---------- Utils ----------
