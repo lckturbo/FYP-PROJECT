@@ -603,7 +603,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 999
   m_TargetDisplay: 0
 --- !u!114 &3553226345209827441
 MonoBehaviour:
@@ -657,6 +657,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b46a3836107cba46814273fb9131406, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  instructionPanel: {fileID: 0}
+  instructionTimerText: {fileID: 0}
+  minigamePanel: {fileID: 0}
+  instructionTime: 5
   boardParent: {fileID: 1913346337382193568}
   boardTilePrefab: {fileID: 4976972511071400695, guid: 510c03c980ce7af4aaad88fe2502f7f2, type: 3}
   playerRackParent: {fileID: 5272417179490024147}

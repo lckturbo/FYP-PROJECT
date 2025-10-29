@@ -152,7 +152,7 @@ public class Scramble : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
-        ;
+        
         while (!gameOver)
             yield return null;
 

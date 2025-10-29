@@ -334,7 +334,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 999
   m_TargetDisplay: 0
 --- !u!114 &8268727804398344989
 MonoBehaviour:
@@ -388,6 +388,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de47258c7c77e214788f046810b616aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  instructionPanel: {fileID: 0}
+  instructionTimerText: {fileID: 0}
+  minigamePanel: {fileID: 0}
+  instructionTime: 5
   wordDisplayText: {fileID: 6181934020537887135}
   wrongLettersText: {fileID: 1246353641737997181}
   messageText: {fileID: 8023408111737074438}

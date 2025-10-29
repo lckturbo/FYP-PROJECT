@@ -406,7 +406,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 999
   m_TargetDisplay: 0
 --- !u!114 &2349666278168978193
 MonoBehaviour:
@@ -460,6 +460,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7647e702379aef4d970d0b5b6233113, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  instructionPanel: {fileID: 0}
+  instructionTimerText: {fileID: 0}
+  minigamePanel: {fileID: 0}
+  instructionTime: 5
   rollButton: {fileID: 5588361882152477506}
   resultText: {fileID: 7919959215382750733}
 --- !u!1 &8632695575274780041

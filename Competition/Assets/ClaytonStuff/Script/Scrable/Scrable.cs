@@ -223,19 +223,25 @@ public class ScrabbleGame : BaseMinigame
             return;
         }
 
-        // ? Prevent single-letter "words"
-        if (formedWord.Length <= 1)
-        {
-            messageText.text = $"'{formedWord}' is too short! Words must be at least 2 letters.";
-            OnResetTurn();
-            return;
-        }
-
         StartCoroutine(CheckWordOnline(formedWord.ToUpper()));
 
-        AddRandomLetterToRack();
-
+        // Immediately calculate result based on score thresholds
+        UpdateResult();
     }
+
+    void UpdateResult()
+    {
+        int maxPossibleScore = rackSize * 10; // Example
+        float scorePercent = (float)totalScore / maxPossibleScore;
+
+        if (scorePercent >= 0.8f)
+            Result = MinigameManager.ResultType.Perfect;
+        else if (scorePercent >= 0.5f)
+            Result = MinigameManager.ResultType.Success;
+        else
+            Result = MinigameManager.ResultType.Fail;
+    }
+
     // ================== ?? TIMER HANDLING ===================
     void StartNewTurn()
     {
@@ -249,12 +255,13 @@ public class ScrabbleGame : BaseMinigame
 
     void HandleTimer()
     {
-        turnTimer -= Time.deltaTime;
+        turnTimer -= Time.unscaledDeltaTime;
         timerText.text = $"? {turnTimer:F1}s";
 
         if (turnTimer <= 0f)
         {
             turnTimer = 0f;
+            EndGame();
             EndTurn(false);
         }
     }
@@ -466,11 +473,45 @@ public class ScrabbleGame : BaseMinigame
         scoreText.text = $"Score: {totalScore}";
     }
 
+    void EndGame()
+    {
+        gameOver = true;
+        turnActive = false;
+        EnableBoardInteraction(false);
+        submitButton.interactable = false;
+        resetTurnButton.interactable = false;
+
+        // Determine result type based on totalScore
+        int maxPossibleScore = rackSize * 10; // Example: assume max letter score per letter = 10
+        float scorePercent = (float)totalScore / maxPossibleScore;
+
+        if (scorePercent >= 0.8f)
+            Result = MinigameManager.ResultType.Perfect;
+        else if (scorePercent >= 0.5f)
+            Result = MinigameManager.ResultType.Success;
+        else
+            Result = MinigameManager.ResultType.Fail;
+
+        messageText.text += $"\nGame Over! Result: {Result}\nTotal Score: {totalScore}";
+    }
+
+    // Call this when the game ends (timer runs out or manually)
+    void CheckEndCondition()
+    {
+        if (turnTimer <= 0f)
+        {
+            EndGame();
+        }
+    }
+
+
     public override IEnumerator Run()
     {
-        Result = MinigameManager.ResultType.Fail;
+        BattleManager.instance?.SetBattlePaused(true);
 
         while (!gameOver)
             yield return null;
+        Debug.Log("Gameover");
+        BattleManager.instance?.SetBattlePaused(false);
     }
 }

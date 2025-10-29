@@ -83,7 +83,7 @@ public class HangMan : BaseMinigame
 
     void HandleTimer()
     {
-        timer -= Time.deltaTime;
+        timer -= Time.unscaledDeltaTime;
         UpdateTimerUI();
 
         if (timer <= 0f)
@@ -160,11 +160,20 @@ public class HangMan : BaseMinigame
         if (allRevealed)
         {
             gameOver = true;
+
+            // Calculate points like Scramble
             int points = Mathf.Max(0, maxPoints - (wrongLetters.Count * (maxPoints / maxAttempts)));
+            points = Mathf.FloorToInt(points * (timer / attemptTime)); // Bonus for faster guesses
+
             messageText.text = $"? You Win! Points: {points}";
-            Result = points >= maxPoints * 0.8f ? MinigameManager.ResultType.Perfect :
-                     points >= maxPoints * 0.5f ? MinigameManager.ResultType.Success :
-                     MinigameManager.ResultType.Fail;
+
+            // Determine ResultType
+            if (points >= maxPoints * 0.8f)
+                Result = MinigameManager.ResultType.Perfect;
+            else if (points >= maxPoints * 0.5f)
+                Result = MinigameManager.ResultType.Success;
+            else
+                Result = MinigameManager.ResultType.Fail;
         }
         else if (remainingAttempts <= 0)
         {
@@ -174,9 +183,14 @@ public class HangMan : BaseMinigame
         }
     }
 
+
     public override IEnumerator Run()
     {
-        Result = MinigameManager.ResultType.Fail;
-        yield return new WaitForSeconds(1);
+        BattleManager.instance?.SetBattlePaused(true);
+
+        while (!gameOver)
+            yield return null;
+
+        BattleManager.instance?.SetBattlePaused(false);
     }
 }
