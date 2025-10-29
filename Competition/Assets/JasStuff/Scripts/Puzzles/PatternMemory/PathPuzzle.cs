@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PathPuzzle : MonoBehaviour
 {
-    [SerializeField] private List<int> correctPath; // e.g. [1, 2, 3]
+    [SerializeField] private ToggleableBlock doorBlock;
+    [SerializeField] private List<int> correctPath; 
     private int currentStep = 0;
     private bool canStep = false;
 
@@ -29,7 +30,7 @@ public class PathPuzzle : MonoBehaviour
             {
                 Debug.Log("Puzzle Completed!");
                 canStep = false;
-                // You can trigger next event here (door open, etc.)
+
             }
         }
         else
