@@ -132,15 +132,7 @@ public abstract class EnemyBase : MonoBehaviour
     // ---- IDLE ---- //
     protected virtual void Idle()
     {
-        aiPath.canMove = false;
         rb2d.velocity = Vector2.zero;
-        UpdateAnim();
-
-        if (CanSeePlayer())
-        {
-            enemyStates = EnemyStates.Alert;
-            return;
-        }
     }
 
     // ---- PATROL ---- //
@@ -290,7 +282,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (!hit.collider) return false;
 
         return hit.collider.CompareTag("Player") || dist < enemyStats.atkRange * 1.2f;
-    }
+    }   
 
     protected void UpdateAnim()
     {

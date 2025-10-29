@@ -6,7 +6,6 @@ public class EnemyStats : BaseStats
     public enum EnemyTypes
     {
         Basic,
-        Tank,
         MiniBoss
     }
 
@@ -14,6 +13,8 @@ public class EnemyStats : BaseStats
     public EnemyTypes type;
     [Header("EnemyPrefab")]
     public GameObject enemyPrefab;
+    public GameObject bossPrefab;
+    public GameObject basicEnemyPrefab;
     [Header("EnemyCombat")]
     public float atkRange;
     [Header("BossStats")]

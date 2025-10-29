@@ -5,11 +5,11 @@ using UnityEngine;
 public class MinigameManager : MonoBehaviour
 {
     public static MinigameManager instance;
-
+    [SerializeField] private GameObject minigameParent;
     public enum ResultType
     {
-        Fail,
-        Success,
+        Fail, 
+        Success, 
         Perfect
     }
 
@@ -18,39 +18,31 @@ public class MinigameManager : MonoBehaviour
         if (!instance) instance = this;
         else Destroy(gameObject);
     }
-
     public void StartMinigame(string id, Action<ResultType> onComplete)
     {
         StartCoroutine(RunMinigame(id, onComplete));
     }
-
     public IEnumerator RunMinigame(string id, Action<ResultType> onComplete)
     {
         Debug.Log($"[MINIGAME] Starting {id}...");
+        //TurnEngine engine = FindObjectOfType<TurnEngine>();
+        //if (engine) engine.Pause(true);
 
         GameObject minigamePrefab = Resources.Load<GameObject>($"Minigames/{id}");
         if (minigamePrefab == null)
         {
             Debug.LogWarning($"[MINIGAME] No prefab found for ID {id}");
+            //if (engine) engine.Pause(false);
             onComplete?.Invoke(ResultType.Fail);
             yield break;
         }
 
-        GameObject instance = Instantiate(minigamePrefab, this.transform);
+        GameObject instance = Instantiate(minigamePrefab, minigameParent.transform);
         var minigame = instance.GetComponent<BaseMinigame>();
-
-        // --- RANDOMIZE ANIMATOR EVENT ---
-        Animator animator = instance.GetComponentInChildren<Animator>();
-        if (animator != null)
-        {
-            int randomEvent = UnityEngine.Random.Range(0, 2); // 0 or 1
-            animator.SetInteger("EventInt", randomEvent);
-            Debug.Log($"[MINIGAME] Triggering event: {randomEvent}");
-        }
-
         if (minigame != null)
         {
             yield return minigame.Run();
+            //if (engine) engine.Pause(false);
             onComplete?.Invoke(minigame.Result);
         }
 

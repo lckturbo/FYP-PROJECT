@@ -10,7 +10,6 @@ public class StaticEnemy : EnemyBase
     protected override void Start()
     {
         base.Start();
-
         originalPosition = transform.position;
         originalFacingDir = startingFacingDir.normalized;
 
@@ -22,6 +21,18 @@ public class StaticEnemy : EnemyBase
 
         lastMoveDir = originalFacingDir;
         UpdateHitboxDirection();
+    }
+    protected override void Idle()
+    {
+        base.Idle();
+        aiPath.canMove = false;
+        UpdateAnim();
+
+        if (CanSeePlayer())
+        {
+            enemyStates = EnemyStates.Alert;
+            return;
+        }
     }
 
     protected override void Patrol()
@@ -61,5 +72,27 @@ public class StaticEnemy : EnemyBase
             enemyStates = EnemyStates.Attack;
 
         UpdateAnim();
+    }
+
+    protected override void StateMachine()
+    {
+        switch (enemyStates)
+        {
+            case EnemyStates.Idle:
+                Idle();
+                break;
+            case EnemyStates.Patrol:
+                Patrol();
+                break;
+            case EnemyStates.Alert:
+                Alert();
+                break;
+            case EnemyStates.Chase:
+                Chase();
+                break;
+            case EnemyStates.Attack:
+                Attack(); // trigger battle scene
+                break;
+        }
     }
 }
