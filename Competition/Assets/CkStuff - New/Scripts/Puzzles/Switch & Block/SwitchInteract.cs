@@ -26,7 +26,7 @@ public class SwitchInteract : MonoBehaviour
 
     [Header("Spam Control")]
     public float cooldown = 0.25f;
-
+    
     // runtime
     private bool _coolingDown;
     private int _resolvedChannel;
