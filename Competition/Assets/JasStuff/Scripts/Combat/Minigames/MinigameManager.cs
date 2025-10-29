@@ -59,7 +59,7 @@ public class MinigameManager : MonoBehaviour
         }
 
         // Pick a random one from this frame’s triggers
-        int randomIndex = UnityEngine.Random.Range(0, frameTriggers.Count);
+        int randomIndex = UnityEngine.Random.Range(0, 2);
         var (chosenID, chosenCallback) = frameTriggers[randomIndex];
         Debug.Log($"[MINIGAME] Randomly selected '{chosenID}' from {frameTriggers.Count} triggers this frame.");
 
