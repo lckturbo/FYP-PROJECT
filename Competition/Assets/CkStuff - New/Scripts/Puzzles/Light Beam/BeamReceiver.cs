@@ -84,7 +84,7 @@ public class BeamReceiver : MonoBehaviour
         }
 
         if (!_coolingDown)
-            StartCoroutine(UseSequence(true)); // true = opening
+            StartCoroutine(UseSequence(true));
 
         OnActivated?.Invoke(this);
     }
@@ -99,9 +99,8 @@ public class BeamReceiver : MonoBehaviour
             if (doorBlock) doorBlock.Close();
             else if (doorAnimator) doorAnimator.SetTrigger("Close");
 
-            // Show the closing cinematic too
             if (!_coolingDown)
-                StartCoroutine(UseSequence(false)); // false = closing
+                StartCoroutine(UseSequence(false));
         }
 
         OnDeactivated?.Invoke(this);
@@ -111,19 +110,16 @@ public class BeamReceiver : MonoBehaviour
     {
         _coolingDown = true;
 
-        // Hard lock: disable PlayerInput component + set global lock (blocks manual Keyboard polling)
         SetPlayerControl(false);
         GameInputLock.inputLocked = true;
 
         NewCameraController cam = FindObjectOfType<NewCameraController>();
 
-        // Snapshot anchors (prevents camera target disappearing during toggles)
         Transform receiverAnchor = receiverFocus ? CreateTempAnchor(receiverFocus.position, "CamTemp_Receiver") : null;
         Transform blockAnchor = blockFocus ? CreateTempAnchor(blockFocus.position, "CamTemp_Block") : null;
 
         try
         {
-            // 1) Focus receiver first
             if (cam && receiverAnchor)
                 yield return cam.PanTo(receiverAnchor, panDuration);
 
@@ -132,11 +128,9 @@ public class BeamReceiver : MonoBehaviour
             if (receiverHold > 0f)
                 yield return new WaitForSeconds(receiverHold);
 
-            // 2) Focus block
             if (cam && blockAnchor)
                 yield return cam.PanTo(blockAnchor, panDuration);
 
-            // 3) Perform open/close action while we’re framed on the block
             if (doorBlock)
             {
                 if (opening) doorBlock.Open();
@@ -147,7 +141,6 @@ public class BeamReceiver : MonoBehaviour
                 doorAnimator.SetTrigger(opening ? "Open" : "Close");
             }
 
-            // 4) Wait for door anim or fallback, then optional hold
             if (blockAnimator)
                 yield return WaitForCurrentAnimOrFallback(blockAnimator, blockAnimFallback);
             else
@@ -156,13 +149,11 @@ public class BeamReceiver : MonoBehaviour
             if (holdOnBlock > 0f)
                 yield return new WaitForSeconds(holdOnBlock);
 
-            // 5) Return to player
             if (cam)
                 yield return cam.ReturnToPlayer(panDuration);
         }
         finally
         {
-            // Cleanup (no yields here)
             if (receiverAnchor) Destroy(receiverAnchor.gameObject);
             if (blockAnchor) Destroy(blockAnchor.gameObject);
 
@@ -170,8 +161,6 @@ public class BeamReceiver : MonoBehaviour
             SetPlayerControl(true);
             GameInputLock.inputLocked = false;
         }
-
-        // Cooldown after the sequence
         if (cooldown > 0f)
             yield return new WaitForSeconds(cooldown);
 
