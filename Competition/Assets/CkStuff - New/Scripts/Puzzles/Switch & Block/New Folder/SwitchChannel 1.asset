@@ -9,15 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b30668b56d339e74eb926853f3ab6c88, type: 3}
-  m_Name: LevelGrowthPlayer
+  m_Script: {fileID: 11500000, guid: 00f40307bdf85b14cb9744341fea0939, type: 3}
+  m_Name: SwitchChannel 1
   m_EditorClassIdentifier: 
-  maxHealthAdd: 5
-  atkDmgAdd: 16
-  defenseAdd: 13
-  speedAdd: 0.16
-  critRateAdd: 0.02
-  critDmgAdd: 0.2
-  maxHealthMul: 1
-  atkDmgMul: 1
-  speedMul: 1
+  channelName: 1
+  channelIndex: 1
