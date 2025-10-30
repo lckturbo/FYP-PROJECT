@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
@@ -14,7 +15,7 @@ public class StatueController : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-        boardTileMap = FindObjectsOfType<Tilemap>().FirstOrDefault(s => s.gameObject.name == "TicTacToe");
+        boardTileMap = FindObjectsOfType<Tilemap>().FirstOrDefault(s => s.gameObject.name == "Tilemap - Connect3 Puzzles");
         if (playerInput)
         {
             interactAction = playerInput.actions["Interaction"];
@@ -29,6 +30,10 @@ public class StatueController : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext ctx)
     {
+        var statueManager = FindObjectOfType<StatueManager>();
+        if (statueManager != null && !statueManager.IsWhiteTurn())
+            return;
+
         if (selectedStatue != null)
         {
             Vector3Int cell = boardTileMap.WorldToCell(transform.position);

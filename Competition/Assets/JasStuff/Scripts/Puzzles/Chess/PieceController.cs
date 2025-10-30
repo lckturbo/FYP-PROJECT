@@ -15,7 +15,7 @@ public class PieceController : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-        boardTileMap = FindObjectsOfType<Tilemap>().FirstOrDefault(s => s.gameObject.name == "ChessBoard");
+        boardTileMap = FindObjectsOfType<Tilemap>().FirstOrDefault(s => s.gameObject.name == "Tilemap - ChessBoard");
         if (playerInput)
         {
             interactAction = playerInput.actions["Interaction"];

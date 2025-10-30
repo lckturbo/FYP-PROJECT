@@ -9745,6 +9745,7 @@ GameObject:
   - component: {fileID: -92138703383983078}
   - component: {fileID: 7827928779246245682}
   - component: {fileID: -4908080834905126878}
+  - component: {fileID: 3760575192579169997}
   m_Layer: 8
   m_Name: Cameraman
   m_TagString: Player
@@ -10117,6 +10118,18 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 262144
   pushKey: 19
+--- !u!114 &3760575192579169997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42a2c7f1a06e06d44906c4c1ab06fc50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5284496553185815870
 GameObject:
   m_ObjectHideFlags: 0

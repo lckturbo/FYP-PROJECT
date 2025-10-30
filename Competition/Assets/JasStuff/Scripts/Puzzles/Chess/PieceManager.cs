@@ -84,9 +84,9 @@ public class PieceManager : BoardManager
             }
             else
             {
-                Debug.Log("Puzzle solved!");
                 puzzleSolved = true;
                 LockAllPieces();
+                StartCoroutine(HandlePuzzleComplete());
             }
         }
         else

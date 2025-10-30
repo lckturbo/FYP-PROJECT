@@ -222,7 +222,6 @@ public class InventoryUIManager : MonoBehaviour
         var inv = inventoryManager.PlayerInventory;
         if (inv == null) return;
 
-
         if (selectedMainSlot < 0 || selectedMainSlot >= inv.mainInventory.Count)
         {
             Debug.Log("No valid item selected.");
