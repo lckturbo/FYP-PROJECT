@@ -5,23 +5,26 @@ using UnityEngine.InputSystem;
 
 public class PathPuzzle : MonoBehaviour
 {
+    [SerializeField] private ToggleableBlock doorToOpen;
     [SerializeField] private List<int> correctPath;
     [SerializeField] private Transform cameraFocusPoint;
     [SerializeField] private float cameraPanDuration = 0.5f;
     [SerializeField] private float cameraHoldDuration = 1.0f;
+
+    [Header("Door Focus")]
+    [SerializeField] private Transform doorFocusPoint;
+    [SerializeField] private float doorFocusDuration = 0.5f;
 
     private int currentStep = 0;
     private bool canStep = false;
 
     private List<PuzzleZone> zones;
     private NewCameraController cam;
-    //private PlayerInput playerInput;
 
     private bool puzzleStarted = false;
 
     private void Start()
     {
-        //playerInput = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerInput>();
         zones = new List<PuzzleZone>(FindObjectsOfType<PuzzleZone>());
         cam = FindObjectOfType<NewCameraController>();
     }
@@ -29,6 +32,9 @@ public class PathPuzzle : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player") && !puzzleStarted)
         {
+            PlayerInput playerInput = collision.GetComponent<PlayerInput>();
+            if(playerInput != null) 
+                playerInput.enabled = false;
             puzzleStarted = true;
             StartCoroutine(StartPuzzleSequence());
         }
@@ -36,6 +42,7 @@ public class PathPuzzle : MonoBehaviour
 
     private IEnumerator StartPuzzleSequence()
     {
+        yield return new WaitForSeconds(0.5f);
         if (cam && cameraFocusPoint)
         {
             yield return cam.StartCoroutine(cam.PanTo(cameraFocusPoint, cameraPanDuration));
@@ -54,6 +61,14 @@ public class PathPuzzle : MonoBehaviour
 
         canStep = true;
         Debug.Log("Player may now step.");
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player)
+        {
+            PlayerInput playerInput = player.GetComponent<PlayerInput>();
+            if (playerInput != null)
+                playerInput.enabled = true;
+        }
     }
 
     public void OnZoneStepped(PuzzleZone zone)
@@ -70,7 +85,8 @@ public class PathPuzzle : MonoBehaviour
             {
                 Debug.Log("Puzzle Completed!");
                 canStep = false;
-                // TODO: open door, trigger effect
+
+                StartCoroutine(HandlePuzzleComplete());
             }
         }
         else
@@ -79,10 +95,51 @@ public class PathPuzzle : MonoBehaviour
 
             currentStep = 0;
             canStep = false;
+            puzzleStarted = false;
 
             StartCoroutine(ReturnToCheckpoint());
         }
     }
+
+    private IEnumerator HandlePuzzleComplete()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player)
+        {
+            PlayerInput playerInput = player.GetComponent<PlayerInput>();
+            if (playerInput != null)
+                playerInput.enabled = false;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (cam && doorFocusPoint)
+        {
+            Debug.Log("[PathPuzzle] Panning camera to door...");
+            yield return cam.StartCoroutine(cam.PanTo(doorFocusPoint, 0.8f));
+        }
+
+        if (doorToOpen != null)
+        {
+            doorToOpen.Open();
+            Debug.Log("[PathPuzzle] Door opened!");
+        }
+
+        yield return new WaitForSeconds(doorFocusDuration);
+
+        if (cam)
+            yield return cam.StartCoroutine(cam.ReturnToPlayer(0.8f));
+
+        Debug.Log("[PathPuzzle] Puzzle sequence complete.");
+
+        if (player)
+        {
+            PlayerInput playerInput = player.GetComponent<PlayerInput>();
+            if (playerInput != null)
+                playerInput.enabled = true;
+        }
+    }
+
 
     private IEnumerator ShowCorrectPath()
     {
@@ -127,7 +184,8 @@ public class PathPuzzle : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.0f);
+
         puzzleStarted = false;
     }
 
