@@ -96,6 +96,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
             Destroy(followerObj.GetComponentInChildren<PlayerHeldItem>());
             Destroy(followerObj.GetComponentInChildren<PlayerAttack>());
             Destroy(followerObj.GetComponentInChildren<PlayerBuffHandler>());
+            Destroy(followerObj.GetComponentInChildren<PushableBlock>());   
 
             var follower = followerObj.AddComponent<PartyFollower>();
             follower.SetTarget(lastTarget);

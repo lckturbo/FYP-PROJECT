@@ -8,6 +8,9 @@ public class MovingBlock : MonoBehaviour
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private float waitTime = 1f;
 
+    [Header("Rotation Settings")]
+    [SerializeField] private float spinSpeed = 180f; // ?? Degrees per second
+
     [Header("Player Reset Settings")]
     [SerializeField] private int checkpointID = 0; // Which checkpoint to send player to
 
@@ -28,11 +31,18 @@ public class MovingBlock : MonoBehaviour
 
     private void Update()
     {
-        if (waiting || checkpoints.Length == 0) return;
+        if (checkpoints.Length == 0) return;
 
+        // ?? Always spin
+        transform.Rotate(Vector3.forward * spinSpeed * Time.deltaTime);
+
+        if (waiting) return;
+
+        // ?? Move toward the target
         Transform target = checkpoints[currentIndex];
         transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
+        // ?? Check if reached target
         if (Vector3.Distance(transform.position, target.position) < 0.05f)
         {
             StartCoroutine(WaitAndMoveNext());
