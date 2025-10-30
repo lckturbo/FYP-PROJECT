@@ -4714,8 +4714,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneID: 2
   puzzleTileMap: {fileID: 393049185}
-  normalTile: {fileID: 11400000, guid: c0d6da1cb5164754482daf83a248e494, type: 2}
   highlightTile: {fileID: 11400000, guid: 3e1563464ee77b24e9d30e2fcb1bfb34, type: 2}
+  correctTile: {fileID: 0}
+  wrongTile: {fileID: 0}
 --- !u!483693784 &393049184
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -5474,7 +5475,7 @@ GameObject:
   - component: {fileID: 827448581}
   - component: {fileID: 827448580}
   m_Layer: 0
-  m_Name: TicTacToe
+  m_Name: Tilemap - Connect3 Puzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5492,7 +5493,8 @@ Transform:
   m_LocalPosition: {x: -3.8, y: -4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 981993268}
   m_Father: {fileID: 919221797}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!483693784 &827448580
@@ -5533,8 +5535,8 @@ TilemapRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -2142590473
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
@@ -5627,7 +5629,6 @@ Transform:
   - {fileID: 206620670}
   - {fileID: 335493661}
   - {fileID: 316543382}
-  - {fileID: 981993268}
   - {fileID: 827448579}
   - {fileID: 1966793471}
   - {fileID: 1144085653}
@@ -5682,8 +5683,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneID: 3
   puzzleTileMap: {fileID: 935167290}
-  normalTile: {fileID: 11400000, guid: c0d6da1cb5164754482daf83a248e494, type: 2}
   highlightTile: {fileID: 11400000, guid: 3e1563464ee77b24e9d30e2fcb1bfb34, type: 2}
+  correctTile: {fileID: 0}
+  wrongTile: {fileID: 0}
 --- !u!483693784 &935167289
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -6111,12 +6113,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 981993267}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.8, y: -4, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 919221797}
+  m_Father: {fileID: 827448579}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!483693784 &981993269
 TilemapRenderer:
@@ -6156,9 +6158,9 @@ TilemapRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingLayerID: -2142590473
+  m_SortingLayer: 4
+  m_SortingOrder: 10
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
   m_MaxChunkCount: 16
@@ -6762,8 +6764,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneID: 1
   puzzleTileMap: {fileID: 1034079822}
-  normalTile: {fileID: 11400000, guid: c0d6da1cb5164754482daf83a248e494, type: 2}
   highlightTile: {fileID: 11400000, guid: 3e1563464ee77b24e9d30e2fcb1bfb34, type: 2}
+  correctTile: {fileID: 0}
+  wrongTile: {fileID: 0}
 --- !u!19719996 &1034079824
 TilemapCollider2D:
   m_ObjectHideFlags: 0
@@ -6815,7 +6818,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1144085653
 Transform:
   m_ObjectHideFlags: 0
@@ -6878,7 +6881,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc872d89721ee7f43980fc555f404986, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  doorToOpen: {fileID: 0}
   correctPath: 010000000200000003000000
+  cameraFocusPoint: {fileID: 0}
+  cameraPanDuration: 0.5
+  cameraHoldDuration: 1
+  doorFocusPoint: {fileID: 0}
+  doorFocusDuration: 0.5
 --- !u!1 &1243777684
 GameObject:
   m_ObjectHideFlags: 0
@@ -6926,7 +6935,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1444365278
 Transform:
   m_ObjectHideFlags: 0
@@ -7304,7 +7313,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1926434515
 Transform:
   m_ObjectHideFlags: 0

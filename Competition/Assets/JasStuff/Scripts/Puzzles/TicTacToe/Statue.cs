@@ -147,7 +147,7 @@ public class Statue : BoardEntity
         Vector3Int targetCell = boardTileMap.WorldToCell(worldPos);
         if (!currentValidMoves.Contains(targetCell)) return false;
 
-        Vector3 world = boardTileMap.CellToWorld(targetCell) + new Vector3(0.5f, 0.5f, -0.1f);
+        Vector3 world = boardTileMap.CellToWorld(targetCell) + new Vector3(0.5f, 0.5f, 0.0f);
         transform.position = world;
 
         currentCell = targetCell;

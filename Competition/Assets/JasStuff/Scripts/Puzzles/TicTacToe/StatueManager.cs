@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Tilemaps;
+using UnityEngine.InputSystem;
 
 public class StatueManager : BoardManager
 {
@@ -11,9 +11,11 @@ public class StatueManager : BoardManager
     [SerializeField] private GameObject blackStatuePrefab;
 
     private bool whiteTurn;
+    public bool IsWhiteTurn() => whiteTurn;
 
     private Vector3Int[] whitePositions;
     private Vector3Int[] blackPositions;
+
 
     private static Vector3Int[][] WinningLines = new Vector3Int[][]
   {
@@ -22,7 +24,6 @@ public class StatueManager : BoardManager
     new Vector3Int[] { new(1,1,0), new(3,3,0), new(5,5,0) }, // Diagonal \
     new Vector3Int[] { new(5,1,0), new(3,3,0), new(1,5,0) }  // Diagonal /
   };
-
     protected override void SetupPuzzle()
     {
         var ticTacToeBoard = FindObjectOfType<TicTacToeBoard>();
@@ -99,9 +100,9 @@ public class StatueManager : BoardManager
                 blackCells.Add(s.CurrentCell);
         }
 
-        if (HasLine(whiteCells)) 
+        if (HasLine(whiteCells))
             DeclareWinner("White");
-        else if (HasLine(blackCells)) 
+        else if (HasLine(blackCells))
             DeclareWinner("Black");
     }
 
@@ -110,6 +111,26 @@ public class StatueManager : BoardManager
         Debug.Log($"{winner} Wins!");
         puzzleSolved = true;
         LockAllPieces();
+
+        if (winner == "White")
+            StartCoroutine(HandlePuzzleComplete());
+        else
+            StartCoroutine(ResetPuzzleAfterDelay(0.5f));
+    }
+    private IEnumerator ResetPuzzleAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        foreach (var obj in spawnedObjs)
+        {
+            if (obj != null)
+                Destroy(obj);
+        }
+        spawnedObjs.Clear();
+
+        highlightTileMap.ClearAllTiles();
+        puzzleSolved = false;
+        SetupPuzzle();
     }
     private bool HasLine(List<Vector3Int> cells)
     {
