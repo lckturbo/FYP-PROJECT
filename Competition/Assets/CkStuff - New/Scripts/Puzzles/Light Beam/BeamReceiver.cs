@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class BeamReceiver : MonoBehaviour
 {
     [Header("Door/Target")]
-    public ToggleableBlock doorBlock;   // or use doorAnimator
+    public ToggleableBlock doorBlock;
     public Animator doorAnimator;
 
     [Header("Behavior")]
@@ -36,7 +36,6 @@ public class BeamReceiver : MonoBehaviour
     [Header("Spam Control")]
     public float cooldown = 0.25f;
 
-    // NEW: delay opening until the camera has panned to the door
     [Header("Timing Options")]
     public bool openDuringCinematic = true;
 
@@ -48,7 +47,6 @@ public class BeamReceiver : MonoBehaviour
     private bool _active;
     private float _timer;
     private bool _coolingDown;
-    private bool _playedOnce;
 
     private PlayerInput _playerInput;
     private NewPlayerMovement _playerMove;
@@ -86,7 +84,7 @@ public class BeamReceiver : MonoBehaviour
         }
 
         if (!_coolingDown)
-            StartCoroutine(UseSequence());
+            StartCoroutine(UseSequence(true));
 
         OnActivated?.Invoke(this);
     }
@@ -100,62 +98,69 @@ public class BeamReceiver : MonoBehaviour
         {
             if (doorBlock) doorBlock.Close();
             else if (doorAnimator) doorAnimator.SetTrigger("Close");
+
+            if (!_coolingDown)
+                StartCoroutine(UseSequence(false));
         }
 
         OnDeactivated?.Invoke(this);
     }
 
-    private IEnumerator UseSequence()
+    private IEnumerator UseSequence(bool opening)
     {
         _coolingDown = true;
+
         SetPlayerControl(false);
+        GameInputLock.inputLocked = true;
 
         NewCameraController cam = FindObjectOfType<NewCameraController>();
 
-        // 1) Pan to the receiver first
-        if (cam && receiverFocus)
+        Transform receiverAnchor = receiverFocus ? CreateTempAnchor(receiverFocus.position, "CamTemp_Receiver") : null;
+        Transform blockAnchor = blockFocus ? CreateTempAnchor(blockFocus.position, "CamTemp_Block") : null;
+
+        try
         {
-            yield return cam.PanTo(receiverFocus, panDuration);
-            yield return new WaitForSeconds(panDuration);
+            if (cam && receiverAnchor)
+                yield return cam.PanTo(receiverAnchor, panDuration);
 
             if (receiverAnimFallback > 0f)
                 yield return new WaitForSeconds(receiverAnimFallback);
             if (receiverHold > 0f)
                 yield return new WaitForSeconds(receiverHold);
-        }
 
-        // 2) Pan to the door/block focus
-        if (cam && blockFocus)
+            if (cam && blockAnchor)
+                yield return cam.PanTo(blockAnchor, panDuration);
+
+            if (doorBlock)
+            {
+                if (opening) doorBlock.Open();
+                else doorBlock.Close();
+            }
+            else if (doorAnimator)
+            {
+                doorAnimator.SetTrigger(opening ? "Open" : "Close");
+            }
+
+            if (blockAnimator)
+                yield return WaitForCurrentAnimOrFallback(blockAnimator, blockAnimFallback);
+            else
+                yield return new WaitForSeconds(blockAnimFallback);
+
+            if (holdOnBlock > 0f)
+                yield return new WaitForSeconds(holdOnBlock);
+
+            if (cam)
+                yield return cam.ReturnToPlayer(panDuration);
+        }
+        finally
         {
-            yield return cam.PanTo(blockFocus, panDuration);
-            yield return new WaitForSeconds(panDuration);
+            if (receiverAnchor) Destroy(receiverAnchor.gameObject);
+            if (blockAnchor) Destroy(blockAnchor.gameObject);
+
+            // Re-enable inputs
+            SetPlayerControl(true);
+            GameInputLock.inputLocked = false;
         }
-
-        // 3) OPEN the door now (so the player sees it during the focus shot)
-        if (openDuringCinematic)
-        {
-            if (doorBlock) doorBlock.Open();
-            else if (doorAnimator) doorAnimator.SetTrigger("Open");
-        }
-
-        // 4) Wait for the door animation or fallback
-        if (blockAnimator)
-            yield return WaitForCurrentAnimOrFallback(blockAnimator, blockAnimFallback);
-        else
-            yield return new WaitForSeconds(blockAnimFallback);
-
-        if (holdOnBlock > 0f)
-            yield return new WaitForSeconds(holdOnBlock);
-
-        // 5) Pan back to the player
-        if (cam)
-        {
-            yield return cam.ReturnToPlayer(panDuration);
-            yield return new WaitForSeconds(panDuration);
-        }
-
-        SetPlayerControl(true);
-
         if (cooldown > 0f)
             yield return new WaitForSeconds(cooldown);
 
@@ -200,6 +205,13 @@ public class BeamReceiver : MonoBehaviour
     private void SetVisual(bool on)
     {
         if (indicator) indicator.color = on ? activeColor : idleColor;
+    }
+
+    private Transform CreateTempAnchor(Vector3 worldPos, string name)
+    {
+        var go = new GameObject(name);
+        go.transform.position = worldPos;
+        return go.transform;
     }
 
 #if UNITY_EDITOR

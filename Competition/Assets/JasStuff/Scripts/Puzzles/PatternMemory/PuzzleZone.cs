@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -9,8 +10,9 @@ public class PuzzleZone : MonoBehaviour
     [SerializeField] private Tilemap puzzleTileMap;
 
     [Header("Tiles")]
-    [SerializeField] private TileBase normalTile;
     [SerializeField] private TileBase highlightTile;
+    [SerializeField] private TileBase correctTile;
+    [SerializeField] private TileBase wrongTile;
 
     private TileBase[,] originalTiles;
 
@@ -48,7 +50,10 @@ public class PuzzleZone : MonoBehaviour
     {
         if (!puzzleTileMap) yield break;
 
-        foreach (var pos in puzzleTileMap.cellBounds.allPositionsWithin)
+        BoundsInt bounds = puzzleTileMap.cellBounds;
+        int x = 0, y = 0;
+
+        foreach (var pos in bounds.allPositionsWithin)
         {
             if (puzzleTileMap.HasTile(pos))
                 puzzleTileMap.SetTile(pos, highlightTile);
@@ -56,10 +61,52 @@ public class PuzzleZone : MonoBehaviour
 
         yield return new WaitForSeconds(duration);
 
-        foreach (var pos in puzzleTileMap.cellBounds.allPositionsWithin)
+        x = 0; y = 0;
+        foreach (var pos in bounds.allPositionsWithin)
+        {
+            if (originalTiles[x, y] != null)
+                puzzleTileMap.SetTile(pos, originalTiles[x, y]);
+
+            y++;
+            if (y >= bounds.size.y)
+            {
+                y = 0;
+                x++;
+            }
+        }
+    }
+    public void FlashFeedback(bool correct)
+    {
+        StartCoroutine(FlashFeedbackRoutine(correct));
+    }
+
+    private IEnumerator FlashFeedbackRoutine(bool correct)
+    {
+        if (!puzzleTileMap) yield break;
+
+        BoundsInt bounds = puzzleTileMap.cellBounds;
+        TileBase feedbackTile = correct ? correctTile : wrongTile;
+
+        foreach (var pos in bounds.allPositionsWithin)
         {
             if (puzzleTileMap.HasTile(pos))
-                puzzleTileMap.SetTile(pos, normalTile);
+                puzzleTileMap.SetTile(pos, feedbackTile);
+        }
+
+        yield return new WaitForSeconds(1.0f);
+
+        int x = 0, y = 0;
+        foreach (var pos in bounds.allPositionsWithin)
+        {
+            if (originalTiles[x, y] != null)
+                puzzleTileMap.SetTile(pos, originalTiles[x, y]);
+
+            y++;
+            if (y >= bounds.size.y)
+            {
+                y = 0;
+                x++;
+            }
         }
     }
 
