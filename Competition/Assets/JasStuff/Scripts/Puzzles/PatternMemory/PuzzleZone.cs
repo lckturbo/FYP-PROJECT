@@ -115,4 +115,9 @@ public class PuzzleZone : MonoBehaviour
         if (other.CompareTag("Player"))
             FindObjectOfType<PathPuzzle>().OnZoneStepped(this);
     }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+            FindObjectOfType<PathPuzzle>().ClearLastZone();
+    }
 }

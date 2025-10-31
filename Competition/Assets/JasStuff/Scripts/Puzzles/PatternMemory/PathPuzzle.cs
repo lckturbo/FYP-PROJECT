@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static GameData;
 
-public class PathPuzzle : MonoBehaviour
+public class PathPuzzle : MonoBehaviour, IDataPersistence
 {
     [SerializeField] private ToggleableBlock doorToOpen;
     [SerializeField] private List<int> correctPath;
+    private HashSet<int> solvedZoneIDs = new HashSet<int>();
     [SerializeField] private Transform cameraFocusPoint;
     [SerializeField] private float cameraPanDuration = 0.5f;
     [SerializeField] private float cameraHoldDuration = 1.0f;
@@ -22,6 +24,7 @@ public class PathPuzzle : MonoBehaviour
     private NewCameraController cam;
 
     private bool puzzleStarted = false;
+    private PuzzleZone lastZoneStepped;
 
     private void Start()
     {
@@ -74,19 +77,25 @@ public class PathPuzzle : MonoBehaviour
     public void OnZoneStepped(PuzzleZone zone)
     {
         if (!canStep) return;
+        if (lastZoneStepped == zone) return;
+        lastZoneStepped = zone;
+
+        if (solvedZoneIDs.Contains(zone.ZoneID)) return;
 
         if (currentStep < correctPath.Count)
         {
+            Debug.Log($"Zone stepped: {zone.ZoneID}, expecting: {correctPath[currentStep]}");
             if (zone.ZoneID == correctPath[currentStep])
             {
                 zone.FlashFeedback(true);
+                solvedZoneIDs.Add(zone.ZoneID);
                 currentStep++;
                 Debug.Log($"Correct step {currentStep}/{correctPath.Count}");
             }
             else
             {
                 zone.FlashFeedback(false);
-
+                Debug.Log("wrong step");
                 ResetPuzzle();
                 StartCoroutine(ReturnToCheckpoint());
             }
@@ -99,6 +108,10 @@ public class PathPuzzle : MonoBehaviour
                 StartCoroutine(HandlePuzzleComplete());
             }
         }
+    }
+    public void ClearLastZone()
+    {
+        lastZoneStepped = null;
     }
 
     private IEnumerator HandlePuzzleComplete()
@@ -186,6 +199,7 @@ public class PathPuzzle : MonoBehaviour
     }
     private void ResetPuzzle()
     {
+        solvedZoneIDs.Clear();
         currentStep = 0;
         canStep = false;
         puzzleStarted = false;
@@ -263,6 +277,35 @@ public class PathPuzzle : MonoBehaviour
             SetLayerRecursively(child.gameObject, layer);
     }
 
+    public void LoadData(GameData data)
+    {
+        if (data.pathPuzzleData == null)
+            return;
 
+        if (data.pathPuzzleData.puzzleCompleted)
+        {
+            canStep = false;
+            puzzleStarted = true;
+            StartCoroutine(EnsureDoorOpen());
+        }
+    }
+    private IEnumerator EnsureDoorOpen()
+    {
+        yield return null;
+
+        if (doorToOpen != null)
+        {
+            doorToOpen.LoadFromSave(true);
+            Debug.Log("[PathPuzzle] Loaded: Puzzle completed, forcing door open after load.");
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        data.pathPuzzleData = new GameData.PathPuzzleSaveData
+        {
+            puzzleCompleted = doorToOpen.IsOpen
+        };
+    }
 
 }
