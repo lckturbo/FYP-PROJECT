@@ -2,7 +2,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 
-public class PieceManager : BoardManager
+public class PieceManager : BoardManager, IDataPersistence
 {
     [Header("Reference")]
     [SerializeField] private GameObject piecePrefab;
@@ -135,4 +135,66 @@ public class PieceManager : BoardManager
         ResetBoard();
         currentStep = 0;
     }
+
+    public void LoadData(GameData data)
+    {
+        StartCoroutine(LoadChessPiecesRoutine(data));
+    }
+
+    private IEnumerator LoadChessPiecesRoutine(GameData data)
+    {
+        yield return null; 
+
+        if (data.chessPuzzleCompleted && doorToOpen != null)
+        {
+            doorToOpen.Open();
+            puzzleSolved = true;
+        }
+        else
+        {
+            puzzleSolved = false;
+            ClearBoard();
+
+            if (data.chessPieces != null && data.chessPieces.Count > 0)
+            {
+                foreach (var pieceData in data.chessPieces)
+                {
+                    Sprite sprite = pieceData.isWhite
+                        ? whitePieceSprites[(int)pieceData.type]
+                        : blackPieceSprites[(int)pieceData.type];
+
+                    SpawnPiece(pieceData.type, pieceData.isWhite, sprite, pieceData.position);
+                }
+            }
+            else
+            {
+                SetupPuzzle();
+            }
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        data.chessPieces.Clear();
+
+        if (!puzzleSolved)
+        {
+            foreach (var obj in spawnedObjs)
+            {
+                var piece = obj.GetComponent<Piece>();
+                if (piece != null)
+                {
+                    Vector3Int cellPos = boardTileMap.WorldToCell(piece.transform.position);
+                    data.chessPieces.Add(new GameData.ChessPieceSaveData(
+                        piece.pieceType,
+                        piece.IsWhite(),
+                        cellPos
+                    ));
+                }
+            }
+        }
+
+        data.chessPuzzleCompleted = puzzleSolved;
+    }
+
 }

@@ -114,6 +114,16 @@ public class ToggleableBlock : MonoBehaviour
         ApplyState(effectiveOpen);
     }
 
+    //public void LoadData(GameData data)
+    //{
+    //    throw new System.NotImplementedException();
+    //}
+
+    //public void SaveData(ref GameData data)
+    //{
+    //    throw new System.NotImplementedException();
+    //}
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
