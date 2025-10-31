@@ -154,7 +154,7 @@ public class Wordle : BaseMinigame
             if (request.result == UnityWebRequest.Result.ConnectionError ||
                 request.result == UnityWebRequest.Result.ProtocolError)
             {
-                resultText.text = $"?? Network error checking '{guess}'";
+                //resultText.text = $"?? Network error checking '{guess}'";
                 yield break;
             }
 
