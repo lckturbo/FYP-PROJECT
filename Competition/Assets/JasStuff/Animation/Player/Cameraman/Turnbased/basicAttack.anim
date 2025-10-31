@@ -124,6 +124,13 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
   m_Events:
+  - time: 0
+    functionName: TriggerMinigame
+    data: Captcha
+    objectReferenceParameter: {fileID: 11500000, guid: 30e07a710bda0a14c9b4e8293b81849d, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.4444444
     functionName: DealDamage
     data: 
