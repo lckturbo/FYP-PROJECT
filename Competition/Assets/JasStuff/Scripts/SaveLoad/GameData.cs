@@ -41,6 +41,11 @@ public class GameData
             this.position = position;
         }
     }
+    [System.Serializable]
+    public class PathPuzzleSaveData
+    {
+        public bool puzzleCompleted;
+    }
 
     public bool hasSavedGame;
 
@@ -71,6 +76,7 @@ public class GameData
     public List<BreakableSaveEntry> brokenObjects; // breakable
     public List<NPCQuestStageEntry> npcQuestStages; // quests
     public List<BlockSaveData> pushableBlocks; // push-able blocks 
+    public PathPuzzleSaveData pathPuzzleData;
 
     public GameData()
     {
@@ -101,5 +107,9 @@ public class GameData
         brokenObjects = new List<BreakableSaveEntry>(); // breakables
         npcQuestStages = new List<NPCQuestStageEntry>(); // quests
         pushableBlocks = new List<BlockSaveData>(); // push-able blocks
+        pathPuzzleData = new PathPuzzleSaveData
+        {
+            puzzleCompleted = false,
+        };
     }
 }

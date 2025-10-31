@@ -56,9 +56,6 @@ public class ShutterChanceBishi : BaseMinigame
 
     [Header("Backgrounds (instant swap, no fade)")]
     [SerializeField] private Image backgroundImage;
-    [SerializeField] private Sprite bgRuleIntro1;
-    [SerializeField] private Sprite bgRuleIntro2;
-    [SerializeField] private Sprite bgRuleIntro3;
     [SerializeField] private Sprite bgPhoto;
     [SerializeField] private Sprite bgTransition;
     [SerializeField] private Sprite bgResult;
@@ -109,7 +106,11 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private float goSeconds = 0.5f;
     [SerializeField] private float readyGoPopScale = 1.2f;
 
-    private bool gameplayActive = false; 
+    [Header("Skip")]
+    [SerializeField] private Button skipButton;
+    private bool skipRequested = false;
+
+    private bool gameplayActive = false;
 
     [Header("NORMAL: Waves")]
     [SerializeField] private int normalWaves = 11;
@@ -223,7 +224,6 @@ public class ShutterChanceBishi : BaseMinigame
         gameplayActive = false;
         ShowCameraman(false);
 
-
         HideLane(Lane.Left);
         HideLane(Lane.Mid);
         HideLane(Lane.Right);
@@ -254,6 +254,10 @@ public class ShutterChanceBishi : BaseMinigame
         goldenWindowActive = false;
         waveHitsRemaining = 0;
         bonusPhase = false;
+
+        // Skip UI state
+        skipRequested = false;
+        SetupSkipUI(false);
     }
 
     private void HideLane(Lane lane)
@@ -275,24 +279,20 @@ public class ShutterChanceBishi : BaseMinigame
         score = 0;
         isShowingOkay = false;
 
+        // ===== INSTRUCTIONS (skippable) =====
         if (instructionsPanel) instructionsPanel.SetActive(true);
         if (scoreText) scoreText.gameObject.SetActive(false);
+        SetupSkipUI(true);
 
-        EnsureBackground(bgRuleIntro1);
         if (instructionsText)
-        {
-            instructionsText.text =
-                "Aim! Don't miss out!\nShutter Chance!!";
-        }
-        yield return new WaitForSecondsRealtime(instructionSeconds * 0.25f);
+            instructionsText.text = "Aim! Don't miss out!\nShutter Chance!!";
+        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
+        if (skipRequested) goto SKIP_TO_GAMEPLAY;
 
-        EnsureBackground(bgRuleIntro2);
         if (instructionsText)
-        {
-            instructionsText.text =
-                "HOW TO PLAY\n";
-        }
-        yield return new WaitForSecondsRealtime(instructionSeconds * 0.25f);
+            instructionsText.text = "HOW TO PLAY\n";
+        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
+        if (skipRequested) goto SKIP_TO_GAMEPLAY;
 
         if (instructionsText)
         {
@@ -302,20 +302,20 @@ public class ShutterChanceBishi : BaseMinigame
                 "• MODELS need multiple taps. TRASH is a mistake (-points).\n" +
                 "• Clear ALL required taps to finish a wave (OKAY!). Faster = bonus.";
         }
-        yield return new WaitForSecondsRealtime(instructionSeconds * 0.25f);
+        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
+        if (skipRequested) goto SKIP_TO_GAMEPLAY;
 
-        EnsureBackground(bgRuleIntro3);
         if (instructionsText)
         {
             instructionsText.text =
                  "HOW TO PLAY\n" +
-                "• BONUS: spam models;\n" +
-                "  when GOLDEN ROPE appears,\n" +
-                "  press SPACE fast!";
+                 "• BONUS: spam pictures;\n" +
+                 "  when GOLDEN ROPE appears,\n" +
+                 "  press SPACE fast!";
         }
-        yield return new WaitForSecondsRealtime(instructionSeconds * 0.25f);
+        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
+        if (skipRequested) goto SKIP_TO_GAMEPLAY;
 
-        EnsureBackground(bgRuleIntro3);
         if (instructionsText)
         {
             instructionsText.text =
@@ -331,33 +331,27 @@ public class ShutterChanceBishi : BaseMinigame
                 "F           600\n" +
                 "Out of Rank  0";
         }
-        yield return new WaitForSecondsRealtime(instructionSeconds * 0.25f);
+        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
 
+    SKIP_TO_GAMEPLAY:
+        SetupSkipUI(false);
         if (instructionsPanel) instructionsPanel.SetActive(false);
         if (scoreText) scoreText.gameObject.SetActive(true);
         ShowCameraman(true);
         EnsureBackground(bgTransition);
 
-
+        // READY / GO! and intro delay
         yield return ShowReadyGo();
         if (normalIntroDelay > 0f)
             yield return new WaitForSecondsRealtime(Mathf.Max(0f, normalIntroDelay));
 
+        // ===== NORMAL (stage-based) =====
         for (int wave = 1; wave <= Mathf.Max(1, normalWaves); wave++)
         {
             int desiredModels;
-            if (wave <= 3)
-            {
-                desiredModels = 1;
-            }
-            else if (wave <= 6)
-            {
-                desiredModels = Random.Range(1, 3);
-            }
-            else
-            {
-                desiredModels = Random.Range(1, 4);
-            }
+            if (wave <= 3) desiredModels = 1;
+            else if (wave <= 6) desiredModels = Random.Range(1, 3);
+            else desiredModels = Random.Range(1, 4);
 
             SpawnNormalStage(desiredModels);
             EnsureBackground(bgPhoto);
@@ -376,6 +370,7 @@ public class ShutterChanceBishi : BaseMinigame
             EnsureBackground(bgTransition);
         }
 
+        // ===== BONUS =====
         ClearAllLanes();
         EnsureBackground(bgTransition);
 
@@ -442,9 +437,7 @@ public class ShutterChanceBishi : BaseMinigame
             finishText.gameObject.SetActive(true);
 
             yield return FadeTMPAlpha(finishText, 0f, 1f, 0.25f);
-
             yield return new WaitForSecondsRealtime(finishHoldSeconds);
-
             yield return FadeTMPAlpha(finishText, 1f, 0f, 0.25f);
             finishText.gameObject.SetActive(false);
         }
@@ -473,69 +466,69 @@ public class ShutterChanceBishi : BaseMinigame
     }
 
     private IEnumerator ShowReadyGo()
-{
-    gameplayActive = false;
-
-    if (!readyGoText)
     {
-        yield return new WaitForSecondsRealtime(0.8f);
+        gameplayActive = false;
+
+        if (!readyGoText)
+        {
+            yield return new WaitForSecondsRealtime(0.8f);
+            gameplayActive = true;
+            yield break;
+        }
+
+        readyGoText.gameObject.SetActive(true);
+
+        yield return PopWord(readyGoText, "READY", readySeconds);
+
+        yield return new WaitForSecondsRealtime(0.1f);
+
+        yield return PopWord(readyGoText, "GO!", goSeconds);
+
+        readyGoText.gameObject.SetActive(false);
+
         gameplayActive = true;
-        yield break;
     }
 
-    readyGoText.gameObject.SetActive(true);
-
-    yield return PopWord(readyGoText, "READY", readySeconds);
-
-    yield return new WaitForSecondsRealtime(0.1f);
-
-    yield return PopWord(readyGoText, "GO!", goSeconds);
-
-    readyGoText.gameObject.SetActive(false);
-
-    gameplayActive = true;
-}
-
-private IEnumerator PopWord(TMP_Text txt, string word, float seconds)
-{
-    txt.text = word;
-    var rt = txt.rectTransform;
-
-    Vector3 startScale = Vector3.one * Mathf.Max(1f, readyGoPopScale);
-    Vector3 endScale   = Vector3.one;
-
-    float inTime  = seconds * 0.25f;
-    float hold    = seconds * 0.50f;
-    float outTime = seconds * 0.25f;
-
-    rt.localScale = startScale;
-    Color baseCol = txt.color;
-    txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 0f);
-
-    float t = 0f;
-    while (t < inTime)
+    private IEnumerator PopWord(TMP_Text txt, string word, float seconds)
     {
-        t += Time.unscaledDeltaTime;
-        float u = Mathf.Clamp01(t / inTime);
-        rt.localScale = Vector3.Lerp(startScale, endScale, u);
-        txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, u);
-        yield return null;
-    }
-    rt.localScale = endScale;
-    txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 1f);
+        txt.text = word;
+        var rt = txt.rectTransform;
 
-    if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
+        Vector3 startScale = Vector3.one * Mathf.Max(1f, readyGoPopScale);
+        Vector3 endScale = Vector3.one;
 
-    t = 0f;
-    while (t < outTime)
-    {
-        t += Time.unscaledDeltaTime;
-        float u = Mathf.Clamp01(t / outTime);
-        txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 1f - u);
-        yield return null;
+        float inTime = seconds * 0.25f;
+        float hold = seconds * 0.50f;
+        float outTime = seconds * 0.25f;
+
+        rt.localScale = startScale;
+        Color baseCol = txt.color;
+        txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 0f);
+
+        float t = 0f;
+        while (t < inTime)
+        {
+            t += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(t / inTime);
+            rt.localScale = Vector3.Lerp(startScale, endScale, u);
+            txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, u);
+            yield return null;
+        }
+        rt.localScale = endScale;
+        txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 1f);
+
+        if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
+
+        t = 0f;
+        while (t < outTime)
+        {
+            t += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(t / outTime);
+            txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 1f - u);
+            yield return null;
+        }
+        txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 0f);
     }
-    txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, 0f);
-}
 
     private IEnumerator FadeTMPAlpha(TMP_Text txt, float aFrom, float aTo, float seconds)
     {
@@ -1085,7 +1078,7 @@ private IEnumerator PopWord(TMP_Text txt, string word, float seconds)
     {
         if (finalScore >= 2240) return Rank.SSS;
         if (finalScore >= 2100) return Rank.SS;
-        if (finalScore >= 2000) return Rank.S;    
+        if (finalScore >= 2000) return Rank.S;
         if (finalScore >= 1900) return Rank.A;
         if (finalScore >= 1600) return Rank.B;
         if (finalScore >= 1300) return Rank.C;
@@ -1154,7 +1147,6 @@ private IEnumerator PopWord(TMP_Text txt, string word, float seconds)
 
         isShowingOkay = false;
 
-        // small inter-wave delay
         if (delayAfter > 0f)
             yield return new WaitForSecondsRealtime(delayAfter);
     }
@@ -1185,4 +1177,30 @@ private IEnumerator PopWord(TMP_Text txt, string word, float seconds)
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
-} 
+
+    // ==== Skip (button-only) =================================================
+    private void RequestSkip() => skipRequested = true;
+
+    private void SetupSkipUI(bool show)
+    {
+        if (skipButton)
+        {
+            skipButton.onClick.RemoveListener(RequestSkip);
+            if (show) skipButton.onClick.AddListener(RequestSkip);
+            skipButton.gameObject.SetActive(show);
+        }
+        if (!show) skipRequested = false;
+    }
+
+    private bool PollSkip() => skipRequested;
+
+    private IEnumerator WaitForRealtimeOrSkip(float seconds)
+    {
+        float t = 0f;
+        while (t < seconds && !PollSkip())
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+    }
+}

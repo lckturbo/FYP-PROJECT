@@ -26,6 +26,7 @@ public class ToggleableBlock : MonoBehaviour
     public Renderer[] visuals;
 
     private bool _isOpen;
+    public bool IsOpen => _isOpen;
     private int _resolvedChannel;
 
     private void OnEnable()
