@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
         {
             bool settingsOpen = UIManager.instance != null && UIManager.instance.IsSettingsOpen();
 
-            if (!settingsOpen && (Input.anyKeyDown || Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject())
+            if (!settingsOpen && (Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject())
                 ASyncManager.instance.LoadLevelBtn("Lobby");
         }
     }
