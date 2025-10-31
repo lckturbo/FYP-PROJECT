@@ -1,10 +1,11 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Collider2D))]
-public class SwitchInteract : MonoBehaviour
+public class SwitchInteract : MonoBehaviour, IDataPersistence
 {
     [Header("Linking")]
     public SwitchChannelData channelData;
@@ -31,6 +32,7 @@ public class SwitchInteract : MonoBehaviour
     private bool _coolingDown;
     private int _resolvedChannel;
     private bool _playerInRange;
+    private bool _isActivated;
 
     private PlayerInput _playerInput;
     private NewPlayerMovement _playerMove;
@@ -67,6 +69,9 @@ public class SwitchInteract : MonoBehaviour
 
     private void OnEnable()
     {
+        if (SaveLoadSystem.instance != null)
+            SaveLoadSystem.instance.RegisterDataPersistenceObjects(this);
+
         SubscribeAction();
     }
 
@@ -134,6 +139,7 @@ public class SwitchInteract : MonoBehaviour
 
             // 3) Toggle AFTER we've framed the block (target can safely disable now)
             SwitchBus.Toggle(_resolvedChannel);
+            _isActivated = !_isActivated;
 
             // 4) Wait for block anim or fallback, then optional hold
             if (blockAnimator)
@@ -230,6 +236,38 @@ public class SwitchInteract : MonoBehaviour
         var go = new GameObject(name);
         go.transform.position = worldPos;
         return go.transform;
+    }
+
+    public void LoadData(GameData data)
+    {
+        if (data.switchStates != null && data.switchStates.TryGetValue(_resolvedChannel, out bool savedState))
+        {
+            _isActivated = savedState;
+
+            // Broadcast saved state to all subscribers (ToggleableBlocks)
+            SwitchBus.SetState(_resolvedChannel, _isActivated);
+
+            // Update own visuals immediately
+            if (switchAnimator) switchAnimator.Play(_isActivated ? "Open" : "Close", 0, 1f);
+            if (blockAnimator) blockAnimator.Play(_isActivated ? "Open" : "Close", 0, 1f);
+
+            // Extra safety: manually refresh blocks on same channel
+            var blocks = FindObjectsOfType<ToggleableBlock>();
+            foreach (var b in blocks)
+            {
+                if (b.channelIndex == _resolvedChannel || (b.channelData != null && b.channelData.channelIndex == _resolvedChannel))
+                    b.ForceRefreshState();
+            }
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        if (data.switchStates == null)
+            data.switchStates = new Dictionary<int, bool>();
+
+        data.switchStates[_resolvedChannel] = _isActivated;
+        Debug.Log($"[SwitchInteract] Saved channel {_resolvedChannel}, state: {_isActivated}");
     }
 
 #if UNITY_EDITOR

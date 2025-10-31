@@ -20,18 +20,28 @@ public class GameData
     public bool hasCheckpoint;
     public int lastCheckpointID;
 
+    // switches //
+    public Dictionary<int, bool> switchStates;
+
     public GameData()
     {
+        // player //
         selectedCharacterIndex = -1;
         playerPosition = Vector2.zero;
         hasSavedPosition = false;
-
+        
+        // enemies //
         defeatedEnemies = new List<string>();
 
+        // audio //
         bgmVolume = 1f;
         sfxVolume = 1f;
 
+        // checkpoints //
         hasCheckpoint = false;
         lastCheckpointID = 0;
+
+        // switches //
+        switchStates = new Dictionary<int, bool>();
     }
 }
