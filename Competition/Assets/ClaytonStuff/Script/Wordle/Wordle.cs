@@ -121,7 +121,6 @@ public class Wordle : BaseMinigame
         if (timer <= 0f)
         {
             resultText.text = "? Time’s up! Moving to next attempt.";
-            EndGame();
             OnSubmitGuess(forceFail: true);
         }
     }
