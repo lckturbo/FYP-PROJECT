@@ -1,9 +1,13 @@
 ﻿using System.Collections;
+using System.Xml;
 using UnityEngine;
+using static GameData;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-public class PushableBlock : MonoBehaviour
+public class PushableBlock : MonoBehaviour, IDataPersistence
 {
+    [SerializeField] private int id;
+
     [Header("Movement")]
     public float gridSize = 1f;
     public float moveSpeed = 6f;
@@ -142,6 +146,25 @@ public class PushableBlock : MonoBehaviour
             Mathf.Round((rb.position.x - gridOffset.x) / gridSize) * gridSize + gridOffset.x,
             Mathf.Round((rb.position.y - gridOffset.y) / gridSize) * gridSize + gridOffset.y
         );
+    }
+
+    public void LoadData(GameData data)
+    {
+        var blockData = data.pushableBlocks.Find(b => b.id == id);
+        if (blockData != null)
+        {
+            rb.position = blockData.position;
+            SnapToGrid();
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        var existing = data.pushableBlocks.Find(b => b.id == id);
+        if (existing != null)
+            existing.position = rb.position;
+        else
+            data.pushableBlocks.Add(new BlockSaveData(id, rb.position));
     }
 
     //private void OnCollisionEnter2D(Collision2D collision)
