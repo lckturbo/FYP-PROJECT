@@ -62,6 +62,12 @@ public class GameData
             this.position = position;
         }
     }
+    [System.Serializable]
+    public class BlockSaveEntry
+    {
+        public string id;      
+        public bool isOpen;    
+    }
 
     public bool hasSavedGame;
 
@@ -97,6 +103,7 @@ public class GameData
     public bool connectPuzzleCompleted;
     public List<ChessPieceSaveData> chessPieces;
     public bool chessPuzzleCompleted;
+    public List<BlockSaveEntry> savedBlocks;
 
     public GameData()
     {
@@ -132,5 +139,6 @@ public class GameData
         connectPuzzleCompleted = false;
         chessPieces = new List<ChessPieceSaveData>();
         chessPuzzleCompleted = false;
+        savedBlocks = new List<BlockSaveEntry>();
     }
 }
