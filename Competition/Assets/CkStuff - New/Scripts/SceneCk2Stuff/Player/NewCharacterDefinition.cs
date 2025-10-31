@@ -14,6 +14,7 @@ public class NewCharacterDefinition : ScriptableObject
     public Sprite normalArt;
     public Sprite pixelArt;
     public Sprite portrait;
+    public Sprite portrait2;
 
     [Header("Gameplay")]
     public NewCharacterStats stats;
