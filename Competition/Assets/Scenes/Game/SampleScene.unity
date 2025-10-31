@@ -23771,7 +23771,6 @@ Transform:
   - {fileID: 145557520}
   - {fileID: 1682026923}
   - {fileID: 1532653162}
-  - {fileID: 1484995091}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &468321379
@@ -47808,6 +47807,10 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: possibleItems.Array.size
       value: 4
       objectReference: {fileID: 0}
@@ -49188,6 +49191,10 @@ PrefabInstance:
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: chestID
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: 1292154187642933741, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: m_LocalPosition.x
@@ -53735,6 +53742,10 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: possibleItems.Array.size
       value: 4
       objectReference: {fileID: 0}
@@ -54162,6 +54173,10 @@ PrefabInstance:
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: chestID
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: possibleItems.Array.size
@@ -55561,6 +55576,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: possibleItems.Array.size
       value: 4
       objectReference: {fileID: 0}
@@ -56879,6 +56898,10 @@ PrefabInstance:
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: chestID
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: possibleItems.Array.size
@@ -58795,6 +58818,10 @@ PrefabInstance:
       propertyPath: chestID
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
+      objectReference: {fileID: 0}
     - target: {fileID: 1292154187642933741, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: m_LocalPosition.x
       value: 52.514
@@ -60419,6 +60446,10 @@ PrefabInstance:
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: chestID
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: possibleItems.Array.size
@@ -84485,6 +84516,10 @@ PrefabInstance:
     - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: chestID
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 245984454424847095, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
+      propertyPath: maxScatterRadius
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: 1292154187642933741, guid: a3c44ccf517a2a047bcfde78035f0705, type: 3}
       propertyPath: m_LocalPosition.x

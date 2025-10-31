@@ -821,6 +821,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1d8ae5abdf332a47989726026fc785b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  breakableID: 
   dropItems:
   - {fileID: 6156245796294065881, guid: 5a15eca1b5c42a044abdaa9c3dd93408, type: 3}
   - {fileID: 6959797460596084576, guid: 0463f68427f3e89428ff0876b4d7ea63, type: 3}
@@ -7706,6 +7707,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 949513fa9fd700b40b3b8223e690fac7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chestID: 
   possibleItems:
   - itemPrefab: {fileID: 6156245796294065881, guid: 5a15eca1b5c42a044abdaa9c3dd93408, type: 3}
     dropChance: 0.7
@@ -9289,6 +9291,7 @@ MonoBehaviour:
   - {fileID: 1908872032}
   moveSpeed: 2
   waitTime: 1
+  spinSpeed: 180
   checkpointID: 1
 --- !u!61 &1845903542
 BoxCollider2D:
