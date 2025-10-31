@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class QuestManager : MonoBehaviour
+public class QuestManager : MonoBehaviour, IDataPersistence
 {
     public static QuestManager Instance { get; private set; }
 
@@ -113,4 +113,33 @@ public class QuestManager : MonoBehaviour
         return null;
     }
 
+    public void SaveData(ref GameData data)
+    {
+        // Clear existing quest data
+        data.npcQuestStages.Clear();
+
+        // Save NPC quest stages
+        foreach (var kvp in npcQuestStages)
+        {
+            data.npcQuestStages.Add(new GameData.NPCQuestStageEntry
+            {
+                npcName = kvp.Key,
+                stageIndex = kvp.Value
+            });
+        }
+
+        Debug.Log($"[QuestManager] Saved {data.npcQuestStages.Count} NPC quest stages.");
+    }
+
+    public void LoadData(GameData data)
+    {
+        npcQuestStages.Clear();
+
+        foreach (var entry in data.npcQuestStages)
+        {
+            npcQuestStages[entry.npcName] = entry.stageIndex;
+        }
+
+        Debug.Log($"[QuestManager] Loaded {npcQuestStages.Count} NPC quest stages from save data.");
+    }
 }

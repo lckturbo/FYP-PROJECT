@@ -54,6 +54,12 @@ public class NPCQuestGiver : MonoBehaviour
 
         if (stage.questData != null)
         {
+            if (QuestManager.Instance.completedQuests.Contains(stage.questData))
+            {
+                Debug.Log($"Quest '{stage.questData.questName}' already completed for {questDialogueData.npcName}.");
+                return;
+            }
+
             // ?? If quest is already active, don't start it again
             if (activeQuest == null)
             {
