@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class NewCameraController : MonoBehaviour
+public class NewCameraController : MonoBehaviour, IDataPersistence
 {
     [Header("Follow Settings")]
     public Transform target;
@@ -76,5 +76,21 @@ public class NewCameraController : MonoBehaviour
         }
 
         _cam.orthographicSize = targetSize;
+    }
+
+    public void LoadData(GameData data)
+    {
+        if (data.cameraPositionSaved)
+        {
+            transform.position = data.cameraPosition;
+            _isPanning = data.cameraIsPanning;
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        data.cameraPosition = transform.position;
+        data.cameraIsPanning = _isPanning;
+        data.cameraPositionSaved = true;
     }
 }

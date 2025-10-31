@@ -4,6 +4,18 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
+    [System.Serializable]
+    public class ChannelState
+    {
+        public int channelIndex;
+        public bool isActivated;
+    }
+
+    // camera //
+    public Vector3 cameraPosition;
+    public bool cameraIsPanning;
+    public bool cameraPositionSaved;
+
     // player //
     public int selectedCharacterIndex;
     public Vector2 playerPosition;
@@ -21,10 +33,13 @@ public class GameData
     public int lastCheckpointID;
 
     // switches //
-    public Dictionary<int, bool> switchStates;
+    public List<ChannelState> switchChannelStates;  
 
     public GameData()
     {
+        cameraPosition = new Vector3(0, 0, 0);
+        cameraIsPanning = false;
+        cameraPositionSaved = false;
         // player //
         selectedCharacterIndex = -1;
         playerPosition = Vector2.zero;
@@ -42,6 +57,6 @@ public class GameData
         lastCheckpointID = 0;
 
         // switches //
-        switchStates = new Dictionary<int, bool>();
+        switchChannelStates = new List<ChannelState>();
     }
 }

@@ -37,7 +37,8 @@ public class ToggleableBlock : MonoBehaviour
 
     private void Start()
     {
-        SetOpenInternal(startOpen, applyInvert: true);
+        if (!SaveLoadSystem.instance || SaveLoadSystem.instance.IsNewGame)
+            SetOpenInternal(startOpen, applyInvert: true);
     }
 
     private void OnDisable()
@@ -105,9 +106,11 @@ public class ToggleableBlock : MonoBehaviour
             else animator.SetTrigger("Close");
         }
     }
-    public void ForceRefreshState()
+    public void LoadFromSave(bool openState)
     {
-        SetOpenInternal(_isOpen, applyInvert: true);
+        _isOpen = openState;
+        bool effectiveOpen = invert ? !openState : openState;
+        ApplyState(effectiveOpen);
     }
 
 #if UNITY_EDITOR

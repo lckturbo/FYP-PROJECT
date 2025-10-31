@@ -14,6 +14,7 @@ public class SaveLoadSystem : MonoBehaviour
     private FileDataHandler fileDataHandler;
 
     private bool isNewGame = false;
+    public bool IsNewGame => isNewGame;
 
     private void Awake()
     {
