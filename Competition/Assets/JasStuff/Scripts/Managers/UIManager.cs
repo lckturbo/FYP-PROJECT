@@ -131,6 +131,12 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 SaveLoadSystem.instance.NewGame();
                 ASyncManager.instance.LoadLevelBtn("CharSelection");
                 });
+
+            if (SaveLoadSystem.instance.GetGameData()?.hasSavedGame == true)
+                loadBtn.interactable = true;
+            else
+                loadBtn.interactable = false;
+
             loadBtn.onClick.RemoveAllListeners();
             loadBtn.onClick.AddListener(() => { 
                 SaveLoadSystem.instance.LoadGame();

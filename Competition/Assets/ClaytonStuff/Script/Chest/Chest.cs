@@ -10,9 +10,10 @@ public class ChestItem
     [Range(0f, 1f)] public float dropChance = 1f;
 }
 
-public class Chest : MonoBehaviour
+public class Chest : MonoBehaviour, IDataPersistence
 {
     [Header("Chest Settings")]
+    [SerializeField] private string chestID;
     public List<ChestItem> possibleItems;
     public int minItems = 1;
     public int maxItems = 5;
@@ -82,8 +83,10 @@ public class Chest : MonoBehaviour
 
         SpawnItems(drops);
 
+        SaveLoadSystem.instance.SaveGame(savePlayer: false, saveEnemies: false);
+
         // Stop spinning and destroy chest after a moment
-        opened = false;
+        //opened = false;
         Destroy(gameObject);
     }
 
@@ -159,6 +162,34 @@ public class Chest : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawLine(transform.position, spawnPoint.position);
             Gizmos.DrawWireSphere(spawnPoint.position, 0.2f);
+        }
+    }
+
+    public void LoadData(GameData data)
+    {
+        var chestData = data.openedChests.Find(c => c.id == chestID);
+
+        if (chestData != null)
+        {
+            opened = chestData.opened;
+            if (opened)
+                Destroy(gameObject);
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        var existingEntry = data.openedChests.Find(c => c.id == chestID);
+
+        if (existingEntry != null)
+            existingEntry.opened = opened;
+        else
+        {
+            data.openedChests.Add(new GameData.ChestSaveEntry
+            {
+                id = chestID,
+                opened = opened
+            });
         }
     }
 }

@@ -97,6 +97,7 @@ public class SaveLoadSystem : MonoBehaviour
             dataObj.SaveData(ref gameData);
         }
 
+        gameData.hasSavedGame = true;
         fileDataHandler.Save(gameData);
     }
 

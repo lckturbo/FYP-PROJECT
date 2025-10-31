@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
-public class BreakableObject : MonoBehaviour
+public class BreakableObject : MonoBehaviour, IDataPersistence
 {
     [Header("Breakable Object Settings")]
+    [SerializeField] private string breakableID;
     public List<GameObject> dropItems;   // Items to spawn on break
     public float dropChance = 1f;        // Overall chance to drop each item
     public float scatterSpeed = 5f;
@@ -15,6 +16,7 @@ public class BreakableObject : MonoBehaviour
     public bool destroyOnHit = true;     // Destroy immediately on hit
     public int requiredHits = 1;         // Number of hits to break
     private int currentHits = 0;
+    private bool destroyed = false;
 
     private Transform spawnPoint;
 
@@ -28,6 +30,7 @@ public class BreakableObject : MonoBehaviour
     /// </summary>
     public void TakeHit()
     {
+        if(destroyed) return;
         currentHits++;
 
         if (currentHits >= requiredHits)
@@ -38,6 +41,8 @@ public class BreakableObject : MonoBehaviour
 
     private void Break()
     {
+        destroyed = true;
+
         SpawnDrops();
         if (destroyOnHit)
             Destroy(gameObject);
@@ -87,5 +92,32 @@ public class BreakableObject : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, maxScatterRadius);
+    }
+    public void LoadData(GameData data)
+    {
+        var entry = data.brokenObjects.Find(o => o.id == breakableID);
+        if (entry != null && entry.destroyed)
+        {
+            destroyed = true;
+            Destroy(gameObject);
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        var existing = data.brokenObjects.Find(o => o.id == breakableID);
+
+        if (existing != null)
+        {
+            existing.destroyed = destroyed;
+        }
+        else
+        {
+            data.brokenObjects.Add(new GameData.BreakableSaveEntry
+            {
+                id = breakableID,
+                destroyed = destroyed
+            });
+        }
     }
 }

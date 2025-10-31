@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static GameData;
 
 [System.Serializable]
 public class GameData
@@ -10,6 +11,19 @@ public class GameData
         public int channelIndex;
         public bool isActivated;
     }
+    [System.Serializable]
+    public class ChestSaveEntry
+    {
+        public string id;
+        public bool opened;
+    }
+    [System.Serializable]
+    public class BreakableSaveEntry
+    {
+        public string id;
+        public bool destroyed;
+    }
+    public bool hasSavedGame;
 
     // camera //
     public Vector3 cameraPosition;
@@ -33,10 +47,16 @@ public class GameData
     public int lastCheckpointID;
 
     // switches //
-    public List<ChannelState> switchChannelStates;  
+    public List<ChannelState> switchChannelStates;
+    // chest //
+    public List<ChestSaveEntry> openedChests;
+    // unbreakable //
+    public List<BreakableSaveEntry> brokenObjects;
 
     public GameData()
     {
+        hasSavedGame = false;
+
         cameraPosition = new Vector3(0, 0, 0);
         cameraIsPanning = false;
         cameraPositionSaved = false;
@@ -56,7 +76,8 @@ public class GameData
         hasCheckpoint = false;
         lastCheckpointID = 0;
 
-        // switches //
-        switchChannelStates = new List<ChannelState>();
+        switchChannelStates = new List<ChannelState>(); // switches
+        openedChests = new List<ChestSaveEntry>(); // chests
+        brokenObjects = new List<BreakableSaveEntry>(); // breakables
     }
 }
