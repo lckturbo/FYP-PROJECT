@@ -168,7 +168,8 @@ Jaslin Joo Chui Hoon",
             },
             new Section{
                 title = "Additional Contributors",
-                body = @"",
+                body =
+@"GNDLF The Maker",
                 holdSeconds = 1.0f
             },
             new Section{
