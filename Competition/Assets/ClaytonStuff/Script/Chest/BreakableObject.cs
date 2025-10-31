@@ -31,6 +31,7 @@ public class BreakableObject : MonoBehaviour, IDataPersistence
     public void TakeHit()
     {
         if(destroyed) return;
+        Debug.Log("is destroying breakable");
         currentHits++;
 
         if (currentHits >= requiredHits)
@@ -42,6 +43,7 @@ public class BreakableObject : MonoBehaviour, IDataPersistence
     private void Break()
     {
         destroyed = true;
+        SaveLoadSystem.instance.SaveGame();
 
         SpawnDrops();
         if (destroyOnHit)
@@ -93,6 +95,7 @@ public class BreakableObject : MonoBehaviour, IDataPersistence
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, maxScatterRadius);
     }
+
     public void LoadData(GameData data)
     {
         var entry = data.brokenObjects.Find(o => o.id == breakableID);

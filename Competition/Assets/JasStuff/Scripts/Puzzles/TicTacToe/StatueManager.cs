@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class StatueManager : BoardManager
+public class StatueManager : BoardManager, IDataPersistence
 {
     [Header("References")]
     [SerializeField] private GameObject whiteStatuePrefab;
@@ -72,6 +72,7 @@ public class StatueManager : BoardManager
     {
         if (puzzleSolved) return;
         CheckForLineWin();
+        if (puzzleSolved) return;
 
         if (!puzzleSolved && whiteTurn)
         {
@@ -237,5 +238,87 @@ public class StatueManager : BoardManager
 
         OnMove(statue.gameObject, Vector3Int.zero, targetCell);
     }
+
+    public void LoadData(GameData data)
+    {
+        StartCoroutine(LoadStatuesRoutine(data));
+    }
+
+    private IEnumerator LoadStatuesRoutine(GameData data)
+    {
+        yield return null; // wait one frame for tilemap init
+
+        // Safety check
+        if (data.statueStates == null)
+            data.statueStates = new List<GameData.StatueSaveData>();
+
+        // Clear old instances
+        foreach (var obj in spawnedObjs.ToList())
+        {
+            if (obj != null)
+                Destroy(obj);
+        }
+        spawnedObjs.Clear();
+
+        puzzleSolved = data.connectPuzzleCompleted;
+
+        if (puzzleSolved)
+        {
+            // Open the door
+            if (doorToOpen != null)
+                doorToOpen.Open();
+
+            // Respawn saved statues
+            foreach (var entry in data.statueStates)
+            {
+                GameObject prefab = entry.isWhite ? whiteStatuePrefab : blackStatuePrefab;
+                GameObject statue = SpawnOnBoard(prefab, entry.position);
+
+                var s = statue.GetComponent<Statue>();
+                s.SetWhite(entry.isWhite);
+                s.Init(boardTileMap, highlightTileMap, highlightTile, this);
+                s.UpdateCell(entry.position);
+                s.SetMove(false); // lock movement after puzzle is solved
+
+                spawnedObjs.Add(statue);
+            }
+
+            Debug.Log("[StatueManager] Puzzle completed — respawned saved statues & opened door.");
+        }
+        else
+        {
+            // Not completed yet — randomize new puzzle
+            SetupPuzzle();
+            Debug.Log("[StatueManager] Puzzle not completed — fresh setup.");
+        }
+    }
+
+
+    public void SaveData(ref GameData data)
+    {
+        data.connectPuzzleCompleted = puzzleSolved;
+
+        if (data.statueStates == null)
+            data.statueStates = new List<GameData.StatueSaveData>();
+
+        data.statueStates.Clear();
+
+        if (puzzleSolved)
+        {
+            foreach (var obj in spawnedObjs)
+            {
+                var s = obj.GetComponent<Statue>();
+                if (s == null) continue;
+
+                data.statueStates.Add(new GameData.StatueSaveData
+                {
+                    position = s.CurrentCell,
+                    isWhite = s.IsWhite(),
+                    isCompleted = true
+                });
+            }
+        }
+    }
+
 
 }
