@@ -1,8 +1,10 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class ToggleableBlock : MonoBehaviour
+public class ToggleableBlock : MonoBehaviour, IDataPersistence
 {
+    [SerializeField] private string blockID;
+
     [Header("Linking")]
     public SwitchChannelData channelData;
     public int channelIndex = 0;
@@ -112,6 +114,36 @@ public class ToggleableBlock : MonoBehaviour
         _isOpen = openState;
         bool effectiveOpen = invert ? !openState : openState;
         ApplyState(effectiveOpen);
+    }
+
+    public void LoadData(GameData data)
+    {
+        var entry = data.savedBlocks.Find(b => b.id == blockID);
+        if (entry != null)
+        {
+            LoadFromSave(entry.isOpen);
+        }
+        else
+        {
+            LoadFromSave(startOpen);
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        var existing = data.savedBlocks.Find(b => b.id == blockID);
+        if (existing != null)
+        {
+            existing.isOpen = _isOpen;
+        }
+        else
+        {
+            data.savedBlocks.Add(new GameData.BlockSaveEntry
+            {
+                id = blockID,
+                isOpen = _isOpen
+            });
+        }
     }
 
 #if UNITY_EDITOR

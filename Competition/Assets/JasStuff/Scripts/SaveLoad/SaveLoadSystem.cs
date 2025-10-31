@@ -91,7 +91,6 @@ public class SaveLoadSystem : MonoBehaviour
         foreach (IDataPersistence dataObj in dataPersistenceObjs)
         {
             if (!savePlayer && dataObj.GetType().Name.Contains("Player")) continue;
-
             if (!saveEnemies && dataObj is EnemyTracker) continue;
 
             dataObj.SaveData(ref gameData);

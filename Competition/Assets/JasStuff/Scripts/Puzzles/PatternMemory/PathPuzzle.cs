@@ -6,19 +6,16 @@ using static GameData;
 
 public class PathPuzzle : MonoBehaviour, IDataPersistence
 {
-    [SerializeField] private ToggleableBlock doorToOpen;
     [SerializeField] private List<int> correctPath;
     private HashSet<int> solvedZoneIDs = new HashSet<int>();
     [SerializeField] private Transform cameraFocusPoint;
     [SerializeField] private float cameraPanDuration = 0.5f;
     [SerializeField] private float cameraHoldDuration = 1.0f;
 
-    [Header("Door Focus")]
-    [SerializeField] private Transform doorFocusPoint;
-    [SerializeField] private float doorFocusDuration = 0.5f;
-
     private int currentStep = 0;
     private bool canStep = false;
+    private bool completed = false;
+    private bool isLoadingFromSave = false;
 
     private List<PuzzleZone> zones;
     private NewCameraController cam;
@@ -104,8 +101,7 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
             {
                 Debug.Log("Puzzle Completed!");
                 canStep = false;
-
-                StartCoroutine(HandlePuzzleComplete());
+                completed = true;
             }
         }
     }
@@ -113,46 +109,6 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
     {
         lastZoneStepped = null;
     }
-
-    private IEnumerator HandlePuzzleComplete()
-    {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player)
-        {
-            PlayerInput playerInput = player.GetComponent<PlayerInput>();
-            if (playerInput != null)
-                playerInput.enabled = false;
-        }
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (cam && doorFocusPoint)
-        {
-            Debug.Log("[PathPuzzle] Panning camera to door...");
-            yield return cam.StartCoroutine(cam.PanTo(doorFocusPoint, 0.8f));
-        }
-
-        if (doorToOpen != null)
-        {
-            doorToOpen.Open();
-            Debug.Log("[PathPuzzle] Door opened!");
-        }
-
-        yield return new WaitForSeconds(doorFocusDuration);
-
-        if (cam)
-            yield return cam.StartCoroutine(cam.ReturnToPlayer(0.8f));
-
-        Debug.Log("[PathPuzzle] Puzzle sequence complete.");
-
-        if (player)
-        {
-            PlayerInput playerInput = player.GetComponent<PlayerInput>();
-            if (playerInput != null)
-                playerInput.enabled = true;
-        }
-    }
-
 
     private IEnumerator ShowCorrectPath()
     {
@@ -170,7 +126,8 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
 
     private IEnumerator ReturnToCheckpoint()
     {
-        yield return new WaitForSeconds(0.5f);
+        if (!isLoadingFromSave)
+            yield return new WaitForSeconds(0.5f);
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
 
@@ -184,25 +141,43 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
                 player.transform.position = activeCP.transform.position;
 
                 if (FindObjectOfType<NewCameraController>() is NewCameraController cam)
-                    cam.ReturnToPlayer(0.2f);
+                {
+                    cam.transform.position = new Vector3(
+                        activeCP.transform.position.x,
+                        activeCP.transform.position.y,
+                        cam.transform.position.z
+                    );
+                }
 
                 RespawnPartyAtCheckpoint(activeCP);
             }
-            else
-            {
-                Debug.LogWarning("[PathPuzzle] No active checkpoint found to respawn at!");
-            }
         }
-
-        yield return new WaitForSeconds(1.0f);
-        Debug.Log("[PathPuzzle] Puzzle reset and ready for retry.");
+        if (player != null)
+        {
+            PlayerInput playerInput = player.GetComponent<PlayerInput>();
+            if (playerInput != null)
+                playerInput.enabled = true;
+        }
+        ResetPuzzle();
     }
-    private void ResetPuzzle()
+
+
+    private void ResetPuzzle(bool respawnToCheckpoint = false)
     {
         solvedZoneIDs.Clear();
         currentStep = 0;
         canStep = false;
+
+        bool wasStarted = puzzleStarted;
         puzzleStarted = false;
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        PlayerInput playerInput = player.GetComponent<PlayerInput>();
+        if (playerInput != null)
+            playerInput.enabled = true;
+
+        if (respawnToCheckpoint && wasStarted)
+            StartCoroutine(ReturnToCheckpoint());
     }
 
     private void RespawnPartyAtCheckpoint(Checkpoint cp)
@@ -279,33 +254,35 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData data)
     {
-        if (data.pathPuzzleData == null)
-            return;
-
-        if (data.pathPuzzleData.puzzleCompleted)
-        {
-            canStep = false;
-            puzzleStarted = true;
-            StartCoroutine(EnsureDoorOpen());
-        }
+        isLoadingFromSave = true;
+        StartCoroutine(LoadPuzzleState(data));
     }
-    private IEnumerator EnsureDoorOpen()
+
+    private IEnumerator LoadPuzzleState(GameData data)
     {
         yield return null;
 
-        if (doorToOpen != null)
+        if (data.pathPuzzleCompleted)
         {
-            doorToOpen.LoadFromSave(true);
-            Debug.Log("[PathPuzzle] Loaded: Puzzle completed, forcing door open after load.");
+            canStep = false;
+            puzzleStarted = true;
+            completed = true;
         }
+        else
+        {
+            ResetPuzzle(true);
+
+            puzzleStarted = false;
+            completed = false;
+        }
+
+        isLoadingFromSave = false;
     }
+
 
     public void SaveData(ref GameData data)
     {
-        data.pathPuzzleData = new GameData.PathPuzzleSaveData
-        {
-            puzzleCompleted = doorToOpen.IsOpen
-        };
+        data.pathPuzzleCompleted = completed;
     }
 
 }

@@ -255,7 +255,6 @@ public class ShutterChanceBishi : BaseMinigame
         waveHitsRemaining = 0;
         bonusPhase = false;
 
-        // Skip UI state
         skipRequested = false;
         SetupSkipUI(false);
     }

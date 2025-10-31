@@ -42,9 +42,31 @@ public class GameData
         }
     }
     [System.Serializable]
-    public class PathPuzzleSaveData
+    public class StatueSaveData
     {
-        public bool puzzleCompleted;
+        public bool isCompleted;
+        public Vector3Int position;
+        public bool isWhite;
+    }
+    [System.Serializable]
+    public class ChessPieceSaveData
+    {
+        public Piece.PieceType type;
+        public bool isWhite;
+        public Vector3Int position;
+
+        public ChessPieceSaveData(Piece.PieceType type, bool isWhite, Vector3Int position)
+        {
+            this.type = type;
+            this.isWhite = isWhite;
+            this.position = position;
+        }
+    }
+    [System.Serializable]
+    public class BlockSaveEntry
+    {
+        public string id;      
+        public bool isOpen;    
     }
 
     public bool hasSavedGame;
@@ -76,7 +98,12 @@ public class GameData
     public List<BreakableSaveEntry> brokenObjects; // breakable
     public List<NPCQuestStageEntry> npcQuestStages; // quests
     public List<BlockSaveData> pushableBlocks; // push-able blocks 
-    public PathPuzzleSaveData pathPuzzleData;
+    public bool pathPuzzleCompleted;
+    public List<StatueSaveData> statueStates;
+    public bool connectPuzzleCompleted;
+    public List<ChessPieceSaveData> chessPieces;
+    public bool chessPuzzleCompleted;
+    public List<BlockSaveEntry> savedBlocks;
 
     public GameData()
     {
@@ -107,9 +134,11 @@ public class GameData
         brokenObjects = new List<BreakableSaveEntry>(); // breakables
         npcQuestStages = new List<NPCQuestStageEntry>(); // quests
         pushableBlocks = new List<BlockSaveData>(); // push-able blocks
-        pathPuzzleData = new PathPuzzleSaveData
-        {
-            puzzleCompleted = false,
-        };
+        pathPuzzleCompleted = false;
+        statueStates = new List<StatueSaveData>();
+        connectPuzzleCompleted = false;
+        chessPieces = new List<ChessPieceSaveData>();
+        chessPuzzleCompleted = false;
+        savedBlocks = new List<BlockSaveEntry>();
     }
 }

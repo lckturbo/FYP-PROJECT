@@ -6,10 +6,7 @@ public class MinigameController : MonoBehaviour
     private string globalMinigameID = "TakeABreak";
     private float globalMinigameChance = 2f;
     private float minigameChance = 20f;
-    /// <summary>
-    /// Called directly from animation event.
-    /// Example: Animation Event calls TriggerMinigame("Wordle")
-    /// </summary>
+
     public void TriggerMinigame(string id)
     {
         currCombatant = GetComponentInParent<Combatant>();
