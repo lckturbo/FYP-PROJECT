@@ -29,6 +29,18 @@ public class GameData
         public string npcName;
         public int stageIndex;
     }
+    [System.Serializable]
+    public class BlockSaveData
+    {
+        public int id;
+        public Vector2 position;
+
+        public BlockSaveData(int id, Vector2 position)
+        {
+            this.id = id;
+            this.position = position;
+        }
+    }
 
     public bool hasSavedGame;
 
@@ -53,13 +65,11 @@ public class GameData
     public bool hasCheckpoint;
     public int lastCheckpointID;
 
-    // switches //
-    public List<ChannelState> switchChannelStates;
-    // chest //
-    public List<ChestSaveEntry> openedChests;
-    // unbreakable //
-    public List<BreakableSaveEntry> brokenObjects;
-    public List<NPCQuestStageEntry> npcQuestStages;
+    public List<ChannelState> switchChannelStates; // switches
+    public List<ChestSaveEntry> openedChests; // chest
+    public List<BreakableSaveEntry> brokenObjects; // breakable
+    public List<NPCQuestStageEntry> npcQuestStages; // quests
+    public List<BlockSaveData> pushableBlocks; // push-able blocks 
 
     public GameData()
     {
@@ -88,5 +98,6 @@ public class GameData
         openedChests = new List<ChestSaveEntry>(); // chests
         brokenObjects = new List<BreakableSaveEntry>(); // breakables
         npcQuestStages = new List<NPCQuestStageEntry>(); // quests
+        pushableBlocks = new List<BlockSaveData>(); // push-able blocks
     }
 }
