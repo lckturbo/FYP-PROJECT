@@ -103,4 +103,14 @@ public class QuestManager : MonoBehaviour
         // Reset NPC quest stages
         npcQuestStages.Clear();
     }
+    public Quest GetActiveQuestByID(string questID)
+    {
+        foreach (var quest in activeQuests)
+        {
+            if (quest.questData.questID == questID)
+                return quest;
+        }
+        return null;
+    }
+
 }

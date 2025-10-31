@@ -12,57 +12,67 @@ public class NPCQuestGiver : MonoBehaviour
     {
         // Load stage progress for this NPC
         currentStageIndex = QuestManager.Instance.GetNPCStage(questDialogueData.npcName);
-    }
 
-    private void Update()
-    {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        // Try to find an active quest that matches this NPC’s current quest stage
+        if (currentStageIndex < questDialogueData.stages.Length)
         {
-            if (!DialogueManager.Instance.IsDialogueActive)
+            var stage = questDialogueData.stages[currentStageIndex];
+            if (stage.questData != null)
             {
-                if (currentStageIndex >= questDialogueData.stages.Length)
+                // Look for an active quest with the same questID
+                activeQuest = QuestManager.Instance.GetActiveQuestByID(stage.questData.questID);
+                if (activeQuest != null)
                 {
-                    if (questDialogueData.finalDialogue != null)
-                        DialogueManager.Instance.StartDialogue(questDialogueData.finalDialogue);
-                    else
-                        Debug.Log($"{questDialogueData.npcName} has no more quests or dialogue.");
-                    return;
+                    // Re-link event so completion still works after scene reload
+                    activeQuest.OnQuestCompleted += HandleQuestCompleted;
                 }
-
-                var stage = questDialogueData.stages[currentStageIndex];
-
-                if (stage.questData != null)
-                {
-                    if (activeQuest == null)
-                    {
-                        DialogueManager.Instance.StartDialogue(stage.startDialogue);
-
-                        activeQuest = QuestManagerInstance().StartQuest(stage.questData);
-                        activeQuest.OnQuestCompleted += HandleQuestCompleted;
-                    }
-                    else if (!activeQuest.isCompleted)
-                    {
-                        if (stage.inProgressDialogue != null)
-                            DialogueManager.Instance.StartDialogue(stage.inProgressDialogue);
-                        else
-                            Debug.Log($"No in-progress dialogue set for {questDialogueData.npcName}");
-                    }
-                }
-                else
-                {
-                    DialogueManager.Instance.StartDialogue(stage.startDialogue);
-                }
-            }
-            else
-            {
-                DialogueManager.Instance.DisplayNextLine();
             }
         }
     }
 
-    private QuestManager QuestManagerInstance()
+    private void Update()
     {
-        return QuestManager.Instance;
+        if (!playerInRange || !Input.GetKeyDown(KeyCode.E))
+            return;
+
+        if (DialogueManager.Instance.IsDialogueActive)
+        {
+            DialogueManager.Instance.DisplayNextLine();
+            return;
+        }
+
+        if (currentStageIndex >= questDialogueData.stages.Length)
+        {
+            if (questDialogueData.finalDialogue != null)
+                DialogueManager.Instance.StartDialogue(questDialogueData.finalDialogue);
+            else
+                Debug.Log($"{questDialogueData.npcName} has no more quests or dialogue.");
+            return;
+        }
+
+        var stage = questDialogueData.stages[currentStageIndex];
+
+        if (stage.questData != null)
+        {
+            // ?? If quest is already active, don't start it again
+            if (activeQuest == null)
+            {
+                DialogueManager.Instance.StartDialogue(stage.startDialogue);
+                activeQuest = QuestManager.Instance.StartQuest(stage.questData);
+                activeQuest.OnQuestCompleted += HandleQuestCompleted;
+            }
+            else if (!activeQuest.isCompleted)
+            {
+                if (stage.inProgressDialogue != null)
+                    DialogueManager.Instance.StartDialogue(stage.inProgressDialogue);
+                else
+                    Debug.Log($"No in-progress dialogue set for {questDialogueData.npcName}");
+            }
+        }
+        else
+        {
+            DialogueManager.Instance.StartDialogue(stage.startDialogue);
+        }
     }
 
     private void HandleQuestCompleted(Quest quest)
