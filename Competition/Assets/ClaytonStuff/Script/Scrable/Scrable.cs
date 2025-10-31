@@ -314,7 +314,7 @@ public class ScrabbleGame : BaseMinigame
             if (request.result == UnityWebRequest.Result.ConnectionError ||
                 request.result == UnityWebRequest.Result.ProtocolError)
             {
-                messageText.text = $"Network error: {request.error}";
+                messageText.text = $"NOT A REAL WORD";
                 //yield break;
             }
 
