@@ -238,37 +238,64 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
         return go.transform;
     }
 
+    public void SaveData(ref GameData data)
+    {
+        bool found = false;
+        foreach (var state in data.switchChannelStates)
+        {
+            if (state.channelIndex == _resolvedChannel)
+            {
+                state.isActivated = _isActivated;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            data.switchChannelStates.Add(new GameData.ChannelState
+            {
+                channelIndex = _resolvedChannel,
+                isActivated = _isActivated
+            });
+    }
+
     public void LoadData(GameData data)
     {
-        if (data.switchStates != null && data.switchStates.TryGetValue(_resolvedChannel, out bool savedState))
+        foreach (var state in data.switchChannelStates)
         {
-            _isActivated = savedState;
-
-            // Broadcast saved state to all subscribers (ToggleableBlocks)
-            SwitchBus.SetState(_resolvedChannel, _isActivated);
-
-            // Update own visuals immediately
-            if (switchAnimator) switchAnimator.Play(_isActivated ? "Open" : "Close", 0, 1f);
-            if (blockAnimator) blockAnimator.Play(_isActivated ? "Open" : "Close", 0, 1f);
-
-            // Extra safety: manually refresh blocks on same channel
-            var blocks = FindObjectsOfType<ToggleableBlock>();
-            foreach (var b in blocks)
+            if (state.channelIndex == _resolvedChannel)
             {
-                if (b.channelIndex == _resolvedChannel || (b.channelData != null && b.channelData.channelIndex == _resolvedChannel))
-                    b.ForceRefreshState();
+                _isActivated = state.isActivated;
+                SwitchBus.SetState(_resolvedChannel, _isActivated);
+                break;
             }
+        }
+
+        foreach (var block in FindObjectsOfType<ToggleableBlock>())
+        {
+            foreach (var state in data.switchChannelStates)
+            {
+                if (state.channelIndex == block.channelIndex)
+                {
+                    block.LoadFromSave(state.isActivated);
+                    break;
+                }
+            }
+        }
+
+        if (switchAnimator)
+        {
+            switchAnimator.ResetTrigger("Use");
+            switchAnimator.ResetTrigger("On");
+            switchAnimator.ResetTrigger("Off");
+
+            if (_isActivated)
+                switchAnimator.Play("On", 0, 1f);
+            else
+                switchAnimator.Play("Off", 0, 1f);
         }
     }
 
-    public void SaveData(ref GameData data)
-    {
-        if (data.switchStates == null)
-            data.switchStates = new Dictionary<int, bool>();
-
-        data.switchStates[_resolvedChannel] = _isActivated;
-        Debug.Log($"[SwitchInteract] Saved channel {_resolvedChannel}, state: {_isActivated}");
-    }
 
 #if UNITY_EDITOR
     private void OnValidate()
