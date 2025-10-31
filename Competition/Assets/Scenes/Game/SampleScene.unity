@@ -24576,7 +24576,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &560059616
 Transform:
   m_ObjectHideFlags: 0
@@ -25965,7 +25965,7 @@ Transform:
   m_GameObject: {fileID: 667851354}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.29, y: 2.71, z: 0}
+  m_LocalPosition: {x: 79.68, y: 88.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25983,6 +25983,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ca6d9a41829f2b40bca6d9209f90cf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  characterDatabase: {fileID: 11400000, guid: 240a5a2743c56d849a269d97e550d185, type: 2}
   selectedStore: {fileID: 11400000, guid: ad2861f4482af1240b4a84ea6f014cb8, type: 2}
   spawnPoint: {fileID: 667851355}
 --- !u!61 &667851357

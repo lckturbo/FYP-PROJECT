@@ -11,13 +11,12 @@ public class CharacterDatabase : ScriptableObject
     {
         lookup = new Dictionary<string, NewCharacterDefinition>();
 
-        foreach(var def in roster)
+        foreach (var def in roster)
         {
-            if(!def && !string.IsNullOrEmpty(def.id))
-            {
-                if(!lookup.ContainsKey(def.id))
-                    lookup.Add(def.id, def);
-            }
+            if (def == null || string.IsNullOrEmpty(def.id)) continue;
+
+            if (!lookup.ContainsKey(def.id))
+                lookup.Add(def.id, def);
         }
     }
 

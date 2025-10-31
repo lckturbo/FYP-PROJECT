@@ -33,7 +33,7 @@ public class PathPuzzle : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && !puzzleStarted)
         {
             PlayerInput playerInput = collision.GetComponent<PlayerInput>();
-            if(playerInput != null) 
+            if (playerInput != null)
                 playerInput.enabled = false;
             puzzleStarted = true;
             StartCoroutine(StartPuzzleSequence());
@@ -75,11 +75,21 @@ public class PathPuzzle : MonoBehaviour
     {
         if (!canStep) return;
 
-        if (zone.ZoneID == correctPath[currentStep])
+        if (currentStep < correctPath.Count)
         {
-            zone.FlashFeedback(true);
-            currentStep++;
-            Debug.Log($"Correct step {currentStep}/{correctPath.Count}");
+            if (zone.ZoneID == correctPath[currentStep])
+            {
+                zone.FlashFeedback(true);
+                currentStep++;
+                Debug.Log($"Correct step {currentStep}/{correctPath.Count}");
+            }
+            else
+            {
+                zone.FlashFeedback(false);
+
+                ResetPuzzle();
+                StartCoroutine(ReturnToCheckpoint());
+            }
 
             if (currentStep >= correctPath.Count)
             {
@@ -88,16 +98,6 @@ public class PathPuzzle : MonoBehaviour
 
                 StartCoroutine(HandlePuzzleComplete());
             }
-        }
-        else
-        {
-            zone.FlashFeedback(false);
-
-            currentStep = 0;
-            canStep = false;
-            puzzleStarted = false;
-
-            StartCoroutine(ReturnToCheckpoint());
         }
     }
 
@@ -153,9 +153,6 @@ public class PathPuzzle : MonoBehaviour
                 yield return new WaitForSeconds(2.1f);
             }
         }
-
-        canStep = true;
-        Debug.Log("Player may now step.");
     }
 
     private IEnumerator ReturnToCheckpoint()
@@ -185,7 +182,12 @@ public class PathPuzzle : MonoBehaviour
         }
 
         yield return new WaitForSeconds(1.0f);
-
+        Debug.Log("[PathPuzzle] Puzzle reset and ready for retry.");
+    }
+    private void ResetPuzzle()
+    {
+        currentStep = 0;
+        canStep = false;
         puzzleStarted = false;
     }
 

@@ -152,6 +152,17 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
-        data.selectedCharacterIndex = currentIndex;
+        data.selectedCharacterIndex = currentIndex; // leader
+
+        var party = PlayerParty.instance.GetFullParty();
+
+        foreach (var memberDef in party)
+        {
+            if (memberDef == roster[currentIndex]) continue;
+
+            int index = System.Array.IndexOf(roster, memberDef);
+            if (index >= 0)
+                data.allyIndices.Add(index); // allies
+        }
     }
 }

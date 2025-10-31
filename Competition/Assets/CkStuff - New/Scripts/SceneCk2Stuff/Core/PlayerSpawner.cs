@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class PlayerSpawner : MonoBehaviour, IDataPersistence
 {
+    [SerializeField] private CharacterDatabase characterDatabase;
+
     [SerializeField] private SelectedCharacter selectedStore;
+    private List<int> cachedAllyIndices = new List<int>();
     [SerializeField] private Transform spawnPoint;
 
     private Vector2 position;
@@ -15,6 +18,8 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         selectedStore.index = data.selectedCharacterIndex;
         selectedStore.RestoreFromIndex(data.selectedCharacterIndex);
         position = data.playerPosition;
+
+        cachedAllyIndices = new List<int>(data.allyIndices);
     }
 
     public void SaveData(ref GameData data) { }
@@ -73,7 +78,21 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         var camCtrl = Camera.main ? Camera.main.GetComponent<NewCameraController>() : FindFirstObjectByType<NewCameraController>();
         if (camCtrl) camCtrl.target = go.transform;
 
-        PlayerParty.instance.SetupParty(def, new List<NewCharacterDefinition>());
+        var allies = new List<NewCharacterDefinition>();
+
+        if (cachedAllyIndices != null && cachedAllyIndices.Count > 0)
+        {
+            foreach (int allyIndex in cachedAllyIndices)
+            {
+                if (allyIndex >= 0 && allyIndex < characterDatabase.roster.Length)
+                {
+                    var allyDef = characterDatabase.GetByIndex(allyIndex);
+                    if (allyDef != null) allies.Add(allyDef);
+                }
+            }
+        }
+
+        PlayerParty.instance.SetupParty(def, allies);
         var fullParty = PlayerParty.instance.GetFullParty();
 
         Transform lastTarget = go.transform;

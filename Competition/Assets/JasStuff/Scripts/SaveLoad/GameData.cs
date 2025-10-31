@@ -51,6 +51,7 @@ public class GameData
 
     // player //
     public int selectedCharacterIndex;
+    public List<int> allyIndices;
     public Vector2 playerPosition;
     public bool hasSavedPosition;
 
@@ -80,6 +81,7 @@ public class GameData
         cameraPositionSaved = false;
         // player //
         selectedCharacterIndex = -1;
+        allyIndices = new List<int>();
         playerPosition = Vector2.zero;
         hasSavedPosition = false;
         
