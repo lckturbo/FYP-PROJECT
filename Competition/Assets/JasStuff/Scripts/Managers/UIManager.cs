@@ -10,7 +10,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
     public static UIManager instance;
 
     [Header("MainMenu / Lobby Buttons")]
-    [SerializeField] private Button playBtn;
+    [SerializeField] private Button loadBtn;
+    [SerializeField] private Button newBtn  ;
     [SerializeField] private Button settingsBtn;
     [SerializeField] private Button creditsBtn;
     [SerializeField] private Button exitBtn;
@@ -118,14 +119,23 @@ public class UIManager : MonoBehaviour, IDataPersistence
         settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
         if (settingsUI) SetupSettingUI();
 
-        playBtn = GameObject.Find("PlayBtn")?.GetComponent<Button>();
+        newBtn = GameObject.Find("NewBtn")?.GetComponent<Button>();
+        loadBtn = GameObject.Find("LoadBtn")?.GetComponent<Button>();
         settingsBtn = GameObject.Find("SettingsBtn")?.GetComponent<Button>();
         exitBtn = GameObject.Find("ReturnBtn")?.GetComponent<Button>();
 
-        if (playBtn || settingsBtn || exitBtn)
+        if (newBtn || loadBtn || settingsBtn || exitBtn)
         {
-            playBtn.onClick.RemoveAllListeners();
-            playBtn.onClick.AddListener(() => ASyncManager.instance.LoadLevelBtn("CharSelection"));
+            newBtn.onClick.RemoveAllListeners();
+            newBtn.onClick.AddListener(() => {
+                SaveLoadSystem.instance.NewGame();
+                ASyncManager.instance.LoadLevelBtn("CharSelection");
+                });
+            loadBtn.onClick.RemoveAllListeners();
+            loadBtn.onClick.AddListener(() => { 
+                SaveLoadSystem.instance.LoadGame();
+                ASyncManager.instance.LoadLevelBtn("SampleScene");
+            });
 
             settingsBtn.onClick.RemoveAllListeners();
             settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
@@ -215,7 +225,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (pauseUI)
         {
             resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
-            if (resumeBtn) resumeBtn.onClick.AddListener(() => ToggleSettings(false));
+            if (resumeBtn) resumeBtn.onClick.AddListener(() => ShowPauseUI(false));
             settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
             if (settingsBtn) settingsBtn.onClick.AddListener(() =>
             {
@@ -226,6 +236,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             if (menuBtn) menuBtn.onClick.AddListener(() =>
             {
                 TogglePause(false);
+                SaveLoadSystem.instance.SaveGame();
                 ASyncManager.instance.LoadLevelBtn("Main");
             });
             if (statsDisplay == null)

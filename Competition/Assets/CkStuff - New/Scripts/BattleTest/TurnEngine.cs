@@ -22,9 +22,7 @@ public class TurnEngine : MonoBehaviour
     public event Action<bool> OnBattleEnd;
 
     private int _nextIndex = 0;
-
     private bool _resolvingAction = false;
-
     private bool _ended = false;
 
     // JAS ADDED //
@@ -87,20 +85,31 @@ public class TurnEngine : MonoBehaviour
 
         Time.timeScale = battleSpeed;
 
-        // Pause the loop if an action is resolving
-        if (_resolvingAction) return;
-
-        // If leader died, end battle immediately
-        var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
-        if (leader != null && !leader.IsAlive)
+        // ========= Global failsafes (run EVERY frame) =========
+        // 1) If all ENEMIES are gone at any moment (DOT, projectile, etc.), end as WIN.
+        if (IsTeamWiped(false))
         {
-            ForceEnd(false);
+            Debug.Log("[TurnEngine] Failsafe: no enemies alive — force end battle (WIN).");
+            ForceEnd(true);
             return;
         }
 
+        // 2) If the LEADER died at any moment, end as LOSS.
+        var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
+        if (leader != null && !leader.IsAlive)
+        {
+            Debug.Log("[TurnEngine] Leader dead — force end battle (LOSS).");
+            ForceEnd(false);
+            return;
+        }
+        // ======================================================
+
+        // Pause the loop if an action is resolving (but after failsafes above)
+        if (_resolvingAction) return;
+
         if (_waitingForLeader) return;
 
-        float step = Time.deltaTime  / Mathf.Max(0.01f, atbFillSeconds);
+        float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
         // PASS 1: fill everyone's ATB
         for (int i = 0; i < _units.Count; i++)
@@ -152,6 +161,7 @@ public class TurnEngine : MonoBehaviour
                     AutoAct(u, false);
                 }
 
+                // Standard end check after any action
                 if (IsTeamWiped(true) || IsTeamWiped(false))
                 {
                     bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
@@ -178,14 +188,8 @@ public class TurnEngine : MonoBehaviour
         actor.ActionEnded += OnActorActionEnded;
     }
 
-    private void OnActorActionBegan() 
-    { 
-        _resolvingAction = true; 
-    }
-    private void OnActorActionEnded()
-    {
-        _resolvingAction = false;
-    }
+    private void OnActorActionBegan() { _resolvingAction = true; }
+    private void OnActorActionEnded() { _resolvingAction = false; }
 
     // === Leader actions ===
     public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
@@ -193,8 +197,7 @@ public class TurnEngine : MonoBehaviour
         if (!_waitingForLeader || _currentLeader == null) return;
 
         var target = ValidateOrFallback(explicitTarget);
-        if (target == null)
-            return;
+        if (target == null) return;
 
         HookActionLock(_currentLeader);
         _currentLeader.BasicAttack(target);
@@ -206,8 +209,7 @@ public class TurnEngine : MonoBehaviour
         if (!_waitingForLeader || _currentLeader == null) return;
 
         var target = ValidateOrFallback(explicitTarget);
-        if (target == null)
-            return;
+        if (target == null) return;
 
         HookActionLock(_currentLeader);
         bool used = false;

@@ -19,14 +19,10 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
-    {
-        //if (!initialized && SceneManager.GetActiveScene().name == "Main")
-        //{
-        SaveLoadSystem.instance.NewGame();
-        //    initialized = true;
-        //}
-    }
+    //private void Start()
+    //{
+    //    SaveLoadSystem.instance.NewGame();
+    //}
 
 
     public void Update()
@@ -37,7 +33,7 @@ public class GameManager : MonoBehaviour
             bool settingsOpen = UIManager.instance != null && UIManager.instance.IsSettingsOpen();
 
             if (!settingsOpen && (Input.anyKeyDown || Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject())
-                ASyncManager.instance.LoadLevelBtn("CharSelection");
+                ASyncManager.instance.LoadLevelBtn("Lobby");
         }
     }
     public void ChangeScene(string scn)

@@ -105,6 +105,10 @@ public class ToggleableBlock : MonoBehaviour
             else animator.SetTrigger("Close");
         }
     }
+    public void ForceRefreshState()
+    {
+        SetOpenInternal(_isOpen, applyInvert: true);
+    }
 
 #if UNITY_EDITOR
     private void OnValidate()

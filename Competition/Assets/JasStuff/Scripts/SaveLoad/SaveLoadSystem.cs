@@ -60,11 +60,6 @@ public class SaveLoadSystem : MonoBehaviour
         if (keepCharIndex && gameData != null)
             savedIndex = gameData.selectedCharacterIndex;
 
-        //if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
-        //gameData.playerPosition = Vector2.zero;
-        //gameData.hasSavedPosition = false;
-        //gameData.hasCheckpoint = false;
-        
         if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
         gameData.playerPosition = Vector2.zero;
         gameData.hasSavedPosition = false;
@@ -77,18 +72,13 @@ public class SaveLoadSystem : MonoBehaviour
 
     public void LoadGame()
     {
-        // load saved data from file using data handler
         gameData = fileDataHandler.Load();
-        // if no data, initialize new game
         if (gameData == null) NewGame();
 
         dataPersistenceObjs = FindAllDataPersistenceObjects();
 
-        // push loaded data to all other scripts that need it
         foreach (IDataPersistence dataObjs in dataPersistenceObjs)
-        {
             dataObjs.LoadData(gameData);
-        }
     }
     public void SaveGame(bool savePlayer = true, bool saveEnemies = true)
     {
@@ -106,7 +96,6 @@ public class SaveLoadSystem : MonoBehaviour
             dataObj.SaveData(ref gameData);
         }
 
-        // save data to a file using data handler
         fileDataHandler.Save(gameData);
     }
 
