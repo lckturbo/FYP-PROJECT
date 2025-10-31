@@ -23,6 +23,13 @@ public class GameData
         public string id;
         public bool destroyed;
     }
+    [System.Serializable]
+    public class NPCQuestStageEntry
+    {
+        public string npcName;
+        public int stageIndex;
+    }
+
     public bool hasSavedGame;
 
     // camera //
@@ -52,6 +59,7 @@ public class GameData
     public List<ChestSaveEntry> openedChests;
     // unbreakable //
     public List<BreakableSaveEntry> brokenObjects;
+    public List<NPCQuestStageEntry> npcQuestStages;
 
     public GameData()
     {
@@ -79,5 +87,6 @@ public class GameData
         switchChannelStates = new List<ChannelState>(); // switches
         openedChests = new List<ChestSaveEntry>(); // chests
         brokenObjects = new List<BreakableSaveEntry>(); // breakables
+        npcQuestStages = new List<NPCQuestStageEntry>(); // quests
     }
 }
