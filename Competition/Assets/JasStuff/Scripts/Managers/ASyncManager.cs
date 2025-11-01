@@ -57,6 +57,9 @@ public class ASyncManager : MonoBehaviour
         var questUI = FindObjectOfType<QuestUIManager>();
         if (questUI) questUI.gameObject.SetActive(false);
 
+        var inventoryUI = FindObjectOfType<InventoryUIManager>();
+        if (inventoryUI) inventoryUI.gameObject.SetActive(false);
+
         if (mainScreen) mainScreen.SetActive(false);
         if (loadingScreen) loadingScreen.SetActive(true);
 
