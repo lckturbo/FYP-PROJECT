@@ -16,10 +16,10 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     [SerializeField] private TMP_Text critDmgText;
     [SerializeField] private TMP_Text elemText;
 
-    [Header("LEFT: Bars (0..1 fill)")]
-    [SerializeField] private Image healthFill;
-    [SerializeField] private Image dmgFill;
-    [SerializeField] private Image defFill;
+    [Header("LEFT: Segmented Bars (10 blocks each)")]
+    [SerializeField] private Transform healthBarContainer;
+    [SerializeField] private Transform dmgBarContainer;
+    [SerializeField] private Transform defBarContainer;
 
     [Header("LEFT: Resist icons (tint only)")]
     [SerializeField] private Image fireIcon;
@@ -103,32 +103,44 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
 
         var s = def.stats;
 
-        if (healthFill)
-            healthFill.fillAmount = Mathf.Clamp01(s.maxHealth / Mathf.Max(1f, healthMaxUI));
+        float hpRatio = s.maxHealth / Mathf.Max(1f, healthMaxUI);
+        float dmgRatio = s.atkDmg / Mathf.Max(1f, damageMaxUI);
+        float defRatio = s.attackreduction / Mathf.Max(1f, defenseMaxUI);
 
-        if (dmgFill)
-            dmgFill.fillAmount = Mathf.Clamp01(s.atkDmg / Mathf.Max(1f, damageMaxUI));
-
-        if (defFill)
-        {
-            float defRatio = s.attackreduction / Mathf.Max(1f, defenseMaxUI);
-            defFill.fillAmount = Mathf.Clamp01(defRatio);
-        }
+        UpdateBarSegments(healthBarContainer, hpRatio);
+        UpdateBarSegments(dmgBarContainer, dmgRatio);
+        UpdateBarSegments(defBarContainer, defRatio);
 
         if (critRateText) critRateText.text = $"{Mathf.RoundToInt(s.critRate * 100f)}%";
         if (critDmgText) critDmgText.text = $"×{s.critDamage:0.##}";
         if (elemText) elemText.text = s.attackElement.ToString();
 
-        // Resist coloring (green <1, grey =1, red >1)
+        // Resist coloring
         TintResist(fireIcon, s.fireRes);
         TintResist(waterIcon, s.waterRes);
         TintResist(grassIcon, s.grassRes);
         TintResist(darkIcon, s.darkRes);
         TintResist(lightIcon, s.lightRes);
 
-        // CENTER: art
+        // Art
         if (artNormal) artNormal.sprite = def.normalArt;
         if (artPixel) artPixel.sprite = def.pixelArt;
+    }
+
+    private void UpdateBarSegments(Transform container, float ratio)
+    {
+        if (!container) return;
+        int total = container.childCount;
+        int activeCount = Mathf.RoundToInt(ratio * total);
+
+        for (int i = 0; i < total; i++)
+        {
+            var seg = container.GetChild(i).GetComponent<Image>();
+            if (seg)
+            {
+                seg.color = (i < activeCount) ? new Color(0.8156863f, 0.5254902f, 0.3372549f,1) : new Color(1, 1, 1, 0.15f);
+            }
+        }
     }
 
     private void TintResist(Image icon, float val)
@@ -136,14 +148,13 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         if (!icon) return;
         if (val < 0.999f) icon.color = new Color(0.6f, 1f, 0.6f, 1f);
         else if (val > 1.001f) icon.color = new Color(1f, 0.6f, 0.6f, 1f);
-        else icon.color = Color.white;
+        else icon.color = Color.black;
     }
 
     private void Confirm()
     {
         SaveLoadSystem.instance.SaveGame();
-       GameManager.instance.ChangeScene("SampleScene");
-        //GameManager.instance.ChangeScene("jas");
+        GameManager.instance.ChangeScene("SampleScene");
     }
 
     public int GetCurrentIndex() => currentIndex;
@@ -155,7 +166,6 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         data.selectedCharacterIndex = currentIndex; // leader
 
         var party = PlayerParty.instance.GetFullParty();
-
         foreach (var memberDef in party)
         {
             if (memberDef == roster[currentIndex]) continue;
