@@ -19,19 +19,19 @@ public class MinigameController : MonoBehaviour
 
         string finalID = id;
 
-        if (roll < globalMinigameChance)
-        {
-            finalID = globalMinigameID;
+        //if (roll < globalMinigameChance)
+        //{
+        //    finalID = globalMinigameID;
+        //    MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+        //}
+        //else if (roll > globalMinigameChance && roll <= minigameChance)
+        //{
             MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        }
-        else if (roll > globalMinigameChance && roll <= minigameChance)
-        {
-            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        }
-        else
-        {
-            Debug.Log("Nothing playing, no chance");
-        }
+        //}
+        //else
+        //{
+        //    Debug.Log("Nothing playing, no chance");
+        //}
     }
 
     private void OnMinigameComplete(MinigameManager.ResultType result)

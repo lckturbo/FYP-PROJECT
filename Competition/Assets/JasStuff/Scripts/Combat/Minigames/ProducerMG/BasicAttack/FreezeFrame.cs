@@ -27,7 +27,7 @@ public class FreezeFrame : BaseMinigame
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(4.5f);
+            yield return new WaitForSecondsRealtime(3.0f);
         }
 
         animPanel.SetActive(false);
