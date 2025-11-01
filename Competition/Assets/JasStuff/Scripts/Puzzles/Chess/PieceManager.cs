@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PieceManager : BoardManager, IDataPersistence
 {
+    public static PieceManager instance;
     [Header("Reference")]
     [SerializeField] private GameObject piecePrefab;
 
@@ -15,9 +16,17 @@ public class PieceManager : BoardManager, IDataPersistence
     [SerializeField] private PuzzleDatabase puzzleDB;
     private int currentStep = 0;
     private int currentPuzzleIndex = 0;
+    public int CurrentPuzzleIndex => currentPuzzleIndex;
 
     private PuzzleSolution activeSolution;
 
+    private void Awake()
+    {
+        if (!instance)
+            instance = this;
+        else
+            Destroy(gameObject);
+    }
     private void SpawnPiece(Piece.PieceType type, bool isWhite, Sprite sprite, Vector3Int cellPos)
     {
         GameObject spawned = SpawnOnBoard(piecePrefab, cellPos);
@@ -197,4 +206,8 @@ public class PieceManager : BoardManager, IDataPersistence
         data.chessPuzzleCompleted = puzzleSolved;
     }
 
+    public PuzzleSolution GetActiveSolution()
+    {
+        return activeSolution;
+    }
 }

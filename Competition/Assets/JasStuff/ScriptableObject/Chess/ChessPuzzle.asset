@@ -35,6 +35,10 @@ MonoBehaviour:
         isWhite: 1
         startCell: {x: 4, y: 6, z: 0}
         targetCell: {x: 5, y: 4, z: 0}
+      clues:
+        sign1Clue: {fileID: 11400000, guid: 8b8e0ddb799a23149afa0eb4e37fcd8d, type: 2}
+        sign2Clue: {fileID: 11400000, guid: ca2b670069f8a6748a496bbaeafd03fd, type: 2}
+        sign3Clue: {fileID: 11400000, guid: 3558993081e7de7498eabcc1611c6ab1, type: 2}
     - moves:
       - type: 1
         isWhite: 1
@@ -56,6 +60,10 @@ MonoBehaviour:
         isWhite: 1
         startCell: {x: 4, y: 6, z: 0}
         targetCell: {x: 2, y: 5, z: 0}
+      clues:
+        sign1Clue: {fileID: 11400000, guid: 1f38dc404f6908a4984561e98b2f50aa, type: 2}
+        sign2Clue: {fileID: 11400000, guid: 8e074328246a2824197e2b97892eb475, type: 2}
+        sign3Clue: {fileID: 11400000, guid: 38f7edc26d4ed484a901670883c2d2f7, type: 2}
     - moves:
       - type: 1
         isWhite: 1
@@ -77,3 +85,7 @@ MonoBehaviour:
         isWhite: 1
         startCell: {x: 7, y: 0, z: 0}
         targetCell: {x: 2, y: 5, z: 0}
+      clues:
+        sign1Clue: {fileID: 11400000, guid: 65302ef53e403d344ab791aa0a0389be, type: 2}
+        sign2Clue: {fileID: 11400000, guid: 24d07777feabdc54caf377c38c81ed5a, type: 2}
+        sign3Clue: {fileID: 11400000, guid: f0d23f0b0feadc3449aa62fddef91cac, type: 2}

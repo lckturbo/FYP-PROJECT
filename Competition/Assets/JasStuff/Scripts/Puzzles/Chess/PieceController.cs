@@ -8,6 +8,7 @@ public class PieceController : MonoBehaviour
     private PlayerInput playerInput;
     private InputAction interactAction;
 
+    private ChessClues nearbyClue;
     private Piece nearbyPiece;
     private Piece selectedPiece;
     private Tilemap boardTileMap;
@@ -30,6 +31,12 @@ public class PieceController : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext ctx)
     {
+        if (nearbyClue != null)
+        {
+            nearbyClue.Interact();
+            return;
+        }
+
         if (selectedPiece != null)
         {
             Vector3Int cell = boardTileMap.WorldToCell(transform.position);
@@ -58,11 +65,17 @@ public class PieceController : MonoBehaviour
     {
         if (other.TryGetComponent(out Piece piece))
             nearbyPiece = piece;
+
+        if (other.TryGetComponent(out ChessClues clue))
+            nearbyClue = clue;
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.TryGetComponent(out Piece piece) && piece == nearbyPiece)
             nearbyPiece = null;
+
+        if (other.TryGetComponent(out ChessClues clue) && clue == nearbyClue)
+            nearbyClue = null;
     }
 }
