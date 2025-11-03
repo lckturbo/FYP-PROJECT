@@ -234,9 +234,9 @@ public class ScrabbleGame : BaseMinigame
         int maxPossibleScore = rackSize * 10; // Example
         float scorePercent = (float)totalScore / maxPossibleScore;
 
-        if (scorePercent >= 0.8f)
+        if (scorePercent >= 0.6f)
             Result = MinigameManager.ResultType.Perfect;
-        else if (scorePercent >= 0.5f)
+        else if (scorePercent >= 0.3f)
             Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
@@ -256,7 +256,7 @@ public class ScrabbleGame : BaseMinigame
     void HandleTimer()
     {
         turnTimer -= Time.unscaledDeltaTime;
-        timerText.text = $"? {turnTimer:F1}s";
+        timerText.text = $"{turnTimer:F1}s";
 
         if (turnTimer <= 0f)
         {
@@ -275,12 +275,12 @@ public class ScrabbleGame : BaseMinigame
 
         if (!submitted)
         {
-            messageText.text = "? Time’s up! You can’t place more tiles.";
+            messageText.text = "Time’s up! You can’t place more tiles.";
             Result = MinigameManager.ResultType.Fail;
         }
         else
         {
-            messageText.text = "? Word submitted before time ran out!";
+            messageText.text = "Word submitted before time ran out!";
             Result = MinigameManager.ResultType.Success;
         }
     }
@@ -324,14 +324,14 @@ public class ScrabbleGame : BaseMinigame
             {
                 int wordScore = CalculateWordScore(word);
                 totalScore += wordScore;
-                messageText.text = $"? '{word}' is valid! You earned {wordScore} points.";
+                messageText.text = $"'{word}' is valid! You earned {wordScore} points.";
                 currentTurnTiles.Clear();
                 UpdateScoreUI();
                 RefillRack();
             }
             else
             {
-                messageText.text = $"? '{word}' not found in dictionary!";
+                messageText.text = $"'{word}' not found in dictionary!";
                 OnResetTurn();
             }
         }
@@ -354,7 +354,7 @@ public class ScrabbleGame : BaseMinigame
             AddRandomLetterToRack();
         }
 
-        messageText.text = "?? Hand reset! You got new letters.";
+        messageText.text = "Hand reset! You got new letters.";
     }
 
 
@@ -512,6 +512,10 @@ public class ScrabbleGame : BaseMinigame
         while (!gameOver)
             yield return null;
         Debug.Log("Gameover");
+
+        // Add a short delay before unpausing and closing
+        yield return new WaitForSecondsRealtime(2f);
+
         BattleManager.instance?.SetBattlePaused(false);
     }
 }
