@@ -273,6 +273,8 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
 
         foreach (var block in FindObjectsOfType<ToggleableBlock>())
         {
+            if (!block.useSwitchBus) continue;
+
             foreach (var state in data.switchChannelStates)
             {
                 if (state.channelIndex == block.channelIndex)
@@ -282,6 +284,7 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
                 }
             }
         }
+
 
         if (switchAnimator)
         {
