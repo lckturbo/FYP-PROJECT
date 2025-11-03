@@ -3330,6 +3330,7 @@ GameObject:
   - component: {fileID: 1001371854}
   - component: {fileID: 1001371853}
   - component: {fileID: 1001371852}
+  - component: {fileID: 1001371855}
   m_Layer: 0
   m_Name: SelectButton
   m_TagString: Untagged
@@ -3414,7 +3415,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0.2784314, g: 0.2784314, b: 0.2784314, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3439,6 +3440,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1001371850}
   m_CullTransparentMesh: 1
+--- !u!114 &1001371855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001371850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 100a2801cc2cabd4a8d349c301ab3d86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1
+  clickScale: 1
+  animSpeed: 8
+  normalColor: {r: 0.26666668, g: 0.26666668, b: 0.26666668, a: 1}
+  hoverColor: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
+  clickColor: {r: 0.5568628, g: 0.5568628, b: 0.5568628, a: 1}
+  colorLerpSpeed: 10
 --- !u!1 &1003733893
 GameObject:
   m_ObjectHideFlags: 0
