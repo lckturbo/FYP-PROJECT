@@ -296,29 +296,24 @@ public class StatueManager : BoardManager, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
-        data.connectPuzzleCompleted = puzzleSolved;
+        if (data.chessPieces == null)
+            data.chessPieces = new List<GameData.ChessPieceSaveData>();
+        data.chessPieces.Clear();
 
-        if (data.statueStates == null)
-            data.statueStates = new List<GameData.StatueSaveData>();
-
-        data.statueStates.Clear();
-
-        if (puzzleSolved)
+        foreach (var obj in spawnedObjs)
         {
-            foreach (var obj in spawnedObjs)
+            var piece = obj.GetComponent<Piece>();
+            if (piece != null)
             {
-                var s = obj.GetComponent<Statue>();
-                if (s == null) continue;
-
-                data.statueStates.Add(new GameData.StatueSaveData
-                {
-                    position = s.CurrentCell,
-                    isWhite = s.IsWhite(),
-                    isCompleted = true
-                });
+                Vector3Int cellPos = boardTileMap.WorldToCell(piece.transform.position);
+                data.chessPieces.Add(new GameData.ChessPieceSaveData(
+                    piece.pieceType,
+                    piece.IsWhite(),
+                    cellPos
+                ));
             }
         }
+
+        data.chessPuzzleCompleted = puzzleSolved;
     }
-
-
 }

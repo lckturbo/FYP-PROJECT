@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -38,6 +39,9 @@ public class PieceManager : BoardManager, IDataPersistence
         p.pieceType = type;
         p.SetWhite(isWhite);
         p.Init(boardTileMap, highlightTileMap, highlightTile, this);
+
+        if (!spawnedObjs.Contains(spawned))
+            spawnedObjs.Add(spawned);
     }
 
     protected override void SetupPuzzle()
@@ -184,7 +188,8 @@ public class PieceManager : BoardManager, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
-        data.chessPieces.Clear();
+        data.chessPieces = new List<GameData.ChessPieceSaveData>();
+        Debug.Log($"Saving Chess Pieces... SpawnedObjs count: {spawnedObjs.Count}");
 
         if (!puzzleSolved)
         {
@@ -203,6 +208,7 @@ public class PieceManager : BoardManager, IDataPersistence
             }
         }
 
+        Debug.Log($"Saved {data.chessPieces.Count} chess pieces");
         data.chessPuzzleCompleted = puzzleSolved;
     }
 
