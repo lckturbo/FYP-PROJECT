@@ -138,7 +138,7 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
             var seg = container.GetChild(i).GetComponent<Image>();
             if (seg)
             {
-                seg.color = (i < activeCount) ? new Color(0.8156863f, 0.5254902f, 0.3372549f,1) : new Color(1, 1, 1, 0.15f);
+                seg.color = (i < activeCount) ? new Color(0.8156863f, 0.5254902f, 0.3372549f,1) : new Color(1, 1, 1, 1);
             }
         }
     }
