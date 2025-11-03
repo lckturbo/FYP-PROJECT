@@ -120,7 +120,7 @@ public class Wordle : BaseMinigame
 
         if (timer <= 0f)
         {
-            resultText.text = "? Time’s up! Moving to next attempt.";
+            resultText.text = "Time’s up! Moving to next attempt.";
             OnSubmitGuess(forceFail: true);
         }
     }
@@ -139,7 +139,7 @@ public class Wordle : BaseMinigame
 
     void UpdateTimerUI()
     {
-        timerText.text = $"? {timer:F1}s";
+        timerText.text = $"{timer:F1}s";
     }
 
     IEnumerator CheckWordValidity(string guess)
@@ -165,7 +165,7 @@ public class Wordle : BaseMinigame
             }
             else
             {
-                resultText.text = $"? '{guess}' is not a valid English word!";
+                resultText.text = $"'{guess}' is not a valid English word!";
                 currentGuess = "";
                 UpdateLetterRow();
             }
@@ -186,8 +186,8 @@ public class Wordle : BaseMinigame
         if (guess == targetWord && !forceFail)
         {
             CalculateScore();
-            resultText.text = $"? Correct! The word was {targetWord}\nScore: {score}";
-            EndGame();
+            resultText.text = $"Correct! The word was {targetWord}\nScore: {score}";
+            StartCoroutine(EndGameWithDelay());
             return;
         }
 
@@ -198,8 +198,8 @@ public class Wordle : BaseMinigame
         if (currentAttempt >= maxAttempts)
         {
             score = 0;
-            resultText.text = $"? Out of attempts!\nWord was: {targetWord}\nScore: {score}";
-            EndGame();
+            resultText.text = $"Out of attempts!\nWord was: {targetWord}\nScore: {score}";
+            StartCoroutine(EndGameWithDelay());
         }
         else
         {
@@ -207,6 +207,14 @@ public class Wordle : BaseMinigame
             UpdateLetterRow();
         }
     }
+
+    private IEnumerator EndGameWithDelay()
+    {
+        gameOver = true;
+        yield return new WaitForSecondsRealtime(2f); //  Delay before closing the game
+        EndGame();
+    }
+
 
     void DisplayGuess(string guess)
     {
@@ -234,8 +242,6 @@ public class Wordle : BaseMinigame
 
     void EndGame()
     {
-        gameOver = true;
-
         if (score >= 50)
             Result = MinigameManager.ResultType.Perfect;
         else if (score >= 30)
@@ -244,13 +250,19 @@ public class Wordle : BaseMinigame
             Result = MinigameManager.ResultType.Fail;
     }
 
+
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
-;
+
+        // Wait until the game is over
         while (!gameOver)
             yield return null;
 
+        // Delay before unpausing battle / ending minigame
+        yield return new WaitForSecondsRealtime(2f);
+
         BattleManager.instance?.SetBattlePaused(false);
     }
+
 }

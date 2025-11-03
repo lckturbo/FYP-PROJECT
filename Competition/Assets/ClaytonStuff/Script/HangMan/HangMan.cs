@@ -6,11 +6,11 @@ using UnityEngine;
 public class HangMan : BaseMinigame
 {
     [Header("UI References")]
-    public TMP_Text wordDisplayText;       // Shows current word progress
-    public TMP_Text wrongLettersText;      // Shows wrong guesses
-    public TMP_Text messageText;           // Feedback / win-loss messages
-    public TMP_Text playerInputText;       // Displays letters as player types
-    public TMP_Text timerText;             // Countdown timer
+    public TMP_Text wordDisplayText;
+    public TMP_Text wrongLettersText;
+    public TMP_Text messageText;
+    public TMP_Text playerInputText;
+    public TMP_Text timerText;
 
     [Header("Hangman Drawing Parts")]
     public List<GameObject> hangmanParts;
@@ -18,7 +18,7 @@ public class HangMan : BaseMinigame
     [Header("Game Settings")]
     public string secretWord = "UNITY";
     public int maxAttempts = 6;
-    public float attemptTime = 10f;        // Time per guess
+    public float attemptTime = 10f;
     public int maxPoints = 100;
 
     private List<char> guessedLetters = new List<char>();
@@ -27,6 +27,7 @@ public class HangMan : BaseMinigame
     private int remainingAttempts;
     private float timer;
     private bool gameOver = false;
+    private int totalMistakes = 0; // <-- NEW: includes wrong guesses + timeouts
 
     void Start()
     {
@@ -46,7 +47,6 @@ public class HangMan : BaseMinigame
     void Update()
     {
         if (gameOver) return;
-
         HandleTyping();
         HandleTimer();
     }
@@ -57,25 +57,25 @@ public class HangMan : BaseMinigame
         {
             if (char.IsLetter(c))
             {
-                if (currentInput.Length < 1) // Only allow one letter at a time
+                if (currentInput.Length < 1)
                 {
                     currentInput = char.ToUpper(c).ToString();
                     playerInputText.text = currentInput;
                 }
             }
-            else if (c == '\b') // Backspace
+            else if (c == '\b')
             {
                 currentInput = "";
                 playerInputText.text = currentInput;
             }
-            else if (c == '\n' || c == '\r') // Enter
+            else if (c == '\n' || c == '\r')
             {
                 if (!string.IsNullOrEmpty(currentInput))
                 {
                     SubmitGuess(currentInput[0]);
                     currentInput = "";
                     playerInputText.text = "";
-                    timer = attemptTime; // Reset timer for next letter
+                    timer = attemptTime; // Reset timer
                 }
             }
         }
@@ -88,8 +88,9 @@ public class HangMan : BaseMinigame
 
         if (timer <= 0f)
         {
-            messageText.text = "? Time's up! Moving to next attempt.";
+            messageText.text = "Time's up! You missed a guess.";
             remainingAttempts--;
+            totalMistakes++; // <-- Count timeout as mistake
             UpdateHangmanDrawing();
             currentInput = "";
             playerInputText.text = "";
@@ -115,6 +116,7 @@ public class HangMan : BaseMinigame
         {
             wrongLetters.Add(guessedChar);
             remainingAttempts--;
+            totalMistakes++; // <-- Also increment here
             messageText.text = $"Wrong! {remainingAttempts} tries left.";
             UpdateHangmanDrawing();
         }
@@ -135,14 +137,13 @@ public class HangMan : BaseMinigame
 
     void UpdateHangmanDrawing()
     {
-        int wrongCount = wrongLetters.Count;
         for (int i = 0; i < hangmanParts.Count; i++)
-            hangmanParts[i].SetActive(i < wrongCount);
+            hangmanParts[i].SetActive(i < totalMistakes); // <-- use totalMistakes
     }
 
     void UpdateTimerUI()
     {
-        timerText.text = $"? {timer:F1}s";
+        timerText.text = $"{timer:F1}s";
     }
 
     void CheckGameStatus()
@@ -160,17 +161,13 @@ public class HangMan : BaseMinigame
         if (allRevealed)
         {
             gameOver = true;
+            int points = Mathf.Max(0, maxPoints - (totalMistakes * (maxPoints / maxAttempts)));
+            points = Mathf.FloorToInt(points * (timer / attemptTime));
+            messageText.text = $"You Win! Points: {points}";
 
-            // Calculate points like Scramble
-            int points = Mathf.Max(0, maxPoints - (wrongLetters.Count * (maxPoints / maxAttempts)));
-            points = Mathf.FloorToInt(points * (timer / attemptTime)); // Bonus for faster guesses
-
-            messageText.text = $"? You Win! Points: {points}";
-
-            // Determine ResultType
-            if (points >= maxPoints * 0.8f)
+            if (points >= maxPoints * 0.6f)
                 Result = MinigameManager.ResultType.Perfect;
-            else if (points >= maxPoints * 0.5f)
+            else if (points >= maxPoints * 0.4f)
                 Result = MinigameManager.ResultType.Success;
             else
                 Result = MinigameManager.ResultType.Fail;
@@ -178,19 +175,16 @@ public class HangMan : BaseMinigame
         else if (remainingAttempts <= 0)
         {
             gameOver = true;
-            messageText.text = $"? Game Over! The word was: {secretWord}. Points: 0";
+            messageText.text = $"Game Over! The word was: {secretWord}. Points: 0";
             Result = MinigameManager.ResultType.Fail;
         }
     }
 
-
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
-
         while (!gameOver)
             yield return null;
-
         BattleManager.instance?.SetBattlePaused(false);
     }
 }
