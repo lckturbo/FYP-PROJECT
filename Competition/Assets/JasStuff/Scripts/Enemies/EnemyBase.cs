@@ -63,6 +63,9 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected bool isAlerting = false;
 
+    [Header("Chase Settings")]
+    [SerializeField] private float chaseSpeedMultiplier = 1.5f;
+
     public void EnableHitBox() => hitboxCollider.enabled = true;
     public void DisableHitBox() => hitboxCollider.enabled = false;
 
@@ -182,13 +185,12 @@ public abstract class EnemyBase : MonoBehaviour
         }
 
         if (anim) anim.SetTrigger("alert");
-
         StartCoroutine(AlertDelay());
     }
 
     private IEnumerator AlertDelay()
     {
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(0.2f);
 
         isAlerting = false;
         enemyStates = EnemyStates.Chase;
@@ -253,12 +255,15 @@ public abstract class EnemyBase : MonoBehaviour
         if (dist > enemyStats.chaseRange)
         {
             aiPath.destination = rb2d.position;
+            aiPath.maxSpeed = enemyStats.Speed;
             enemyStates = EnemyStates.Idle;
             return;
         }
 
         aiPath.canMove = true;
         aiPath.destination = player.position;
+
+        aiPath.maxSpeed = enemyStats.Speed * chaseSpeedMultiplier;
 
         if (dist < enemyStats.atkRange && !isAttacking && attackCooldownTimer <= 0f)
             enemyStates = EnemyStates.Attack;
