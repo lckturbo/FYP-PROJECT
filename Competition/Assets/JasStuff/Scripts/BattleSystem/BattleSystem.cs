@@ -23,6 +23,7 @@ public class BattleSystem : MonoBehaviour
     [Header("SpawnPoints")]
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
+    [SerializeField] private Transform bossSpawnPt;
 
     [Header("UI")]
     [SerializeField] private Slider[] playerHealth;
@@ -191,8 +192,17 @@ public class BattleSystem : MonoBehaviour
         List<GameObject> spawnList = BattleManager.instance.enemypartyRef.GetEnemies();
         for (int i = 0; i < spawnList.Count; i++)
         {
-            GameObject enemy = Instantiate(spawnList[i], enemySpawnPt[i].position, Quaternion.identity);
-            enemy.transform.localScale = new Vector2(1.5f, 1.5f);
+            GameObject enemy;
+            if (BattleManager.instance.IsBossBattle)
+            {
+                enemy = Instantiate(spawnList[i], bossSpawnPt.position, Quaternion.identity);
+                enemy.transform.localScale = new Vector2(3.0f, 3.0f);
+            }
+            else
+            {
+                enemy = Instantiate(spawnList[i], enemySpawnPt[i].position, Quaternion.identity);
+                enemy.transform.localScale = new Vector2(1.5f, 1.5f);
+            }
             enemy.name = "Enemy_" + i;
             enemies.Add(enemy);
 
@@ -403,16 +413,6 @@ public class BattleSystem : MonoBehaviour
         }
 
         resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
-    }
-
-    private void HandlePauseStateChanged(bool paused)
-    {
-        _pausedForMenu = paused;
-        if (trackBattleElapsed)
-        {
-            if (paused) _battleTimer.Stop();
-            else if (!_ended) _battleTimer.Start();
-        }
     }
 
     private BattleResultsPayload BuildResultsPayload(
