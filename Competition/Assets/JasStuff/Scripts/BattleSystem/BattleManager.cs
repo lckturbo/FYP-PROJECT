@@ -14,6 +14,9 @@ public class BattleManager : MonoBehaviour
 
     public static event Action OnClearAllBuffs;
 
+    private bool isBossBattle = false;
+    public bool IsBossBattle => isBossBattle;
+
     private void Awake()
     {
         if (!instance)
@@ -27,6 +30,14 @@ public class BattleManager : MonoBehaviour
     public void RegisterEnemy(EnemyBase enemy)
     {
         enemy.OnAttackPlayer += HandleBattleTransition;
+
+        if (enemy.GetEnemyStats().type == EnemyStats.EnemyTypes.MiniBoss)
+        {
+            Debug.Log("this is a boss battle");
+            isBossBattle = true;
+        }
+        else
+            isBossBattle = false;
     }
 
     public void UnRegisterEnemy(EnemyBase enemy)
@@ -53,6 +64,18 @@ public class BattleManager : MonoBehaviour
 
         enemypartyRef = enemyParty;
         enemyPartyID = enemypartyRef.GetID();
+
+        var enemies = enemyParty.GetEnemies();
+        foreach (var enemyObj in enemies)
+        {
+            var eb = enemyObj.GetComponent<EnemyBase>();
+            if (eb != null && eb.GetEnemyStats().type == EnemyStats.EnemyTypes.MiniBoss)
+            {
+                isBossBattle = true;
+                Debug.Log("[BattleManager] Boss battle detected!");
+                break;
+            }
+        }
 
         SaveLoadSystem.instance.SaveGame();
         if (CheckpointManager.instance != null) CheckpointManager.instance.ClearCheckpoints();
@@ -91,21 +114,26 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Defeated"); // TODO: GAME OVER UI
+            Debug.Log("Defeated");
 
-            if (data != null) 
+            if (data != null)
                 data.hasSavedPosition = false;
 
             if (QuestManager.Instance != null)
                 QuestManager.Instance.ResetAllQuests();
 
-           // SaveLoadSystem.instance.NewGame(true);
             SaveLoadSystem.instance.SaveGame(false, false);
         }
         OnGlobalBattleEnd?.Invoke(enemyPartyID, playerWon);
 
+        if (IsBossBattle && playerWon)
+        {
+            GameManager.instance.ChangeScene("Credits");
+            SaveLoadSystem.instance.NewGame();
+        }
+        else
+            GameManager.instance.ChangeScene("SampleScene");
 
-        GameManager.instance.ChangeScene("SampleScene");
     }
     public void SetBattlePaused(bool paused)
     {
