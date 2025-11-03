@@ -249,6 +249,7 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (!player) return;
         float dist = Vector2.Distance(rb2d.position, player.position);
+
         if (dist > enemyStats.chaseRange)
         {
             aiPath.destination = rb2d.position;

@@ -58,6 +58,18 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
         var go = Instantiate(prefab, position, rot);
         go.name = $"Player_{def.displayName}";
 
+        var movement = go.GetComponent<NewPlayerMovement>();
+        if (movement != null)
+        {
+            var anim = go.GetComponent<Animator>();
+            if (anim != null)
+            {
+                anim.SetFloat("moveX", 1f);
+                anim.SetFloat("moveY", 0f);
+                anim.SetBool("moving", false);
+            }
+        }
+
         SetLayerRecursively(go, LayerMask.NameToLayer("Player"));
 
         var applier = go.GetComponent<PlayerLevelApplier>();
@@ -103,7 +115,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
             if (memberDef == def) continue;
             if (!memberDef.playerPrefab) continue;
 
-            Vector3 spawnPos = go.transform.position + new Vector3(-1.5f * (index + 1), 0f, 0f);
+            Vector3 spawnPos = go.transform.position + new Vector3(-1.9f * (index + 1), 0f, 0f);
             var followerObj = Instantiate(memberDef.playerPrefab, spawnPos, rot);
             followerObj.name = $"Follower_{memberDef.displayName}";
 

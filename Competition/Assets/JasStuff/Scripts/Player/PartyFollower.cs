@@ -2,7 +2,7 @@ using UnityEngine;
 public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
-    [SerializeField] private float followDistance = 0.75f;
+    [SerializeField] private float followDistance = 0.9f;
     [SerializeField] private float moveSpeed = 4.0f;
     [SerializeField] private float stopDistance = 0.15f;
 
