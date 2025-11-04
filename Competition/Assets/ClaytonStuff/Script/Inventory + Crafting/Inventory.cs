@@ -14,7 +14,7 @@ public class InventorySlot
     }
 }
 
-public class Inventory : MonoBehaviour , IDataPersistence
+public class Inventory : MonoBehaviour, IDataPersistence
 {
     public List<InventorySlot> mainInventory = new List<InventorySlot>();
     public List<InventorySlot> subInventory = new List<InventorySlot>();
@@ -135,49 +135,43 @@ public class Inventory : MonoBehaviour , IDataPersistence
 
     public void LoadData(GameData data)
     {
+        mainInventory.Clear();
+        subInventory.Clear();
 
-        if (data == null) return;
-
-        // Load main inventory
-        foreach (var slotData in data.mainInventory)
+        foreach (var entry in data.mainInventoryData)
         {
-            Item item = Resources.Load<Item>($"Items/{slotData.itemName}");
-            if (item != null)
-                mainInventory.Add(new InventorySlot(item, slotData.quantity));
+            Item loadedItem = Resources.Load<Item>($"Items/{entry.itemName}");
+            if (loadedItem != null)
+                mainInventory.Add(new InventorySlot(loadedItem, entry.quantity));
         }
 
-        // Load sub inventory
-        foreach (var slotData in data.subInventory)
+        foreach (var entry in data.subInventoryData)
         {
-            Item item = Resources.Load<Item>($"Items/{slotData.itemName}");
-            if (item != null)
-                subInventory.Add(new InventorySlot(item, slotData.quantity));
+            Item loadedItem = Resources.Load<Item>($"Items/{entry.itemName}");
+            if (loadedItem != null)
+                subInventory.Add(new InventorySlot(loadedItem, entry.quantity));
         }
+
+        Money = data.money;
     }
 
     public void SaveData(ref GameData data)
     {
+        data.mainInventoryData.Clear();
+        data.subInventoryData.Clear();
 
-        // Save main inventory
         foreach (var slot in mainInventory)
         {
-            if (slot.item == null) continue;
-            data.mainInventory.Add(new GameData.InventorySlotSaveData
-            {
-                itemName = slot.item.name, // Use ScriptableObject name
-                quantity = slot.quantity
-            });
+            if (slot.item != null)
+                data.mainInventoryData.Add(new GameData.InventoryItemData(slot.item.itemName, slot.quantity));
         }
 
-        // Save sub inventory
         foreach (var slot in subInventory)
         {
-            if (slot.item == null) continue;
-            data.subInventory.Add(new GameData.InventorySlotSaveData
-            {
-                itemName = slot.item.name,
-                quantity = slot.quantity
-            });
+            if (slot.item != null)
+                data.subInventoryData.Add(new GameData.InventoryItemData(slot.item.itemName, slot.quantity));
         }
+
+        data.money = Money;
     }
 }

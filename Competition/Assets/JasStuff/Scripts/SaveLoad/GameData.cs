@@ -106,17 +106,22 @@ public class GameData
     public bool chessPuzzleCompleted;
     public List<BlockSaveEntry> savedBlocks;
 
+    public List<InventoryItemData> mainInventoryData;
+    public List<InventoryItemData> subInventoryData;
+    public int money;
+
     [System.Serializable]
-    public class InventorySlotSaveData
+    public class InventoryItemData
     {
         public string itemName;
         public int quantity;
+
+        public InventoryItemData(string itemName, int quantity)
+        {
+            this.itemName = itemName;
+            this.quantity = quantity;
+        }
     }
-
-    // Inventory
-    public List<InventorySlotSaveData> mainInventory;
-    public List<InventorySlotSaveData> subInventory;
-
     public GameData()
     {
         hasSavedGame = false;
@@ -153,8 +158,9 @@ public class GameData
         chessPuzzleCompleted = false;
         savedBlocks = new List<BlockSaveEntry>();
 
-        // ... existing initializations ...
-        mainInventory = new List<InventorySlotSaveData>();
-        subInventory = new List<InventorySlotSaveData>();
+        // existing initializations...
+        mainInventoryData = new List<InventoryItemData>();
+        subInventoryData = new List<InventoryItemData>();
+        money = 0;
     }
 }

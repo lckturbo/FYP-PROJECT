@@ -143,4 +143,6 @@ public class InventoryManager : MonoBehaviour
         var ui = FindObjectOfType<InventoryUIManager>();
         if (ui != null) ui.RefreshUI();
     }
+
+  
 }
