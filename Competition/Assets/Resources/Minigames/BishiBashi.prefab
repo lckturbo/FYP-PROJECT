@@ -596,11 +596,11 @@ MonoBehaviour:
   shakeIntensity: 14
   shakeFrequency: 28
   shakeDecay: 1.6
-  gameplayTotalSeconds: 17
+  gameplayTotalSeconds: 18
   bonusPortion: 0.3235
   goldenRopeAtPortion: 0.5455
-  instructionSeconds: 5.5
-  resultHoldSeconds: 2.5
+  instructionSeconds: 7.5
+  resultHoldSeconds: 4.5
   instructionsPanel: {fileID: 6384737927078398819}
   instructionsText: {fileID: 7813158355097932085}
   resultPanel: {fileID: 6839430225253435650}
@@ -610,9 +610,9 @@ MonoBehaviour:
   goSeconds: 0.5
   readyGoPopScale: 1.2
   skipButton: {fileID: 4813489625560730262}
-  normalBeatSeconds: 0.95
-  normalBeatGapSeconds: 0.35
-  normalHitsNeeded: {x: 3, y: 5}
+  normalBeatSeconds: 1.25
+  normalBeatGapSeconds: 0.75
+  normalHitsNeeded: {x: 8, y: 12}
   minModelsPerBeat: 1
   maxModelsPerBeat: 2
   pointsPerHit: 10

@@ -1083,7 +1083,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -1236,9 +1236,9 @@ MonoBehaviour:
   datasets:
   - {fileID: 11400000, guid: 1e112846b0bb6a84a98ceafb36c755da, type: 2}
   - {fileID: 11400000, guid: f66e5dadff51c784294f6b0d75160b2c, type: 2}
-  - {fileID: 11400000, guid: 95c698ec6b2bcdf439bb14924f55f937, type: 2}
+  - {fileID: 11400000, guid: fcf4c5d2359a84f499c3bb855ecaa71e, type: 2}
   - {fileID: 11400000, guid: b5faa8265cfbc6b47af90e9b33ecbfb7, type: 2}
-  - {fileID: 11400000, guid: b5faa8265cfbc6b47af90e9b33ecbfb7, type: 2}
+  - {fileID: 11400000, guid: f5498decaf4335d45807922e1fbd8495, type: 2}
   gridParent: {fileID: 8459192842560822337}
   promptText: {fileID: 7519291391025705850}
   verifyButton: {fileID: 6945126642683927771}
@@ -1246,7 +1246,7 @@ MonoBehaviour:
   timerText: {fileID: 1206749720715345729}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 0.3, g: 0.8, b: 1, a: 1}
-  timeLimitSeconds: 8
+  timeLimitSeconds: 20
 --- !u!1 &3179054568205162052
 GameObject:
   m_ObjectHideFlags: 0
@@ -2031,7 +2031,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -2645,7 +2645,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -2823,10 +2823,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 4250193371225946859}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1000, y: 1}
+  m_SizeDelta: {x: 1000, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6917950753438501278
 CanvasRenderer:
