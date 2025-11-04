@@ -7,8 +7,8 @@ public class CaptchaData : ScriptableObject
     [TextArea] public string prompt;
 
     [Header("Grid")]
-    [Min(1)] public int rows = 3;
-    [Min(1)] public int cols = 3;
+    [Min(1)] public int rows = 4;
+    [Min(1)] public int cols = 4;
 
     [Header("Tiles (length must be rows*cols)")]
     public Sprite[] tiles;
