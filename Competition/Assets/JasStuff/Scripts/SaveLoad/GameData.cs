@@ -122,6 +122,16 @@ public class GameData
             this.quantity = quantity;
         }
     }
+
+    [System.Serializable]
+    public class PuzzleSaveEntry
+    {
+        public string puzzleID;
+        public bool solved;
+    }
+
+    public List<PuzzleSaveEntry> savedPuzzles = new List<PuzzleSaveEntry>();
+
     public GameData()
     {
         hasSavedGame = false;
@@ -162,5 +172,8 @@ public class GameData
         mainInventoryData = new List<InventoryItemData>();
         subInventoryData = new List<InventoryItemData>();
         money = 0;
+
+        savedPuzzles = new List<PuzzleSaveEntry>();
+
     }
 }
