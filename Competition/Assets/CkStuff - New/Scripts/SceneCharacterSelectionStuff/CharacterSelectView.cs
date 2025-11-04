@@ -42,6 +42,13 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     [SerializeField] private float damageMaxUI;
     [SerializeField] private float defenseMaxUI;
 
+    [Header("LEFT: Resist labels")]
+    [SerializeField] private TMP_Text fireLabel;
+    [SerializeField] private TMP_Text waterLabel;
+    [SerializeField] private TMP_Text grassLabel;
+    [SerializeField] private TMP_Text darkLabel;
+    [SerializeField] private TMP_Text lightLabel;
+
     private int currentIndex;
 
     private void Start()
@@ -115,12 +122,12 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         if (critDmgText) critDmgText.text = $"×{s.critDamage:0.##}";
         if (elemText) elemText.text = s.attackElement.ToString();
 
-        // Resist coloring
-        TintResist(fireIcon, s.fireRes);
-        TintResist(waterIcon, s.waterRes);
-        TintResist(grassIcon, s.grassRes);
-        TintResist(darkIcon, s.darkRes);
-        TintResist(lightIcon, s.lightRes);
+        TintResist(fireIcon, fireLabel, s.fireRes);
+        TintResist(waterIcon, waterLabel, s.waterRes);
+        TintResist(grassIcon, grassLabel, s.grassRes);
+        TintResist(darkIcon, darkLabel, s.darkRes);
+        TintResist(lightIcon, lightLabel, s.lightRes);
+
 
         // Art
         if (artNormal) artNormal.sprite = def.normalArt;
@@ -160,13 +167,23 @@ private void UpdateBarSegments(Transform container, float ratio)
 }
 
 
-    private void TintResist(Image icon, float val)
+    private void TintResist(Image icon, TMP_Text label, float val)
     {
-        if (!icon) return;
-        if (val < 0.999f) icon.color = new Color(0.6f, 1f, 0.6f, 1f);
-        else if (val > 1.001f) icon.color = new Color(1f, 0.6f, 0.6f, 1f);
-        else icon.color = Color.black;
+        if (icon)
+        {
+            if (val < 0.999f) icon.color = new Color(0.6f, 1f, 0.6f, 1f);      // Weak (green)
+            else if (val > 1.001f) icon.color = new Color(1f, 0.6f, 0.6f, 1f);   // Strong (red)
+            else icon.color = Color.black;                                       // Neutral
+        }
+
+        if (label)
+        {
+            if (val < 0.999f) label.color = Color.green;
+            else if (val > 1.001f) label.color = Color.red;
+            else label.color = Color.black;
+        }
     }
+
 
     private void Confirm()
     {
