@@ -52,7 +52,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
     }
     private void Update()
     {
-        if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby") return;
+        if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby" || SceneManager.GetActiveScene().name == "Credits") return;
         if (!canPause || isOpen || (MinigameManager.instance && MinigameManager.instance.IsMinigameActive())) return;
 
         if (Input.GetKeyDown(KeyCode.Escape))

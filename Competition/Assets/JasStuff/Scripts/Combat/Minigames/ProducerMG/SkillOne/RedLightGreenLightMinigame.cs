@@ -24,10 +24,6 @@ public class RedLightGreenLightMinigame : BaseMinigame
     private bool running = false;
     private float timer;
 
-    //private void Start()
-    //{
-    //    StartCoroutine(RunMinigame());
-    //}
     private void Update()
     {
         if (!running) return;
