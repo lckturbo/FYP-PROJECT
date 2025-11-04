@@ -296,29 +296,32 @@ public class StatueManager : BoardManager, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
-        data.connectPuzzleCompleted = puzzleSolved;
+        if (!puzzleSolved)
+        {
+            Debug.Log("[StatueManager] Puzzle not solved — skipping save (will reset next load).");
+            data.connectPuzzleCompleted = false;
+            return;
+        }
 
         if (data.statueStates == null)
             data.statueStates = new List<GameData.StatueSaveData>();
-
         data.statueStates.Clear();
 
-        if (puzzleSolved)
+        foreach (var obj in spawnedObjs)
         {
-            foreach (var obj in spawnedObjs)
+            var statue = obj.GetComponent<Statue>();
+            if (statue != null)
             {
-                var s = obj.GetComponent<Statue>();
-                if (s == null) continue;
-
+                Vector3Int cellPos = boardTileMap.WorldToCell(statue.transform.position);
                 data.statueStates.Add(new GameData.StatueSaveData
                 {
-                    position = s.CurrentCell,
-                    isWhite = s.IsWhite(),
-                    isCompleted = true
+                    isCompleted = puzzleSolved,
+                    isWhite = statue.IsWhite(),
+                    position = cellPos
                 });
             }
         }
+
+        data.connectPuzzleCompleted = puzzleSolved;
     }
-
-
 }

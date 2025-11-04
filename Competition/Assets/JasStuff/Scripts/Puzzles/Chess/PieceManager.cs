@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -38,6 +39,9 @@ public class PieceManager : BoardManager, IDataPersistence
         p.pieceType = type;
         p.SetWhite(isWhite);
         p.Init(boardTileMap, highlightTileMap, highlightTile, this);
+
+        if (!spawnedObjs.Contains(spawned))
+            spawnedObjs.Add(spawned);
     }
 
     protected override void SetupPuzzle()
@@ -152,54 +156,59 @@ public class PieceManager : BoardManager, IDataPersistence
 
     private IEnumerator LoadChessPiecesRoutine(GameData data)
     {
-        yield return null; 
+        yield return null;
 
-        if (data.chessPuzzleCompleted && doorToOpen != null)
+        ClearBoard();
+
+        if (data.chessPieces != null && data.chessPieces.Count > 0)
         {
-            doorToOpen.Open();
-            puzzleSolved = true;
+            foreach (var pieceData in data.chessPieces)
+            {
+                Sprite sprite = pieceData.isWhite
+                    ? whitePieceSprites[(int)pieceData.type]
+                    : blackPieceSprites[(int)pieceData.type];
+
+                SpawnPiece(pieceData.type, pieceData.isWhite, sprite, pieceData.position);
+            }
+
+            if (data.chessPuzzleCompleted && doorToOpen != null)
+            {
+                puzzleSolved = true;
+                doorToOpen.Open();
+            }
+            else
+                puzzleSolved = false;
         }
         else
         {
             puzzleSolved = false;
-            ClearBoard();
-
-            if (data.chessPieces != null && data.chessPieces.Count > 0)
-            {
-                foreach (var pieceData in data.chessPieces)
-                {
-                    Sprite sprite = pieceData.isWhite
-                        ? whitePieceSprites[(int)pieceData.type]
-                        : blackPieceSprites[(int)pieceData.type];
-
-                    SpawnPiece(pieceData.type, pieceData.isWhite, sprite, pieceData.position);
-                }
-            }
-            else
-            {
-                SetupPuzzle();
-            }
+            SetupPuzzle();
         }
     }
 
     public void SaveData(ref GameData data)
     {
-        data.chessPieces.Clear();
-
         if (!puzzleSolved)
         {
-            foreach (var obj in spawnedObjs)
+            data.chessPuzzleCompleted = false;
+            return;
+        }
+
+        if (data.chessPieces == null)
+            data.chessPieces = new List<GameData.ChessPieceSaveData>();
+        data.chessPieces.Clear();
+
+        foreach (var obj in spawnedObjs)
+        {
+            var piece = obj.GetComponent<Piece>();
+            if (piece != null)
             {
-                var piece = obj.GetComponent<Piece>();
-                if (piece != null)
-                {
-                    Vector3Int cellPos = boardTileMap.WorldToCell(piece.transform.position);
-                    data.chessPieces.Add(new GameData.ChessPieceSaveData(
-                        piece.pieceType,
-                        piece.IsWhite(),
-                        cellPos
-                    ));
-                }
+                Vector3Int cellPos = boardTileMap.WorldToCell(piece.transform.position);
+                data.chessPieces.Add(new GameData.ChessPieceSaveData(
+                    piece.pieceType,
+                    piece.IsWhite(),
+                    cellPos
+                ));
             }
         }
 
