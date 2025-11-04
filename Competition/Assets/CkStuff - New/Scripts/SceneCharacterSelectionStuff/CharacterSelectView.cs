@@ -49,6 +49,9 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     [SerializeField] private TMP_Text darkLabel;
     [SerializeField] private TMP_Text lightLabel;
 
+    [Header("LEFT: Character Icon")]
+    [SerializeField] private Image characterIcon;
+
     private int currentIndex;
 
     private void Start()
@@ -132,6 +135,13 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         // Art
         if (artNormal) artNormal.sprite = def.normalArt;
         if (artPixel) artPixel.sprite = def.pixelArt;
+
+        // Icon
+        if (characterIcon && def.icon)
+        {
+            characterIcon.sprite = def.icon;
+            characterIcon.enabled = true;
+        }
     }
 
 private void UpdateBarSegments(Transform container, float ratio)
