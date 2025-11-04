@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class ShutterChanceBishi : BaseMinigame
 {
-    [Header("UI (assign from prefab)")]
+    [Header("UI")]
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text goldenHint;
     [SerializeField] private Image flashOverlay;
@@ -44,7 +44,7 @@ public class ShutterChanceBishi : BaseMinigame
     private Quaternion goldenHintBaseRot;
     private Color goldenHintBaseColor;
 
-    [Header("Sprites (randomized, no duplicates per wave)")]
+    [Header("Sprites")]
     [SerializeField] private Sprite[] modelSprites = new Sprite[0];
     [SerializeField] private Sprite[] trashSprites = new Sprite[0];
 
@@ -66,7 +66,6 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private float camWiggleSeconds = 0.22f;
     private bool camFlipped = false;
     private Coroutine camWiggleCo;
-
     private Vector2 cameramanBasePos;
 
     [Header("Cameraman Sprite Swap")]
@@ -88,9 +87,14 @@ public class ShutterChanceBishi : BaseMinigame
     private Coroutine shakeCo;
     private Vector2 shakeRootBasePos;
 
-    [Header("Phases & Durations")]
-    [SerializeField] private float instructionSeconds = 8.0f;
-    [SerializeField] private float resultHoldSeconds = 14f;
+    [Header("Gameplay Time Budget (Normal + Bonus)")]
+    [SerializeField] private float gameplayTotalSeconds = 17f;
+    [SerializeField, Range(0f, 1f)] private float bonusPortion = 0.3235f;
+    [SerializeField, Range(0.1f, 0.95f)] private float goldenRopeAtPortion = 0.5455f;
+
+    [Header("Phases & Durations (non-gameplay)")]
+    [SerializeField] private float instructionSeconds = 5.5f;
+    [SerializeField] private float resultHoldSeconds = 2.5f;
 
     [Header("Instruction UI")]
     [SerializeField] private GameObject instructionsPanel;
@@ -112,26 +116,16 @@ public class ShutterChanceBishi : BaseMinigame
 
     private bool gameplayActive = false;
 
-    [Header("NORMAL: Waves")]
-    [SerializeField] private int normalWaves = 11;
-    [SerializeField] private float normalIntroDelay = 1.0f;
-    [SerializeField] private float normalInterWaveDelay = 0.60f;
-
-    [SerializeField] private Vector2Int normalHitsNeeded = new Vector2Int(8, 14);
+    [Header("NORMAL: Beat Settings (time-boxed)")]
+    [SerializeField] private float normalBeatSeconds = 0.95f;
+    [SerializeField] private float normalBeatGapSeconds = 0.22f;
+    [SerializeField] private Vector2Int normalHitsNeeded = new Vector2Int(3,5);
+    [SerializeField] private int minModelsPerBeat = 1;
+    [SerializeField] private int maxModelsPerBeat = 2;
 
     [Header("NORMAL: Scoring")]
     [SerializeField] private int pointsPerHit = 10;
-    [SerializeField] private int wrongLanePenalty = -20;
-
-    [Header("NORMAL: Speed Bonus")]
-    [SerializeField] private int normalSpeedMaxBonus = 150;
-    [SerializeField] private float normalSpeedParSeconds = 1.20f;
-    [SerializeField] private int normalSpeedMinBonus = 20;
-
-    [Header("BONUS: Timing")]
-    [SerializeField] private float bonusPhaseSeconds = 6.0f;
-    [SerializeField] private float bonusIntroDelay = 0.75f;
-    [SerializeField] private float goldenRopeDelay = 4.75f;
+    [SerializeField] private int wrongLanePenalty = -10;
 
     [Header("BONUS: Reaction Scoring")]
     [SerializeField] private int goldenReactionMaxPoints = 250;
@@ -144,7 +138,12 @@ public class ShutterChanceBishi : BaseMinigame
 
     [Header("Finish Splash")]
     [SerializeField] private TMP_Text finishText;
-    [SerializeField] private float finishHoldSeconds = 2.5f;
+    [SerializeField] private float finishHoldSeconds = 2.0f;
+
+    [Header("End-of-Normal Alignment")]
+    [SerializeField, Range(0.2f, 1f)] private float endAlignMinBeatFraction = 0.35f;
+    [SerializeField] private float endOKAYExtraSeconds = 0.12f;
+    [SerializeField] private float bonusIntroHold = 0.45f;
 
     private enum Lane { Left = 0, Mid = 1, Right = 2 }
 
@@ -163,8 +162,6 @@ public class ShutterChanceBishi : BaseMinigame
     private int score;
     private bool bonusPhase;
 
-    private bool waveActive = false;
-    private float waveStartTime = 0f;
     private int waveHitsRemaining = 0;
 
     private Coroutine tintPulseCo;
@@ -246,12 +243,6 @@ public class ShutterChanceBishi : BaseMinigame
             shakeRoot.anchoredPosition = shakeRootBasePos;
         }
 
-        if (leftImage) leftBaseScale = leftImage.rectTransform.localScale;
-        if (midImage) midBaseScale = midImage.rectTransform.localScale;
-        if (rightImage) rightBaseScale = rightImage.rectTransform.localScale;
-
-        waveActive = false;
-        goldenWindowActive = false;
         waveHitsRemaining = 0;
         bonusPhase = false;
 
@@ -278,18 +269,15 @@ public class ShutterChanceBishi : BaseMinigame
         score = 0;
         isShowingOkay = false;
 
-        // ===== INSTRUCTIONS (skippable) =====
         if (instructionsPanel) instructionsPanel.SetActive(true);
         if (scoreText) scoreText.gameObject.SetActive(false);
         SetupSkipUI(true);
 
-        if (instructionsText)
-            instructionsText.text = "Aim! Don't miss out!\nShutter Chance!!";
+        if (instructionsText) instructionsText.text = "Aim! Don't miss out!\nShutter Chance!!";
         yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
         if (skipRequested) goto SKIP_TO_GAMEPLAY;
 
-        if (instructionsText)
-            instructionsText.text = "HOW TO PLAY\n";
+        if (instructionsText) instructionsText.text = "HOW TO PLAY\n";
         yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
         if (skipRequested) goto SKIP_TO_GAMEPLAY;
 
@@ -299,7 +287,7 @@ public class ShutterChanceBishi : BaseMinigame
                 "HOW TO PLAY\n" +
                 "• Z / X / C to snap.\n" +
                 "• MODELS need multiple taps. TRASH is a mistake (-points).\n" +
-                "• Clear ALL required taps to finish a wave (OKAY!). Faster = bonus.";
+                "• Each BEAT shows a new layout. OKAY! flashes right before next spawn.";
         }
         yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
         if (skipRequested) goto SKIP_TO_GAMEPLAY;
@@ -339,37 +327,75 @@ public class ShutterChanceBishi : BaseMinigame
         ShowCameraman(true);
         EnsureBackground(bgTransition);
 
-        // READY / GO! and intro delay
         yield return ShowReadyGo();
-        if (normalIntroDelay > 0f)
-            yield return new WaitForSecondsRealtime(Mathf.Max(0f, normalIntroDelay));
 
-        // ===== NORMAL (stage-based) =====
-        for (int wave = 1; wave <= Mathf.Max(1, normalWaves); wave++)
+        float desiredBonusSeconds = Mathf.Clamp(gameplayTotalSeconds * bonusPortion, 0.5f, Mathf.Max(0.5f, gameplayTotalSeconds - 0.5f));
+        float normalBudget = Mathf.Max(0f, gameplayTotalSeconds - desiredBonusSeconds);
+
+        float normalClock = 0f;
+        float beatClock = 0f;
+
+        SpawnBeatLayout(0f);
+        EnsureBackground(bgPhoto);
+
+        bool endingNormal = false;
+
+        while (!endingNormal)
         {
-            int desiredModels;
-            if (wave <= 3) desiredModels = 1;
-            else if (wave <= 6) desiredModels = Random.Range(1, 3);
-            else desiredModels = Random.Range(1, 4);
+            float dt = Time.unscaledDeltaTime;
+            normalClock += dt;
+            beatClock += dt;
 
-            SpawnNormalStage(desiredModels);
-            EnsureBackground(bgPhoto);
+            HandleInput(normalPhase: true);
 
-            waveActive = true;
-            waveStartTime = Time.unscaledTime;
-
-            while (waveHitsRemaining > 0)
+            if (normalClock >= normalBudget)
             {
-                HandleInput(normalPhase: true);
-                yield return null;
+                float timeToNextOKAY = Mathf.Max(0f, normalBeatSeconds - beatClock);
+                while (timeToNextOKAY > 0f)
+                {
+                    float d = Time.unscaledDeltaTime;
+                    normalClock += d;
+                    timeToNextOKAY -= d;
+                    HandleInput(normalPhase: true);
+                    UpdateScoreHUD();
+                    yield return null;
+                }
+
+                ClearAllLanes();
+                yield return OKAYBeatFlash(normalBeatGapSeconds + endOKAYExtraSeconds);
+
+                endingNormal = true;
+                break;
             }
 
-            yield return WaveClearedSequence();
+            if (beatClock >= normalBeatSeconds)
+            {
+                beatClock -= normalBeatSeconds;
 
-            EnsureBackground(bgTransition);
+                ClearAllLanes();
+                yield return OKAYBeatFlash(normalBeatGapSeconds);
+
+                float remaining = Mathf.Max(0f, normalBudget - normalClock);
+
+                float minNeeded = (normalBeatSeconds * endAlignMinBeatFraction) + (normalBeatGapSeconds * 0.25f);
+
+                if (remaining < minNeeded)
+                {
+                    endingNormal = true;
+                }
+                else
+                {
+                    float p = (normalBudget <= 0.001f) ? 1f : Mathf.Clamp01(normalClock / normalBudget);
+                    SpawnBeatLayout(p);
+                    EnsureBackground(bgPhoto);
+                }
+            }
+
+            UpdateScoreHUD();
+            yield return null;
         }
 
-        // ===== BONUS =====
+
         ClearAllLanes();
         EnsureBackground(bgTransition);
 
@@ -377,27 +403,28 @@ public class ShutterChanceBishi : BaseMinigame
         EnterBonusVisuals();
         goldenActive = false;
         goldenWindowActive = false;
-
         if (goldenHint) goldenHint.gameObject.SetActive(false);
 
+        float bonusWindow = desiredBonusSeconds;
         float bonusTimer = 0f;
+        float goldenAppearAt = Mathf.Clamp(bonusWindow * goldenRopeAtPortion, 0.15f, Mathf.Max(0.2f, bonusWindow - 0.1f));
         bool feverActivated = false;
 
-        while (bonusTimer < bonusPhaseSeconds)
+        while (bonusTimer < bonusWindow)
         {
             float dt = Time.unscaledDeltaTime;
             bonusTimer += dt;
 
             EnsureBackground(feverActivated ? bgPhoto : bgTransition);
 
-            if (!feverActivated && bonusTimer >= bonusIntroDelay)
+            if (!feverActivated)
             {
                 ActivateBonusFeverAllLanes();
                 feverActivated = true;
                 EnsureBackground(bgPhoto);
             }
 
-            if (!goldenActive && bonusTimer >= goldenRopeDelay)
+            if (!goldenActive && bonusTimer >= goldenAppearAt)
             {
                 goldenActive = true;
                 goldenWindowActive = true;
@@ -426,6 +453,7 @@ public class ShutterChanceBishi : BaseMinigame
         if (goldenRope) goldenRope.gameObject.SetActive(false);
         ClearAllLanes();
 
+        // ===== RESULT =====
         EnsureBackground(bgResult);
 
         if (finishText)
@@ -464,6 +492,121 @@ public class ShutterChanceBishi : BaseMinigame
         BattleManager.instance?.SetBattlePaused(false);
     }
 
+    private void SpawnBeatLayout(float progress01)
+    {
+        int models = Mathf.RoundToInt(Mathf.Lerp(minModelsPerBeat, maxModelsPerBeat, Mathf.Clamp01(progress01)));
+        models = Mathf.Clamp(models, 1, 3);
+
+        ClearAllLanes();
+
+        List<Lane> lanes = new List<Lane> { Lane.Left, Lane.Mid, Lane.Right };
+        Shuffle(lanes);
+
+        int placed = 0;
+        for (int i = 0; i < lanes.Count; i++)
+        {
+            Lane lane = lanes[i];
+
+            if (placed < models)
+            {
+                int hits = Random.Range(normalHitsNeeded.x, normalHitsNeeded.y + 1);
+
+                var s = slots[lane];
+                s.isModel = true;
+                s.isTrash = false;
+                s.hasSprite = true;
+                s.cleared = false;
+                s.hitsToClear = Mathf.Max(1, hits);
+                s.currentSprite = PickUniqueSprite(modelSprites, lane);
+                slots[lane] = s;
+
+                SetLaneSprite(lane, s.currentSprite);
+                placed++;
+            }
+            else
+            {
+                var s = slots[lane];
+                s.isModel = false;
+                s.isTrash = true;
+                s.hasSprite = true;
+                s.cleared = false;
+                s.hitsToClear = 0;
+                s.currentSprite = PickUniqueSprite(trashSprites, lane);
+                slots[lane] = s;
+
+                SetLaneSprite(lane, s.currentSprite);
+            }
+        }
+
+        waveHitsRemaining = 0;
+        foreach (var kv in slots)
+            if (kv.Value.isModel) waveHitsRemaining += Mathf.Max(0, kv.Value.hitsToClear);
+    }
+
+    private IEnumerator OKAYBeatFlash(float gapSeconds)
+    {
+        isShowingOkay = true;
+
+        bool scoreWasActive = scoreText && scoreText.gameObject.activeSelf;
+        bool hintWasActive = goldenHint && goldenHint.gameObject.activeSelf;
+        bool ropeWasActive = goldenRope && goldenRope.gameObject.activeSelf;
+
+        if (scoreText) scoreText.gameObject.SetActive(false);
+        if (goldenHint) goldenHint.gameObject.SetActive(false);
+        if (goldenRope) goldenRope.gameObject.SetActive(false);
+
+        if (okayCenterText && gapSeconds > 0f)
+        {
+            okayCenterText.text = "OKAY!";
+            okayCenterText.gameObject.SetActive(true);
+        }
+
+        Sprite prevCamSprite = null;
+        Vector3 prevCamScale = Vector3.one;
+
+        if (cameramanImage) prevCamSprite = cameramanImage.sprite;
+        if (cameraman) prevCamScale = cameraman.localScale;
+
+        if (cameramanImage && cameramanThumbsSprite)
+            cameramanImage.sprite = cameramanThumbsSprite;
+
+        float show = Mathf.Clamp(gapSeconds * 0.8f, 0.06f, Mathf.Max(0.06f, gapSeconds));
+        float blank = Mathf.Max(0f, gapSeconds - show);
+
+        float popUp = Mathf.Min(0.10f, show * 0.35f);
+        float popDown = Mathf.Min(0.12f, show * 0.35f);
+        float hold = Mathf.Max(0f, show - popUp - popDown);
+
+        // pop up
+        if (cameraman)
+        {
+            float t = 0f;
+            Vector3 peak = prevCamScale * 1.07f;
+            while (t < popUp) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(prevCamScale, peak, t / Mathf.Max(0.01f, popUp)); yield return null; }
+            if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
+            // pop down
+            t = 0f;
+            while (t < popDown) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(peak, prevCamScale, t / Mathf.Max(0.01f, popDown)); yield return null; }
+            cameraman.localScale = prevCamScale;
+        }
+        else
+        {
+            if (show > 0f) yield return new WaitForSecondsRealtime(show);
+        }
+
+        if (okayCenterText) okayCenterText.gameObject.SetActive(false);
+        if (blank > 0f) yield return new WaitForSecondsRealtime(blank);
+
+        if (cameramanImage)
+            cameramanImage.sprite = cameramanDefaultSprite ? cameramanDefaultSprite : prevCamSprite;
+
+        if (scoreText) scoreText.gameObject.SetActive(scoreWasActive);
+        if (goldenHint) goldenHint.gameObject.SetActive(hintWasActive);
+        if (goldenRope) goldenRope.gameObject.SetActive(ropeWasActive);
+
+        isShowingOkay = false;
+    }
+
     private IEnumerator ShowReadyGo()
     {
         gameplayActive = false;
@@ -476,13 +619,9 @@ public class ShutterChanceBishi : BaseMinigame
         }
 
         readyGoText.gameObject.SetActive(true);
-
         yield return PopWord(readyGoText, "READY", readySeconds);
-
         yield return new WaitForSecondsRealtime(0.1f);
-
         yield return PopWord(readyGoText, "GO!", goSeconds);
-
         readyGoText.gameObject.SetActive(false);
 
         gameplayActive = true;
@@ -542,36 +681,6 @@ public class ShutterChanceBishi : BaseMinigame
             yield return null;
         }
         txt.color = new Color(baseCol.r, baseCol.g, baseCol.b, aTo);
-    }
-
-    private IEnumerator WaveClearedSequence()
-    {
-        if (waveActive)
-        {
-            float elapsed = Mathf.Max(0f, Time.unscaledTime - waveStartTime);
-            float t = (normalSpeedParSeconds <= 0f) ? 1f : (elapsed / normalSpeedParSeconds);
-            int spd = Mathf.RoundToInt(Mathf.Lerp(normalSpeedMaxBonus, normalSpeedMinBonus, t));
-            spd = Mathf.Clamp(spd, normalSpeedMinBonus, normalSpeedMaxBonus);
-            score += spd;
-            waveActive = false;
-            UpdateScoreHUD();
-        }
-
-        foreach (Lane L in System.Enum.GetValues(typeof(Lane)))
-        {
-            var ss = slots[L];
-            ss.hasSprite = false;
-            ss.isModel = false;
-            ss.isTrash = false;
-            ss.cleared = false;
-            ss.hitsToClear = 0;
-            ss.currentSprite = null;
-            slots[L] = ss;
-            SetLaneSprite(L, null);
-        }
-
-        // OKAY! pop
-        yield return ShowOkayCenteredRoutine(Mathf.Max(0f, normalInterWaveDelay));
     }
 
     private void ActivateBonusFeverAllLanes()
@@ -674,35 +783,6 @@ public class ShutterChanceBishi : BaseMinigame
         backgroundImage.enabled = true;
         backgroundImage.sprite = target;
         var c = backgroundImage.color; c.a = 1f; backgroundImage.color = c;
-    }
-
-    private IEnumerator CameramanThumbsUpFor(float seconds)
-    {
-        if (!cameramanImage || !cameramanThumbsSprite) yield break;
-
-        var original = cameramanImage.sprite;
-
-        cameramanImage.sprite = cameramanThumbsSprite;
-
-        if (cameraman)
-        {
-            var start = cameraman.localScale;
-            var peak = start * 1.07f;
-            float t = 0f, up = 0.08f, down = 0.10f;
-
-            while (t < up) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(start, peak, t / up); yield return null; }
-            float hold = Mathf.Max(0f, seconds - up - down);
-            if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
-            t = 0f;
-            while (t < down) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(peak, start, t / down); yield return null; }
-            cameraman.localScale = start;
-        }
-        else
-        {
-            yield return new WaitForSecondsRealtime(seconds);
-        }
-
-        cameramanImage.sprite = cameramanDefaultSprite ? cameramanDefaultSprite : original;
     }
 
     private void EnterBonusVisuals()
@@ -867,49 +947,6 @@ public class ShutterChanceBishi : BaseMinigame
         return candidates[Random.Range(0, candidates.Count)];
     }
 
-    private void SpawnNormalStage(int desiredModels)
-    {
-        waveHitsRemaining = 0;
-
-        List<Lane> lanes = new List<Lane> { Lane.Left, Lane.Mid, Lane.Right };
-        Shuffle(lanes);
-
-        int modelsToPlace = Mathf.Clamp(desiredModels, 1, 3);
-
-        for (int i = 0; i < modelsToPlace; i++)
-        {
-            Lane lane = lanes[i];
-            int hits = Random.Range(normalHitsNeeded.x, normalHitsNeeded.y + 1);
-
-            var s = slots[lane];
-            s.isModel = true;
-            s.isTrash = false;
-            s.hasSprite = true;
-            s.cleared = false;
-            s.hitsToClear = Mathf.Max(1, hits);
-            s.currentSprite = PickUniqueSprite(modelSprites, lane);
-            slots[lane] = s;
-
-            SetLaneSprite(lane, s.currentSprite);
-            waveHitsRemaining += s.hitsToClear;
-        }
-
-        for (int i = modelsToPlace; i < 3; i++)
-        {
-            Lane lane = lanes[i];
-            var s = slots[lane];
-            s.isModel = false;
-            s.isTrash = true;
-            s.hasSprite = true;
-            s.cleared = false;
-            s.hitsToClear = 0;
-            s.currentSprite = PickUniqueSprite(trashSprites, lane);
-            slots[lane] = s;
-
-            SetLaneSprite(lane, s.currentSprite);
-        }
-    }
-
     private void ClearAllLanes()
     {
         foreach (Lane lane in System.Enum.GetValues(typeof(Lane)))
@@ -945,7 +982,6 @@ public class ShutterChanceBishi : BaseMinigame
         {
             img.sprite = spriteOrNull;
             img.gameObject.SetActive(true);
-
             ApplyRandomFlip(img, lane);
         }
     }
@@ -981,7 +1017,6 @@ public class ShutterChanceBishi : BaseMinigame
         _ => rightImage
     };
 
-    // ---------- Input & Scoring ----------
     private void HandleInput(bool normalPhase)
     {
         if (!gameplayActive) return;
@@ -1021,11 +1056,7 @@ public class ShutterChanceBishi : BaseMinigame
             if (rightImage) rightImage.gameObject.SetActive(false);
 
             ExitBonusVisuals();
-
-            resultPhase = true;
-
             EnsureBackground(bgResult);
-
             return true;
         }
 
@@ -1113,43 +1144,6 @@ public class ShutterChanceBishi : BaseMinigame
         flashOverlay.gameObject.SetActive(false);
     }
 
-    private IEnumerator ShowOkayCenteredRoutine(float delayAfter)
-    {
-        if (!okayCenterText)
-        {
-            yield return new WaitForSecondsRealtime(delayAfter);
-            yield break;
-        }
-
-        isShowingOkay = true;
-
-        bool scoreWasActive = scoreText && scoreText.gameObject.activeSelf;
-        bool hintWasActive = goldenHint && goldenHint.gameObject.activeSelf;
-        bool ropeWasActive = goldenRope && goldenRope.gameObject.activeSelf;
-
-        if (scoreText) scoreText.gameObject.SetActive(false);
-        if (goldenHint) goldenHint.gameObject.SetActive(false);
-        if (goldenRope) goldenRope.gameObject.SetActive(false);
-
-        okayCenterText.text = "OKAY!";
-        okayCenterText.gameObject.SetActive(true);
-
-        StartCoroutine(CameramanThumbsUpFor(okayDisplayTime));
-
-        yield return new WaitForSecondsRealtime(okayDisplayTime);
-
-        okayCenterText.gameObject.SetActive(false);
-
-        if (scoreText) scoreText.gameObject.SetActive(scoreWasActive);
-        if (goldenHint) goldenHint.gameObject.SetActive(hintWasActive);
-        if (goldenRope) goldenRope.gameObject.SetActive(ropeWasActive);
-
-        isShowingOkay = false;
-
-        if (delayAfter > 0f)
-            yield return new WaitForSecondsRealtime(delayAfter);
-    }
-
     private void OnDisable()
     {
         if (shakeRoot)
@@ -1177,7 +1171,6 @@ public class ShutterChanceBishi : BaseMinigame
         }
     }
 
-    // ==== Skip (button-only) =================================================
     private void RequestSkip() => skipRequested = true;
 
     private void SetupSkipUI(bool show)

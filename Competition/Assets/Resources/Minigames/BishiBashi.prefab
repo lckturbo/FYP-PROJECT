@@ -553,7 +553,7 @@ MonoBehaviour:
   bonusTintAlpha: 0.35
   bonusTintPulseSpeed: 2
   okayCenterText: {fileID: 514243374858964247}
-  okayDisplayTime: 0.6
+  okayDisplayTime: 0.45
   leftImage: {fileID: 6617329769921418446}
   midImage: {fileID: 7771278582483552504}
   rightImage: {fileID: 7653564642442023188}
@@ -595,8 +595,11 @@ MonoBehaviour:
   shakeIntensity: 14
   shakeFrequency: 28
   shakeDecay: 1.6
-  instructionSeconds: 21.5
-  resultHoldSeconds: 14
+  gameplayTotalSeconds: 17
+  bonusPortion: 0.3235
+  goldenRopeAtPortion: 0.5455
+  instructionSeconds: 5.5
+  resultHoldSeconds: 2.5
   instructionsPanel: {fileID: 6384737927078398819}
   instructionsText: {fileID: 7813158355097932085}
   resultPanel: {fileID: 6839430225253435650}
@@ -606,18 +609,13 @@ MonoBehaviour:
   goSeconds: 0.5
   readyGoPopScale: 1.2
   skipButton: {fileID: 4813489625560730262}
-  normalWaves: 11
-  normalIntroDelay: 1.25
-  normalInterWaveDelay: 0.6
-  normalHitsNeeded: {x: 6, y: 8}
+  normalBeatSeconds: 0.95
+  normalBeatGapSeconds: 0.22
+  normalHitsNeeded: {x: 3, y: 5}
+  minModelsPerBeat: 1
+  maxModelsPerBeat: 2
   pointsPerHit: 10
   wrongLanePenalty: -10
-  normalSpeedMaxBonus: 120
-  normalSpeedParSeconds: 1.2
-  normalSpeedMinBonus: 0
-  bonusPhaseSeconds: 12
-  bonusIntroDelay: 0.75
-  goldenRopeDelay: 8
   goldenReactionMaxPoints: 250
   goldenReactionDecayPerSecond: 300
   goldenReactionMinPoints: 20
@@ -625,6 +623,9 @@ MonoBehaviour:
   flashFade: 0.18
   finishText: {fileID: 6261907249438093904}
   finishHoldSeconds: 2
+  endAlignMinBeatFraction: 0.35
+  endOKAYExtraSeconds: 0.12
+  bonusIntroHold: 0.45
 --- !u!1 &2979108656604121975
 GameObject:
   m_ObjectHideFlags: 0
