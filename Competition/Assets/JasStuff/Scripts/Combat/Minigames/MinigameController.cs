@@ -6,7 +6,7 @@ public class MinigameController : MonoBehaviour
     private Combatant currCombatant;
     private string globalMinigameID = "TakeABreak";
     private float globalMinigameChance = 2f;
-    private float minigameChance = 20f;
+    private float minigameChance = 35f;
 
     private void Awake()
     {
@@ -38,20 +38,20 @@ public class MinigameController : MonoBehaviour
 
         string finalID = id;
 
-        // You can re-enable your chance logic later if desired
-        // if (roll < globalMinigameChance)
-        // {
-        //     finalID = globalMinigameID;
-        //     MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        // }
-        // else if (roll > globalMinigameChance && roll <= minigameChance)
-        // {
-        MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        // }
-        // else
-        // {
-        //     Debug.Log("Nothing playing, no chance");
-        // }
+        //You can re - enable your chance logic later if desired
+        if (roll < globalMinigameChance)
+        {
+            finalID = globalMinigameID;
+            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+        }
+        else if (roll > globalMinigameChance && roll <= minigameChance)
+        {
+            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+        }
+        else
+        {
+            Debug.Log("Nothing playing, no chance");
+        }
     }
 
     private void OnMinigameComplete(MinigameManager.ResultType result)
