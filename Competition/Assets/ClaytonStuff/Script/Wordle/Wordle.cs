@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 public class Wordle : BaseMinigame
 {
     [Header("UI References")]
-    [SerializeField] private Transform gridParent; // Parent with 6x5 letter boxes
+    [SerializeField] private Transform gridParent;
     [SerializeField] private GameObject letterBoxPrefab;
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private TMP_Text timerText;
@@ -22,8 +22,7 @@ public class Wordle : BaseMinigame
 
     [Header("Game Settings")]
     [SerializeField] private int maxAttempts = 6;
-    //[SerializeField] private string[] wordList = { "APPLE", "CHAIR", "UNITY", "PLANT", "GAMES", "CLOUD" };
-    [SerializeField] private float attemptTime = 3f;
+    [SerializeField] private float totalGameTime = 30f; //  total time for entire game
 
     [Header("Word Topics")]
     [SerializeField] private WordTopic[] topics;
@@ -31,7 +30,6 @@ public class Wordle : BaseMinigame
     private string targetWord;
     private int currentAttempt = 0;
     private List<List<TMP_Text>> grid = new List<List<TMP_Text>>();
-
     private string currentGuess = "";
     private float timer;
     private bool gameOver = false;
@@ -75,10 +73,7 @@ public class Wordle : BaseMinigame
             return;
         }
 
-        // Pick a random topic
         WordTopic selectedTopic = topics[Random.Range(0, topics.Length)];
-
-        // Pick a random word from that topic
         string[] list = selectedTopic.words;
         if (list == null || list.Length == 0)
         {
@@ -91,19 +86,18 @@ public class Wordle : BaseMinigame
         score = 0;
         gameOver = false;
         currentGuess = "";
-        timer = attemptTime;
 
-        // Update UI
+        timer = totalGameTime; //  total timer starts here
+
         if (topicText)
             topicText.text = $"Topic: <b>{selectedTopic.topicName}</b>";
+
         resultText.text = "Type a 5-letter word!";
         UpdateLetterRow();
         UpdateTimerUI();
 
         Debug.Log($"[Wordle] Topic: {selectedTopic.topicName}, Target: {targetWord}");
     }
-
-
 
     void Update()
     {
@@ -154,10 +148,16 @@ public class Wordle : BaseMinigame
 
         if (timer <= 0f)
         {
-            resultText.text = "Time’s up! Moving to next attempt.";
-            OnSubmitGuess(forceFail: true);
+            timer = 0;
+            gameOver = true;
+
+            //  Show the correct word when time runs out
+            resultText.text = $"Time’s up! The word was <b>{targetWord}</b>.";
+
+            StartCoroutine(EndGameWithDelay());
         }
     }
+
 
     void UpdateLetterRow()
     {
@@ -185,41 +185,30 @@ public class Wordle : BaseMinigame
         {
             yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.ConnectionError ||
-                request.result == UnityWebRequest.Result.ProtocolError)
-            {
-                //resultText.text = $"Network error while checking '{guess}'!";
-                //yield break;
-            }
-
             string json = request.downloadHandler.text;
 
-            if (json.Contains("\"word\"")) //Word found in dictionary
+            if (json.Contains("\"word\""))
             {
                 OnSubmitGuess(false);
             }
             else
             {
-                // Invalid word — clear the current row visually
                 resultText.text = $"'{guess}' is not a valid English word!";
                 currentGuess = "";
 
-                // Reset the current attempt row to empty boxes
                 if (currentAttempt < grid.Count)
                 {
                     var row = grid[currentAttempt];
-                    for (int i = 0; i < row.Count; i++)
+                    foreach (var letter in row)
                     {
-                        row[i].text = "";
-                        row[i].color = Color.white;
+                        letter.text = "";
+                        letter.color = Color.white;
                     }
                 }
-
                 UpdateLetterRow();
             }
         }
     }
-
 
     void OnSubmitGuess(bool forceFail = false)
     {
@@ -242,7 +231,8 @@ public class Wordle : BaseMinigame
 
         currentAttempt++;
         currentGuess = "";
-        timer = attemptTime;
+
+        //  No timer reset here anymore
 
         if (currentAttempt >= maxAttempts)
         {
@@ -256,14 +246,6 @@ public class Wordle : BaseMinigame
             UpdateLetterRow();
         }
     }
-
-    private IEnumerator EndGameWithDelay()
-    {
-        gameOver = true;
-        yield return new WaitForSecondsRealtime(2f); //  Delay before closing the game
-        EndGame();
-    }
-
 
     void DisplayGuess(string guess)
     {
@@ -286,7 +268,15 @@ public class Wordle : BaseMinigame
     {
         int baseScore = 60;
         int deduction = currentAttempt * 10;
-        score = Mathf.Max(baseScore - deduction, 10);
+        int timeBonus = Mathf.RoundToInt(timer); //  optional time bonus
+        score = Mathf.Max(baseScore - deduction + timeBonus, 10);
+    }
+
+    IEnumerator EndGameWithDelay()
+    {
+        gameOver = true;
+        yield return new WaitForSecondsRealtime(2f);
+        EndGame();
     }
 
     void EndGame()
@@ -299,19 +289,15 @@ public class Wordle : BaseMinigame
             Result = MinigameManager.ResultType.Fail;
     }
 
-
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
 
-        // Wait until the game is over
         while (!gameOver)
             yield return null;
 
-        // Delay before unpausing battle / ending minigame
         yield return new WaitForSecondsRealtime(2f);
 
         BattleManager.instance?.SetBattlePaused(false);
     }
-
 }
