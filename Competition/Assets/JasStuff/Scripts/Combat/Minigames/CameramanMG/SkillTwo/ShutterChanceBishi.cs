@@ -72,6 +72,7 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private Image cameramanImage;
     [SerializeField] private Sprite cameramanDefaultSprite;
     [SerializeField] private Sprite cameramanThumbsSprite;
+    [SerializeField] private Sprite cameramanFailSprite;
 
     [Header("Cameraman Hop")]
     [SerializeField] private float camHopHeight = 32f;
@@ -119,7 +120,7 @@ public class ShutterChanceBishi : BaseMinigame
     [Header("NORMAL: Beat Settings (time-boxed)")]
     [SerializeField] private float normalBeatSeconds = 0.95f;
     [SerializeField] private float normalBeatGapSeconds = 0.22f;
-    [SerializeField] private Vector2Int normalHitsNeeded = new Vector2Int(3,5);
+    [SerializeField] private Vector2Int normalHitsNeeded = new Vector2Int(3, 5);
     [SerializeField] private int minModelsPerBeat = 1;
     [SerializeField] private int maxModelsPerBeat = 2;
 
@@ -176,6 +177,11 @@ public class ShutterChanceBishi : BaseMinigame
     private bool resultPhase = false;
 
     private Vector3 leftBaseScale, midBaseScale, rightBaseScale;
+
+    private enum BeatOutcome { Good, Miss, Afk }
+    private int hitsThisBeat = 0;
+    private int missesThisBeat = 0;
+    private BeatOutcome lastBeatOutcome = BeatOutcome.Good;
 
     private void Awake()
     {
@@ -361,6 +367,11 @@ public class ShutterChanceBishi : BaseMinigame
                     yield return null;
                 }
 
+                // ==== decide outcome for the final normal beat
+                if (hitsThisBeat <= 0) lastBeatOutcome = BeatOutcome.Afk;
+                else if (missesThisBeat > hitsThisBeat) lastBeatOutcome = BeatOutcome.Miss;
+                else lastBeatOutcome = BeatOutcome.Good;
+
                 ClearAllLanes();
                 yield return OKAYBeatFlash(normalBeatGapSeconds + endOKAYExtraSeconds);
 
@@ -372,11 +383,15 @@ public class ShutterChanceBishi : BaseMinigame
             {
                 beatClock -= normalBeatSeconds;
 
+                // ==== decide outcome for this beat
+                if (hitsThisBeat <= 0) lastBeatOutcome = BeatOutcome.Afk;
+                else if (missesThisBeat > hitsThisBeat) lastBeatOutcome = BeatOutcome.Miss;
+                else lastBeatOutcome = BeatOutcome.Good;
+
                 ClearAllLanes();
                 yield return OKAYBeatFlash(normalBeatGapSeconds);
 
                 float remaining = Mathf.Max(0f, normalBudget - normalClock);
-
                 float minNeeded = (normalBeatSeconds * endAlignMinBeatFraction) + (normalBeatGapSeconds * 0.25f);
 
                 if (remaining < minNeeded)
@@ -394,7 +409,6 @@ public class ShutterChanceBishi : BaseMinigame
             UpdateScoreHUD();
             yield return null;
         }
-
 
         ClearAllLanes();
         EnsureBackground(bgTransition);
@@ -453,7 +467,6 @@ public class ShutterChanceBishi : BaseMinigame
         if (goldenRope) goldenRope.gameObject.SetActive(false);
         ClearAllLanes();
 
-        // ===== RESULT =====
         EnsureBackground(bgResult);
 
         if (finishText)
@@ -494,6 +507,10 @@ public class ShutterChanceBishi : BaseMinigame
 
     private void SpawnBeatLayout(float progress01)
     {
+        hitsThisBeat = 0;
+        missesThisBeat = 0;
+        lastBeatOutcome = BeatOutcome.Good;
+
         int models = Mathf.RoundToInt(Mathf.Lerp(minModelsPerBeat, maxModelsPerBeat, Mathf.Clamp01(progress01)));
         models = Mathf.Clamp(models, 1, 3);
 
@@ -555,9 +572,29 @@ public class ShutterChanceBishi : BaseMinigame
         if (goldenHint) goldenHint.gameObject.SetActive(false);
         if (goldenRope) goldenRope.gameObject.SetActive(false);
 
+        // ==== Decide label + color + sprite based on outcome
+        string label;
+        Color labelColor;
+        Sprite desiredCamSprite = cameramanDefaultSprite;
+
+        if (lastBeatOutcome == BeatOutcome.Good)
+        {
+            label = "OKAY!";
+            labelColor = new Color(0.3f, 1f, 0.45f, 1f); // green-ish
+            if (cameramanThumbsSprite) desiredCamSprite = cameramanThumbsSprite;
+        }
+        else
+        {
+            label = "MISS!";
+            labelColor = new Color(1f, 0.3f, 0.3f, 1f);  // red-ish
+            if (cameramanFailSprite) desiredCamSprite = cameramanFailSprite;
+        }
+
         if (okayCenterText && gapSeconds > 0f)
         {
-            okayCenterText.text = "OKAY!";
+            okayCenterText.text = label;
+            var baseCol = okayCenterText.color;
+            okayCenterText.color = new Color(labelColor.r, labelColor.g, labelColor.b, baseCol.a);
             okayCenterText.gameObject.SetActive(true);
         }
 
@@ -567,8 +604,8 @@ public class ShutterChanceBishi : BaseMinigame
         if (cameramanImage) prevCamSprite = cameramanImage.sprite;
         if (cameraman) prevCamScale = cameraman.localScale;
 
-        if (cameramanImage && cameramanThumbsSprite)
-            cameramanImage.sprite = cameramanThumbsSprite;
+        if (cameramanImage && desiredCamSprite)
+            cameramanImage.sprite = desiredCamSprite;
 
         float show = Mathf.Clamp(gapSeconds * 0.8f, 0.06f, Mathf.Max(0.06f, gapSeconds));
         float blank = Mathf.Max(0f, gapSeconds - show);
@@ -577,14 +614,13 @@ public class ShutterChanceBishi : BaseMinigame
         float popDown = Mathf.Min(0.12f, show * 0.35f);
         float hold = Mathf.Max(0f, show - popUp - popDown);
 
-        // pop up
+        // little scale pop
         if (cameraman)
         {
             float t = 0f;
             Vector3 peak = prevCamScale * 1.07f;
             while (t < popUp) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(prevCamScale, peak, t / Mathf.Max(0.01f, popUp)); yield return null; }
             if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
-            // pop down
             t = 0f;
             while (t < popDown) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(peak, prevCamScale, t / Mathf.Max(0.01f, popDown)); yield return null; }
             cameraman.localScale = prevCamScale;
@@ -1072,6 +1108,7 @@ public class ShutterChanceBishi : BaseMinigame
             StartCoroutine(FlashColor(Color.red, flashHold * 0.6f, flashFade * 0.6f));
             TriggerScreenShake(0.65f);
             score += wrongLanePenalty;
+            missesThisBeat++;
             UpdateScoreHUD();
             return;
         }
@@ -1090,6 +1127,7 @@ public class ShutterChanceBishi : BaseMinigame
             s.hitsToClear = Mathf.Max(0, s.hitsToClear - 1);
             waveHitsRemaining = Mathf.Max(0, waveHitsRemaining - 1);
             score += Mathf.Max(0, pointsPerHit);
+            hitsThisBeat++; // NEW: track hit
 
             if (s.hitsToClear <= 0) s.cleared = true;
 
