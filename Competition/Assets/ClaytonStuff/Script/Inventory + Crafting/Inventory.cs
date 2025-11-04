@@ -14,7 +14,7 @@ public class InventorySlot
     }
 }
 
-public class Inventory : MonoBehaviour
+public class Inventory : MonoBehaviour , IDataPersistence
 {
     public List<InventorySlot> mainInventory = new List<InventorySlot>();
     public List<InventorySlot> subInventory = new List<InventorySlot>();
@@ -131,5 +131,53 @@ public class Inventory : MonoBehaviour
     public void AddMoney(int amount)
     {
         Money += amount;
+    }
+
+    public void LoadData(GameData data)
+    {
+
+        if (data == null) return;
+
+        // Load main inventory
+        foreach (var slotData in data.mainInventory)
+        {
+            Item item = Resources.Load<Item>($"Items/{slotData.itemName}");
+            if (item != null)
+                mainInventory.Add(new InventorySlot(item, slotData.quantity));
+        }
+
+        // Load sub inventory
+        foreach (var slotData in data.subInventory)
+        {
+            Item item = Resources.Load<Item>($"Items/{slotData.itemName}");
+            if (item != null)
+                subInventory.Add(new InventorySlot(item, slotData.quantity));
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+
+        // Save main inventory
+        foreach (var slot in mainInventory)
+        {
+            if (slot.item == null) continue;
+            data.mainInventory.Add(new GameData.InventorySlotSaveData
+            {
+                itemName = slot.item.name, // Use ScriptableObject name
+                quantity = slot.quantity
+            });
+        }
+
+        // Save sub inventory
+        foreach (var slot in subInventory)
+        {
+            if (slot.item == null) continue;
+            data.subInventory.Add(new GameData.InventorySlotSaveData
+            {
+                itemName = slot.item.name,
+                quantity = slot.quantity
+            });
+        }
     }
 }

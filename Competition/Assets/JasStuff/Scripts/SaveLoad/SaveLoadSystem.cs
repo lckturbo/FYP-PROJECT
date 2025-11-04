@@ -55,7 +55,16 @@ public class SaveLoadSystem : MonoBehaviour
 
         fileDataHandler.DeleteSaveFile();
         Debug.Log("[SaveLoadSystem] Old save file deleted.");
+
         gameData = new GameData();
+
+        //// Clear inventory for new game
+        //if (InventoryManager.Instance != null)
+        //{
+        //    InventoryManager.Instance.PlayerInventory?.mainInventory.Clear();
+        //    InventoryManager.Instance.PlayerInventory?.subInventory.Clear();
+        //}
+
         fileDataHandler.Save(gameData);
 
         if (keepCharIndex && gameData != null)

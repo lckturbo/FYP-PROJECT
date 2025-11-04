@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static GameData;
 
+
 [System.Serializable]
 public class GameData
 {
@@ -105,6 +106,17 @@ public class GameData
     public bool chessPuzzleCompleted;
     public List<BlockSaveEntry> savedBlocks;
 
+    [System.Serializable]
+    public class InventorySlotSaveData
+    {
+        public string itemName;
+        public int quantity;
+    }
+
+    // Inventory
+    public List<InventorySlotSaveData> mainInventory;
+    public List<InventorySlotSaveData> subInventory;
+
     public GameData()
     {
         hasSavedGame = false;
@@ -140,5 +152,9 @@ public class GameData
         chessPieces = new List<ChessPieceSaveData>();
         chessPuzzleCompleted = false;
         savedBlocks = new List<BlockSaveEntry>();
+
+        // ... existing initializations ...
+        mainInventory = new List<InventorySlotSaveData>();
+        subInventory = new List<InventorySlotSaveData>();
     }
 }
