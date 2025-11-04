@@ -11,11 +11,22 @@ public class Wordle : BaseMinigame
     [SerializeField] private GameObject letterBoxPrefab;
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private TMP_Text timerText;
+    [SerializeField] private TMP_Text topicText;
+
+    [System.Serializable]
+    public class WordTopic
+    {
+        public string topicName;
+        public string[] words;
+    }
 
     [Header("Game Settings")]
     [SerializeField] private int maxAttempts = 6;
-    [SerializeField] private string[] wordList = { "APPLE", "CHAIR", "UNITY", "PLANT", "GAMES", "CLOUD" };
+    //[SerializeField] private string[] wordList = { "APPLE", "CHAIR", "UNITY", "PLANT", "GAMES", "CLOUD" };
     [SerializeField] private float attemptTime = 3f;
+
+    [Header("Word Topics")]
+    [SerializeField] private WordTopic[] topics;
 
     private string targetWord;
     private int currentAttempt = 0;
@@ -58,18 +69,41 @@ public class Wordle : BaseMinigame
 
     void StartNewGame()
     {
-        targetWord = wordList[Random.Range(0, wordList.Length)].ToUpper();
+        if (topics == null || topics.Length == 0)
+        {
+            Debug.LogError("No word topics assigned!");
+            return;
+        }
+
+        // Pick a random topic
+        WordTopic selectedTopic = topics[Random.Range(0, topics.Length)];
+
+        // Pick a random word from that topic
+        string[] list = selectedTopic.words;
+        if (list == null || list.Length == 0)
+        {
+            Debug.LogError($"Topic '{selectedTopic.topicName}' has no words!");
+            return;
+        }
+
+        targetWord = list[Random.Range(0, list.Length)].ToUpper();
         currentAttempt = 0;
         score = 0;
         gameOver = false;
         currentGuess = "";
         timer = attemptTime;
-        resultText.text = "Type a 5-letter word and press Enter!";
+
+        // Update UI
+        if (topicText)
+            topicText.text = $"Topic: <b>{selectedTopic.topicName}</b>";
+        resultText.text = "Type a 5-letter word!";
         UpdateLetterRow();
         UpdateTimerUI();
 
-        Debug.Log($"[Wordle] Target word: {targetWord}");
+        Debug.Log($"[Wordle] Topic: {selectedTopic.topicName}, Target: {targetWord}");
     }
+
+
 
     void Update()
     {

@@ -604,15 +604,25 @@ MonoBehaviour:
   letterBoxPrefab: {fileID: 5129150777570748038, guid: 4fa1f05d8653bfa48b6695101b675736, type: 3}
   resultText: {fileID: 4208347192983105044}
   timerText: {fileID: 5351965296937900691}
+  topicText: {fileID: 6545496955502875533}
   maxAttempts: 6
-  wordList:
-  - APPLE
-  - GRAPE
-  - LEMON
-  - MANGO
-  - PEACH
-  - MELON
   attemptTime: 15
+  topics:
+  - topicName: Fruits
+    words:
+    - APPLE
+    - GRAPE
+    - MELON
+    - LEMON
+  - topicName: Drinks
+    words:
+    - WATER
+    - PEPSI
+    - VODKA
+  - topicName: Food
+    words:
+    - CURRY
+    - PRATA
 --- !u!1 &8739637842306821293
 GameObject:
   m_ObjectHideFlags: 0
