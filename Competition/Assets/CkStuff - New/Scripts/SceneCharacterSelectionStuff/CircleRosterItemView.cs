@@ -9,6 +9,12 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
     [SerializeField] private CanvasGroup selectedGlow; // child: SelectedGlow
     [SerializeField] private Button button;
 
+    [SerializeField] private Vector3 selectedOffset = new Vector3(0f, 15f, 0f);
+    [SerializeField] private float moveDuration = 0.15f;
+
+    private Vector3 originalPos;
+    private Coroutine moveRoutine;
+
     private Vector3 originalScale;
     private Coroutine scaleRoutine;
 
@@ -19,7 +25,9 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
     private void Awake()
     {
         originalScale = transform.localScale;
+        originalPos = transform.localPosition;
     }
+
 
     public void Bind(NewCharacterDefinition def, System.Action onClick)
     {
@@ -38,7 +46,11 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
         isSelected = on;
         if (selectedGlow) selectedGlow.alpha = on ? 1f : 0f;
 
-        // Update portrait based on selection state
+        // Move position based on selection state
+        Vector3 targetPos = on ? originalPos + selectedOffset : originalPos;
+        StartMoveTween(targetPos, moveDuration);
+
+        // Update portrait
         if (portrait && currentDef != null)
         {
             portrait.sprite = on
@@ -46,6 +58,28 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
                 : (currentDef.portrait ? currentDef.portrait : currentDef.normalArt);
         }
     }
+
+    private void StartMoveTween(Vector3 target, float duration)
+    {
+        if (moveRoutine != null)
+            StopCoroutine(moveRoutine);
+        moveRoutine = StartCoroutine(MoveTween(target, duration));
+    }
+
+    private IEnumerator MoveTween(Vector3 target, float duration)
+    {
+        Vector3 start = transform.localPosition;
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            transform.localPosition = Vector3.Lerp(start, target, time / duration);
+            yield return null;
+        }
+        transform.localPosition = target;
+    }
+
 
     // Hover effects
     public void OnPointerEnter(PointerEventData eventData)
