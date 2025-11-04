@@ -14,7 +14,8 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     [SerializeField] private TMP_Text descText;
     [SerializeField] private TMP_Text critRateText;
     [SerializeField] private TMP_Text critDmgText;
-    [SerializeField] private TMP_Text elemText;
+    [SerializeField] private Image elemIcon;
+
 
     [Header("LEFT: Segmented Bars (10 blocks each)")]
     [SerializeField] private Transform healthBarContainer;
@@ -41,6 +42,16 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     [SerializeField] private float healthMaxUI;
     [SerializeField] private float damageMaxUI;
     [SerializeField] private float defenseMaxUI;
+
+    [Header("LEFT: Resist labels")]
+    [SerializeField] private TMP_Text fireLabel;
+    [SerializeField] private TMP_Text waterLabel;
+    [SerializeField] private TMP_Text grassLabel;
+    [SerializeField] private TMP_Text darkLabel;
+    [SerializeField] private TMP_Text lightLabel;
+
+    [Header("LEFT: Character Icon")]
+    [SerializeField] private Image characterIcon;
 
     private int currentIndex;
 
@@ -113,21 +124,47 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
 
         if (critRateText) critRateText.text = $"{Mathf.RoundToInt(s.critRate * 100f)}%";
         if (critDmgText) critDmgText.text = $"×{s.critDamage:0.##}";
-        if (elemText) elemText.text = s.attackElement.ToString();
+        if (elemIcon)
+        {
+            elemIcon.enabled = true;
+            elemIcon.sprite = GetElementSprite(s.attackElement);
+        }
 
-        // Resist coloring
-        TintResist(fireIcon, s.fireRes);
-        TintResist(waterIcon, s.waterRes);
-        TintResist(grassIcon, s.grassRes);
-        TintResist(darkIcon, s.darkRes);
-        TintResist(lightIcon, s.lightRes);
+
+        TintResist(fireIcon, fireLabel, s.fireRes);
+        TintResist(waterIcon, waterLabel, s.waterRes);
+        TintResist(grassIcon, grassLabel, s.grassRes);
+        TintResist(darkIcon, darkLabel, s.darkRes);
+        TintResist(lightIcon, lightLabel, s.lightRes);
+
 
         // Art
         if (artNormal) artNormal.sprite = def.normalArt;
         if (artPixel) artPixel.sprite = def.pixelArt;
+
+        // Icon
+        if (characterIcon && def.icon)
+        {
+            characterIcon.sprite = def.icon;
+            characterIcon.enabled = true;
+        }
     }
 
-private void UpdateBarSegments(Transform container, float ratio)
+    private Sprite GetElementSprite(NewElementType element)
+    {
+        return element switch
+        {
+            NewElementType.Fire => fireIcon ? fireIcon.sprite : null,
+            NewElementType.Water => waterIcon ? waterIcon.sprite : null,
+            NewElementType.Grass => grassIcon ? grassIcon.sprite : null,
+            NewElementType.Dark => darkIcon ? darkIcon.sprite : null,
+            NewElementType.Light => lightIcon ? lightIcon.sprite : null,
+            _ => null
+        };
+    }
+
+
+    private void UpdateBarSegments(Transform container, float ratio)
 {
     if (!container) return;
     int total = container.childCount;
@@ -160,13 +197,23 @@ private void UpdateBarSegments(Transform container, float ratio)
 }
 
 
-    private void TintResist(Image icon, float val)
+    private void TintResist(Image icon, TMP_Text label, float val)
     {
-        if (!icon) return;
-        if (val < 0.999f) icon.color = new Color(0.6f, 1f, 0.6f, 1f);
-        else if (val > 1.001f) icon.color = new Color(1f, 0.6f, 0.6f, 1f);
-        else icon.color = Color.black;
+        if (icon)
+        {
+            if (val < 0.999f) icon.color = new Color(0.6f, 1f, 0.6f, 1f);      // Weak (green)
+            else if (val > 1.001f) icon.color = new Color(1f, 0.6f, 0.6f, 1f);   // Strong (red)
+            else icon.color = Color.black;                                       // Neutral
+        }
+
+        if (label)
+        {
+            if (val < 0.999f) label.color = Color.green;
+            else if (val > 1.001f) label.color = Color.red;
+            else label.color = Color.black;
+        }
     }
+
 
     private void Confirm()
     {
