@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
     [Header("MainMenu / Lobby Buttons")]
     [SerializeField] private Button loadBtn;
-    [SerializeField] private Button newBtn  ;
+    [SerializeField] private Button newBtn;
     [SerializeField] private Button settingsBtn;
     [SerializeField] private Button creditsBtn;
     [SerializeField] private Button exitBtn;
@@ -53,7 +53,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
     private void Update()
     {
         if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby") return;
-        if (!canPause || isOpen) return;
+        if (!canPause || isOpen || (MinigameManager.instance && MinigameManager.instance.IsMinigameActive())) return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
             TogglePause(!isPaused);
@@ -127,10 +127,11 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (newBtn || loadBtn || settingsBtn || exitBtn)
         {
             newBtn.onClick.RemoveAllListeners();
-            newBtn.onClick.AddListener(() => {
+            newBtn.onClick.AddListener(() =>
+            {
                 SaveLoadSystem.instance.NewGame();
                 ASyncManager.instance.LoadLevelBtn("CharSelection");
-                });
+            });
 
             if (SaveLoadSystem.instance.GetGameData()?.hasSavedGame == true)
                 loadBtn.interactable = true;
@@ -138,7 +139,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 loadBtn.interactable = false;
 
             loadBtn.onClick.RemoveAllListeners();
-            loadBtn.onClick.AddListener(() => { 
+            loadBtn.onClick.AddListener(() =>
+            {
                 SaveLoadSystem.instance.LoadGame();
                 ASyncManager.instance.LoadLevelBtn("SampleScene");
             });
@@ -231,7 +233,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (pauseUI)
         {
             resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
-            if (resumeBtn) resumeBtn.onClick.AddListener(() => ShowPauseUI(false));
+            if (resumeBtn) resumeBtn.onClick.AddListener(() => TogglePause(false));
             settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
             if (settingsBtn) settingsBtn.onClick.AddListener(() =>
             {
@@ -254,13 +256,23 @@ public class UIManager : MonoBehaviour, IDataPersistence
     {
         isPaused = v;
         Time.timeScale = v ? 0 : 1;
+
+        Debug.Log($"[UIManager] Pause toggled: {v}, timeScale = {Time.timeScale}");
+
+        if (SceneManager.GetActiveScene().name == "jasBattle")
+        {
+            BattleManager.instance.SetBattlePaused(v);
+            Debug.Log($"[UIManager] Battle paused: {v}");
+        }
+
         ShowPauseUI(v);
     }
+
     public void ShowPauseUI(bool v)
     {
         if (!pauseUI) return;
         pauseUI.SetActive(v);
-
+        Debug.Log($"[UIManager] Pause toggled: {v}, timeScale = {Time.timeScale}");
         if (v && statsDisplay) statsDisplay.DisplayStats();
     }
 
