@@ -89,13 +89,13 @@ public class ShutterChanceBishi : BaseMinigame
     private Vector2 shakeRootBasePos;
 
     [Header("Gameplay Time Budget (Normal + Bonus)")]
-    [SerializeField] private float gameplayTotalSeconds = 17f;
+    [SerializeField] private float gameplayTotalSeconds = 18f;
     [SerializeField, Range(0f, 1f)] private float bonusPortion = 0.3235f;
     [SerializeField, Range(0.1f, 0.95f)] private float goldenRopeAtPortion = 0.5455f;
 
     [Header("Phases & Durations (non-gameplay)")]
-    [SerializeField] private float instructionSeconds = 5.5f;
-    [SerializeField] private float resultHoldSeconds = 2.5f;
+    [SerializeField] private float instructionSeconds = 7.5f;
+    [SerializeField] private float resultHoldSeconds = 4.5f;
 
     [Header("Instruction UI")]
     [SerializeField] private GameObject instructionsPanel;
@@ -118,9 +118,9 @@ public class ShutterChanceBishi : BaseMinigame
     private bool gameplayActive = false;
 
     [Header("NORMAL: Beat Settings (time-boxed)")]
-    [SerializeField] private float normalBeatSeconds = 0.95f;
-    [SerializeField] private float normalBeatGapSeconds = 0.22f;
-    [SerializeField] private Vector2Int normalHitsNeeded = new Vector2Int(3, 5);
+    [SerializeField] private float normalBeatSeconds = 1.25f;
+    [SerializeField] private float normalBeatGapSeconds = 0.75f;
+    [SerializeField] private Vector2Int normalHitsNeeded = new Vector2Int(8, 12);
     [SerializeField] private int minModelsPerBeat = 1;
     [SerializeField] private int maxModelsPerBeat = 2;
 
@@ -313,15 +313,15 @@ public class ShutterChanceBishi : BaseMinigame
         {
             instructionsText.text =
                 "RATING      SCORE\n" +
-                "SSS         2240+\n" +
-                "SS          2100\n" +
-                "S           2000\n" +
-                "A           1900\n" +
-                "B           1600\n" +
-                "C           1300\n" +
-                "D           1100\n" +
-                "E           900\n" +
-                "F           600\n" +
+                "SSS         1650+\n" +
+                "SS          1550\n" +
+                "S           1450\n" +
+                "A           1300\n" +
+                "B           1150\n" +
+                "C           1000\n" +
+                "D           850\n" +
+                "E           700\n" +
+                "F           500\n" +
                 "Out of Rank  0";
         }
         yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
@@ -367,7 +367,6 @@ public class ShutterChanceBishi : BaseMinigame
                     yield return null;
                 }
 
-                // ==== decide outcome for the final normal beat
                 if (hitsThisBeat <= 0) lastBeatOutcome = BeatOutcome.Afk;
                 else if (missesThisBeat > hitsThisBeat) lastBeatOutcome = BeatOutcome.Miss;
                 else lastBeatOutcome = BeatOutcome.Good;
@@ -383,7 +382,6 @@ public class ShutterChanceBishi : BaseMinigame
             {
                 beatClock -= normalBeatSeconds;
 
-                // ==== decide outcome for this beat
                 if (hitsThisBeat <= 0) lastBeatOutcome = BeatOutcome.Afk;
                 else if (missesThisBeat > hitsThisBeat) lastBeatOutcome = BeatOutcome.Miss;
                 else lastBeatOutcome = BeatOutcome.Good;
@@ -1127,7 +1125,7 @@ public class ShutterChanceBishi : BaseMinigame
             s.hitsToClear = Mathf.Max(0, s.hitsToClear - 1);
             waveHitsRemaining = Mathf.Max(0, waveHitsRemaining - 1);
             score += Mathf.Max(0, pointsPerHit);
-            hitsThisBeat++; // NEW: track hit
+            hitsThisBeat++;
 
             if (s.hitsToClear <= 0) s.cleared = true;
 
@@ -1144,15 +1142,15 @@ public class ShutterChanceBishi : BaseMinigame
     private enum Rank { SSS, SS, S, A, B, C, D, E, F }
     private Rank JudgeRank(int finalScore)
     {
-        if (finalScore >= 2240) return Rank.SSS;
-        if (finalScore >= 2100) return Rank.SS;
-        if (finalScore >= 2000) return Rank.S;
-        if (finalScore >= 1900) return Rank.A;
-        if (finalScore >= 1600) return Rank.B;
-        if (finalScore >= 1300) return Rank.C;
-        if (finalScore >= 1100) return Rank.D;
-        if (finalScore >= 900) return Rank.E;
-        if (finalScore >= 600) return Rank.F;
+        if (finalScore >= 1650) return Rank.SSS;
+        if (finalScore >= 1550) return Rank.SS;
+        if (finalScore >= 1450) return Rank.S;
+        if (finalScore >= 1300) return Rank.A;
+        if (finalScore >= 1150) return Rank.B;
+        if (finalScore >= 1000) return Rank.C;
+        if (finalScore >= 850) return Rank.D;
+        if (finalScore >= 700) return Rank.E;
+        if (finalScore >= 500) return Rank.F;
         return Rank.F;
     }
 
