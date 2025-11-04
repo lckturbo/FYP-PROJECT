@@ -14,7 +14,8 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
     [SerializeField] private TMP_Text descText;
     [SerializeField] private TMP_Text critRateText;
     [SerializeField] private TMP_Text critDmgText;
-    [SerializeField] private TMP_Text elemText;
+    [SerializeField] private Image elemIcon;
+
 
     [Header("LEFT: Segmented Bars (10 blocks each)")]
     [SerializeField] private Transform healthBarContainer;
@@ -123,7 +124,12 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
 
         if (critRateText) critRateText.text = $"{Mathf.RoundToInt(s.critRate * 100f)}%";
         if (critDmgText) critDmgText.text = $"×{s.critDamage:0.##}";
-        if (elemText) elemText.text = s.attackElement.ToString();
+        if (elemIcon)
+        {
+            elemIcon.enabled = true;
+            elemIcon.sprite = GetElementSprite(s.attackElement);
+        }
+
 
         TintResist(fireIcon, fireLabel, s.fireRes);
         TintResist(waterIcon, waterLabel, s.waterRes);
@@ -144,7 +150,21 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         }
     }
 
-private void UpdateBarSegments(Transform container, float ratio)
+    private Sprite GetElementSprite(NewElementType element)
+    {
+        return element switch
+        {
+            NewElementType.Fire => fireIcon ? fireIcon.sprite : null,
+            NewElementType.Water => waterIcon ? waterIcon.sprite : null,
+            NewElementType.Grass => grassIcon ? grassIcon.sprite : null,
+            NewElementType.Dark => darkIcon ? darkIcon.sprite : null,
+            NewElementType.Light => lightIcon ? lightIcon.sprite : null,
+            _ => null
+        };
+    }
+
+
+    private void UpdateBarSegments(Transform container, float ratio)
 {
     if (!container) return;
     int total = container.childCount;

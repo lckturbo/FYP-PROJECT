@@ -2047,7 +2047,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &495836932
 MonoBehaviour:
@@ -6692,7 +6692,7 @@ MonoBehaviour:
   artNormal: {fileID: 253742264}
   artPixel: {fileID: 812703317}
   autoSwap: 1
-  swapInterval: 2
+  swapInterval: 5
 --- !u!114 &1613848129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7212,7 +7212,7 @@ MonoBehaviour:
   descText: {fileID: 1994964885}
   critRateText: {fileID: 1068966575}
   critDmgText: {fileID: 1065173727}
-  elemText: {fileID: 1487209331}
+  elemIcon: {fileID: 0}
   healthBarContainer: {fileID: 2114161184}
   dmgBarContainer: {fileID: 329291415}
   defBarContainer: {fileID: 1847388876}
