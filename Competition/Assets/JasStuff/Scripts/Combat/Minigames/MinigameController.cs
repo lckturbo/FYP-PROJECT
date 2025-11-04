@@ -2,13 +2,32 @@ using UnityEngine;
 
 public class MinigameController : MonoBehaviour
 {
+    [SerializeField] private TurnEngine engine; // Will auto-assign if left empty
     private Combatant currCombatant;
     private string globalMinigameID = "TakeABreak";
     private float globalMinigameChance = 2f;
-    private float minigameChance = 100f;
+    private float minigameChance = 20f;
+
+    private void Awake()
+    {
+        //  Auto-find TurnEngine in scene if not assigned
+        if (engine == null)
+        {
+            engine = FindObjectOfType<TurnEngine>();
+            if (engine == null)
+                Debug.LogWarning("[MinigameController] No TurnEngine found in scene!");
+        }
+    }
 
     public void TriggerMinigame(string id)
     {
+        //  Skip minigame if Auto Battle is ON
+        if (engine != null && engine.autoBattle)
+        {
+            Debug.Log("[MINIGAME] Auto Battle is ON — skipping minigame trigger.");
+            return;
+        }
+
         currCombatant = GetComponentInParent<Combatant>();
         if (MinigameManager.instance == null) return;
 
@@ -19,19 +38,20 @@ public class MinigameController : MonoBehaviour
 
         string finalID = id;
 
-        //if (roll < globalMinigameChance)
-        //{
-        //    finalID = globalMinigameID;
-        //    MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        //}
-        //else if (roll > globalMinigameChance && roll <= minigameChance)
-        //{
-            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        //}
-        //else
-        //{
-        //    Debug.Log("Nothing playing, no chance");
-        //}
+        // You can re-enable your chance logic later if desired
+        // if (roll < globalMinigameChance)
+        // {
+        //     finalID = globalMinigameID;
+        //     MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+        // }
+        // else if (roll > globalMinigameChance && roll <= minigameChance)
+        // {
+        MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+        // }
+        // else
+        // {
+        //     Debug.Log("Nothing playing, no chance");
+        // }
     }
 
     private void OnMinigameComplete(MinigameManager.ResultType result)
