@@ -16,6 +16,7 @@ public class MinigameManager : MonoBehaviour
     }
 
     private bool isMinigameActive = false;
+    public bool IsMinigameActive() => isMinigameActive;
 
     // For collecting triggers in the same frame
     private int lastTriggerFrame = -1;
