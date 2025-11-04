@@ -133,15 +133,32 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         int total = container.childCount;
         int activeCount = Mathf.RoundToInt(ratio * total);
 
+        // Calculate spacing
+        float totalWidth = ((RectTransform)container).rect.width;
+        float segmentWidth = total > 0 ? totalWidth / total : 0f;
+
         for (int i = 0; i < total; i++)
         {
-            var seg = container.GetChild(i).GetComponent<Image>();
-            if (seg)
+            var seg = container.GetChild(i);
+            var img = seg.GetComponent<Image>();
+            if (img)
             {
-                seg.color = (i < activeCount) ? new Color(0.8156863f, 0.5254902f, 0.3372549f,1) : new Color(1, 1, 1, 1);
+                img.color = (i < activeCount)
+                    ? new Color(0.8156863f, 0.5254902f, 0.3372549f, 1)
+                    : new Color(1, 1, 1, 1);
+            }
+
+            // Position evenly
+            if (seg.TryGetComponent<RectTransform>(out RectTransform rect))
+            {
+                rect.anchorMin = new Vector2(0, 0.5f);
+                rect.anchorMax = new Vector2(0, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.anchoredPosition = new Vector2((i + 0.5f) * segmentWidth, 0f);
             }
         }
     }
+
 
     private void TintResist(Image icon, float val)
     {

@@ -154,23 +154,38 @@ public class Wordle : BaseMinigame
             if (request.result == UnityWebRequest.Result.ConnectionError ||
                 request.result == UnityWebRequest.Result.ProtocolError)
             {
-                //resultText.text = $"?? Network error checking '{guess}'";
-                yield break;
+                //resultText.text = $"Network error while checking '{guess}'!";
+                //yield break;
             }
 
             string json = request.downloadHandler.text;
-            if (json.Contains("\"word\"")) // means valid word found
+
+            if (json.Contains("\"word\"")) //Word found in dictionary
             {
                 OnSubmitGuess(false);
             }
             else
             {
+                // Invalid word — clear the current row visually
                 resultText.text = $"'{guess}' is not a valid English word!";
                 currentGuess = "";
+
+                // Reset the current attempt row to empty boxes
+                if (currentAttempt < grid.Count)
+                {
+                    var row = grid[currentAttempt];
+                    for (int i = 0; i < row.Count; i++)
+                    {
+                        row[i].text = "";
+                        row[i].color = Color.white;
+                    }
+                }
+
                 UpdateLetterRow();
             }
         }
     }
+
 
     void OnSubmitGuess(bool forceFail = false)
     {
