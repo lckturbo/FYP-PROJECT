@@ -429,7 +429,8 @@ public class Combatant : MonoBehaviour
                 break;
 
             case MinigameManager.ResultType.Perfect:
-                dmg = currentTarget?.health.GetCurrHealth() ?? 0;
+                dmg = Mathf.RoundToInt(stats.atkDmg * 1.5f);
+                // dmg = currentTarget?.health.GetCurrHealth() ?? 0;
                 break;
         }
 
