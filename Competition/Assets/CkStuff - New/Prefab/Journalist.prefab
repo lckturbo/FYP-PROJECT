@@ -4948,6 +4948,7 @@ GameObject:
   - component: {fileID: -3057692005875216168}
   - component: {fileID: 8193472900448858267}
   - component: {fileID: 5732861926567812565}
+  - component: {fileID: -4074030254782739097}
   m_Layer: 8
   m_Name: Journalist
   m_TagString: Player
@@ -5344,6 +5345,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b0a192ae406b7049bff22b1f61d565d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-4074030254782739097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e2537241bd2077469676fdce976c7a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconSprite: {fileID: 21300000, guid: faa8eccde6c02c5478f28292686bb632, type: 3}
+  offset: {x: 0, y: 0, z: -1}
+  iconScale: 10
 --- !u!1 &5080612305008182421
 GameObject:
   m_ObjectHideFlags: 0
