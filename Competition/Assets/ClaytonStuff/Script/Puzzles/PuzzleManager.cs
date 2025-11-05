@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,14 +17,21 @@ public class PuzzleGroup
     [Tooltip("Optional animators to trigger when solved")]
     public List<Animator> animators = new List<Animator>();
 
+    [Header("Camera Pan Points")]
+    public Transform panPoint1;   // first focus point
+    public Transform panPoint2;   // second focus point
+
     [HideInInspector] public bool solved = false;
 }
 
 public class PuzzleManager : MonoBehaviour, IDataPersistence
 {
     [Header("Puzzle Groups")]
-    [Tooltip("Each group has its own set of goals and barriers.")]
     public List<PuzzleGroup> puzzleGroups = new List<PuzzleGroup>();
+
+    [Header("Camera Timing")]
+    public float panDuration = 0.6f;
+    public float holdOnEach = 0.3f;
 
     public event System.Action<PuzzleGroup> OnAnyPuzzleGroupSolved;
 
@@ -50,17 +58,34 @@ public class PuzzleManager : MonoBehaviour, IDataPersistence
         foreach (var goal in group.goals)
         {
             if (goal == null || !goal.IsOccupied)
-                return; // not solved yet
+                return;
         }
 
         group.solved = true;
-        OnPuzzleGroupSolved(group);
+        StartCoroutine(HandlePuzzleSolved(group));
     }
 
-    private void OnPuzzleGroupSolved(PuzzleGroup group)
+    private IEnumerator HandlePuzzleSolved(PuzzleGroup group)
     {
         Debug.Log($"Puzzle group solved: {group.puzzleID}");
+        NewCameraController cam = FindObjectOfType<NewCameraController>();
+        Transform playerAnchor = CreateTempAnchor(FindPlayerPosition(), "CamTemp_Player");
 
+        // === PAN TO POINT 1 ===
+        if (cam && group.panPoint1)
+        {
+            yield return cam.PanTo(group.panPoint1, panDuration);
+            yield return new WaitForSeconds(holdOnEach);
+        }
+
+        // === PAN TO POINT 2 ===
+        if (cam && group.panPoint2)
+        {
+            yield return cam.PanTo(group.panPoint2, panDuration);
+            yield return new WaitForSeconds(holdOnEach);
+        }
+
+        // === Trigger Animations & Barrier Removal ===
         foreach (var barrier in group.barriers)
         {
             if (barrier != null)
@@ -73,28 +98,42 @@ public class PuzzleManager : MonoBehaviour, IDataPersistence
                 anim.SetTrigger("Solved");
         }
 
+        // === Return to Player ===
+        if (cam && playerAnchor)
+            yield return cam.PanTo(playerAnchor, panDuration);
+
+        if (cam)
+            yield return cam.ReturnToPlayer(panDuration);
+
+        Destroy(playerAnchor.gameObject);
         OnAnyPuzzleGroupSolved?.Invoke(group);
     }
 
-    // ====== SAVE / LOAD ======
+    private Vector3 FindPlayerPosition()
+    {
+        var player = FindObjectOfType<NewPlayerMovement>();
+        if (player != null)
+            return player.transform.position;
+        return Vector3.zero;
+    }
 
+    private Transform CreateTempAnchor(Vector3 pos, string name)
+    {
+        GameObject temp = new GameObject(name);
+        temp.transform.position = pos;
+        return temp.transform;
+    }
+
+    // ===== SAVE / LOAD =====
     public void SaveData(ref GameData data)
     {
         foreach (var group in puzzleGroups)
         {
             var existing = data.savedPuzzles.Find(p => p.puzzleID == group.puzzleID);
             if (existing != null)
-            {
                 existing.solved = group.solved;
-            }
             else
-            {
-                data.savedPuzzles.Add(new GameData.PuzzleSaveEntry
-                {
-                    puzzleID = group.puzzleID,
-                    solved = group.solved
-                });
-            }
+                data.savedPuzzles.Add(new GameData.PuzzleSaveEntry { puzzleID = group.puzzleID, solved = group.solved });
         }
     }
 
@@ -109,18 +148,11 @@ public class PuzzleManager : MonoBehaviour, IDataPersistence
 
             if (group.solved)
             {
-                // Reapply the solved state
                 foreach (var barrier in group.barriers)
-                {
-                    if (barrier != null)
-                        Destroy(barrier);
-                }
+                    if (barrier != null) Destroy(barrier);
 
                 foreach (var anim in group.animators)
-                {
-                    if (anim != null)
-                        anim.Play("Solved", 0, 1f);
-                }
+                    if (anim != null) anim.Play("Solved", 0, 1f);
             }
         }
     }
