@@ -9747,6 +9747,7 @@ GameObject:
   - component: {fileID: -4908080834905126878}
   - component: {fileID: 3760575192579169997}
   - component: {fileID: 8525443773237868431}
+  - component: {fileID: 3210803804069359322}
   m_Layer: 8
   m_Name: Cameraman
   m_TagString: Player
@@ -10049,7 +10050,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackPoint: {fileID: 3472961998062604482}
-  attackRange: 1
+  attackRange: 0.7
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -10143,6 +10144,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b0a192ae406b7049bff22b1f61d565d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3210803804069359322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e2537241bd2077469676fdce976c7a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconSprite: {fileID: 21300000, guid: 7d3415ec621fede42aa532a94054ded0, type: 3}
+  offset: {x: 0, y: 0, z: -1}
+  iconScale: 10
 --- !u!1 &5284496553185815870
 GameObject:
   m_ObjectHideFlags: 0
