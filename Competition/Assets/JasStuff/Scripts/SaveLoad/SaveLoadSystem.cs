@@ -55,7 +55,10 @@ public class SaveLoadSystem : MonoBehaviour
 
         fileDataHandler.DeleteSaveFile();
         Debug.Log("[SaveLoadSystem] Old save file deleted.");
+
         gameData = new GameData();
+
+
         fileDataHandler.Save(gameData);
 
         if (keepCharIndex && gameData != null)
