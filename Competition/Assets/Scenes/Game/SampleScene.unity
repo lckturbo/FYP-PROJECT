@@ -90312,19 +90312,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   puzzleGroups:
-  - goals:
+  - puzzleID: 1
+    goals:
     - {fileID: 2861562258554889427}
     barriers:
     - {fileID: 2293473284264389722}
     - {fileID: 594450930}
+    animators:
+    - {fileID: 594450932}
     solved: 0
-  - goals:
+  - puzzleID: 2
+    goals:
     - {fileID: 1725617121}
     barriers:
     - {fileID: 673264939}
     - {fileID: 468321379}
+    animators:
+    - {fileID: 673264941}
     solved: 0
-  - goals:
+  - puzzleID: 3
+    goals:
     - {fileID: 1037246351}
     - {fileID: 1541397271}
     - {fileID: 1403564832}
@@ -90333,6 +90340,9 @@ MonoBehaviour:
     - {fileID: 157163494}
     - {fileID: 1277451094}
     - {fileID: 610789081}
+    animators:
+    - {fileID: 157163496}
+    - {fileID: 610789082}
     solved: 0
 --- !u!50 &6550993891176178010
 Rigidbody2D:
