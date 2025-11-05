@@ -260,19 +260,39 @@ public class ShopManager : MonoBehaviour
     {
         if (playerInventory == null || !playerInventory.HasItem(item)) return;
 
-        // Remove 1 item from inventory
+        // --- Restriction logic: prevent selling last weapon/bow ---
+        bool hasWeapon = playerInventory.mainInventory.Exists(s => s.item != null && s.item.isWeapon && !s.item.isBow);
+        bool hasBow = playerInventory.mainInventory.Exists(s => s.item != null && s.item.isBow);
+
+        // Case 1: trying to sell a sword but you also have a bow ? allowed
+        if (item.isWeapon && !item.isBow && hasBow && !hasWeapon)
+        {
+            // allowed, proceed
+        }
+        // Case 2: trying to sell a bow but you also have a sword ? allowed
+        else if (item.isBow && hasWeapon && !hasBow)
+        {
+            // allowed, proceed
+        }
+        // Case 3: trying to sell last or only weapon/bow
+        else if ((item.isWeapon && !item.isBow && !hasBow) || (item.isBow && !hasWeapon))
+        {
+            ShowMessage("You must keep at least one weapon or bow!");
+            return;
+        }
+
+        // --- Proceed with selling ---
         playerInventory.RemoveItem(item, 1);
 
-        // Give money to player (example: 50% of price)
         int sellPrice = item.price / 2;
         playerInventory.AddMoney(sellPrice);
 
-        // Update UI
         PopulateSellMenu();
         UpdateSellMoneyUI();
         ShowMessage($"Sold 1 x {item.itemName} for {sellPrice} G!");
         inventoryUIManager.RefreshUI();
     }
+
 
     private void UpdateSellMoneyUI()
     {

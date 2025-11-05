@@ -26,10 +26,19 @@ public class Scramble : BaseMinigame
     private bool gameOver = false;
     private float timeLeft;
 
-    void Start()
+    private bool canStartGame = false;
+
+    public void BeginMinigame()
     {
+        canStartGame = true;
         StartNewGame();
     }
+
+
+    //void Start()
+    //{
+    //    //StartNewGame();
+    //}
 
     void StartNewGame()
     {
@@ -51,7 +60,7 @@ public class Scramble : BaseMinigame
 
     void Update()
     {
-        if (gameOver) return;
+        if (!canStartGame || gameOver) return;
 
         timeLeft -= Time.unscaledDeltaTime;
         timerText.text = $"Time: {timeLeft:F1}s";

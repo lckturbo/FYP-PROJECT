@@ -43,7 +43,7 @@ public class ScrabbleGame : BaseMinigame
         "HELLO", "WORLD", "UNITY", "GAME", "CODE", "SCRABBLE", "PLAY", "FUN", "WORD","TO"
     };
 
-    void Start()
+    public void BeginMinigame()
     {
         SetupLetterScores();
         SetupBoard();
@@ -53,9 +53,22 @@ public class ScrabbleGame : BaseMinigame
         resetTurnButton.onClick.AddListener(OnResetTurn);
         UpdateScoreUI();
 
-        StartNewTurn(); // ?? start timer
-
+        StartNewTurn(); // starts the timer, enables board, etc.
     }
+
+    //void Start()
+    //{
+    //    SetupLetterScores();
+    //    SetupBoard();
+    //    SetupRack();
+
+    //    submitButton.onClick.AddListener(OnSubmitWord);
+    //    resetTurnButton.onClick.AddListener(OnResetTurn);
+    //    UpdateScoreUI();
+
+    //    StartNewTurn(); // ?? start timer
+
+    //}
 
     void Update()
     {
@@ -127,7 +140,7 @@ public class ScrabbleGame : BaseMinigame
 
         messageText.text = "4 random letters spawned at the center!";
         // Example: randomly place 5–8 letters on the board
-        int numberOfLetters = Random.Range(5, 9);
+        int numberOfLetters = Random.Range(2, 5);
 
         for (int i = 0; i < numberOfLetters; i++)
         {
@@ -234,9 +247,9 @@ public class ScrabbleGame : BaseMinigame
         int maxPossibleScore = rackSize * 10; // Example
         float scorePercent = (float)totalScore / maxPossibleScore;
 
-        if (scorePercent >= 0.6f)
+        if (scorePercent >= 0.3f)
             Result = MinigameManager.ResultType.Perfect;
-        else if (scorePercent >= 0.3f)
+        else if (scorePercent >= 0.1f)
             Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
