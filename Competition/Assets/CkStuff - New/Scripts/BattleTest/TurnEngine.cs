@@ -10,6 +10,7 @@ public class TurnEngine : MonoBehaviour
     public bool autoBattle = false;
 
     private readonly List<Combatant> _units = new();
+    public List<Combatant> GetAllCombatants() { return new List<Combatant>(_units); }
     private bool _running;
 
     [SerializeField] private TargetSelector targetSelector;
