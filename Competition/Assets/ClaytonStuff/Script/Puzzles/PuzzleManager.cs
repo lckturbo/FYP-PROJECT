@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [System.Serializable]
 public class PuzzleGroup
@@ -68,6 +69,14 @@ public class PuzzleManager : MonoBehaviour, IDataPersistence
     private IEnumerator HandlePuzzleSolved(PuzzleGroup group)
     {
         Debug.Log($"Puzzle group solved: {group.puzzleID}");
+
+        // --- Disable player control ---
+        PlayerInput playerInput = FindObjectOfType<PlayerInput>();
+        if (playerInput != null) playerInput.enabled = false;
+
+        NewPlayerMovement newPlayerMovement = FindAnyObjectByType<NewPlayerMovement>();
+        if (newPlayerMovement != null) newPlayerMovement.enabled = false;
+
         NewCameraController cam = FindObjectOfType<NewCameraController>();
         Transform playerAnchor = CreateTempAnchor(FindPlayerPosition(), "CamTemp_Player");
 
@@ -106,8 +115,15 @@ public class PuzzleManager : MonoBehaviour, IDataPersistence
             yield return cam.ReturnToPlayer(panDuration);
 
         Destroy(playerAnchor.gameObject);
+
+        // --- Re-enable player control ---
+        if (playerInput != null) playerInput.enabled = true;
+
+        if (newPlayerMovement != null) newPlayerMovement.enabled = true;
+
         OnAnyPuzzleGroupSolved?.Invoke(group);
     }
+
 
     private Vector3 FindPlayerPosition()
     {
