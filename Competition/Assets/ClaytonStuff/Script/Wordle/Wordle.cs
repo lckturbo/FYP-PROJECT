@@ -35,11 +35,20 @@ public class Wordle : BaseMinigame
     private bool gameOver = false;
     private int score = 0;
 
+    private bool canStartTimer = false;
+
     void Start()
     {
         SetupGrid();
-        StartNewGame();
+        //StartNewGame();
     }
+
+    public void BeginMinigame()
+    {
+        StartNewGame();    // sets up topic, words, etc.
+        canStartTimer = true;
+    }
+
 
     void SetupGrid()
     {
@@ -143,6 +152,8 @@ public class Wordle : BaseMinigame
 
     void HandleTimer()
     {
+        if (!canStartTimer || gameOver) return;
+
         timer -= Time.unscaledDeltaTime;
         UpdateTimerUI();
 

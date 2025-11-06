@@ -123,6 +123,8 @@ public class GameData
         }
     }
 
+    public bool hasSpawnedStartingItem;
+
     [System.Serializable]
     public class PuzzleSaveEntry
     {
@@ -174,6 +176,7 @@ public class GameData
         money = 0;
 
         savedPuzzles = new List<PuzzleSaveEntry>();
+        hasSpawnedStartingItem = false;
 
     }
 }

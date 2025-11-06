@@ -32,6 +32,7 @@ public class PlayerHeldItem : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
+
     }
 
     private void Start()
@@ -52,9 +53,18 @@ public class PlayerHeldItem : MonoBehaviour
         if (startingItem == null)
             return;
 
+        // Skip if in battle
         if (BattleManager.instance != null && BattleManager.instance.inBattle)
         {
             Debug.Log("In battle — skipping starting weapon spawn.");
+            return;
+        }
+
+        // --- NEW: Only spawn once across entire game ---
+        GameData data = SaveLoadSystem.instance?.GetGameData();
+        if (data != null && data.hasSpawnedStartingItem)
+        {
+            Debug.Log("Starting item already spawned earlier — skipping.");
             return;
         }
 
@@ -65,6 +75,13 @@ public class PlayerHeldItem : MonoBehaviour
                 InventoryManager.Instance.AddItemToInventory(startingItem, 1);
                 DisplayItem(startingItem);
                 Debug.Log($"Spawned and added starting item: {startingItem.itemName}");
+
+                // Mark as spawned in GameData
+                if (data != null)
+                {
+                    data.hasSpawnedStartingItem = true;
+                    SaveLoadSystem.instance.SaveGame();
+                }
             }
         }
         else
@@ -72,6 +89,7 @@ public class PlayerHeldItem : MonoBehaviour
             Debug.LogWarning("No InventoryManager found when trying to add starting item!");
         }
     }
+
 
     private void Update()
     {

@@ -16,6 +16,27 @@ public class NewCameraController : MonoBehaviour, IDataPersistence
     private Transform _originalTarget;
     private Camera _cam;
 
+    private void OnEnable()
+    {
+        PlayerSpawner.OnPlayerSpawned += HandlePlayerSpawned;
+    }
+
+    private void OnDisable()
+    {
+        PlayerSpawner.OnPlayerSpawned -= HandlePlayerSpawned;
+    }
+
+    private void HandlePlayerSpawned(Transform playerTransform)
+    {
+        if (playerTransform == null) return;
+
+        target = playerTransform;
+        _originalTarget = target;
+
+        Debug.Log($"[NewCameraController] Assigned new player target: {playerTransform.name}");
+    }
+
+
     private void Awake()
     {
         _originalTarget = target;

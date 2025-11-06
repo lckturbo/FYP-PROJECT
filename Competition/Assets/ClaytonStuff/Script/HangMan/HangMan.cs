@@ -29,8 +29,12 @@ public class HangMan : BaseMinigame
     private bool gameOver = false;
     private int totalMistakes = 0; // <-- NEW: includes wrong guesses + timeouts
 
-    void Start()
+    private bool canStart = false;
+
+    public void BeginMinigame()
     {
+        canStart = true;
+        // Initialize the game only when countdown ends
         secretWord = secretWord.ToUpper();
         remainingAttempts = maxAttempts;
         timer = attemptTime;
@@ -38,15 +42,22 @@ public class HangMan : BaseMinigame
         foreach (var part in hangmanParts)
             part.SetActive(false);
 
+        guessedLetters.Clear();
+        wrongLetters.Clear();
+        totalMistakes = 0;
+        gameOver = false;
+
         UpdateWordDisplay();
         playerInputText.text = "";
         messageText.text = "";
         UpdateTimerUI();
     }
 
+
     void Update()
     {
-        if (gameOver) return;
+        if (!canStart || gameOver) return;
+
         HandleTyping();
         HandleTimer();
     }

@@ -63,10 +63,14 @@ public class MovingBlock : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!collision.gameObject.CompareTag("Player"))
+        // --- Handle both player and ally ---
+        bool isPlayer = collision.gameObject.CompareTag("Player");
+        bool isAlly = collision.gameObject.layer == LayerMask.NameToLayer("Ally");
+
+        if (!isPlayer && !isAlly)
             return;
 
-        // Get the checkpoint by ID
+        // Get target checkpoint
         Checkpoint targetCheckpoint = CheckpointManager.instance?.GetCheckpointByID(checkpointID);
         if (targetCheckpoint == null)
         {
@@ -74,10 +78,15 @@ public class MovingBlock : MonoBehaviour
             return;
         }
 
-        // Move the player to the checkpoint position
+        // Teleport back to checkpoint
         collision.transform.position = targetCheckpoint.transform.position;
-        Debug.Log($"Player reset to checkpoint ID {checkpointID}");
+
+        if (isPlayer)
+            Debug.Log($"Player reset to checkpoint ID {checkpointID}");
+        else if (isAlly)
+            Debug.Log($"Ally {collision.gameObject.name} reset to checkpoint ID {checkpointID}");
     }
+
 
     private void OnDrawGizmos()
     {

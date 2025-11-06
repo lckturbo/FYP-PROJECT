@@ -29,6 +29,11 @@ public class TypingSpeedTest : BaseMinigame
 
     void Start()
     {
+       //StartNewTest();
+    }
+    public void BeginMinigame()
+    {
+        // Reset the test state
         StartNewTest();
     }
 

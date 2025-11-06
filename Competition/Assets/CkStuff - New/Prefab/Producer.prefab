@@ -4917,6 +4917,7 @@ GameObject:
   - component: {fileID: -1728161754744661667}
   - component: {fileID: 8548034155636275124}
   - component: {fileID: 4597016607363187574}
+  - component: {fileID: -3314739798667956135}
   m_Layer: 8
   m_Name: Producer
   m_TagString: Player
@@ -5196,7 +5197,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackPoint: {fileID: 2242311685228229447}
-  attackRange: 1
+  attackRange: 0.7
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -5313,6 +5314,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42a2c7f1a06e06d44906c4c1ab06fc50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-3314739798667956135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e2537241bd2077469676fdce976c7a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconSprite: {fileID: 21300000, guid: 547799aca5cbde248807a28a5f931846, type: 3}
+  offset: {x: 0, y: 0, z: -1}
+  iconScale: 10
 --- !u!1 &4359777992862640976
 GameObject:
   m_ObjectHideFlags: 0
