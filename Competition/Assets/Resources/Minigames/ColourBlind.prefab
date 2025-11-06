@@ -623,6 +623,22 @@ MonoBehaviour:
   - {r: 0.27, g: 0.8, b: 0.68, a: 1}
   - {r: 0.31, g: 0.72, b: 0.55, a: 1}
   - {r: 0.18, g: 0.7, b: 0.52, a: 1}
+  minLumaDiff: 0.3
+  digitRadiusScale: 1.25
+  bgAlpha: 0.8
+  digitAlpha: 1
+  digitFractionOverride: 0.97
+  segmentInflate: 0.02
+  minDotsPerLitSegment: 28
+  edgeAnchorDotsPerSegment: 6
+  edgeAnchorRadiusScale: 1.35
+  useDigitGrid: 1
+  digitGridCols: 18
+  digitGridRows: 26
+  useBackgroundGrid: 1
+  bgGridCols: 14
+  bgGridRows: 20
+  bgGridFillChance: 0.35
 --- !u!1 &2926079544608364744
 GameObject:
   m_ObjectHideFlags: 0

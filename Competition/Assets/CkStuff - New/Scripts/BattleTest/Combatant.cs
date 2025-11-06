@@ -28,6 +28,12 @@ public class Combatant : MonoBehaviour
     public event System.Action ActionBegan;
     public event System.Action ActionEnded;
 
+    // --- Skill bonus suppression (for auto) ---
+    private bool _suppressSkillBonusNextHit = false;
+    public void SuppressSkillBonusOnce() { _suppressSkillBonusNextHit = true; }
+    public void ClearSkillBonusSuppression() { _suppressSkillBonusNextHit = false; }
+
+
     // --- Physics we’ll toggle while lunging ---
     [Header("Collision Control While Acting")]
     [SerializeField] private bool disablePhysicsWhileActing = true;
@@ -206,7 +212,16 @@ public class Combatant : MonoBehaviour
             case AttackType.Skill2: baseMultiplier = 1.5f; break;
         }
 
+        if (_suppressSkillBonusNextHit &&
+            (currentAttackType == AttackType.Skill1 || currentAttackType == AttackType.Skill2))
+        {
+            baseMultiplier = 1.0f;
+        }
+
         int damage = CalculateDamage(currentTarget, baseMultiplier);
+
+        _suppressSkillBonusNextHit = false;
+
         currentTarget.health.TakeDamage(damage, stats, NewElementType.None);
     }
 

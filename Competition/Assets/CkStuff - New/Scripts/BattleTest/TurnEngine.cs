@@ -261,27 +261,66 @@ public class TurnEngine : MonoBehaviour
             if (actor.isLeader && isLeaderAuto)
             {
                 int roll = UnityEngine.Random.Range(0, 3);
-                if (roll == 0) actor.BasicAttack(target);
-                else if (roll == 1) { if (!actor.TryUseSkill1(target)) actor.BasicAttack(target); }
-                else { if (!actor.TryUseSkill2(target)) actor.BasicAttack(target); }
+                if (roll == 0)
+                {
+                    actor.BasicAttack(target);
+                }
+                else if (roll == 1)
+                {
+                    if (actor.IsSkill1Ready) actor.SuppressSkillBonusOnce();
+                    if (!actor.TryUseSkill1(target))
+                    {
+                        actor.ClearSkillBonusSuppression();
+                        actor.BasicAttack(target);
+                    }
+                }
+                else
+                {
+                    if (actor.IsSkill2Ready) actor.SuppressSkillBonusOnce();
+                    if (!actor.TryUseSkill2(target))
+                    {
+                        actor.ClearSkillBonusSuppression();
+                        actor.BasicAttack(target);
+                    }
+                }
             }
             else
             {
                 float r = UnityEngine.Random.value;
-                if (r < 0.6f) actor.BasicAttack(target);
-                else if (r < 0.8f) { if (!actor.TryUseSkill1(target)) actor.BasicAttack(target); }
-                else { if (!actor.TryUseSkill2(target)) actor.BasicAttack(target); }
+                if (r < 0.6f)
+                {
+                    actor.BasicAttack(target);
+                }
+                else if (r < 0.8f)
+                {
+                    if (actor.IsSkill1Ready) actor.SuppressSkillBonusOnce();
+                    if (!actor.TryUseSkill1(target))
+                    {
+                        actor.ClearSkillBonusSuppression();
+                        actor.BasicAttack(target);
+                    }
+                }
+                else
+                {
+                    if (actor.IsSkill2Ready) actor.SuppressSkillBonusOnce();
+                    if (!actor.TryUseSkill2(target))
+                    {
+                        actor.ClearSkillBonusSuppression();
+                        actor.BasicAttack(target);
+                    }
+                }
             }
         }
         else
         {
-            // simple enemy logic with cooldown-aware usage of skill1
+            // Enemies keep their normal multipliers (no suppression)
             if (UnityEngine.Random.value < 0.5f || !actor.IsSkill1Ready)
                 actor.BasicAttack(target);
             else
                 actor.TryUseSkill1(target);
         }
     }
+
 
     private Combatant FindRandomAlive(bool playerTeam)
     {
