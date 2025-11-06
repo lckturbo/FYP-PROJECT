@@ -2916,6 +2916,7 @@ GameObject:
   - component: {fileID: 579761203}
   - component: {fileID: 579761202}
   - component: {fileID: 579761204}
+  - component: {fileID: 579761205}
   m_Layer: 0
   m_Name: BattleSystem
   m_TagString: Untagged
@@ -3002,6 +3003,24 @@ MonoBehaviour:
   healItem: {fileID: 11400000, guid: 20ff7fd9c30151d4f8e836720dbe7439, type: 2}
   attackBuffItem: {fileID: 11400000, guid: d2c97b0f4dbd12a4fa99b6c03b2f7f5f, type: 2}
   defenseBuffItem: {fileID: 11400000, guid: 02831ec2b29f2d449a16dfcea3ccb53f, type: 2}
+--- !u!114 &579761205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579761201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6bfa81ad0e89be4dbb1350bb7ac8ecb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoToggle: {fileID: 1782614126}
+  speedToggle: {fileID: 2109885880}
+  autoLabel: {fileID: 1951496333}
+  speedLabel: {fileID: 1233058144}
+  autoUnlockLevel: 5
+  speedUnlockLevel: 3
 --- !u!1 &593190401
 GameObject:
   m_ObjectHideFlags: 0
@@ -7292,8 +7311,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 9, y: -0.5}
-  m_SizeDelta: {x: -28, y: -3}
+  m_AnchoredPosition: {x: 36.5, y: -0.5}
+  m_SizeDelta: {x: 27, y: -3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1233058144
 MonoBehaviour:
@@ -7325,7 +7344,7 @@ MonoBehaviour:
     m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
+    m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Toggle
@@ -12231,8 +12250,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 9, y: -0.5}
-  m_SizeDelta: {x: -28, y: -3}
+  m_AnchoredPosition: {x: 36.50004, y: -0.5}
+  m_SizeDelta: {x: 26.99992, y: -3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1951496333
 MonoBehaviour:
@@ -12264,7 +12283,7 @@ MonoBehaviour:
     m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
+    m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Toggle
