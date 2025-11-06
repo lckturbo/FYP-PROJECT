@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MinigameTutrol : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class MinigameTutrol : MonoBehaviour
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private float countdownDuration = 3f;
 
+    [Header("Skip Button")]
+    [SerializeField] private Button skipButton;
+
     [Header("Minigame References (only one should be active)")]
     [SerializeField] private Wordle wordleScript;
     [SerializeField] private TypingSpeedTest typingGameScript;
@@ -20,6 +24,7 @@ public class MinigameTutrol : MonoBehaviour
     [SerializeField] private HangMan hangmanScript;
 
     private bool countdownDone = false;
+    private Coroutine countdownRoutine;
 
     void Start()
     {
@@ -29,7 +34,13 @@ public class MinigameTutrol : MonoBehaviour
         if (countdownText)
             countdownText.text = "";
 
-        StartCoroutine(StartCountdown());
+        if (skipButton != null)
+        {
+            skipButton.onClick.RemoveAllListeners();
+            skipButton.onClick.AddListener(SkipTutorial);
+        }
+
+        countdownRoutine = StartCoroutine(StartCountdown());
     }
 
     private IEnumerator StartCountdown()
@@ -37,7 +48,7 @@ public class MinigameTutrol : MonoBehaviour
         float remaining = countdownDuration;
 
         // --- Countdown phase ---
-        while (remaining > 0)
+        while (remaining > 0 && !countdownDone)
         {
             if (countdownText)
                 countdownText.text = Mathf.Ceil(remaining).ToString();
@@ -45,33 +56,32 @@ public class MinigameTutrol : MonoBehaviour
             yield return null;
         }
 
+        StartMinigame();
+    }
+
+    private void SkipTutorial()
+    {
+        if (countdownRoutine != null)
+            StopCoroutine(countdownRoutine);
+
+        StartMinigame();
+    }
+
+    private void StartMinigame()
+    {
+        if (countdownDone) return;
         countdownDone = true;
-
-        if (countdownText)
-            countdownText.text = "GO!";
-
-        //yield return new WaitForSeconds(0.5f);
 
         if (tutorialPanel) tutorialPanel.SetActive(false);
         if (minigamePanel) minigamePanel.SetActive(true);
+        if (countdownText) countdownText.gameObject.SetActive(false);
+        if (skipButton) skipButton.gameObject.SetActive(false);
 
         // === Start whichever minigame is assigned ===
-        if (wordleScript)
-            wordleScript.BeginMinigame();
-
-        if (typingGameScript)
-            typingGameScript.BeginMinigame();
-
-        if (scrambleScript)
-            scrambleScript.BeginMinigame();
-
-        if (scrabbleScript)
-            scrabbleScript.BeginMinigame();
-
-        if (hangmanScript)
-            hangmanScript.BeginMinigame();
-
-        if (countdownText)
-            countdownText.gameObject.SetActive(false);
+        if (wordleScript) wordleScript.BeginMinigame();
+        if (typingGameScript) typingGameScript.BeginMinigame();
+        if (scrambleScript) scrambleScript.BeginMinigame();
+        if (scrabbleScript) scrabbleScript.BeginMinigame();
+        if (hangmanScript) hangmanScript.BeginMinigame();
     }
 }
