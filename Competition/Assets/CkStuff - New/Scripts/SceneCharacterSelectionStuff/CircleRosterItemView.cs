@@ -8,6 +8,7 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
     [SerializeField] private Image portrait;           // child: Portrait
     [SerializeField] private CanvasGroup selectedGlow; // child: SelectedGlow
     [SerializeField] private Button button;
+    [SerializeField] private RectTransform rectTransform;
 
     [SerializeField] private Vector3 selectedOffset = new Vector3(0f, 15f, 0f);
     [SerializeField] private float moveDuration = 0.15f;
@@ -25,7 +26,9 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
     private void Awake()
     {
         originalScale = transform.localScale;
-        originalPos = transform.localPosition;
+        originalPos = rectTransform.localPosition;
+
+        Debug.Log(rectTransform.localPosition);
     }
 
 

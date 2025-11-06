@@ -347,6 +347,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3849182938652635480, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3943156672087111108, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -396,12 +400,32 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: spawnPoint
+      value: 
+      objectReference: {fileID: 914456700}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: rectTransform
+      value: 
+      objectReference: {fileID: 914456700}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: useManualSpawn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: selectedOffset.x
       value: -30
       objectReference: {fileID: 0}
     - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: selectedOffset.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: manualSpawnPosition.x
+      value: -197
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: manualSpawnPosition.y
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 7414650177695333979, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: m_SizeDelta.x
@@ -2335,12 +2359,32 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: spawnPoint
+      value: 
+      objectReference: {fileID: 1792241973}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: rectTransform
+      value: 
+      objectReference: {fileID: 1792241973}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: useManualSpawn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: selectedOffset.x
       value: -30
       objectReference: {fileID: 0}
     - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: selectedOffset.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: manualSpawnPosition.x
+      value: -197
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: manualSpawnPosition.y
+      value: 232
       objectReference: {fileID: 0}
     - target: {fileID: 7414650177695333979, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: m_SizeDelta.x
@@ -5187,12 +5231,32 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: spawnPoint
+      value: 
+      objectReference: {fileID: 32514699}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: rectTransform
+      value: 
+      objectReference: {fileID: 32514699}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: useManualSpawn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: selectedOffset.x
       value: -30
       objectReference: {fileID: 0}
     - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: selectedOffset.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: manualSpawnPosition.x
+      value: -197
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119175686037699089, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
+      propertyPath: manualSpawnPosition.y
+      value: 392
       objectReference: {fileID: 0}
     - target: {fileID: 7414650177695333979, guid: 7f01935539d87944aa9a2e5554039213, type: 3}
       propertyPath: m_SizeDelta.x
