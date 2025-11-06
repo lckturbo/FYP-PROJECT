@@ -21,7 +21,7 @@ public class BattleSpeedToggle : MonoBehaviour
     {
         if (!engine) return;
 
-        engine.BattleSpeed = isOn ? 4f : 1f;
+        engine.BattleSpeed = isOn ? 1.5f : 1f;
         UpdateLabel();
     }
 
