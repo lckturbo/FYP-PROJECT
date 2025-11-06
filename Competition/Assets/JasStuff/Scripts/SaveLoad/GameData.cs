@@ -133,6 +133,7 @@ public class GameData
     }
 
     public List<PuzzleSaveEntry> savedPuzzles = new List<PuzzleSaveEntry>();
+    public List<string> clearedFogIds;
 
     public GameData()
     {
@@ -177,6 +178,8 @@ public class GameData
 
         savedPuzzles = new List<PuzzleSaveEntry>();
         hasSpawnedStartingItem = false;
+        clearedFogIds = new List<string>();
+
 
     }
 }

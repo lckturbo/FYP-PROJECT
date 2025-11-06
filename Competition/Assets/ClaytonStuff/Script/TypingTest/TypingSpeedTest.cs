@@ -97,7 +97,7 @@ public class TypingSpeedTest : BaseMinigame
             }
             else
             {
-                formatted += $"<color=#555555>{currentSentence[i]}</color>"; // Future - faint gray
+                formatted += $"<color=#D9D9D9>{currentSentence[i]}</color>"; // Future - faint gray
             }
         }
 

@@ -49,7 +49,9 @@ public class Scramble : BaseMinigame
         gameOver = false;
         currentInput = "";
 
-        scrambledWordText.text = scrambledWord;
+        // Add small spacing between letters for readability
+        scrambledWordText.text = string.Join(" ", scrambledWord.ToCharArray());
+
         playerGuessText.text = "";
         messageText.text = "Type and press Enter to guess!";
         attemptText.text = $"Attempts Left: {remainingAttempts}";

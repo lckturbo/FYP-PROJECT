@@ -88,12 +88,12 @@ public class ScrabbleGame : BaseMinigame
         string ten = "QZ";
 
         foreach (char c in one) letterScores[c] = 1;
-        foreach (char c in two) letterScores[c] = 2;
-        foreach (char c in three) letterScores[c] = 3;
-        foreach (char c in four) letterScores[c] = 4;
-        foreach (char c in five) letterScores[c] = 5;
-        foreach (char c in eight) letterScores[c] = 8;
-        foreach (char c in ten) letterScores[c] = 10;
+        foreach (char c in two) letterScores[c] = 5;
+        foreach (char c in three) letterScores[c] = 10;
+        foreach (char c in four) letterScores[c] = 15;
+        foreach (char c in five) letterScores[c] = 20;
+        foreach (char c in eight) letterScores[c] = 25;
+        foreach (char c in ten) letterScores[c] = 30;
     }
 
     void SetupBoard()
