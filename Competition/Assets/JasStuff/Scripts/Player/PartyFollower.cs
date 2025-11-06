@@ -3,7 +3,7 @@ public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
     [SerializeField] private float followDistance = 0.9f;
-    [SerializeField] private float moveSpeed = 4.0f;
+    [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float stopDistance = 0.15f;
 
     private Animator animator;

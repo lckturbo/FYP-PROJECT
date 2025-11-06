@@ -383,6 +383,7 @@ public class BattleSystem : MonoBehaviour
         {
             xpAwarded = CalculateXpReward();
             PartyLevelSystem.Instance?.AddXP(xpAwarded);
+            FindObjectOfType<BattleFeatureUnlocks>()?.UpdateUnlocks();
         }
 
         int postLevel = (ls != null) ? ls.level : preLevel;

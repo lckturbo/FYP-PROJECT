@@ -7,6 +7,6 @@ public class NewCharacterStats : BaseStats
     public int level;
 
     [Header("Combat")]
-    public float atkCD; //this is just to trigger encounter
-    public float atkRange; //this is just to trigger encounter
+    public float atkCD;
+    public float atkRange;
 }
