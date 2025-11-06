@@ -6,7 +6,7 @@ public class MinigameController : MonoBehaviour
     private Combatant currCombatant;
     private string globalMinigameID = "TakeABreak";
     private float globalMinigameChance = 2f;
-    private float minigameChance = 35f;
+    private float minigameChance = 100f;
 
     private void Awake()
     {
