@@ -5,15 +5,17 @@ using System.Collections;
 
 public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    [SerializeField] private Image portrait;           // child: Portrait
-    [SerializeField] private CanvasGroup selectedGlow; // child: SelectedGlow
+    [Header("UI References")]
+    [SerializeField] private Image portrait;
+    [SerializeField] private CanvasGroup selectedGlow;
     [SerializeField] private Button button;
-    [SerializeField] private RectTransform rectTransform;
 
+    [Header("Position Settings")]
+    [SerializeField] private Vector3 spawnPosition; // manually set in Inspector
     [SerializeField] private Vector3 selectedOffset = new Vector3(0f, 15f, 0f);
     [SerializeField] private float moveDuration = 0.15f;
 
-    private Vector3 originalPos;
+    [SerializeField]private Vector3 originalPos;
     private Coroutine moveRoutine;
 
     private Vector3 originalScale;
@@ -23,14 +25,16 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
     private bool isSelected = false;
     private bool isHovered = false;
 
-    private void Awake()
+    private void Start()
     {
+
+        // If you set spawnPosition manually in the Inspector, apply it here
+        if (spawnPosition != Vector3.zero)
+            transform.localPosition = spawnPosition;
+
+        originalPos = spawnPosition;
         originalScale = transform.localScale;
-        originalPos = rectTransform.localPosition;
-
-        Debug.Log(rectTransform.localPosition);
     }
-
 
     public void Bind(NewCharacterDefinition def, System.Action onClick)
     {
@@ -39,7 +43,6 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(() => onClick());
 
-        // Default to portrait1
         if (portrait) portrait.sprite = def.portrait ? def.portrait : def.normalArt;
         SetSelected(false);
     }
@@ -49,11 +52,9 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
         isSelected = on;
         if (selectedGlow) selectedGlow.alpha = on ? 1f : 0f;
 
-        // Move position based on selection state
         Vector3 targetPos = on ? originalPos + selectedOffset : originalPos;
         StartMoveTween(targetPos, moveDuration);
 
-        // Update portrait
         if (portrait && currentDef != null)
         {
             portrait.sprite = on
@@ -83,23 +84,20 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
         transform.localPosition = target;
     }
 
-
-    // Hover effects
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
-        StartScaleTween(originalScale * 1.1f, 0.1f); // expand slightly on hover
+        StartScaleTween(originalScale * 1.1f, 0.1f);
         UpdatePortraitHoverState();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         isHovered = false;
-        StartScaleTween(originalScale, 0.1f); // back to normal
+        StartScaleTween(originalScale, 0.1f);
         UpdatePortraitHoverState();
     }
 
-    // Click effect
     public void OnPointerClick(PointerEventData eventData)
     {
         StartCoroutine(ClickExpandEffect());
@@ -107,9 +105,9 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
 
     private IEnumerator ClickExpandEffect()
     {
-        StartScaleTween(originalScale * 1.25f, 0.08f); // expand a bit more
+        StartScaleTween(originalScale * 1.25f, 0.08f);
         yield return new WaitForSeconds(0.1f);
-        StartScaleTween(originalScale * 1.1f, 0.08f); // return to hover size
+        StartScaleTween(originalScale * 1.1f, 0.08f);
     }
 
     private void StartScaleTween(Vector3 targetScale, float duration)
@@ -137,20 +135,11 @@ public class CircleRosterItemView : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (!portrait || currentDef == null) return;
 
-        // If selected, always show portrait2
         if (isSelected)
-        {
             portrait.sprite = currentDef.portrait2 ? currentDef.portrait2 : currentDef.portrait;
-        }
         else if (isHovered)
-        {
-            // Show portrait2 when hovering
             portrait.sprite = currentDef.portrait2 ? currentDef.portrait2 : currentDef.portrait;
-        }
         else
-        {
-            // Otherwise revert to normal
             portrait.sprite = currentDef.portrait ? currentDef.portrait : currentDef.normalArt;
-        }
     }
 }
