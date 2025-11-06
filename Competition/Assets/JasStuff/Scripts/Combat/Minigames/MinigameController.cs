@@ -31,8 +31,6 @@ public class MinigameController : MonoBehaviour
         currCombatant = GetComponentInParent<Combatant>();
         if (MinigameManager.instance == null) return;
 
-        Debug.Log($"[MINIGAME] Animation-triggered minigame: {id}");
-
         float roll = Random.Range(0f, 100f);
         Debug.Log($"[MINIGAME] Rolled {roll:F1}% (threshold {minigameChance}%)");
 
@@ -54,9 +52,9 @@ public class MinigameController : MonoBehaviour
         }
     }
 
-    private void OnMinigameComplete(MinigameManager.ResultType result)
+    private void OnMinigameComplete(MinigameManager.ResultType result, string id)
     {
         if (currCombatant == null) return;
-        currCombatant.OnMinigameResult(result);
+        currCombatant.OnMinigameResult(result, id);
     }
 }

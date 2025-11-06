@@ -11,7 +11,8 @@ public abstract class BaseMinigame : MonoBehaviour
 
     protected virtual void Start()
     {
-        if (!instructionPanel || !instructionTimerText) return;
+        if (instructionPanel == null || instructionTimerText == null)
+            return;
     }
     public MinigameManager.ResultType Result { get; protected set; } = MinigameManager.ResultType.Fail;
     public abstract IEnumerator Run();

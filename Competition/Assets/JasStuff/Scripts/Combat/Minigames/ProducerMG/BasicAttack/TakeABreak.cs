@@ -7,30 +7,59 @@ public class TakeABreak : BaseMinigame
 {
     [SerializeField] private GameObject animPanel;
     [SerializeField] private Animator anim;
+
+    [Header("Dice")]
+    [SerializeField] private Image diceImage;
+    [SerializeField] private Sprite[] diceSides;
+    [SerializeField] private int rollAnimationSpeed;
+    [SerializeField] private float rollAnimationDuration;
+
     [SerializeField] private Button rollButton;
     [SerializeField] private TMP_Text resultText;
 
     private bool rolled;
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
         rollButton.onClick.AddListener(OnRoll);
         resultText.text = "Press ROLL!";
     }
     private void OnRoll()
     {
-        int roll = Random.Range(1, 101);
-        resultText.text = $"Rolled: {roll}";
+        rollButton.interactable = false;
+        resultText.gameObject.SetActive(false);
+        diceImage.gameObject.SetActive(true);
 
-        if (roll <= 1)
+        StartCoroutine(RollDiceRoutine());
+    }
+
+    private IEnumerator RollDiceRoutine()
+    {
+        float timer = 0f;
+
+        while (timer < rollAnimationDuration)
+        {
+            diceImage.sprite = diceSides[Random.Range(0, diceSides.Length)];
+            timer += Time.unscaledDeltaTime;
+            yield return new WaitForSecondsRealtime(1f / rollAnimationSpeed);
+        }
+
+        int final = Random.Range(1, 7);
+        diceImage.sprite = diceSides[final - 1];
+
+        if (final == 6)
             Result = MinigameManager.ResultType.Perfect;
-        else if (roll <= 3)
+        else if (final >= 4)
             Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
 
+        resultText.gameObject.SetActive(true);
+        resultText.text = Result.ToString();
         rolled = true;
     }
+
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
@@ -38,25 +67,12 @@ public class TakeABreak : BaseMinigame
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(2.2f);
+            yield return new WaitForSecondsRealtime(3.5f);
         }
 
         animPanel.SetActive(false);
-        //instructionPanel.SetActive(true);
-        minigamePanel.SetActive(false);
-
-        //if (instructionPanel.activeSelf)
-        //{
-        //    while (instructionTime > 0)
-        //    {
-        //        instructionTime -= Time.unscaledDeltaTime;
-        //        if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
-        //        yield return null;
-        //    }
-        //}
-
-       // instructionPanel.SetActive(false);
         minigamePanel.SetActive(true);
+
         rolled = false;
         Result = MinigameManager.ResultType.Fail;
 
@@ -64,5 +80,6 @@ public class TakeABreak : BaseMinigame
             yield return null;
 
         yield return new WaitForSecondsRealtime(1f);
+        BattleManager.instance?.SetBattlePaused(false);
     }
 }
