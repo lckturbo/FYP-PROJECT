@@ -13,8 +13,8 @@ public class BattleFeatureUnlocks : MonoBehaviour
     [SerializeField] private Text speedLabel;
 
     [Header("Unlock Levels")]
-    [SerializeField] private int autoUnlockLevel = 5;
-    [SerializeField] private int speedUnlockLevel = 3;
+    [SerializeField] private int autoUnlockLevel = 2;
+    [SerializeField] private int speedUnlockLevel = 2;
 
     private Color lockedColor = new Color(1f, 1f, 1f, 0.4f);
     private Color unlockedColor = Color.white;
