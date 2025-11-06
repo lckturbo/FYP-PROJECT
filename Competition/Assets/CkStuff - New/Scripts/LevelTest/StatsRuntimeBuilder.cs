@@ -1,9 +1,8 @@
-// StatsRuntimeBuilder.cs
 using UnityEngine;
 
 public static class StatsRuntimeBuilder
 {
-    // === Existing: for player-side NewCharacterStats ===
+    // === Player-side NewCharacterStats ===
     public static NewCharacterStats BuildRuntimeStats(NewCharacterStats baseStats, int targetLevel, LevelGrowth growth)
     {
         if (baseStats == null) return null;
@@ -31,15 +30,15 @@ public static class StatsRuntimeBuilder
         int extraLevels = Mathf.Max(0, targetLevel - 1);
         if (growth && extraLevels > 0)
         {
-            // additive
-            rt.maxHealth += growth.maxHealthAdd * extraLevels;
-            rt.atkDmg += growth.atkDmgAdd * extraLevels;
-            rt.attackreduction += growth.defenseAdd * extraLevels;
-            rt.actionvaluespeed += growth.speedAdd * extraLevels;
-            rt.critRate += growth.critRateAdd * extraLevels;
-            rt.critDamage += growth.critDmgAdd * extraLevels;
+            // ====== Additive with curve support ======
+            rt.maxHealth += Mathf.RoundToInt(growth.GetAddValue(growth.maxHealthAdd, growth.maxHealthCurve, extraLevels));
+            rt.atkDmg += Mathf.RoundToInt(growth.GetAddValue(growth.atkDmgAdd, growth.atkDmgCurve, extraLevels));
+            rt.attackreduction += growth.GetAddValue(growth.defenseAdd, growth.defenseCurve, extraLevels);
+            rt.actionvaluespeed += growth.GetAddValue(growth.speedAdd, growth.speedCurve, extraLevels);
+            rt.critRate += growth.GetAddValue(growth.critRateAdd, growth.critRateCurve, extraLevels);
+            rt.critDamage += growth.GetAddValue(growth.critDmgAdd, growth.critDmgCurve, extraLevels);
 
-            // multiplicative (cumulative)
+            // ====== Multiplicative (cumulative) ======
             rt.maxHealth = Mathf.RoundToInt(rt.maxHealth * Mathf.Pow(growth.maxHealthMul, extraLevels));
             rt.atkDmg = Mathf.RoundToInt(rt.atkDmg * Mathf.Pow(growth.atkDmgMul, extraLevels));
             rt.actionvaluespeed = rt.actionvaluespeed * Mathf.Pow(growth.speedMul, extraLevels);
@@ -53,19 +52,19 @@ public static class StatsRuntimeBuilder
         return rt;
     }
 
-    // === New: generic overload for any BaseStats (e.g., EnemyStats) ===
+    // === Enemy-side / generic BaseStats ===
     public static BaseStats BuildRuntimeStats(BaseStats baseStats, int targetLevel, LevelGrowth growth)
     {
         if (baseStats == null) return null;
 
-        // If it's already NewCharacterStats, reuse the player method
+        // If it's already NewCharacterStats, reuse player logic
         if (baseStats is NewCharacterStats ncs)
             return BuildRuntimeStats(ncs, targetLevel, growth);
 
-        // Otherwise, clone into a NewCharacterStats runtime (inherits BaseStats)
+        // Otherwise, clone into a NewCharacterStats runtime
         var rt = ScriptableObject.CreateInstance<NewCharacterStats>();
 
-        // --- copy base (BaseStats fields) ---
+        // --- copy base ---
         rt.Speed = baseStats.Speed;
         rt.maxHealth = baseStats.maxHealth;
         rt.attackreduction = baseStats.attackreduction;
@@ -86,26 +85,25 @@ public static class StatsRuntimeBuilder
         int extraLevels = Mathf.Max(0, targetLevel - 1);
         if (growth && extraLevels > 0)
         {
-            // additive
-            rt.maxHealth += growth.maxHealthAdd * extraLevels;
-            rt.atkDmg += growth.atkDmgAdd * extraLevels;
-            rt.attackreduction += growth.defenseAdd * extraLevels;
-            rt.actionvaluespeed += growth.speedAdd * extraLevels;
-            rt.critRate += growth.critRateAdd * extraLevels;
-            rt.critDamage += growth.critDmgAdd * extraLevels;
+            // ====== Additive with curve support ======
+            rt.maxHealth += Mathf.RoundToInt(growth.GetAddValue(growth.maxHealthAdd, growth.maxHealthCurve, extraLevels));
+            rt.atkDmg += Mathf.RoundToInt(growth.GetAddValue(growth.atkDmgAdd, growth.atkDmgCurve, extraLevels));
+            rt.attackreduction += growth.GetAddValue(growth.defenseAdd, growth.defenseCurve, extraLevels);
+            rt.actionvaluespeed += growth.GetAddValue(growth.speedAdd, growth.speedCurve, extraLevels);
+            rt.critRate += growth.GetAddValue(growth.critRateAdd, growth.critRateCurve, extraLevels);
+            rt.critDamage += growth.GetAddValue(growth.critDmgAdd, growth.critDmgCurve, extraLevels);
 
-            // multiplicative (cumulative)
+            // ====== Multiplicative (cumulative) ======
             rt.maxHealth = Mathf.RoundToInt(rt.maxHealth * Mathf.Pow(growth.maxHealthMul, extraLevels));
             rt.atkDmg = Mathf.RoundToInt(rt.atkDmg * Mathf.Pow(growth.atkDmgMul, extraLevels));
             rt.actionvaluespeed = rt.actionvaluespeed * Mathf.Pow(growth.speedMul, extraLevels);
         }
 
-        // tag level (safe defaults for enemy-only fields)
+        // Tag level (safe defaults for enemies)
         rt.level = targetLevel;
         rt.atkCD = 0f;
         rt.atkRange = 0f;
 
-        // Return as BaseStats (Combatant.stats and NewHealth.ApplyStats both accept BaseStats)
         return rt;
     }
 }

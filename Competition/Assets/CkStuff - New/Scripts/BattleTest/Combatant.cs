@@ -89,8 +89,8 @@ public class Combatant : MonoBehaviour
 
     // --- Skill cooldowns ---
     [Header("Skill Cooldowns")]
-    [SerializeField] public int skill1CooldownTurns = 3;
-    [SerializeField] public int skill2CooldownTurns = 4;
+    [SerializeField] public int skill1CooldownTurns = 2;
+    [SerializeField] public int skill2CooldownTurns = 3;
 
     private int _skill1CD;
     private int _skill2CD;
@@ -420,11 +420,11 @@ public class Combatant : MonoBehaviour
         switch (result)
         {
             case MinigameManager.ResultType.Fail:
-                dmg = 1;
+                dmg = Mathf.RoundToInt(stats.atkDmg);
                 break;
 
             case MinigameManager.ResultType.Success:
-                dmg = Mathf.RoundToInt(stats.atkDmg * 1.02f);
+                dmg = Mathf.RoundToInt(stats.atkDmg * 1.2f);
                 break;
 
             case MinigameManager.ResultType.Perfect:

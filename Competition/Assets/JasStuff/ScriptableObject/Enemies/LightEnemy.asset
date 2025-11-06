@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
-  m_Name: BasicEnemy5 (ONE PUNCH MAN)
+  m_Name: LightEnemy
   m_EditorClassIdentifier: 
   Speed: 4.5
-  maxHealth: 200
-  attackreduction: 5
-  atkDmg: 65
+  maxHealth: 80
+  attackreduction: 8
+  atkDmg: 32
   actionvaluespeed: 1.1
-  critRate: 0.01
-  critDamage: 10000
-  attackElement: 0
-  defenseElement: 0
+  critRate: 0.02
+  critDamage: 4
+  attackElement: 5
+  defenseElement: 5
   fireRes: 1
   waterRes: 1
   grassRes: 1
-  darkRes: 1
-  lightRes: 1
+  darkRes: 1.2
+  lightRes: 0.8
   type: 0
   enemyPrefab: {fileID: 0}
   atkRange: 1

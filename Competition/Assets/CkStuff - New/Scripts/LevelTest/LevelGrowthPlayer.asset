@@ -12,12 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b30668b56d339e74eb926853f3ab6c88, type: 3}
   m_Name: LevelGrowthPlayer
   m_EditorClassIdentifier: 
-  maxHealthAdd: 75
-  atkDmgAdd: 6
-  defenseAdd: 2
-  speedAdd: 0.015
-  critRateAdd: 0.05
-  critDmgAdd: 0.03
-  maxHealthMul: 1.04
-  atkDmgMul: 1.03
+  maxHealthAdd: 12
+  atkDmgAdd: 3
+  defenseAdd: 1.5
+  speedAdd: 0.05
+  critRateAdd: 0.04
+  critDmgAdd: 0.15
+  maxHealthCurve: 0
+  atkDmgCurve: 0
+  defenseCurve: 0
+  speedCurve: 0
+  critRateCurve: 0
+  critDmgCurve: 0
+  maxHealthMul: 1.02
+  atkDmgMul: 1.015
   speedMul: 1.01

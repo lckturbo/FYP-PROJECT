@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
-  m_Name: BasicEnemy2
+  m_Name: WaterEnemy
   m_EditorClassIdentifier: 
   Speed: 4.5
-  maxHealth: 250
-  attackreduction: 8
-  atkDmg: 70
-  actionvaluespeed: 1.2
-  critRate: 0.12
+  maxHealth: 120
+  attackreduction: 12
+  atkDmg: 34
+  actionvaluespeed: 0.9
+  critRate: 0.05
   critDamage: 1.5
-  attackElement: 5
-  defenseElement: 0
-  fireRes: 1.1
-  waterRes: 1
-  grassRes: 1
-  darkRes: 0.9
-  lightRes: 0.8
+  attackElement: 2
+  defenseElement: 2
+  fireRes: 1
+  waterRes: 0.8
+  grassRes: 1.2
+  darkRes: 1
+  lightRes: 1
   type: 0
   enemyPrefab: {fileID: 0}
   atkRange: 1

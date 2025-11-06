@@ -12,12 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b30668b56d339e74eb926853f3ab6c88, type: 3}
   m_Name: LevelGrowthEnemy
   m_EditorClassIdentifier: 
-  maxHealthAdd: 350
-  atkDmgAdd: 27
-  defenseAdd: 2.8
+  maxHealthAdd: 10
+  atkDmgAdd: 3
+  defenseAdd: 1
   speedAdd: 0.04
-  critRateAdd: 0.05
-  critDmgAdd: 0.08
-  maxHealthMul: 1.05
-  atkDmgMul: 1.04
-  speedMul: 1.01
+  critRateAdd: 0.03
+  critDmgAdd: 0.2
+  maxHealthCurve: 0
+  atkDmgCurve: 0
+  defenseCurve: 0
+  speedCurve: 0
+  critRateCurve: 0
+  critDmgCurve: 0
+  maxHealthMul: 1.08
+  atkDmgMul: 1.06
+  speedMul: 1.04

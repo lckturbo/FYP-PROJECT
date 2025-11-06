@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
-  m_Name: BasicEnemy4
+  m_Name: GrassEnemy
   m_EditorClassIdentifier: 
   Speed: 4.5
-  maxHealth: 400
-  attackreduction: 20
-  atkDmg: 85
-  actionvaluespeed: 0.85
-  critRate: 0.12
-  critDamage: 1.4
-  attackElement: 2
-  defenseElement: 2
-  fireRes: 1.1
-  waterRes: 0.7
-  grassRes: 1
+  maxHealth: 110
+  attackreduction: 11
+  atkDmg: 35
+  actionvaluespeed: 1
+  critRate: 0.05
+  critDamage: 1.1
+  attackElement: 3
+  defenseElement: 3
+  fireRes: 1.2
+  waterRes: 1
+  grassRes: 0.8
   darkRes: 1
   lightRes: 1
   type: 0

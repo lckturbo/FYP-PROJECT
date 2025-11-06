@@ -363,7 +363,6 @@ public class BattleSystem : MonoBehaviour
 
     private void HandleBattleEnd(bool playerWon)
     {
-        // stop (and optionally reset) timer on battle end
         if (trackBattleElapsed)
         {
             _battleTimer.Stop();

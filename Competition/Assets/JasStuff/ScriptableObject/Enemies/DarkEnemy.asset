@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
-  m_Name: BasicEnemy3
+  m_Name: DarkEnemy
   m_EditorClassIdentifier: 
   Speed: 4.5
-  maxHealth: 325
-  attackreduction: 18
-  atkDmg: 100
-  actionvaluespeed: 0.9
-  critRate: 0.15
+  maxHealth: 90
+  attackreduction: 9
+  atkDmg: 37
+  actionvaluespeed: 1.1
+  critRate: 0.07
   critDamage: 1.6
-  attackElement: 3
-  defenseElement: 3
+  attackElement: 4
+  defenseElement: 4
   fireRes: 1
-  waterRes: 1.1
-  grassRes: 0.7
-  darkRes: 1
-  lightRes: 1
+  waterRes: 1
+  grassRes: 1
+  darkRes: 0.8
+  lightRes: 1.2
   type: 0
   enemyPrefab: {fileID: 0}
   atkRange: 1
