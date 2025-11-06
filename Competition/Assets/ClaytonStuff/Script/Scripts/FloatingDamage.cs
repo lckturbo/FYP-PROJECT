@@ -9,8 +9,8 @@ public class FloatingDamage : MonoBehaviour
     [SerializeField] private Vector3 offset = new Vector3(0, 1.5f, 0);
 
     [Header("Pop Effect")]
-    [SerializeField] private float popScale = 1.4f;   // How big it pops
-    [SerializeField] private float popDuration = 0.15f; // How fast it expands before shrinking
+    [SerializeField] private float popScale = 1.4f;
+    [SerializeField] private float popDuration = 0.15f;
 
     private Color originalColor;
     private float timer;
@@ -21,10 +21,19 @@ public class FloatingDamage : MonoBehaviour
     {
         if (!damageText) damageText = GetComponentInChildren<TextMeshProUGUI>();
 
-        damageText.text = damageAmount.ToString();
-        originalColor = isCrit ? Color.yellow : Color.white;
-        damageText.color = originalColor;
+        // Add "Crit" marker if critical hit
+        if (isCrit)
+        {
+            damageText.text = $"{damageAmount} Crit!";
+            damageText.color = new Color(1f, 0.9f, 0.1f); // gold-yellow for crit
+        }
+        else
+        {
+            damageText.text = damageAmount.ToString();
+            damageText.color = Color.white;
+        }
 
+        originalColor = damageText.color;
         transform.localPosition += offset;
         originalScale = transform.localScale;
         timer = 0f;
@@ -35,14 +44,12 @@ public class FloatingDamage : MonoBehaviour
     {
         timer += Time.deltaTime;
 
-        // --- Pop expand animation ---
+        // Pop expand effect
         if (!popped)
         {
             float t = Mathf.Clamp01(timer / popDuration);
             transform.localScale = Vector3.Lerp(originalScale * popScale, originalScale, t);
-
-            if (t >= 1f)
-                popped = true;
+            if (t >= 1f) popped = true;
         }
 
         // Move upward
