@@ -413,7 +413,7 @@ public class Combatant : MonoBehaviour
         }
     }
 
-    public void OnMinigameResult(MinigameManager.ResultType result)
+    public void OnMinigameResult(MinigameManager.ResultType result, string id)
     {
         waitingForMinigameResult = false;
 
@@ -429,7 +429,10 @@ public class Combatant : MonoBehaviour
                 break;
 
             case MinigameManager.ResultType.Perfect:
-                dmg = currentTarget?.health.GetCurrHealth() ?? 0;
+                if (id == "TakeABreak")
+                    dmg = currentTarget?.health.GetCurrHealth() ?? 0;
+                else
+                    dmg = Mathf.RoundToInt(stats.atkDmg * 1.5f);
                 break;
         }
 
