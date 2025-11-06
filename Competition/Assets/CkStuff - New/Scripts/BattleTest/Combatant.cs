@@ -30,7 +30,6 @@ public class Combatant : MonoBehaviour
 
     // --- Physics we’ll toggle while lunging ---
     [Header("Collision Control While Acting")]
-    [Tooltip("If enabled, set body to Kinematic and colliders to Trigger during the attack hop, then restore.")]
     [SerializeField] private bool disablePhysicsWhileActing = true;
 
     private Rigidbody2D rb;
@@ -71,8 +70,8 @@ public class Combatant : MonoBehaviour
     // --- Approach / movement settings ---
     [Header("Approach")]
     [SerializeField] private Transform visualRoot;
-    [SerializeField] private float approachDistance = 0.7f;
-    [SerializeField] private float goSpeed = 6f;
+    [SerializeField] private float approachDistance = 1.0f;
+    [SerializeField] private float goSpeed = 12f;
     [SerializeField] private float backSpeed = 8f;
     [SerializeField] private float hopArcHeight = 0.15f;
 
