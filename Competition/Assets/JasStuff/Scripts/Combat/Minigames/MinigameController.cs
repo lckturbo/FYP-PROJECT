@@ -29,6 +29,12 @@ public class MinigameController : MonoBehaviour
         }
 
         currCombatant = GetComponentInParent<Combatant>();
+
+        if (currCombatant == null || !currCombatant.isLeader)
+        {
+            Debug.Log("[MINIGAME] Not leader — minigame ignored.");
+            return;
+        }
         if (MinigameManager.instance == null) return;
 
         float roll = Random.Range(0f, 100f);
