@@ -20,7 +20,7 @@ public class MinigameManager : MonoBehaviour
 
     // For collecting triggers in the same frame
     private int lastTriggerFrame = -1;
-    private List<(string id, Action<ResultType> callback)> frameTriggers = new();
+    private List<(string id, Action<ResultType, string> callback)> frameTriggers = new();
     private bool isSelecting = false;
 
     private void Awake()
@@ -32,7 +32,7 @@ public class MinigameManager : MonoBehaviour
     /// <summary>
     /// Called by animation events via MinigameController.
     /// </summary>
-    public void TriggerMinigameFromAnimation(string id, Action<ResultType> onComplete)
+    public void TriggerMinigameFromAnimation(string id, Action<ResultType, string> onComplete)
     {
         // Collect all triggers within the same frame
         if (Time.frameCount != lastTriggerFrame)
@@ -74,23 +74,17 @@ public class MinigameManager : MonoBehaviour
     }
 
 
-    private IEnumerator RunMinigameInternal(string id, Action<ResultType> onComplete)
+    private IEnumerator RunMinigameInternal(string id, Action<ResultType, string> onComplete)
     {
-        if (isMinigameActive)
-        {
-            Debug.Log($"[MINIGAME] '{id}' ignored — another minigame is already running.");
-            yield break;
-        }
+        if (isMinigameActive) yield break;
 
         isMinigameActive = true;
-        Debug.Log($"[MINIGAME] Starting {id}...");
 
         GameObject minigamePrefab = Resources.Load<GameObject>($"Minigames/{id}");
         if (minigamePrefab == null)
         {
-            Debug.LogWarning($"[MINIGAME] No prefab found for ID {id}");
             isMinigameActive = false;
-            onComplete?.Invoke(ResultType.Fail);
+            onComplete?.Invoke(ResultType.Fail, id);
             yield break;
         }
 
@@ -100,7 +94,7 @@ public class MinigameManager : MonoBehaviour
         if (minigame != null)
         {
             yield return minigame.Run();
-            onComplete?.Invoke(minigame.Result);
+            onComplete?.Invoke(minigame.Result, id);
         }
 
         Destroy(instance);

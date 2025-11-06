@@ -9,6 +9,11 @@ public abstract class BaseMinigame : MonoBehaviour
     [SerializeField] protected GameObject minigamePanel;
     [SerializeField] protected float instructionTime = 5f;
 
+    protected virtual void Start()
+    {
+        if (instructionPanel == null || instructionTimerText == null)
+            return;
+    }
     public MinigameManager.ResultType Result { get; protected set; } = MinigameManager.ResultType.Fail;
     public abstract IEnumerator Run();
 }
