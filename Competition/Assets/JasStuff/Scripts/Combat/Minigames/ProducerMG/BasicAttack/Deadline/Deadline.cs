@@ -5,6 +5,8 @@ using UnityEngine;
 public class Deadline : BaseMinigame
 {
     [Header("Gameplay Settings")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private Animator instrAnim;
     [SerializeField] private RectTransform[] paperParent;
     [SerializeField] private RectTransform basket;
     [SerializeField] private GameObject paperPrefab;
@@ -16,12 +18,32 @@ public class Deadline : BaseMinigame
     private bool running = false;
     private int caught = 0;
     private int missed = 0;
+
+    private bool instructionStarted = false;
+    public void StartInstructionCountdown()
+    {
+        instructionStarted = true;
+        Debug.Log("instruction started: " + instructionStarted);
+    }
+
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
 
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(2.5f);
+        }
+
         instructionPanel.SetActive(true);
+        instrAnim.enabled = true;
         minigamePanel.SetActive(false);
+
+        instructionStarted = false;
+        yield return null;
+        yield return new WaitUntil(() => instructionStarted);
 
         while (instructionTime > 0)
         {
