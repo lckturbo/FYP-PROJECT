@@ -9,10 +9,10 @@ public class MovingBlock : MonoBehaviour
     [SerializeField] private float waitTime = 1f;
 
     [Header("Rotation Settings")]
-    [SerializeField] private float spinSpeed = 180f; // ?? Degrees per second
+    [SerializeField] private float spinSpeed = 180f;
 
     [Header("Player Reset Settings")]
-    [SerializeField] private int checkpointID = 0; // Which checkpoint to send player to
+    [SerializeField] private int checkpointID = 0;
 
     private int currentIndex = 0;
     private bool waiting = false;
@@ -33,20 +33,16 @@ public class MovingBlock : MonoBehaviour
     {
         if (checkpoints.Length == 0) return;
 
-        // ?? Always spin
+        // Rotate continuously
         transform.Rotate(Vector3.forward * spinSpeed * Time.deltaTime);
 
         if (waiting) return;
 
-        // ?? Move toward the target
         Transform target = checkpoints[currentIndex];
         transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
-        // ?? Check if reached target
         if (Vector3.Distance(transform.position, target.position) < 0.05f)
-        {
             StartCoroutine(WaitAndMoveNext());
-        }
     }
 
     private System.Collections.IEnumerator WaitAndMoveNext()
@@ -54,23 +50,30 @@ public class MovingBlock : MonoBehaviour
         waiting = true;
         yield return new WaitForSeconds(waitTime);
 
-        currentIndex++;
-        if (currentIndex >= checkpoints.Length)
-            currentIndex = 0;
-
+        currentIndex = (currentIndex + 1) % checkpoints.Length;
         waiting = false;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // --- Handle both player and ally ---
-        bool isPlayer = collision.gameObject.CompareTag("Player");
-        bool isAlly = collision.gameObject.layer == LayerMask.NameToLayer("Ally");
+        int playerLayer = LayerMask.NameToLayer("Player");
+        int allyLayer = LayerMask.NameToLayer("Ally");
+
+        bool isPlayer = collision.gameObject.layer == playerLayer;
+        bool isAlly = collision.gameObject.layer == allyLayer;
 
         if (!isPlayer && !isAlly)
             return;
 
-        // Get target checkpoint
+        // Find the player by layer
+        GameObject player = FindObjectOfType<NewPlayerMovement>()?.gameObject;
+        if (player == null)
+        {
+            Debug.LogWarning("No player found in scene.");
+            return;
+        }
+
+        // Find checkpoint
         Checkpoint targetCheckpoint = CheckpointManager.instance?.GetCheckpointByID(checkpointID);
         if (targetCheckpoint == null)
         {
@@ -78,25 +81,35 @@ public class MovingBlock : MonoBehaviour
             return;
         }
 
-        // Teleport back to checkpoint
-        collision.transform.position = targetCheckpoint.transform.position;
+        // Move player to checkpoint
+        player.transform.position = targetCheckpoint.transform.position;
+        Debug.Log($"Player reset to checkpoint ID {checkpointID}");
 
-        if (isPlayer)
-            Debug.Log($"Player reset to checkpoint ID {checkpointID}");
-        else if (isAlly)
-            Debug.Log($"Ally {collision.gameObject.name} reset to checkpoint ID {checkpointID}");
+        // Move all allies to the player’s new position
+        BringAlliesToLeader(player.transform, allyLayer);
     }
 
+    private void BringAlliesToLeader(Transform leader, int allyLayer)
+    {
+        foreach (GameObject ally in FindObjectsOfType<GameObject>())
+        {
+            if (ally.layer == allyLayer)
+            {
+                ally.transform.position = leader.position;
+                Debug.Log($"Ally {ally.name} moved to leader position");
+            }
+        }
+    }
 
     private void OnDrawGizmos()
     {
         if (checkpoints == null || checkpoints.Length < 2) return;
+
         Gizmos.color = Color.yellow;
         for (int i = 0; i < checkpoints.Length; i++)
         {
             if (checkpoints[i] == null) continue;
             Gizmos.DrawSphere(checkpoints[i].position, 0.1f);
-
             if (i < checkpoints.Length - 1 && checkpoints[i + 1] != null)
                 Gizmos.DrawLine(checkpoints[i].position, checkpoints[i + 1].position);
         }
