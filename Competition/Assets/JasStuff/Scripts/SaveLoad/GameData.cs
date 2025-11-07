@@ -66,8 +66,8 @@ public class GameData
     [System.Serializable]
     public class BlockSaveEntry
     {
-        public string id;      
-        public bool isOpen;    
+        public string id;
+        public bool isOpen;
     }
 
     public bool hasSavedGame;
@@ -104,6 +104,8 @@ public class GameData
     public bool connectPuzzleCompleted;
     public List<ChessPieceSaveData> chessPieces;
     public bool chessPuzzleCompleted;
+    public int chessPuzzleSolutionIndex; // NEW: Save which solution is active
+    public int chessPuzzleCurrentStep; // NEW: Save current progress in solution
     public List<BlockSaveEntry> savedBlocks;
 
     public List<InventoryItemData> mainInventoryData;
@@ -147,7 +149,7 @@ public class GameData
         allyIndices = new List<int>();
         playerPosition = Vector2.zero;
         hasSavedPosition = false;
-        
+
         // enemies //
         defeatedEnemies = new List<string>();
 
@@ -169,6 +171,8 @@ public class GameData
         connectPuzzleCompleted = false;
         chessPieces = new List<ChessPieceSaveData>();
         chessPuzzleCompleted = false;
+        chessPuzzleSolutionIndex = -1; 
+        chessPuzzleCurrentStep = 0; 
         savedBlocks = new List<BlockSaveEntry>();
 
         // existing initializations...
