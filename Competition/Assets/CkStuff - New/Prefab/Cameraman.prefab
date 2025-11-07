@@ -9748,6 +9748,7 @@ GameObject:
   - component: {fileID: 3760575192579169997}
   - component: {fileID: 8525443773237868431}
   - component: {fileID: 3210803804069359322}
+  - component: {fileID: -8992568622996814437}
   m_Layer: 8
   m_Name: Cameraman
   m_TagString: Player
@@ -9796,7 +9797,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10161,6 +10162,20 @@ MonoBehaviour:
   iconScale: 10
   normalOrder: 10
   leaderOrder: 20
+--- !u!114 &-8992568622996814437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcd2343f01de7c4478464428d46e0203, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 2
+  lightColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &5284496553185815870
 GameObject:
   m_ObjectHideFlags: 0
