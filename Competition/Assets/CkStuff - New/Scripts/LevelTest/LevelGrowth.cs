@@ -24,11 +24,9 @@ public class LevelGrowth : ScriptableObject
     public float atkDmgMul = 1f;
     public float speedMul = 1f;
 
-    // === NEW: curved additive scaling ===
     public float GetAddValue(float baseAdd, float curve, int level)
     {
         if (level <= 0) return 0f;
-        // curved exponential growth — example: baseAdd * level * (1 + curve * (level - 1) * 0.05f)
         return baseAdd * level * (1f + curve * (level - 1) * 0.05f);
     }
 }

@@ -1,24 +1,40 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FreezeFrame : BaseMinigame
 {
-    [Header("Gameplay Settings")]
     [SerializeField] private GameObject animPanel;
     [SerializeField] private Animator anim;
     [SerializeField] private TMP_Text timerText;
+    [SerializeField] private TMP_Text scoreText;
 
+    [Header("References")]
     [SerializeField] private RectTransform markerParent;
     [SerializeField] private RectTransform markerRect;
-    [SerializeField] private RectTransform targetZone;
 
+    [SerializeField] private RectTransform[] targetZones;
+    [SerializeField] private Image markerImage;
+    [SerializeField] private Image[] targetImage;
+    [SerializeField] private Outline[] targetOutlines;
+    [SerializeField] private Sprite[] poseSprites;
+
+    [SerializeField] private CanvasGroup minigamePanelGroup;
+    [SerializeField] private RectTransform scoreTextRect;
+    [SerializeField] private TMP_Text resultText;
+
+    [Header("Gameplay Settings")]
     [SerializeField] private float hitTolerance = 35f;
     [SerializeField] private float moveSpeed = 300f;
 
     private int score = 0;
     private float timer;
     private bool running = false;
+    private int correctIndex;
+    private Sprite currentCorrectPose;
+    private RectTransform correctTargetZone;
+    private bool canHit = true;
 
     public override IEnumerator Run()
     {
@@ -27,7 +43,7 @@ public class FreezeFrame : BaseMinigame
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(3.0f);
+            yield return new WaitForSecondsRealtime(4.2f);
         }
 
         animPanel.SetActive(false);
@@ -47,9 +63,10 @@ public class FreezeFrame : BaseMinigame
         instructionPanel.SetActive(false);
         minigamePanel.SetActive(true);
 
-        timer = 10.0f;
+        timer = 15.0f;
         running = true;
 
+        SetNewRound();
         StartCoroutine(MoveMarker());
 
         while (timer > 0f)
@@ -65,14 +82,15 @@ public class FreezeFrame : BaseMinigame
 
         running = false;
 
-        if (score >= 5)
+        if (score >= 7)
             Result = MinigameManager.ResultType.Perfect;
-        else if (score >= 2)
+        else if (score >= 3)
             Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
 
         Debug.Log($"Minigame ended with result: {Result}");
+        yield return StartCoroutine(EndMinigameSequence());
 
         BattleManager.instance?.SetBattlePaused(false);
     }
@@ -100,18 +118,126 @@ public class FreezeFrame : BaseMinigame
 
     private void CheckHit()
     {
-        float markerX = markerRect.anchoredPosition.x;
-        float targetX = targetZone.anchoredPosition.x;
+        if (!canHit) return; 
+        canHit = false;
 
-        if (Mathf.Abs(markerX - targetX) <= hitTolerance)
+        RectTransform hitZone = GetClosestZone();
+        int hitZoneIndex = hitZone.GetSiblingIndex();
+
+        float markerX = markerRect.anchoredPosition.x;
+        float targetX = hitZone.anchoredPosition.x;
+        bool isInZone = Mathf.Abs(markerX - targetX) <= hitTolerance;
+
+        bool poseMatch = (markerImage.sprite == currentCorrectPose);
+
+        bool isCorrectZone = (hitZone == correctTargetZone);
+
+        if (isInZone && poseMatch && isCorrectZone)
         {
             score++;
-            Debug.Log($"Hit! Score: {score}");
+            Debug.Log($"Correct! Score: {score}");
+            SetScoreText(score.ToString());
+            StartCoroutine(FlashBorder(targetOutlines[hitZoneIndex], Color.green));
         }
         else
         {
-            Debug.Log("Miss!");
+            Debug.Log("Wrong!");
+            StartCoroutine(FlashBorder(targetOutlines[hitZoneIndex], Color.red));
         }
     }
+
+    private IEnumerator FlashBorder(Outline outline, Color color)
+    {
+        Color original = outline.effectColor;
+        outline.effectColor = color;
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        outline.effectColor = original;
+        SetNewRound();
+        canHit = true;
+    }
+    private void SetScoreText(string text)
+    {
+        if (scoreText) scoreText.text = "Score: " + text;
+    }
+    private RectTransform GetClosestZone()
+    {
+        RectTransform closest = null;
+        float closestDist = float.MaxValue;
+        float markerX = markerRect.anchoredPosition.x;
+
+        foreach (var zone in targetZones)
+        {
+            float dist = Mathf.Abs(markerX - zone.anchoredPosition.x);
+            if (dist < closestDist)
+            {
+                closestDist = dist;
+                closest = zone;
+            }
+        }
+
+        return closest;
+    }
+    private void SetNewRound()
+    {
+        currentCorrectPose = poseSprites[Random.Range(0, poseSprites.Length)];
+        markerImage.sprite = currentCorrectPose;
+
+        Sprite wrong1, wrong2;
+        do { wrong1 = poseSprites[Random.Range(0, poseSprites.Length)]; }
+        while (wrong1 == currentCorrectPose);
+
+        do { wrong2 = poseSprites[Random.Range(0, poseSprites.Length)]; }
+        while (wrong2 == currentCorrectPose || wrong2 == wrong1);
+
+        Sprite[] set = new Sprite[] { currentCorrectPose, wrong1, wrong2 };
+        set = Shuffle(set);
+
+        targetImage[0].sprite = set[0];
+        targetImage[1].sprite = set[1];
+        targetImage[2].sprite = set[2];
+
+        for (int i = 0; i < targetImage.Length; i++)
+            if (targetImage[i].sprite == currentCorrectPose)
+                correctTargetZone = targetImage[i].rectTransform;
+    }
+    private Sprite[] Shuffle(Sprite[] array)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            int rand = Random.Range(i, array.Length);
+            (array[i], array[rand]) = (array[rand], array[i]);
+        }
+        return array;
+    }
+
+    private IEnumerator EndMinigameSequence()
+    {
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.unscaledDeltaTime * 1.5f;
+            minigamePanelGroup.alpha = 1f - t;
+            yield return null;
+        }
+
+        Vector2 startPos = scoreTextRect.anchoredPosition;
+        Vector2 endPos = Vector2.zero;
+
+        t = 0f;
+        while (t < 1f)
+        {
+            t += Time.unscaledDeltaTime * 1.2f;
+            scoreTextRect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+            yield return null;
+        }
+
+        resultText.gameObject.SetActive(true);
+        resultText.text = Result.ToString().ToUpper();
+
+        yield return new WaitForSecondsRealtime(1.5f);
+    }
+
 
 }

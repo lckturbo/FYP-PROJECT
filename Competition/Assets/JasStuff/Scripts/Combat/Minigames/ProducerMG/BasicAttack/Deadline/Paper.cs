@@ -26,6 +26,7 @@ public class Paper : MonoBehaviour
         {
             caught = true;
             game.OnCatch();
+            game.RemovePaper(gameObject);
             Destroy(gameObject);
             return;
         }
@@ -33,6 +34,7 @@ public class Paper : MonoBehaviour
         if (rect.anchoredPosition.y < -Screen.height)
         {
             game.OnMiss();
+            game.RemovePaper(gameObject);
             Destroy(gameObject);
         }
     }
@@ -54,11 +56,5 @@ public class Paper : MonoBehaviour
                               bCorners[2].y - bCorners[0].y);
 
         return rectA.Overlaps(rectB);
-    }
-
-    public void Catch()
-    {
-        game.OnCatch();
-        Destroy(gameObject);
     }
 }
