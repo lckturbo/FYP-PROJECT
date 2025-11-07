@@ -15,5 +15,6 @@ public class PlayerLight : MonoBehaviour
         light2D.intensity = 1.2f;
         light2D.color = lightColor;
         light2D.shadowsEnabled = true;
+        light2D.shadowIntensity = 1.0f;
     }
 }
