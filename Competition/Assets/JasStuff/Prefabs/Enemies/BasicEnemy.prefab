@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 7315046046240021036}
   - component: {fileID: 6191435852665564058}
   - component: {fileID: 2807965023668165633}
+  - component: {fileID: 3861231205910328035}
   m_Layer: 9
   m_Name: BasicEnemy
   m_TagString: Enemy
@@ -207,7 +208,7 @@ MonoBehaviour:
   seeker: {fileID: 2058426006471302486}
   rb2d: {fileID: 6888525527434365120}
   aiPath: {fileID: 8907702388655403980}
-  areaID: 0
+  areaID: 2
   attackHitbox: {fileID: 8931024803322961709}
   upOffset: {x: 0, y: 1}
   downOffset: {x: 0, y: -1}
@@ -320,7 +321,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enemyPrefab: {fileID: 0}
-  uniqueID: 1
+  uniqueID: 2
   partySize: 3
 --- !u!114 &2807965023668165633
 MonoBehaviour:
@@ -335,6 +336,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyGrowth: {fileID: 11400000, guid: ef9b76e14dc386645a65cad6f9120bee, type: 2}
+--- !u!114 &3861231205910328035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4249954731921599678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5ce43b6f0c96954a96e3f4bd76ed236, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  battleMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  targetRenderer: {fileID: 0}
 --- !u!1 &6611196082467723058
 GameObject:
   m_ObjectHideFlags: 0

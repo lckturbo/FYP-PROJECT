@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
 public class MinimapIcon : MonoBehaviour
@@ -8,12 +9,19 @@ public class MinimapIcon : MonoBehaviour
     [SerializeField] private Vector3 offset = new Vector3(0, 0, -1f);
     [SerializeField] private float iconScale = 10f;
     [SerializeField] private int normalOrder = 10;
-    [SerializeField] private int leaderOrder = 20; // higher = on top
+    [SerializeField] private int leaderOrder = 20;
 
     private GameObject iconObject;
 
     void Start()
     {
+        // === Disable entirely if in JasBattle scene ===
+        if (SceneManager.GetActiveScene().name == "jasBattle")
+        {
+            enabled = false;
+            return;
+        }
+
         iconObject = new GameObject($"{name}_MinimapIcon");
         iconObject.transform.SetParent(null);
         iconObject.layer = 29;
@@ -23,13 +31,12 @@ public class MinimapIcon : MonoBehaviour
         sr.sortingLayerName = "MiniMap";
         sr.sortingOrder = normalOrder;
 
-        // === Check if this belongs to the current leader ===
+        // --- Identify leader and elevate sorting ---
         var playerParty = PlayerParty.instance;
         if (playerParty != null)
         {
             var leader = playerParty.GetLeader();
-            var held = GetComponentInChildren<PlayerHeldItem>();
-            if (held != null && leader != null && held.name.Contains(leader.displayName))
+            if (leader != null && name.Contains(leader.displayName))
             {
                 sr.sortingOrder = leaderOrder;
                 Debug.Log($"[MinimapIcon] {name} identified as leader, elevated sorting order.");
