@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 6191435852665564058}
   m_Layer: 9
   m_Name: Boss
-  m_TagString: Enemy
+  m_TagString: Boss
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -148,7 +148,7 @@ Animator:
   m_GameObject: {fileID: 4249954731921599678}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: cbf71e1e0bd99ca45b5d43a331fd7104, type: 2}
+  m_Controller: {fileID: 9100000, guid: 4a858c901a576224dbbf986fd0004e93, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -245,6 +245,7 @@ MonoBehaviour:
   leftOffset: {x: -0.5, y: 0}
   rightOffset: {x: 0.5, y: 0}
   hitboxCollider: {fileID: 0}
+  chaseSpeedMultiplier: 1.5
 --- !u!114 &6191435852665564058
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -275,11 +275,30 @@ public class TurnEngine : MonoBehaviour
         }
         else
         {
-            // simple enemy logic with cooldown-aware usage of skill1
-            if (UnityEngine.Random.value < 0.5f || !actor.IsSkill1Ready)
+            if (actor.CompareTag("Boss"))
+            {
                 actor.BasicAttack(target);
+                return;
+            }
+
+            float r = UnityEngine.Random.value;
+
+            if (r < 0.5f) // 50% 
+            {
+                actor.BasicAttack(target);
+            }
+            else if (r < 0.80f)
+            {
+                // 30%
+                if (!actor.TryUseSkill1(target))
+                    actor.BasicAttack(target);
+            }
             else
-                actor.TryUseSkill1(target);
+            {
+                // 20%
+                if (!actor.TryUseSkill2(target))
+                    actor.BasicAttack(target);
+            }
         }
     }
 
