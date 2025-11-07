@@ -1,16 +1,25 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class Deadline : BaseMinigame
 {
-    [Header("Gameplay Settings")]
+    [Header("Animators")]
     [SerializeField] private Animator anim;
     [SerializeField] private Animator instrAnim;
+
+    [Header("References")]
     [SerializeField] private RectTransform[] paperParent;
     [SerializeField] private RectTransform basket;
     [SerializeField] private GameObject paperPrefab;
+
+    [Header("Texts")]
     [SerializeField] private TMP_Text timerText;
+    [SerializeField] private TMP_Text caughtText;
+    [SerializeField] private TMP_Text missedText;
+
+    [Header("Gameplay Settings")]
     [SerializeField] private float fallSpeed = 300f;
     [SerializeField] private int maxMissAllowed = 3;
 
@@ -20,6 +29,7 @@ public class Deadline : BaseMinigame
     private int missed = 0;
 
     private bool instructionStarted = false;
+    private readonly List<GameObject> activePapers = new();
     public void StartInstructionCountdown()
     {
         instructionStarted = true;
@@ -67,13 +77,24 @@ public class Deadline : BaseMinigame
         }
 
         running = false;
+        foreach (var paper in activePapers)
+        {
+            if (paper != null)
+                Destroy(paper);
+        }
+        activePapers.Clear();
 
-        if (missed >= maxMissAllowed)
+        basket.GetComponent<MonoBehaviour>().enabled = false;
+
+        if (missed >= maxMissAllowed) // 3 and below
             Result = MinigameManager.ResultType.Fail;
         else if (caught >= 10)
             Result = MinigameManager.ResultType.Perfect;
-        else
+        else // 11 and above
             Result = MinigameManager.ResultType.Success;
+
+        if (caughtText) caughtText.text = Result + "!";
+        yield return new WaitForSecondsRealtime(1.0f);
 
         BattleManager.instance?.SetBattlePaused(false);
     }
@@ -83,6 +104,7 @@ public class Deadline : BaseMinigame
         RectTransform area = paperParent[Random.Range(0, paperParent.Length)];
 
         GameObject paper = Instantiate(paperPrefab, area);
+        activePapers.Add(paper);
         RectTransform rt = paper.GetComponent<RectTransform>();
 
         float x = Random.Range(-area.rect.width / 2f + 50f, area.rect.width / 2f - 50f);
@@ -96,19 +118,36 @@ public class Deadline : BaseMinigame
         while (running)
         {
             SpawnPaper();
-            yield return new WaitForSecondsRealtime(0.3f);
+            yield return new WaitForSecondsRealtime(0.35f);
         }
     }
 
+    public void RemovePaper(GameObject paper)
+    {
+        activePapers.Remove(paper);
+    }
     public void OnCatch()
     {
         caught++;
-        Debug.Log($"Caught paper! Total caught = {caught}");
+        SetCaughtText(caught.ToString());
     }
 
     public void OnMiss()
     {
-        missed++;
-        Debug.Log($"Missed paper! Total missed = {missed}");
+        missed--;
+        StartCoroutine(SetMissedText());
+        SetCaughtText(caught.ToString());
+    }
+
+    private void SetCaughtText(string text)
+    {
+        if (caughtText) caughtText.text = "Caught: " + text;
+    }
+
+    private IEnumerator SetMissedText()
+    {
+        missedText.gameObject.SetActive(true);
+        yield return new WaitForSecondsRealtime(0.5f);
+        missedText.gameObject.SetActive(false);
     }
 }
