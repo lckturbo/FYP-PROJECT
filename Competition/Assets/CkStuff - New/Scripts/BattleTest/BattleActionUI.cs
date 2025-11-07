@@ -111,12 +111,34 @@ public class BattleActionUI : MonoBehaviour
 
     private void OnSkill2()
     {
+        if (_currentLeader == null) return;
+        if (!_currentLeader.IsSkill2Ready) return;
+
+        // Self-cast support Skill2 (Cameraman)
+        if (_currentLeader.Skill2IsSupport)
+        {
+            if (panel) panel.SetActive(false);
+
+            // Tell TurnEngine to use Skill2; it will auto-cast on self.
+            engine.LeaderChooseSkillTarget(1, _currentLeader);
+
+            // Make sure no leftover highlight
+            if (selector) selector.Clear();
+            return;
+        }
+
+        // ===== Normal offensive Skill2 (still needs enemy target) =====
         var target = selector ? selector.Current : null;
-        if (target == null) { ShowMessage(infoLabel.text); return; }
-        if (_currentLeader && !_currentLeader.IsSkill2Ready) return;
+        if (target == null)
+        {
+            ShowMessage("Select a target first.");
+            return;
+        }
+
         if (panel) panel.SetActive(false);
         engine.LeaderChooseSkillTarget(1, target);
     }
+
 
     private void ShowMessage(string msg)
     {

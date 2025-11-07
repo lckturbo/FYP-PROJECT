@@ -136,6 +136,14 @@ public class BattleSystem : MonoBehaviour
         cL.stats = leaderRT;
         turnEngine.Register(cL);
         _playerCombatants.Add(cL);
+
+        // NEW: if this leader is Cameraman, use support Skill2
+        if (leaderObj.name == "Leader_Cameraman") // change to your actual Cameraman def name
+        {
+            cL.skill2IsSupport = true;
+            Debug.Log("[BattleSystem] Leader is Cameraman - Skill2 set as support.");
+        }
+
         OnLeaderSpawned?.Invoke(leaderObj);
 
         var leaderHealth = leaderObj.GetComponent<NewHealth>();
@@ -180,6 +188,13 @@ public class BattleSystem : MonoBehaviour
                 cA.stats = allyRT;
                 turnEngine.Register(cA);
                 _playerCombatants.Add(cA);
+
+                // NEW: if this member is Cameraman, use support Skill2
+                if (allyObj.name == "Ally_Cameraman") // change to your actual Cameraman def name
+                {
+                    cA.skill2IsSupport = true;
+                    Debug.Log("[BattleSystem] Ally is Cameraman - Skill2 set as support.");
+                }
 
                 AddPlayerLevelApplier(allyObj, member);
                 SnapshotChar(member);

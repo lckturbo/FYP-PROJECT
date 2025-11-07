@@ -4,11 +4,17 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class Combatant : MonoBehaviour
 {
+    // Identify characters whose Skill2 is a support/buff (e.g., Cameraman)
+    [Header("Skill Behavior Flags")]
+    public bool skill2IsSupport = false;
+    public bool Skill2IsSupport => skill2IsSupport;
+
     private enum AttackType
     {
         Basic,
         Skill1,
-        Skill2
+        Skill2,
+        Support
     }
 
     private Combatant currentTarget;
@@ -132,11 +138,96 @@ public class Combatant : MonoBehaviour
 
     public bool TryUseSkill2(Combatant target)
     {
-        if (!IsSkill2Ready || !stats || !target || !target.health) return false;
+        if (!IsSkill2Ready || !stats) return false;
+
+        if (skill2IsSupport)
+        {
+            // Support skill: no movement, just animation + buff.
+            _skill2CD = Mathf.Max(1, skill2CooldownTurns);
+            StartCoroutine(SupportSkill2Routine(target));
+            return true;
+        }
+
+        // Normal offensive Skill 2 (existing behaviour)
+        if (target == null || !target.health) return false;
         _skill2CD = Mathf.Max(1, skill2CooldownTurns);
         StartCoroutine(MoveRoutine(target, DoSkill2Damage, skill2StateName));
         return true;
     }
+
+    // Support variant of Skill2: buff + extra turn, no damage
+    private void DoSkill2Support(Combatant target)
+    {
+        currentTarget = target;
+        currentAttackType = AttackType.Support;
+
+        if (anim) anim.SetTrigger("skill2");
+
+        ApplyCameramanCritBuff(target);
+    }
+
+
+    [Header("Support Skill2 Settings (Cameraman)")]
+    [SerializeField] private float skill2CritMultiplier = 2f; // 100% increase
+    private bool skill2BuffAppliedOnce = false;               // simple guard vs infinite stacking
+
+    private void ApplyCameramanCritBuff(Combatant recipient)
+    {
+        if (recipient == null || recipient.stats == null) return;
+
+        // Simple: one-time permanent buff for this battle.
+        if (skill2BuffAppliedOnce && recipient == this)
+            return;
+
+        var ncs = recipient.stats as NewCharacterStats;
+        if (ncs != null)
+        {
+            ncs.critRate *= skill2CritMultiplier;
+        }
+        // (If your stats type is different, adjust accordingly.)
+
+        if (recipient == this)
+            skill2BuffAppliedOnce = true;
+
+        // Extra turn for the caster: instantly fill their ATB.
+        atb = 1f;
+
+        Debug.Log($"{name} used Support Skill2 on {recipient.name}: Crit Rate x{skill2CritMultiplier}, extra turn granted.");
+    }
+
+    private System.Collections.IEnumerator SupportSkill2Routine(Combatant rawTarget)
+    {
+        ActionBegan?.Invoke();
+
+        // validate target or fallback to self
+        var target = rawTarget;
+        if (target == null || !target.IsAlive || target.isPlayerTeam != this.isPlayerTeam)
+            target = this;
+
+        // Mark as a support action (no damage)
+        currentTarget = target;
+        currentAttackType = AttackType.Support;
+
+        // Play support anim IN PLACE (no MoveRoutine)
+        if (anim && !string.IsNullOrEmpty(skill2StateName))
+            anim.SetTrigger("skill2");
+
+        // let Animator process trigger 1 frame
+        yield return null;
+
+        // optional: wait for the support animation state robustly
+        if (!string.IsNullOrEmpty(skill2StateName))
+            yield return WaitForAnimationRobust(anim, skill2StateName);
+
+        // Apply the buff + extra turn (your Cameraman logic)
+        ApplyCameramanCritBuff(target);
+
+        ActionEnded?.Invoke();
+    }
+
+
+
+
 
     // Kept for compatibility
     public void Skill1(Combatant target)
@@ -191,6 +282,9 @@ public class Combatant : MonoBehaviour
     {
         if (currentTarget == null) return;
 
+        if (currentAttackType == AttackType.Support)
+            return;
+
         if (waitingForMinigameResult)
         {
             Debug.Log("Waiting for minigame result — skipping base damage.");
@@ -224,6 +318,7 @@ public class Combatant : MonoBehaviour
 
         currentTarget.health.TakeDamage(damage, stats, NewElementType.None);
     }
+
 
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
     {
@@ -482,5 +577,4 @@ public class Combatant : MonoBehaviour
         int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
         return finalDamage;
     }
-
 }
