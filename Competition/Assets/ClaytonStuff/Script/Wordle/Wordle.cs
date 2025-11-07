@@ -27,6 +27,9 @@ public class Wordle : BaseMinigame
     [Header("Word Topics")]
     [SerializeField] private WordTopic[] topics;
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+
     private string targetWord;
     private int currentAttempt = 0;
     private List<List<TMP_Text>> grid = new List<List<TMP_Text>>();
@@ -37,7 +40,7 @@ public class Wordle : BaseMinigame
 
     private bool canStartTimer = false;
 
-    void Start()
+    public void Start()
     {
         SetupGrid();
         //StartNewGame();
@@ -303,6 +306,13 @@ public class Wordle : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(2.5f);
+        }
 
         while (!gameOver)
             yield return null;
