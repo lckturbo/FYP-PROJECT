@@ -1,33 +1,82 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FreezeFrame : BaseMinigame
 {
-    [Header("Gameplay Settings")]
     [SerializeField] private GameObject animPanel;
     [SerializeField] private Animator anim;
     [SerializeField] private TMP_Text timerText;
 
+    [Header("References")]
     [SerializeField] private RectTransform markerParent;
     [SerializeField] private RectTransform markerRect;
     [SerializeField] private RectTransform targetZone;
+    [SerializeField] private Image markerImage;
+    [SerializeField] private Image[] targetImage;
+    [SerializeField] private Sprite[] poseSprites;
 
+    [Header("Gameplay Settings")]
     [SerializeField] private float hitTolerance = 35f;
     [SerializeField] private float moveSpeed = 300f;
 
     private int score = 0;
     private float timer;
     private bool running = false;
+    private int correctIndex;
+    private Sprite currentCorrectPose;
+    private RectTransform correctTargetZone;
+
+    private void Start()
+    {
+        StartCoroutine(Run());
+    }
+    private void SetNewRound()
+    {
+        // pick a random sprite as the correct answer
+        currentCorrectPose = poseSprites[Random.Range(0, poseSprites.Length)];
+        markerImage.sprite = currentCorrectPose;
+
+        // pick 2 incorrect sprites
+        Sprite wrong1, wrong2;
+        do { wrong1 = poseSprites[Random.Range(0, poseSprites.Length)]; }
+        while (wrong1 == currentCorrectPose);
+
+        do { wrong2 = poseSprites[Random.Range(0, poseSprites.Length)]; }
+        while (wrong2 == currentCorrectPose || wrong2 == wrong1);
+
+        // place them randomly in the 3 target zones
+        Sprite[] set = new Sprite[] { currentCorrectPose, wrong1, wrong2 };
+        set = Shuffle(set);
+
+        targetImage[0].sprite = set[0];
+        targetImage[1].sprite = set[1];
+        targetImage[2].sprite = set[2];
+
+        // assign the correct target zone index
+        for (int i = 0; i < targetImage.Length; i++)
+            if (targetImage[i].sprite == currentCorrectPose)
+                correctTargetZone = targetImage[i].rectTransform;
+    }
+    private Sprite[] Shuffle(Sprite[] array)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            int rand = Random.Range(i, array.Length);
+            (array[i], array[rand]) = (array[rand], array[i]);
+        }
+        return array;
+    }
 
     public override IEnumerator Run()
     {
-        BattleManager.instance?.SetBattlePaused(true);
+        //BattleManager.instance?.SetBattlePaused(true);
         if (anim)
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(3.0f);
+            yield return new WaitForSecondsRealtime(4.2f);
         }
 
         animPanel.SetActive(false);
@@ -50,6 +99,7 @@ public class FreezeFrame : BaseMinigame
         timer = 10.0f;
         running = true;
 
+        SetNewRound();
         StartCoroutine(MoveMarker());
 
         while (timer > 0f)
@@ -74,7 +124,7 @@ public class FreezeFrame : BaseMinigame
 
         Debug.Log($"Minigame ended with result: {Result}");
 
-        BattleManager.instance?.SetBattlePaused(false);
+       // BattleManager.instance?.SetBattlePaused(false);
     }
     private IEnumerator MoveMarker()
     {
@@ -100,18 +150,26 @@ public class FreezeFrame : BaseMinigame
 
     private void CheckHit()
     {
+        // check horizontal alignment with selected correct zone
         float markerX = markerRect.anchoredPosition.x;
-        float targetX = targetZone.anchoredPosition.x;
+        float targetX = correctTargetZone.anchoredPosition.x;
+        bool isInZone = Mathf.Abs(markerX - targetX) <= hitTolerance;
 
-        if (Mathf.Abs(markerX - targetX) <= hitTolerance)
+        // check pose match
+        bool poseMatch = (markerImage.sprite == currentCorrectPose);
+
+        if (isInZone && poseMatch)
         {
             score++;
-            Debug.Log($"Hit! Score: {score}");
+            Debug.Log($"Correct! Score: {score}");
         }
         else
         {
-            Debug.Log("Miss!");
+            Debug.Log("Wrong!");
         }
+
+        SetNewRound(); // Go to next round
     }
+
 
 }
