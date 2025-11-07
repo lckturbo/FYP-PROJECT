@@ -91,7 +91,7 @@ public class ColorblindChallenge : BaseMinigame
         if (verifyButton) { verifyButton.onClick.RemoveAllListeners(); verifyButton.onClick.AddListener(OnVerify); }
         if (answerInput) { answerInput.text = ""; }
 
-        if (promptText) promptText.text = "Camera calibration test: Enter the number hidden in the dots.";
+        if (promptText) promptText.text = "Camera calibration test:\nEnter the number hidden in the dots.";
         if (resultText) resultText.text = "";
 
         plateTex = new Texture2D(plateSize, plateSize, TextureFormat.RGBA32, false);
