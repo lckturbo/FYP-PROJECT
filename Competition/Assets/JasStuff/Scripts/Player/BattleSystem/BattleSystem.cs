@@ -196,7 +196,7 @@ public class BattleSystem : MonoBehaviour
             if (BattleManager.instance.IsBossBattle)
             {
                 enemy = Instantiate(spawnList[i], bossSpawnPt.position, Quaternion.identity);
-                enemy.transform.localScale = new Vector2(3.0f, 3.0f);
+                enemy.transform.localScale = new Vector2(2.0f, 2.0f);
             }
             else
             {

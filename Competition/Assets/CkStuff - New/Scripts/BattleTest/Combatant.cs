@@ -420,7 +420,10 @@ public class Combatant : MonoBehaviour
         switch (result)
         {
             case MinigameManager.ResultType.Fail:
-                dmg = Mathf.RoundToInt(stats.atkDmg);
+                if (id == "TakeABreak")
+                    dmg = 1;
+                else
+                    dmg = Mathf.RoundToInt(stats.atkDmg);
                 break;
 
             case MinigameManager.ResultType.Success:

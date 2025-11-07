@@ -47,7 +47,7 @@ public class Arrow : MonoBehaviour
         if (collision == null) return;
 
         // Hit Enemy
-        if (collision.CompareTag("Enemy"))
+        if (collision.CompareTag("Enemy") || collision.CompareTag("Boss"))
         {
             EnemyBase enemy = collision.GetComponent<EnemyBase>();
             if (enemy != null)
