@@ -148,8 +148,12 @@ public class TurnEngine : MonoBehaviour
 
                         if (targetSelector)
                         {
-                            targetSelector.EnableForLeaderTurn();
-                            targetSelector.Clear();
+                            if (targetSelector)
+                            {
+                                targetSelector.EnableForLeaderTurn();
+                                targetSelector.Clear();
+                            }
+
                         }
 
                         _nextIndex = (i + 1) % count;
@@ -209,21 +213,42 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_waitingForLeader || _currentLeader == null) return;
 
-        var target = ValidateOrFallback(explicitTarget);
-        if (target == null) return;
-
         HookActionLock(_currentLeader);
         bool used = false;
-        if (skillIndex == 0) used = _currentLeader.TryUseSkill1(target);
-        else if (skillIndex == 1) used = _currentLeader.TryUseSkill2(target);
+
+        if (skillIndex == 0)
+        {
+            // Skill 1 = normal offensive (enemy)
+            var target = ValidateOrFallback(explicitTarget);
+            if (target == null) { _resolvingAction = false; return; }
+            used = _currentLeader.TryUseSkill1(target);
+        }
+        else if (skillIndex == 1)
+        {
+            // Skill 2 logic
+            if (_currentLeader.Skill2IsSupport)
+            {
+                // Support Skill 2: auto-cast on self, no manual target required
+                used = _currentLeader.TryUseSkill2(_currentLeader);
+            }
+            else
+            {
+                // Normal offensive Skill2 (enemy)
+                var target = ValidateOrFallback(explicitTarget);
+                if (target == null) { _resolvingAction = false; return; }
+                used = _currentLeader.TryUseSkill2(target);
+            }
+        }
 
         if (!used)
         {
             _resolvingAction = false;
             return;
         }
+
         EndLeaderDecisionAndCheck();
     }
+
 
     private void EndLeaderDecisionAndCheck()
     {
