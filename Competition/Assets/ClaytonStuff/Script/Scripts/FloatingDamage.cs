@@ -17,23 +17,55 @@ public class FloatingDamage : MonoBehaviour
     private Vector3 originalScale;
     private bool popped;
 
-    public void Initialize(int damageAmount, bool isCrit = false)
+    public void Initialize(int damageAmount, bool isCrit = false, NewElementType elementType = NewElementType.None)
     {
         if (!damageText) damageText = GetComponentInChildren<TextMeshProUGUI>();
 
-        // Add "Crit" marker if critical hit
+        string elementName = "";
+        switch (elementType)
+        {
+            case NewElementType.Fire:
+                elementName = "Fire";
+                originalColor = new Color(1f, 0.35f, 0.25f); // red
+                break;
+            case NewElementType.Water:
+                elementName = "Water";
+                originalColor = new Color(0.3f, 0.6f, 1f); // blue
+                break;
+            case NewElementType.Grass:
+                elementName = "Grass";
+                originalColor = new Color(0.35f, 1f, 0.35f); // green
+                break;
+            case NewElementType.Light:
+                elementName = "Light";
+                originalColor = new Color(1f, 0.95f, 0.5f); // yellow
+                break;
+            case NewElementType.Dark:
+                elementName = "Dark";
+                originalColor = new Color(0.7f, 0.3f, 1f); // purple
+                break;
+            default:
+                elementName = "";
+                originalColor = Color.white;
+                break;
+        }
+
+        // Text display rules
         if (isCrit)
         {
-            damageText.text = $"{damageAmount} Crit!";
-            damageText.color = new Color(1f, 0.9f, 0.1f); // gold-yellow for crit
+            damageText.text = $"{damageAmount} CRIT!";
+            originalColor = new Color(1f, 0.9f, 0.1f); // gold for crits
         }
         else
         {
-            damageText.text = damageAmount.ToString();
-            damageText.color = Color.white;
+            // Show element name if it exists
+            damageText.text = string.IsNullOrEmpty(elementName)
+                ? $"{damageAmount}"
+                : $"{damageAmount} {elementName}";
         }
 
-        originalColor = damageText.color;
+        damageText.color = originalColor;
+
         transform.localPosition += offset;
         originalScale = transform.localScale;
         timer = 0f;

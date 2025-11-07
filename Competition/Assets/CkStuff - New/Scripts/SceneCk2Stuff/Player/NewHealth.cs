@@ -50,13 +50,13 @@ public class NewHealth : MonoBehaviour
         OnHealthChanged?.Invoke(this);
     }
 
-    private IEnumerator SpawnFloatingDamageWithDelay(int final, bool wasCrit)
+    private IEnumerator SpawnFloatingDamageWithDelay(int final, bool wasCrit, NewElementType elementType)
     {
         canSpawnDamage = false;
         Vector3 spawnPos = damageSpawnPoint ? damageSpawnPoint.position : transform.position + Vector3.up * 1.5f;
 
         var dmgObj = Instantiate(floatingDamagePrefab, spawnPos, Quaternion.identity);
-        dmgObj.GetComponent<FloatingDamage>()?.Initialize(final, wasCrit);
+        dmgObj.GetComponent<FloatingDamage>()?.Initialize(final, wasCrit, elementType);
 
         yield return new WaitForSeconds(0.15f);
         canSpawnDamage = true;
@@ -98,7 +98,8 @@ public class NewHealth : MonoBehaviour
         //Debug.Log($"{gameObject.name} took {final} {atkElem} damage. HP = {currentHp}/{GetMaxHealth()}");
 
         if (floatingDamagePrefab && canSpawnDamage)
-            StartCoroutine(SpawnFloatingDamageWithDelay(final, wasCrit));
+            StartCoroutine(SpawnFloatingDamageWithDelay(final, wasCrit, atkElem));
+
 
         // --- 5) Trigger damage flash depending on attacker ---
         if (spriteRenderer)
