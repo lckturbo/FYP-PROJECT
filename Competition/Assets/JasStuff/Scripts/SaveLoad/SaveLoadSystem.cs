@@ -53,48 +53,70 @@ public class SaveLoadSystem : MonoBehaviour
 
         int savedIndex = -1;
 
-        fileDataHandler.DeleteSaveFile();
-        Debug.Log("[SaveLoadSystem] Old save file deleted.");
-
-        gameData = new GameData();
-
-
-        fileDataHandler.Save(gameData);
-
         if (keepCharIndex && gameData != null)
             savedIndex = gameData.selectedCharacterIndex;
 
-        if (QuestManager.Instance != null)
-        {
-            QuestManager.Instance.ResetAllQuests();
-        }
-
-        if (PartyLevelSystem.Instance != null)
-        {
-            PartyLevelSystem.Instance.ResetLevel();
-        }
-    
-
-        if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
-        gameData.playerPosition = Vector2.zero;
-        gameData.hasSavedPosition = false;
-        gameData.hasCheckpoint = false;
-        gameData.lastCheckpointID = 0;
+        // Delete the save file
+        fileDataHandler.DeleteSaveFile();
+        Debug.Log("[SaveLoadSystem] Old save file deleted.");
 
         if (keepCharIndex)
+        {
+            gameData = new GameData();
+
+            if (QuestManager.Instance != null)
+            {
+                QuestManager.Instance.ResetAllQuests();
+            }
+
+            if (PartyLevelSystem.Instance != null)
+            {
+                PartyLevelSystem.Instance.ResetLevel();
+            }
+
+            if (EnemyTracker.instance)
+                EnemyTracker.instance.ResetEnemies();
+
+            gameData.playerPosition = Vector2.zero;
+            gameData.hasSavedPosition = false;
+            gameData.hasCheckpoint = false;
+            gameData.lastCheckpointID = 0;
             gameData.selectedCharacterIndex = savedIndex;
+        }
+        else
+        {
+            gameData = null;
+
+            if (QuestManager.Instance != null)
+            {
+                QuestManager.Instance.ResetAllQuests();
+            }
+
+            if (PartyLevelSystem.Instance != null)
+            {
+                PartyLevelSystem.Instance.ResetLevel();
+            }
+
+            if (EnemyTracker.instance)
+                EnemyTracker.instance.ResetEnemies();
+        }
     }
 
     public void LoadGame()
     {
         gameData = fileDataHandler.Load();
-        if (gameData == null) NewGame();
 
+        if (gameData == null || !gameData.hasSavedGame)
+        {
+            gameData = null;
+            return;
+        }
         dataPersistenceObjs = FindAllDataPersistenceObjects();
 
         foreach (IDataPersistence dataObjs in dataPersistenceObjs)
             dataObjs.LoadData(gameData);
     }
+
     public void SaveGame(bool savePlayer = true, bool saveEnemies = true)
     {
         if (gameData == null)
@@ -117,6 +139,21 @@ public class SaveLoadSystem : MonoBehaviour
     public GameData GetGameData()
     {
         return gameData;
+    }
+
+    public bool HasSaveFile()
+    {
+        GameData data = fileDataHandler.Load();
+        bool hasValidSave = data != null && data.hasSavedGame;
+
+        //dis a helpers tool for checking for savefiles jas
+
+        Debug.Log($"[SaveLoadSystem] HasSaveFile check:");
+        Debug.Log($"  - Data is null: {data == null}");
+        Debug.Log($"  - hasSavedGame: {(data != null ? data.hasSavedGame.ToString() : "N/A")}");
+        Debug.Log($"  - Result: {hasValidSave}");
+
+        return hasValidSave;
     }
 
     private List<IDataPersistence> FindAllDataPersistenceObjects()

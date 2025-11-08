@@ -73,6 +73,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             case "Lobby":
                 AudioManager.instance.PlaySound("bgm");
                 SetupLobbyMenu();
+                RefreshLobbyButtons(); 
                 return;
             case "CharSelection":
                 AudioManager.instance.PlaySound("MainMenuBGM");
@@ -133,11 +134,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 ASyncManager.instance.LoadLevelBtn("CharSelection");
             });
 
-            if (SaveLoadSystem.instance.GetGameData()?.hasSavedGame == true)
-                loadBtn.interactable = true;
-            else
-                loadBtn.interactable = false;
-
             loadBtn.onClick.RemoveAllListeners();
             loadBtn.onClick.AddListener(() =>
             {
@@ -152,8 +148,29 @@ public class UIManager : MonoBehaviour, IDataPersistence
             exitBtn.onClick.AddListener(() =>
             {
                 GameManager.instance.ChangeScene("Main");
-                SaveLoadSystem.instance.SaveGame();
+                //SaveLoadSystem.instance.SaveGame();
             });
+            RefreshLobbyButtons();
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (SceneManager.GetActiveScene().name == "Lobby")
+        {
+            RefreshLobbyButtons();
+        }
+    }
+
+    private void RefreshLobbyButtons()
+    {
+        loadBtn = GameObject.Find("LoadBtn")?.GetComponent<Button>();
+
+        if (loadBtn != null && SaveLoadSystem.instance != null)
+        {
+            bool hasSave = SaveLoadSystem.instance.HasSaveFile();
+            loadBtn.interactable = hasSave;
+            Debug.Log($"[UIManager] Load button refreshed. HasSave: {hasSave}");
         }
     }
     private void SetupMainGameMenu()
@@ -182,7 +199,11 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (exitBtn)
         {
             exitBtn.onClick.RemoveAllListeners();
-            exitBtn.onClick.AddListener(() => GameManager.instance.ChangeScene("Main"));
+            exitBtn.onClick.AddListener(() =>
+            {
+                SaveLoadSystem.instance.NewGame();
+                GameManager.instance.ChangeScene("Main");
+            });
         }
     }
 

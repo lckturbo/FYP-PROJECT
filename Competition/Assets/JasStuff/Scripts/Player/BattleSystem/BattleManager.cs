@@ -129,7 +129,7 @@ public class BattleManager : MonoBehaviour
         if (IsBossBattle && playerWon)
         {
             GameManager.instance.ChangeScene("Credits");
-            SaveLoadSystem.instance.NewGame();
+            //SaveLoadSystem.instance.NewGame(); DONT TOUCH THIS JAS
         }
         else
             GameManager.instance.ChangeScene("SampleScene");
