@@ -64,6 +64,17 @@ public class SaveLoadSystem : MonoBehaviour
         if (keepCharIndex && gameData != null)
             savedIndex = gameData.selectedCharacterIndex;
 
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.ResetAllQuests();
+        }
+
+        if (PartyLevelSystem.Instance != null)
+        {
+            PartyLevelSystem.Instance.ResetLevel();
+        }
+    
+
         if (EnemyTracker.instance) EnemyTracker.instance.ResetEnemies();
         gameData.playerPosition = Vector2.zero;
         gameData.hasSavedPosition = false;

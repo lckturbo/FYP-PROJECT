@@ -83,12 +83,21 @@ public class GameData
     public Vector2 playerPosition;
     public bool hasSavedPosition;
 
+    // player level //
+    public int playerLevel;
+    public int playerCurrentXP;
+
     // enemies //
     public List<string> defeatedEnemies;
 
     // audio //
     public float bgmVolume;
     public float sfxVolume;
+
+    // battle settings //
+    public bool autoBattleUnlocked;
+    public bool battleSpeedUnlocked;
+
 
     // checkpoints //
     public bool hasCheckpoint;
@@ -150,12 +159,20 @@ public class GameData
         playerPosition = Vector2.zero;
         hasSavedPosition = false;
 
+        // player level //
+        playerLevel = 1;
+        playerCurrentXP = 0;
+
         // enemies //
         defeatedEnemies = new List<string>();
 
         // audio //
         bgmVolume = 1f;
         sfxVolume = 1f;
+
+        // battle settings //
+        autoBattleUnlocked = false;
+        battleSpeedUnlocked = false;
 
         // checkpoints //
         hasCheckpoint = false;

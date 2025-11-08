@@ -56,6 +56,8 @@ public class TurnEngine : MonoBehaviour
         _resolvingAction = false;
         _ended = false; // reset end guard for fresh battle
 
+        ResetBattleSettingsBasedOnLevel();
+
         // small random stagger
         for (int i = 0; i < _units.Count; i++)
             if (_units[i])
@@ -344,5 +346,26 @@ public class TurnEngine : MonoBehaviour
             if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
                 return false;
         return true;
+    }
+
+    public void ResetBattleSettingsBasedOnLevel()
+    {
+        if (PartyLevelSystem.Instance == null) return;
+
+        int currentLevel = PartyLevelSystem.Instance.levelSystem.level;
+
+
+        int autoBattleUnlockLevel = 3;  
+        int battleSpeedUnlockLevel = 2; 
+
+        if (currentLevel < autoBattleUnlockLevel)
+        {
+            autoBattle = false;
+        }
+
+        if (currentLevel < battleSpeedUnlockLevel)
+        {
+            BattleSpeed = 1f;
+        }
     }
 }
