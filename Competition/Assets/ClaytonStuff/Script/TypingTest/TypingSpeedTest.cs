@@ -20,6 +20,10 @@ public class TypingSpeedTest : BaseMinigame
         "Clean code is better than clever code."
     };
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+
     private string currentSentence = "";
     private string playerInput = "";
     private float startTime;
@@ -159,6 +163,17 @@ public class TypingSpeedTest : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        animationPanel.SetActive(true);
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(1.5f);
+        }
+
+        animationPanel.SetActive(false);
 
         // Wait until the game is over
         while (!gameOver)

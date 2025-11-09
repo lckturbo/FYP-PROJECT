@@ -29,6 +29,8 @@ public class Wordle : BaseMinigame
 
     [Header("Animator")]
     [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+    [SerializeField] private GameObject tutoralPanel;
 
     private string targetWord;
     private int currentAttempt = 0;
@@ -307,13 +309,18 @@ public class Wordle : BaseMinigame
     {
         BattleManager.instance?.SetBattlePaused(true);
 
+        animationPanel.SetActive(true);
+        tutoralPanel.SetActive(false);
+
         if (anim)
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(2.5f);
+            yield return new WaitForSecondsRealtime(1.5f);
         }
 
+        animationPanel.SetActive(false);
+        tutoralPanel.SetActive(true);
         while (!gameOver)
             yield return null;
 
