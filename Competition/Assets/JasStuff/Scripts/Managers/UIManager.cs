@@ -265,7 +265,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
             if (menuBtn) menuBtn.onClick.AddListener(() =>
             {
                 TogglePause(false);
-                SaveLoadSystem.instance.SaveGame();
+                if (SceneManager.GetActiveScene().name == "SampleScene")
+                    SaveLoadSystem.instance.SaveGame();
                 ASyncManager.instance.LoadLevelBtn("Main");
             });
             if (statsDisplay == null)
