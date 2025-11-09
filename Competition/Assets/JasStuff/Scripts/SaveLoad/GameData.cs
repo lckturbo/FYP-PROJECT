@@ -70,6 +70,13 @@ public class GameData
         public bool isOpen;
     }
 
+    [System.Serializable]
+    public class MirrorSaveEntry
+    {
+        public string id;
+        public float rotation;
+    }
+
     public bool hasSavedGame;
 
     // camera //
@@ -98,7 +105,6 @@ public class GameData
     public bool autoBattleUnlocked;
     public bool battleSpeedUnlocked;
 
-
     // checkpoints //
     public bool hasCheckpoint;
     public int lastCheckpointID;
@@ -113,13 +119,17 @@ public class GameData
     public bool connectPuzzleCompleted;
     public List<ChessPieceSaveData> chessPieces;
     public bool chessPuzzleCompleted;
-    public int chessPuzzleSolutionIndex; // NEW: Save which solution is active
-    public int chessPuzzleCurrentStep; // NEW: Save current progress in solution
+    public int chessPuzzleSolutionIndex; // save which solution is active
+    public int chessPuzzleCurrentStep; // save current progress in solution
     public List<BlockSaveEntry> savedBlocks;
 
     public List<InventoryItemData> mainInventoryData;
     public List<InventoryItemData> subInventoryData;
     public int money;
+
+    // beams
+    public List<MirrorSaveEntry> mirrors;
+    public bool beamReceiverSolved;
 
     [System.Serializable]
     public class InventoryItemData
@@ -191,6 +201,8 @@ public class GameData
         chessPuzzleSolutionIndex = -1; 
         chessPuzzleCurrentStep = 0; 
         savedBlocks = new List<BlockSaveEntry>();
+        mirrors = new List<MirrorSaveEntry>();
+        beamReceiverSolved = false;
 
         // existing initializations...
         mainInventoryData = new List<InventoryItemData>();
@@ -200,7 +212,5 @@ public class GameData
         savedPuzzles = new List<PuzzleSaveEntry>();
         hasSpawnedStartingItem = false;
         clearedFogIds = new List<string>();
-
-
     }
 }

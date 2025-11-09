@@ -2,8 +2,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider2D))]
-public class MirrorInteract : MonoBehaviour
+public class MirrorInteract : MonoBehaviour, IDataPersistence
 {
+    // save load
+    public string mirrorID;
+    public float GetRotation() => mirrorObject.localEulerAngles.z;
+    public void SetRotation(float angle) => mirrorObject.localEulerAngles = new Vector3(0, 0, angle);
+
+
     public Transform mirrorObject;
     public bool rotateClockwise = true;
 
@@ -39,6 +45,33 @@ public class MirrorInteract : MonoBehaviour
         {
             float angle = rotateClockwise ? -90f : 90f;
             mirrorObject.Rotate(0f, 0f, angle);
+        }
+    }
+
+    public void LoadData(GameData data)
+    {
+        var mirrorObjects = FindObjectsOfType<MirrorInteract>();
+
+        foreach (var m in mirrorObjects)
+        {
+            var entry = data.mirrors.Find(x => x.id == m.mirrorID);
+            if (entry != null)
+                m.SetRotation(entry.rotation);
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        var mirrorObjects = FindObjectsOfType<MirrorInteract>();
+        data.mirrors.Clear();
+
+        foreach (var m in mirrorObjects)
+        {
+            data.mirrors.Add(new GameData.MirrorSaveEntry
+            {
+                id = m.mirrorID,
+                rotation = m.GetRotation()
+            });
         }
     }
 }

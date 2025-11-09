@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
-public class BeamReceiver : MonoBehaviour
+public class BeamReceiver : MonoBehaviour, IDataPersistence
 {
     [Header("Door/Target")]
     public ToggleableBlock doorBlock;
@@ -51,6 +51,9 @@ public class BeamReceiver : MonoBehaviour
     private PlayerInput _playerInput;
     private NewPlayerMovement _playerMove;
 
+    private bool solved;
+    private bool skipCinematicOnce;
+
     private void Awake()
     {
         TryBindPlayerInput();
@@ -77,6 +80,19 @@ public class BeamReceiver : MonoBehaviour
         _active = true;
         SetVisual(true);
 
+        if (!solved) solved = true;
+
+        if (skipCinematicOnce)
+        {
+            skipCinematicOnce = false;
+
+            if (doorBlock) doorBlock.Open();
+            else if (doorAnimator) doorAnimator.SetTrigger("Open");
+
+            OnActivated?.Invoke(this);
+            return;
+        }
+        
         if (!openDuringCinematic)
         {
             if (doorBlock) doorBlock.Open();
@@ -93,6 +109,8 @@ public class BeamReceiver : MonoBehaviour
     {
         _active = false;
         SetVisual(false);
+
+        if (solved) solved = false;
 
         if (!latchOpen)
         {
@@ -213,6 +231,19 @@ public class BeamReceiver : MonoBehaviour
         go.transform.position = worldPos;
         return go.transform;
     }
+    public void LoadData(GameData data)
+    {
+        solved = data.beamReceiverSolved;
+
+        if (solved)
+            skipCinematicOnce = true;
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        data.beamReceiverSolved = solved;
+    }
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmos()
