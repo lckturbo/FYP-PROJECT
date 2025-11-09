@@ -20,6 +20,7 @@ public class PieceManager : BoardManager, IDataPersistence
     public int CurrentPuzzleIndex => currentPuzzleIndex;
 
     private PuzzleSolution activeSolution;
+    private int activeSolutionIndex = -1; 
 
     private void Awake()
     {
@@ -49,8 +50,18 @@ public class PieceManager : BoardManager, IDataPersistence
         ClearBoard();
 
         var currentPuzzle = puzzleDB.puzzles[currentPuzzleIndex];
-        activeSolution = currentPuzzle.solutions[Random.Range(0, currentPuzzle.solutions.Count)];
-        Debug.Log($"Selected solution index: {currentPuzzle.solutions.IndexOf(activeSolution)}");
+
+        if (activeSolutionIndex < 0 || activeSolutionIndex >= currentPuzzle.solutions.Count)
+        {
+            activeSolutionIndex = Random.Range(0, currentPuzzle.solutions.Count);
+            Debug.Log($"Selected NEW solution index: {activeSolutionIndex}");
+        }
+        else
+        {
+            Debug.Log($"Using SAVED solution index: {activeSolutionIndex}");
+        }
+
+        activeSolution = currentPuzzle.solutions[activeSolutionIndex];
 
         // white pieces
         SpawnPiece(Piece.PieceType.King, true, whitePieceSprites[5], new Vector3Int(6, 4, 0)); // King g5
@@ -86,6 +97,11 @@ public class PieceManager : BoardManager, IDataPersistence
         {
             Debug.Log($"Correct move ({currentStep + 1}/{activeSolution.moves.Count})");
             currentStep++;
+
+            if (SaveLoadSystem.instance != null)
+            {
+                SaveLoadSystem.instance.SaveGame();
+            }
 
             if (currentStep < activeSolution.moves.Count)
             {
@@ -140,6 +156,11 @@ public class PieceManager : BoardManager, IDataPersistence
             worldTarget.z = piece.transform.position.z;
             piece.transform.position = worldTarget;
             currentStep++;
+
+            if (SaveLoadSystem.instance != null)
+            {
+                SaveLoadSystem.instance.SaveGame();
+            }
         }
     }
     private IEnumerator ResetAfterDelay(float delay)
@@ -147,6 +168,11 @@ public class PieceManager : BoardManager, IDataPersistence
         yield return new WaitForSeconds(delay);
         ResetBoard();
         currentStep = 0;
+
+        if (SaveLoadSystem.instance != null)
+        {
+            SaveLoadSystem.instance.SaveGame();
+        }
     }
 
     public void LoadData(GameData data)
@@ -160,8 +186,20 @@ public class PieceManager : BoardManager, IDataPersistence
 
         ClearBoard();
 
+        if (data.chessPuzzleSolutionIndex >= 0)
+        {
+            activeSolutionIndex = data.chessPuzzleSolutionIndex;
+            currentStep = data.chessPuzzleCurrentStep;
+        }
+
         if (data.chessPieces != null && data.chessPieces.Count > 0)
         {
+            var currentPuzzle = puzzleDB.puzzles[currentPuzzleIndex];
+            if (activeSolutionIndex >= 0 && activeSolutionIndex < currentPuzzle.solutions.Count)
+            {
+                activeSolution = currentPuzzle.solutions[activeSolutionIndex];
+            }
+
             foreach (var pieceData in data.chessPieces)
             {
                 Sprite sprite = pieceData.isWhite
@@ -182,16 +220,21 @@ public class PieceManager : BoardManager, IDataPersistence
         else
         {
             puzzleSolved = false;
+            activeSolutionIndex = -1; 
+            currentStep = 0;
             SetupPuzzle();
         }
     }
 
     public void SaveData(ref GameData data)
     {
+        data.chessPuzzleSolutionIndex = activeSolutionIndex;
+        data.chessPuzzleCurrentStep = currentStep;
+
         if (!puzzleSolved)
         {
             data.chessPuzzleCompleted = false;
-            return;
+            // Continue saving piece positions below
         }
 
         if (data.chessPieces == null)
@@ -212,7 +255,10 @@ public class PieceManager : BoardManager, IDataPersistence
             }
         }
 
-        data.chessPuzzleCompleted = puzzleSolved;
+        if (puzzleSolved)
+        {
+            data.chessPuzzleCompleted = true;
+        }
     }
 
     public PuzzleSolution GetActiveSolution()

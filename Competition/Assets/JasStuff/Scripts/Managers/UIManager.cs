@@ -64,6 +64,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
         string scnName = scene.name;
         AudioManager.instance.StopAllSounds();
 
+        canPause = true;
+
         switch (scnName)
         {
             case "Main":
@@ -73,6 +75,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             case "Lobby":
                 AudioManager.instance.PlaySound("bgm");
                 SetupLobbyMenu();
+                RefreshLobbyButtons(); 
                 return;
             case "CharSelection":
                 AudioManager.instance.PlaySound("MainMenuBGM");
@@ -133,11 +136,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 ASyncManager.instance.LoadLevelBtn("CharSelection");
             });
 
-            if (SaveLoadSystem.instance.GetGameData()?.hasSavedGame == true)
-                loadBtn.interactable = true;
-            else
-                loadBtn.interactable = false;
-
             loadBtn.onClick.RemoveAllListeners();
             loadBtn.onClick.AddListener(() =>
             {
@@ -152,8 +150,29 @@ public class UIManager : MonoBehaviour, IDataPersistence
             exitBtn.onClick.AddListener(() =>
             {
                 GameManager.instance.ChangeScene("Main");
-                SaveLoadSystem.instance.SaveGame();
+                //SaveLoadSystem.instance.SaveGame();
             });
+            RefreshLobbyButtons();
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (SceneManager.GetActiveScene().name == "Lobby")
+        {
+            RefreshLobbyButtons();
+        }
+    }
+
+    private void RefreshLobbyButtons()
+    {
+        loadBtn = GameObject.Find("LoadBtn")?.GetComponent<Button>();
+
+        if (loadBtn != null && SaveLoadSystem.instance != null)
+        {
+            bool hasSave = SaveLoadSystem.instance.HasSaveFile();
+            loadBtn.interactable = hasSave;
+            Debug.Log($"[UIManager] Load button refreshed. HasSave: {hasSave}");
         }
     }
     private void SetupMainGameMenu()
@@ -182,7 +201,11 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (exitBtn)
         {
             exitBtn.onClick.RemoveAllListeners();
-            exitBtn.onClick.AddListener(() => GameManager.instance.ChangeScene("Main"));
+            exitBtn.onClick.AddListener(() =>
+            {
+                SaveLoadSystem.instance.NewGame();
+                GameManager.instance.ChangeScene("Main");
+            });
         }
     }
 
@@ -197,18 +220,25 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
             if (BGMSlider || SFXSlider || backBtn)
             {
+                BGMSlider.SetValueWithoutNotify(AudioManager.instance.GetBgmVol());
+                SFXSlider.SetValueWithoutNotify(AudioManager.instance.GetSFXVol());
+
                 BGMSlider.onValueChanged.RemoveAllListeners();
                 BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
-                BGMSlider.value = AudioManager.instance.GetBgmVol();
+                //BGMSlider.value = AudioManager.instance.GetBgmVol();
 
                 SFXSlider.onValueChanged.RemoveAllListeners();
                 SFXSlider.onValueChanged.AddListener(SettingsManager.instance.OnSFXVolumeChanged);
-                SFXSlider.value = AudioManager.instance.GetSFXVol();
+                //SFXSlider.value = AudioManager.instance.GetSFXVol();
 
                 backBtn.onClick.AddListener(() =>
                 {
                     ToggleSettings(false);
-                    SaveLoadSystem.instance.SaveGame();
+                    
+                    if(SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby")
+                        SaveLoadSystem.instance.SaveSettingsOnly();
+                    else
+                        SaveLoadSystem.instance.SaveGame();
 
                     if (isPaused)
                         ShowPauseUI(true);
@@ -244,7 +274,16 @@ public class UIManager : MonoBehaviour, IDataPersistence
             if (menuBtn) menuBtn.onClick.AddListener(() =>
             {
                 TogglePause(false);
-                SaveLoadSystem.instance.SaveGame();
+                if (SceneManager.GetActiveScene().name == "SampleScene")
+                    SaveLoadSystem.instance.SaveGame();
+
+                if(SceneManager.GetActiveScene().name == "jasBattle")
+                {
+                    TurnEngine turnEngine = FindObjectOfType<TurnEngine>();
+                    if(turnEngine != null)
+                        turnEngine.BattleSpeed = 1f;
+                    Time.timeScale = 1f;
+                }
                 ASyncManager.instance.LoadLevelBtn("Main");
             });
             if (statsDisplay == null)

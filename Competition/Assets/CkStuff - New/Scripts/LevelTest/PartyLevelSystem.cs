@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PartyLevelSystem : MonoBehaviour
+public class PartyLevelSystem : MonoBehaviour, IDataPersistence
 {
     public static PartyLevelSystem Instance { get; private set; }
 
@@ -21,4 +21,21 @@ public class PartyLevelSystem : MonoBehaviour
         levelSystem.AddXP(amount);
         Debug.Log($"[PartyXP] +{amount} XP (Lv {levelSystem.level}, {levelSystem.currXP}/{levelSystem.xpNextLevel})");
     }
+
+    public void ResetLevel()
+    {
+        levelSystem.ResetLevel();
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        data.playerLevel = levelSystem.level;
+        data.playerCurrentXP = levelSystem.currXP;
+    }
+
+    public void LoadData(GameData data)
+    {
+        levelSystem.SetState(data.playerLevel, data.playerCurrentXP);
+    }
+
 }

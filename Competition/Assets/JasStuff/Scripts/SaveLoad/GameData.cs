@@ -66,8 +66,15 @@ public class GameData
     [System.Serializable]
     public class BlockSaveEntry
     {
-        public string id;      
-        public bool isOpen;    
+        public string id;
+        public bool isOpen;
+    }
+
+    [System.Serializable]
+    public class MirrorSaveEntry
+    {
+        public string id;
+        public float rotation;
     }
 
     public bool hasSavedGame;
@@ -83,12 +90,20 @@ public class GameData
     public Vector2 playerPosition;
     public bool hasSavedPosition;
 
+    // player level //
+    public int playerLevel;
+    public int playerCurrentXP;
+
     // enemies //
     public List<string> defeatedEnemies;
 
     // audio //
     public float bgmVolume;
     public float sfxVolume;
+
+    // battle settings //
+    public bool autoBattleUnlocked;
+    public bool battleSpeedUnlocked;
 
     // checkpoints //
     public bool hasCheckpoint;
@@ -104,11 +119,17 @@ public class GameData
     public bool connectPuzzleCompleted;
     public List<ChessPieceSaveData> chessPieces;
     public bool chessPuzzleCompleted;
+    public int chessPuzzleSolutionIndex; // save which solution is active
+    public int chessPuzzleCurrentStep; // save current progress in solution
     public List<BlockSaveEntry> savedBlocks;
 
     public List<InventoryItemData> mainInventoryData;
     public List<InventoryItemData> subInventoryData;
     public int money;
+
+    // beams
+    public List<MirrorSaveEntry> mirrors;
+    public bool beamReceiverSolved;
 
     [System.Serializable]
     public class InventoryItemData
@@ -147,13 +168,21 @@ public class GameData
         allyIndices = new List<int>();
         playerPosition = Vector2.zero;
         hasSavedPosition = false;
-        
+
+        // player level //
+        playerLevel = 1;
+        playerCurrentXP = 0;
+
         // enemies //
         defeatedEnemies = new List<string>();
 
         // audio //
         bgmVolume = 1f;
         sfxVolume = 1f;
+
+        // battle settings //
+        autoBattleUnlocked = false;
+        battleSpeedUnlocked = false;
 
         // checkpoints //
         hasCheckpoint = false;
@@ -169,7 +198,11 @@ public class GameData
         connectPuzzleCompleted = false;
         chessPieces = new List<ChessPieceSaveData>();
         chessPuzzleCompleted = false;
+        chessPuzzleSolutionIndex = -1; 
+        chessPuzzleCurrentStep = 0; 
         savedBlocks = new List<BlockSaveEntry>();
+        mirrors = new List<MirrorSaveEntry>();
+        beamReceiverSolved = false;
 
         // existing initializations...
         mainInventoryData = new List<InventoryItemData>();
@@ -179,7 +212,5 @@ public class GameData
         savedPuzzles = new List<PuzzleSaveEntry>();
         hasSpawnedStartingItem = false;
         clearedFogIds = new List<string>();
-
-
     }
 }

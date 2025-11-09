@@ -71,6 +71,13 @@ public class StatueManager : BoardManager, IDataPersistence
     public override void OnMove(GameObject moved, Vector3Int fromCell, Vector3Int toCell)
     {
         if (puzzleSolved) return;
+
+        // SAVE AFTER EVERY MOVE
+        if (SaveLoadSystem.instance != null)
+        {
+            SaveLoadSystem.instance.SaveGame();
+        }
+
         CheckForLineWin();
         if (puzzleSolved) return;
 
@@ -221,7 +228,7 @@ public class StatueManager : BoardManager, IDataPersistence
         yield return new WaitForSeconds(0.5f);
 
         var occupied = spawnedObjs
-            .FirstOrDefault(o => boardTileMap.WorldToCell(o.transform.position) == targetCell);
+            .FirstOrDefault(o => o != statue.gameObject && boardTileMap.WorldToCell(o.transform.position) == targetCell);
 
         if (occupied != null)
         {
@@ -237,6 +244,11 @@ public class StatueManager : BoardManager, IDataPersistence
         Debug.Log($"AI moved existing statue to {targetCell}");
 
         OnMove(statue.gameObject, Vector3Int.zero, targetCell);
+
+        if (SaveLoadSystem.instance != null)
+        {
+            SaveLoadSystem.instance.SaveGame();
+        }
     }
 
     public void LoadData(GameData data)
@@ -262,13 +274,10 @@ public class StatueManager : BoardManager, IDataPersistence
 
         puzzleSolved = data.connectPuzzleCompleted;
 
-        if (puzzleSolved)
+        if (data.statueStates != null && data.statueStates.Count > 0)
         {
-            // Open the door
-            if (doorToOpen != null)
-                doorToOpen.Open();
+            Debug.Log("[StatueManager] Loading saved statue positions...");
 
-            // Respawn saved statues
             foreach (var entry in data.statueStates)
             {
                 GameObject prefab = entry.isWhite ? whiteStatuePrefab : blackStatuePrefab;
@@ -278,34 +287,39 @@ public class StatueManager : BoardManager, IDataPersistence
                 s.SetWhite(entry.isWhite);
                 s.Init(boardTileMap, highlightTileMap, highlightTile, this);
                 s.UpdateCell(entry.position);
-                s.SetMove(false); // lock movement after puzzle is solved
+
+                if (puzzleSolved)
+                    s.SetMove(false);
 
                 spawnedObjs.Add(statue);
             }
 
-            Debug.Log("[StatueManager] Puzzle completed — respawned saved statues & opened door.");
+            if (puzzleSolved && doorToOpen != null)
+            {
+                doorToOpen.Open();
+                Debug.Log("[StatueManager] Puzzle completed — door opened.");
+            }
+            else
+            {
+                Debug.Log("[StatueManager] Puzzle in progress — positions restored.");
+            }
         }
         else
         {
-            // Not completed yet — randomize new puzzle
+            // No saved data — fresh setup
             SetupPuzzle();
-            Debug.Log("[StatueManager] Puzzle not completed — fresh setup.");
+            Debug.Log("[StatueManager] No saved data — fresh setup.");
         }
     }
 
 
     public void SaveData(ref GameData data)
     {
-        if (!puzzleSolved)
-        {
-            Debug.Log("[StatueManager] Puzzle not solved — skipping save (will reset next load).");
-            data.connectPuzzleCompleted = false;
-            return;
-        }
-
         if (data.statueStates == null)
             data.statueStates = new List<GameData.StatueSaveData>();
         data.statueStates.Clear();
+
+        spawnedObjs.RemoveAll(obj => obj == null);
 
         foreach (var obj in spawnedObjs)
         {
@@ -313,15 +327,21 @@ public class StatueManager : BoardManager, IDataPersistence
             if (statue != null)
             {
                 Vector3Int cellPos = boardTileMap.WorldToCell(statue.transform.position);
-                data.statueStates.Add(new GameData.StatueSaveData
+                bool alreadyExists = data.statueStates.Any(s => s.position == cellPos && s.isWhite == statue.IsWhite());
+                if (!alreadyExists)
                 {
-                    isCompleted = puzzleSolved,
-                    isWhite = statue.IsWhite(),
-                    position = cellPos
-                });
+                    data.statueStates.Add(new GameData.StatueSaveData
+                    {
+                        isCompleted = puzzleSolved,
+                        isWhite = statue.IsWhite(),
+                        position = cellPos
+                    });
+                }
             }
         }
 
         data.connectPuzzleCompleted = puzzleSolved;
+
+        Debug.Log($"[StatueManager] Saved {data.statueStates.Count} statue positions. Solved: {puzzleSolved}");
     }
 }

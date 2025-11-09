@@ -5385,6 +5385,7 @@ MonoBehaviour:
   engine: {fileID: 2058573157}
   toggle: {fileID: 1782614126}
   label: {fileID: 1951496333}
+  unlockLevel: 3
 --- !u!114 &871096328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5467,7 +5468,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!114 &871096332
 MonoBehaviour:
@@ -5552,6 +5553,7 @@ MonoBehaviour:
   engine: {fileID: 2058573157}
   toggle: {fileID: 2109885880}
   label: {fileID: 1233058144}
+  unlockLevel: 2
 --- !u!1 &898640506
 GameObject:
   m_ObjectHideFlags: 0
@@ -11704,7 +11706,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 99
   m_TargetDisplay: 0
 --- !u!224 &1857112322
 RectTransform:

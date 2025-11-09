@@ -6,14 +6,48 @@ public class BattleSpeedToggle : MonoBehaviour
     [SerializeField] private TurnEngine engine;
     [SerializeField] private Toggle toggle;
     [SerializeField] private Text label;
+    [SerializeField] private int unlockLevel = 2; 
+
     private void Awake()
     {
         if (toggle)
         {
             toggle.onValueChanged.AddListener(OnToggle);
-            if (engine)
-                toggle.isOn = !Mathf.Approximately(engine.BattleSpeed, 1f);
+            UpdateToggleState();
             UpdateLabel();
+        }
+    }
+
+    private void OnEnable()
+    {
+        UpdateToggleState();
+        UpdateLabel();
+    }
+    private void Update()
+    {
+        UpdateToggleState();
+        UpdateLabel();
+    }
+
+    private void UpdateToggleState()
+    {
+        if (!toggle || !engine) return;
+
+        int currentLevel = PartyLevelSystem.Instance != null
+            ? PartyLevelSystem.Instance.levelSystem.level
+            : 1;
+
+        bool isUnlocked = currentLevel >= unlockLevel;
+        toggle.interactable = isUnlocked;
+
+        if (!isUnlocked)
+        {
+            toggle.isOn = false;
+            engine.BattleSpeed = 1f;
+        }
+        else
+        {
+            toggle.isOn = !Mathf.Approximately(engine.BattleSpeed, 1f);
         }
     }
 
@@ -21,14 +55,32 @@ public class BattleSpeedToggle : MonoBehaviour
     {
         if (!engine) return;
 
-        engine.BattleSpeed = isOn ? 2f : 1f;
-        UpdateLabel();
-    }
+        int currentLevel = PartyLevelSystem.Instance != null
+            ? PartyLevelSystem.Instance.levelSystem.level
+            : 1;
 
+        if (currentLevel >= unlockLevel)
+        {
+            engine.BattleSpeed = isOn ? 2f : 1f;
+            UpdateLabel();
+        }
+    }
 
     private void UpdateLabel()
     {
         if (!label || !engine) return;
-        label.text = $"{engine.BattleSpeed}x Speed";
+
+        int currentLevel = PartyLevelSystem.Instance != null
+            ? PartyLevelSystem.Instance.levelSystem.level
+            : 1;
+
+        if (currentLevel < unlockLevel)
+        {
+            label.text = $"Speed: LOCKED (Lv{unlockLevel})";
+        }
+        else
+        {
+            label.text = $"{engine.BattleSpeed}x Speed";
+        }
     }
 }
