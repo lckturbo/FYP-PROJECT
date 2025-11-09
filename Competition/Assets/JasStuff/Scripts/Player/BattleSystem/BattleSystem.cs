@@ -384,6 +384,9 @@ public class BattleSystem : MonoBehaviour
             if (resetTimerOnBattleEnd) _battleTimer.Reset();
         }
 
+        if (UIManager.instance)
+            UIManager.instance.canPause = false;
+
         if (_ended) return;
         _ended = true;
 
