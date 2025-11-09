@@ -384,11 +384,11 @@ public class BattleSystem : MonoBehaviour
             if (resetTimerOnBattleEnd) _battleTimer.Reset();
         }
 
-        if (UIManager.instance)
-            UIManager.instance.canPause = false;
-
         if (_ended) return;
         _ended = true;
+
+        if (UIManager.instance)
+            UIManager.instance.canPause = false;
 
         var ls = (PartyLevelSystem.Instance != null) ? PartyLevelSystem.Instance.levelSystem : null;
 
@@ -424,13 +424,23 @@ public class BattleSystem : MonoBehaviour
             {
                 leader.OnDeathComplete += (deadChar) =>
                 {
-                    resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
+                    resultsUI?.Show(payload, () =>
+                    {
+                        //if (UIManager.instance)
+                        //    UIManager.instance.canPause = false;
+                        OnBattleEnd?.Invoke(playerWon);
+                    });
                 };
                 return;
             }
         }
 
-        resultsUI?.Show(payload, () => { OnBattleEnd?.Invoke(playerWon); });
+        resultsUI?.Show(payload, () =>
+        {
+            //if (UIManager.instance)
+            //    UIManager.instance.canPause = false;
+            OnBattleEnd?.Invoke(playerWon);
+        });
     }
 
     private BattleResultsPayload BuildResultsPayload(

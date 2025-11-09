@@ -64,6 +64,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
         string scnName = scene.name;
         AudioManager.instance.StopAllSounds();
 
+        canPause = true;
+
         switch (scnName)
         {
             case "Main":
@@ -267,6 +269,14 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 TogglePause(false);
                 if (SceneManager.GetActiveScene().name == "SampleScene")
                     SaveLoadSystem.instance.SaveGame();
+
+                if(SceneManager.GetActiveScene().name == "jasBattle")
+                {
+                    TurnEngine turnEngine = FindObjectOfType<TurnEngine>();
+                    if(turnEngine != null)
+                        turnEngine.BattleSpeed = 1f;
+                    Time.timeScale = 1f;
+                }
                 ASyncManager.instance.LoadLevelBtn("Main");
             });
             if (statsDisplay == null)

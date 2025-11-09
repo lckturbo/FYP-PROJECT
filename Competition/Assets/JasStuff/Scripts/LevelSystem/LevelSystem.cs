@@ -28,4 +28,10 @@ public class LevelSystem
     {
         return 50 + (lvl * lvl * 20);
     }
+    public void SetState(int newLevel, int newXP)
+    {
+        level = newLevel;
+        currXP = newXP;
+    }
+
 }

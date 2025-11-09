@@ -23,10 +23,8 @@ public class BattleSpeedToggle : MonoBehaviour
         UpdateToggleState();
         UpdateLabel();
     }
-
     private void Update()
     {
-       
         UpdateToggleState();
         UpdateLabel();
     }

@@ -31,7 +31,12 @@ public class TurnEngine : MonoBehaviour
     public float BattleSpeed
     {
         get => battleSpeed;
-        set => battleSpeed = Mathf.Clamp(value, 0.5f, 4f);
+        set
+        {
+            battleSpeed = Mathf.Clamp(value, 0.5f, 4f);
+            if (!_paused)
+                ApplyTimeScale();
+        }
     }
     private bool _paused = false;
     public bool IsPaused => _paused;
@@ -39,7 +44,11 @@ public class TurnEngine : MonoBehaviour
     public void SetPaused(bool paused)
     {
         _paused = paused;
-        Time.timeScale = paused ? 0f : battleSpeed;
+        ApplyTimeScale();
+    }
+    private void ApplyTimeScale()
+    {
+        Time.timeScale = _paused ? 0f : battleSpeed;
     }
 
     public void Register(Combatant c)
@@ -69,6 +78,8 @@ public class TurnEngine : MonoBehaviour
         // guard: only end once
         if (_ended) return;
         _ended = true;
+
+        BattleSpeed = 1f;
         Time.timeScale = 1f;
 
         if (!_running) return;
@@ -86,7 +97,7 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running || _paused) return;
 
-        Time.timeScale = battleSpeed;
+        //Time.timeScale = battleSpeed;
 
         // ========= Global failsafes (run EVERY frame) =========
         // 1) If all ENEMIES are gone at any moment (DOT, projectile, etc.), end as WIN.
