@@ -19,6 +19,10 @@ public class Scramble : BaseMinigame
     [SerializeField] private float maxTime = 10f;          // 10-second timer
     [SerializeField] private float endDelay = 2f;          //  Delay before ending
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+
     private string targetWord;
     private string scrambledWord;
     private string currentInput = "";
@@ -165,6 +169,17 @@ public class Scramble : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        animationPanel.SetActive(true);
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(1.5f);
+        }
+
+        animationPanel.SetActive(false);
 
         while (!gameOver)
             yield return null;
