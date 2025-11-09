@@ -220,18 +220,25 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
             if (BGMSlider || SFXSlider || backBtn)
             {
+                BGMSlider.SetValueWithoutNotify(AudioManager.instance.GetBgmVol());
+                SFXSlider.SetValueWithoutNotify(AudioManager.instance.GetSFXVol());
+
                 BGMSlider.onValueChanged.RemoveAllListeners();
                 BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
-                BGMSlider.value = AudioManager.instance.GetBgmVol();
+                //BGMSlider.value = AudioManager.instance.GetBgmVol();
 
                 SFXSlider.onValueChanged.RemoveAllListeners();
                 SFXSlider.onValueChanged.AddListener(SettingsManager.instance.OnSFXVolumeChanged);
-                SFXSlider.value = AudioManager.instance.GetSFXVol();
+                //SFXSlider.value = AudioManager.instance.GetSFXVol();
 
                 backBtn.onClick.AddListener(() =>
                 {
                     ToggleSettings(false);
-                    SaveLoadSystem.instance.SaveGame();
+                    
+                    if(SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby")
+                        SaveLoadSystem.instance.SaveSettingsOnly();
+                    else
+                        SaveLoadSystem.instance.SaveGame();
 
                     if (isPaused)
                         ShowPauseUI(true);

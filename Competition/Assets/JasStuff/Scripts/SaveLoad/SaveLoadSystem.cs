@@ -136,6 +136,22 @@ public class SaveLoadSystem : MonoBehaviour
         fileDataHandler.Save(gameData);
     }
 
+    public void SaveSettingsOnly()
+    {
+        if (gameData == null)
+            gameData = new GameData();
+
+        dataPersistenceObjs = FindAllDataPersistenceObjects();
+        foreach (IDataPersistence dataObj in dataPersistenceObjs)
+        {
+            if (dataObj is SettingsManager)
+                dataObj.SaveData(ref gameData);
+        }
+
+        fileDataHandler.Save(gameData);
+    }
+
+
     public GameData GetGameData()
     {
         return gameData;
