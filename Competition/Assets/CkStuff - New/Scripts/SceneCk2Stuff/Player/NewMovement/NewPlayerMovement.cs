@@ -7,6 +7,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
     [SerializeField] private NewCharacterStats stats;
     public NewCharacterStats GetStats() => stats;
     [SerializeField] private bool useStatsDirectly = true;
+    [SerializeField] private float combatSpeedMultiplier = 1;
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -133,16 +134,29 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
     void FixedUpdate()
     {
         float speed = GetWalkSpeed();
+        Debug.Log($"[Speed Debug] base={stats.Speed} mult={combatSpeedMultiplier} final={speed}");
         if (speed <= 0f || moveDir == Vector2.zero) return;
 
         Vector2 next = rb.position + moveDir * (speed * Time.fixedDeltaTime);
         rb.MovePosition(next);
     }
 
-    private float GetWalkSpeed()
+    public float GetWalkSpeed()
     {
         if (stats == null) return cachedWalkSpeed;
-        return useStatsDirectly ? stats.Speed : cachedWalkSpeed;
+        float baseSpeed = useStatsDirectly ? stats.Speed : cachedWalkSpeed;
+        return baseSpeed * combatSpeedMultiplier;
+    }
+    public void SetCombatSlow(float multiplier)
+    {
+        Debug.Log("SetCombatSlow");
+        combatSpeedMultiplier = multiplier;
+    }
+
+    public void ResetCombatSlow()
+    {
+        Debug.Log("ResetCombatSlow");
+        combatSpeedMultiplier = 1f;
     }
 
     public void LoadData(GameData data) { }

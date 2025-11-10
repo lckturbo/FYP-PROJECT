@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d13633228c933744a2a0e321b6c5666, type: 3}
   m_Name: BasicEnemy
   m_EditorClassIdentifier: 
-  Speed: 4.5
+  Speed: 5
   maxHealth: 45
   attackreduction: 12
   atkDmg: 42
@@ -28,6 +28,6 @@ MonoBehaviour:
   lightRes: 1
   type: 0
   enemyPrefab: {fileID: 4249954731921599678, guid: 74d6609d1c16bfc44aa4956c665688b8, type: 3}
-  atkRange: 1
+  atkRange: 1.2
   AOERadius: 0
   chaseRange: 6

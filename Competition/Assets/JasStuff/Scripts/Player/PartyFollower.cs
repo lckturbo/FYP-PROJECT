@@ -1,9 +1,10 @@
 using UnityEngine;
+
 public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
     [SerializeField] private float followDistance = 0.9f;
-    [SerializeField] private float moveSpeed = 3.5f;
+    [SerializeField] private float moveSpeed = 3.5f; // fallback if target has no movement script
     [SerializeField] private float stopDistance = 0.15f;
 
     private Animator animator;
@@ -13,11 +14,15 @@ public class PartyFollower : MonoBehaviour
     private Vector2 targetPosition;
     private bool hasTargetPosition;
 
+    private NewPlayerMovement playerMovement; // reference to player's movement
+
     public void SetTarget(Transform newTarget, Vector2 initialDirection = default)
     {
         target = newTarget;
+
         if (target != null)
         {
+            playerMovement = target.GetComponent<NewPlayerMovement>(); // get player movement speed source
             targetPosition = target.position;
             hasTargetPosition = true;
         }
@@ -38,6 +43,7 @@ public class PartyFollower : MonoBehaviour
             animator.SetFloat("moveX", direction.x);
             animator.SetFloat("moveY", direction.y);
             animator.SetBool("moving", false);
+            animator.speed = 1f;
         }
     }
 
@@ -68,17 +74,25 @@ public class PartyFollower : MonoBehaviour
                 Vector2 moveDir = (targetPosition - (Vector2)transform.position).normalized;
                 lastMoveDirection = moveDir;
 
+                float usedSpeed = moveSpeed;
+                if (playerMovement != null)
+                    usedSpeed = playerMovement.GetWalkSpeed(); 
+
                 transform.position = Vector2.MoveTowards(
                     transform.position,
                     targetPosition,
-                    moveSpeed * Time.deltaTime
+                    usedSpeed * Time.deltaTime
                 );
 
                 isMoving = true;
+
+                if (animator && playerMovement != null && playerMovement.GetStats() != null)
+                    animator.speed = usedSpeed / playerMovement.GetStats().Speed;
             }
             else
             {
                 isMoving = false;
+                if (animator) animator.speed = 1f;
             }
         }
 
@@ -88,13 +102,12 @@ public class PartyFollower : MonoBehaviour
             animator.SetFloat("moveY", lastMoveDirection.y);
             animator.SetBool("moving", isMoving);
         }
-        
+
         var ySorter = GetComponent<YSorter>();
         if (ySorter)
         {
             ySorter.SetMoveDirection(lastMoveDirection);
             ySorter.SetLeader(target == null);
         }
-
     }
 }

@@ -36,7 +36,7 @@ Transform:
   m_GameObject: {fileID: 4249954731921599678}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.48, y: 3.08, z: 0.09289829}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -210,12 +210,13 @@ MonoBehaviour:
   aiPath: {fileID: 8907702388655403980}
   areaID: 2
   attackHitbox: {fileID: 8931024803322961709}
-  upOffset: {x: 0, y: 1}
-  downOffset: {x: 0, y: -1}
-  leftOffset: {x: -1, y: 0}
-  rightOffset: {x: 1, y: 0}
+  upOffset: {x: 0, y: 1.5}
+  downOffset: {x: 0, y: -1.5}
+  leftOffset: {x: -1.5, y: 0}
+  rightOffset: {x: 1.5, y: 0}
   hitboxCollider: {fileID: 4426927692771732069}
   chaseSpeedMultiplier: 1.5
+  chaseMemoryDuration: 1.25
   patrolArea: {fileID: 0}
   patrolDir: 0
 --- !u!114 &2058426006471302486
@@ -410,8 +411,8 @@ Transform:
   m_GameObject: {fileID: 8232163925951149203}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.2, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalPosition: {x: 0, y: -1.5, z: 0}
+  m_LocalScale: {x: 2.8, y: 2.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 574135864595883451}
