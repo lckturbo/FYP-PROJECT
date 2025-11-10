@@ -43,6 +43,10 @@ public class ScrabbleGame : BaseMinigame
         "HELLO", "WORLD", "UNITY", "GAME", "CODE", "SCRABBLE", "PLAY", "FUN", "WORD","TO"
     };
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+
     public void BeginMinigame()
     {
         SetupLetterScores();
@@ -521,6 +525,17 @@ public class ScrabbleGame : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        animationPanel.SetActive(true);
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(1.5f);
+        }
+
+        animationPanel.SetActive(false);
 
         while (!gameOver)
             yield return null;

@@ -216,9 +216,24 @@ public class InventoryUIManager : MonoBehaviour
         descriptionText.text = $"{slot.item.itemName}\n\n{slot.item.description}";
     }
 
+    private bool IsInteractionBlocked()
+    {
+        bool dialogueActive = DialogueManager.Instance?.IsDialogueActive == true;
+        bool shopActive = ShopManager.Instance != null &&
+                          (ShopManager.Instance.IsShopActive || ShopManager.Instance.isSellOpen);
+        bool nearNPC = NPCQuestGiver.PlayerNearNPC;
+
+        return dialogueActive || shopActive || nearNPC;
+    }
 
     private void UseSelectedItem()
     {
+        if (IsInteractionBlocked())
+        {
+            Debug.Log("Cannot use items while in dialogue, shop, or near NPC.");
+            return;
+        }
+
         var inv = inventoryManager.PlayerInventory;
         if (inv == null) return;
 

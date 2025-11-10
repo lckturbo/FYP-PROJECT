@@ -8,6 +8,8 @@ public class NPCQuestGiver : MonoBehaviour
     private bool playerInRange = false;
     private Quest activeQuest;
 
+    public static bool PlayerNearNPC { get; private set; }
+
     private void Start()
     {
         // Load stage progress for this NPC
@@ -97,12 +99,20 @@ public class NPCQuestGiver : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
+        {
+            PlayerNearNPC = true;
             playerInRange = true;
+        }
+
+
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
+        {
             playerInRange = false;
+            PlayerNearNPC = false;
+        }
     }
 }
