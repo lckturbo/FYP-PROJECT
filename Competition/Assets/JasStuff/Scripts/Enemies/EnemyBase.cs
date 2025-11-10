@@ -136,6 +136,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Idle()
     {
         rb2d.velocity = Vector2.zero;
+        anim.SetFloat("speed", 0f);
     }
 
     // ---- PATROL ---- //
@@ -296,7 +297,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         float speed = aiPath.canMove ? aiPath.velocity.magnitude : 0f;
 
-        if (aiPath.reachedDestination || !aiPath.canMove || speed < 0.15f)
+        if (aiPath.reachedDestination || !aiPath.canMove || speed < 0.1f)
             speed = 0f;
 
         anim.SetFloat("speed", speed);
