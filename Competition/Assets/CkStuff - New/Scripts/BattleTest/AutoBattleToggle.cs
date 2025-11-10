@@ -32,7 +32,11 @@ public class AutoBattleToggle : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.P))
+            unlockLevel = 1;
+
         UpdateToggleState();
+        UpdateLabel();
     }
 
     private void UpdateToggleState()
