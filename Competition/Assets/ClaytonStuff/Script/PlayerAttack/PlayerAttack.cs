@@ -95,10 +95,18 @@ public class PlayerAttack : MonoBehaviour
     }
     private void OnAttackPerformed(InputAction.CallbackContext ctx)
     {
+        // Block if shop or sell menu open
         if (ShopManager.Instance != null &&
             (ShopManager.Instance.IsShopActive || ShopManager.Instance.isSellOpen))
         {
             Debug.Log("Cannot attack while shop or sell menu is open!");
+            return;
+        }
+
+        // Block if NPC dialogue is active
+        if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive)
+        {
+            Debug.Log("Cannot attack during dialogue!");
             return;
         }
 
@@ -121,9 +129,8 @@ public class PlayerAttack : MonoBehaviour
             : 1f / Mathf.Max(0.01f, attackRate);
 
         nextAttackTime = Time.time + cd;
-
-        Debug.Log($"Attack performed. Cooldown: {cd} sec (Next attack at {nextAttackTime})");
     }
+
 
     private void FireArrow()
     {

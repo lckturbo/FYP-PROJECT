@@ -286,12 +286,24 @@ public class InventoryUIManager : MonoBehaviour
     }
     private void ToggleSubInventory()
     {
-        if (DialogueManager.Instance?.IsDialogueActive == true)
+        // --- Block if shop or dialogue active ---
+        bool dialogueActive = DialogueManager.Instance?.IsDialogueActive == true;
+        bool shopActive = ShopManager.Instance != null &&
+                          (ShopManager.Instance.IsShopActive || ShopManager.Instance.isSellOpen);
+
+        if (dialogueActive)
         {
             Debug.Log("Cannot open inventory during dialogue.");
             return;
         }
 
+        if (shopActive)
+        {
+            Debug.Log("Cannot open inventory while shop or sell menu is open.");
+            return;
+        }
+
+        // --- Normal toggle logic ---
         subInventoryOpen = !subInventoryOpen;
 
         if (subInventoryOpen)
@@ -314,7 +326,6 @@ public class InventoryUIManager : MonoBehaviour
 
         RefreshUI();
     }
-
 
     private void SelectMainSlot(int index)
     {
