@@ -86,6 +86,7 @@ public class InventoryUIManager : MonoBehaviour
         // --- Input Handling ---
         if (Input.GetKeyDown(KeyCode.I))
         {
+            playerMovement = FindObjectOfType<NewPlayerMovement>();
             if (UIManager.instance != null && UIManager.instance.IsPaused()) return;
             ToggleSubInventory();
         }
@@ -108,16 +109,17 @@ public class InventoryUIManager : MonoBehaviour
         }
         else
         {
-            // Sub-inventory navigation
-            if (Input.GetKeyDown(KeyCode.RightArrow)) MoveSubSelection(1, 0);
-            if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveSubSelection(-1, 0);
-            if (Input.GetKeyDown(KeyCode.UpArrow)) MoveSubSelection(0, -1);
-            if (Input.GetKeyDown(KeyCode.DownArrow)) MoveSubSelection(0, 1);
+            // Sub-inventory navigation with WASD
+            if (Input.GetKeyDown(KeyCode.D)) MoveSubSelection(1, 0);
+            if (Input.GetKeyDown(KeyCode.A)) MoveSubSelection(-1, 0);
+            if (Input.GetKeyDown(KeyCode.W)) MoveSubSelection(0, -1);
+            if (Input.GetKeyDown(KeyCode.S)) MoveSubSelection(0, 1);
 
             if (Input.GetKeyDown(KeyCode.E))
                 UseSelectedItemSub();
 
             ShowSubItemDescription();
+
         }
 
         // --- Always check the highlighted slot contents ---
@@ -301,6 +303,7 @@ public class InventoryUIManager : MonoBehaviour
     }
     private void ToggleSubInventory()
     {
+
         // --- Block if shop or dialogue active ---
         bool dialogueActive = DialogueManager.Instance?.IsDialogueActive == true;
         bool shopActive = ShopManager.Instance != null &&
@@ -324,6 +327,7 @@ public class InventoryUIManager : MonoBehaviour
         if (subInventoryOpen)
         {
             UIManager.instance.canPause = false;
+            playerMovement.enabled = false; // <--- DISABLE MOVEMENT
             selectedSubSlot = 0;
             UpdateSubHighlight();
             mainInventoryPanel.SetActive(false);
@@ -333,6 +337,7 @@ public class InventoryUIManager : MonoBehaviour
         else
         {
             UIManager.instance.canPause = true;
+            playerMovement.enabled = true; // <--- DISABLE MOVEMENT
             selectedSubSlot = -1;
             subInventoryPanel.SetActive(false);
             mainInventoryPanel.SetActive(true);

@@ -59,7 +59,7 @@ public class CraftingUIManager : MonoBehaviour
         if (craftingSystem == null)
             craftingSystem = FindObjectOfType<Crafting>();
         // Toggle UI with C key
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.I))
         {
             if (UIManager.instance != null && UIManager.instance.IsPaused()) return;
 
