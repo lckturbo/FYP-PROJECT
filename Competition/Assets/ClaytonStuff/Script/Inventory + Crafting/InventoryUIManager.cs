@@ -489,5 +489,18 @@ public class InventoryUIManager : MonoBehaviour
         descriptionText.text = $"{slot.item.itemName}\n\n{slot.item.description}";
     }
 
+    public Item GetHighlightedWeapon()
+    {
+        var inv = inventoryManager.PlayerInventory;
+        if (inv == null || selectedMainSlot < 0 || selectedMainSlot >= inv.mainInventory.Count)
+            return null;
+
+        var slot = inv.mainInventory[selectedMainSlot];
+        if (slot.item != null && slot.item.isWeapon)
+            return slot.item;
+
+        return null;
+    }
+
 
 }

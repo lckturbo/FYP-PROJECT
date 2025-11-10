@@ -34,6 +34,8 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private NewCharacterStats characterStats;
     private float CurrentAttackRange => characterStats != null ? characterStats.atkRange : attackRange;
 
+    private InventoryUIManager inventoryUI;
+
     private void Start()
     {
         if (arrowPool == null)
@@ -63,6 +65,8 @@ public class PlayerAttack : MonoBehaviour
             attackPoint.SetParent(transform);
             attackPoint.localPosition = Vector3.right;
         }
+
+        inventoryUI = FindObjectOfType<InventoryUIManager>();
     }
 
     private void OnEnable()
@@ -95,7 +99,7 @@ public class PlayerAttack : MonoBehaviour
     }
     private void OnAttackPerformed(InputAction.CallbackContext ctx)
     {
-        // Block if shop or sell menu open
+        // Prevent attacking in shop/dialogue
         if (ShopManager.Instance != null &&
             (ShopManager.Instance.IsShopActive || ShopManager.Instance.isSellOpen))
         {
@@ -103,7 +107,6 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        // Block if NPC dialogue is active
         if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive)
         {
             Debug.Log("Cannot attack during dialogue!");
@@ -112,13 +115,23 @@ public class PlayerAttack : MonoBehaviour
 
         if (Time.time < nextAttackTime) return;
 
-        var item = heldItem != null ? heldItem.GetEquippedItem() : null;
+        Item item = null;
+
+        // --- Use the currently highlighted inventory item if available ---
+        if (inventoryUI != null)
+            item = inventoryUI.GetHighlightedWeapon();
+
+        // --- Otherwise, fallback to currently held item ---
+        if (item == null && heldItem != null)
+            item = heldItem.GetEquippedItem();
+
         if (item == null || !item.isWeapon)
         {
-            Debug.Log("No weapon equipped!");
+            Debug.Log("No weapon equipped or highlighted.");
             return;
         }
 
+        // --- Check weapon type ---
         if (item.isBow)
             FireArrow();
         else
@@ -233,24 +246,44 @@ public class PlayerAttack : MonoBehaviour
 
     public void PerformShoot()
     {
-        GameObject arrowObj = arrowPool.Get();
-        arrowObj.transform.position = attackPoint.position;
+        Item item = null;
 
-        // Determine direction based on attackPoint local position
-        Vector2 dir = attackPoint.localPosition.normalized;
+        // --- Use the currently highlighted inventory item if available ---
+        if (inventoryUI != null)
+            item = inventoryUI.GetHighlightedWeapon();
 
-        // Default fallback 
-        if (dir == Vector2.zero)
-            dir = Vector2.right;
+        // --- Otherwise, fallback to currently held item ---
+        if (item == null && heldItem != null)
+            item = heldItem.GetEquippedItem();
 
-        // Fire arrow
-        Arrow arrow = arrowObj.GetComponent<Arrow>();
-        if (arrow != null)
-            arrow.Fire(dir);
+        // --- Check weapon type ---
+        if (item.isBow)
+        {
 
-        // Rotate arrow to face direction
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        arrowObj.transform.rotation = Quaternion.Euler(0, 0, angle);
+            GameObject arrowObj = arrowPool.Get();
+            arrowObj.transform.position = attackPoint.position;
+
+            // Determine direction based on attackPoint local position
+            Vector2 dir = attackPoint.localPosition.normalized;
+
+            // Default fallback 
+            if (dir == Vector2.zero)
+                dir = Vector2.right;
+
+            // Fire arrow
+            Arrow arrow = arrowObj.GetComponent<Arrow>();
+            if (arrow != null)
+                arrow.Fire(dir);
+
+            // Rotate arrow to face direction
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            arrowObj.transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
+        else
+        {
+            return;
+        }
+
     }
 
     public void EndAttack()
