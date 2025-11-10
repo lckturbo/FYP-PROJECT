@@ -66,6 +66,12 @@ public abstract class EnemyBase : MonoBehaviour
     [Header("Chase Settings")]
     [SerializeField] private float chaseSpeedMultiplier = 1.5f;
 
+    private float chaseMemoryTimer = 0f;
+    [SerializeField] private float chaseMemoryDuration = 1.25f;
+
+    private float chaseTime = 0f;
+
+
     public void EnableHitBox() => hitboxCollider.enabled = true;
     public void DisableHitBox() => hitboxCollider.enabled = false;
 
@@ -79,11 +85,18 @@ public abstract class EnemyBase : MonoBehaviour
     private void Awake()
     {
         if (!enemyStats || !aiPath || !rb2d || !seeker) return;
-        //if (!enemyStats) return;
+
         enemyStates = EnemyStates.Idle;
+
         aiPath.maxSpeed = enemyStats.Speed;
+
+        aiPath.maxAcceleration = 999f;
+        aiPath.slowWhenNotFacingTarget = false;
+        aiPath.enableRotation = false; 
+
         hitboxCollider.enabled = false;
     }
+
 
     protected virtual void Start()
     {
@@ -137,6 +150,9 @@ public abstract class EnemyBase : MonoBehaviour
     {
         rb2d.velocity = Vector2.zero;
         anim.SetFloat("speed", 0f);
+
+        chaseTime = 0f;
+        chaseMemoryTimer = 0f;
     }
 
     // ---- PATROL ---- //
@@ -186,6 +202,12 @@ public abstract class EnemyBase : MonoBehaviour
         }
 
         if (anim) anim.SetTrigger("alert");
+        if (player != null)
+        {
+            NewPlayerMovement pm = player.GetComponent<NewPlayerMovement>();
+            if (pm != null)
+                pm.SetCombatSlow(0.8f);
+        }
         StartCoroutine(AlertDelay());
     }
 
@@ -251,26 +273,45 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Chase()
     {
         if (!player) return;
+
         float dist = Vector2.Distance(rb2d.position, player.position);
 
-        if (dist > enemyStats.chaseRange)
+        if (!CanSeePlayer())
         {
-            aiPath.destination = rb2d.position;
-            aiPath.maxSpeed = enemyStats.Speed;
-            enemyStates = EnemyStates.Idle;
-            return;
+            chaseMemoryTimer -= Time.deltaTime;
+            if (chaseMemoryTimer <= 0f)
+            {
+                aiPath.destination = rb2d.position;
+                aiPath.maxSpeed = enemyStats.Speed;
+                NewPlayerMovement pm = player.GetComponent<NewPlayerMovement>();
+                if (pm != null) pm.ResetCombatSlow();
+
+                chaseTime = 0f;
+                enemyStates = EnemyStates.Idle;
+                return;
+            }
+        }
+        else
+        {
+            chaseMemoryTimer = chaseMemoryDuration;
         }
 
         aiPath.canMove = true;
-        aiPath.destination = player.position;
 
-        aiPath.maxSpeed = enemyStats.Speed * chaseSpeedMultiplier;
+        Vector2 playerVel = player.GetComponent<Rigidbody2D>().velocity;
+        Vector2 predictedPos = (Vector2)player.position + playerVel * 0.6f;
+        aiPath.destination = predictedPos;
 
-        if (dist < enemyStats.atkRange && !isAttacking && attackCooldownTimer <= 0f)
+        chaseTime += Time.deltaTime;
+        float ramp = 1f + chaseTime * 0.15f;
+        aiPath.maxSpeed = enemyStats.Speed * chaseSpeedMultiplier * ramp;
+
+        if (dist < enemyStats.atkRange + 0.5f && !isAttacking && attackCooldownTimer <= 0f)
             enemyStates = EnemyStates.Attack;
 
         UpdateAnim();
     }
+
     protected virtual bool CanSeePlayer()
     {
         if (!player) return false;
@@ -278,18 +319,17 @@ public abstract class EnemyBase : MonoBehaviour
         float dist = Vector2.Distance(transform.position, player.position);
         if (dist > enemyStats.chaseRange) return false;
 
-        Vector2 rayOrigin = (Vector2)transform.position + Vector2.up * 0.2f;
+        Vector2 rayOrigin = rb2d.position;
         Vector2 dirToPlayer = ((Vector2)player.position - rayOrigin).normalized;
 
-        int mask = LayerMask.GetMask("Default", "Player", "Obstacles");
+        int mask = LayerMask.GetMask("Player", "Obstacles");
         RaycastHit2D hit = Physics2D.Raycast(rayOrigin, dirToPlayer, enemyStats.chaseRange, mask);
-
-        Debug.DrawRay(rayOrigin, dirToPlayer * enemyStats.chaseRange, Color.red);
-
         if (!hit.collider) return false;
 
-        return hit.collider.CompareTag("Player") || dist < enemyStats.atkRange * 1.2f;
-    }   
+        return hit.collider.CompareTag("Player");
+    }
+
+
 
     protected void UpdateAnim()
     {

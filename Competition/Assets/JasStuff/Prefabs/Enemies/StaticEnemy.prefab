@@ -37,7 +37,7 @@ Transform:
   m_GameObject: {fileID: 4015835877819868307}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 24.06, y: 4.66, z: 0.09289829}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -211,12 +211,13 @@ MonoBehaviour:
   aiPath: {fileID: 8090749803166621678}
   areaID: 0
   attackHitbox: {fileID: 2798916792423487334}
-  upOffset: {x: 0, y: 0.5}
-  downOffset: {x: 0, y: -0.5}
-  leftOffset: {x: -0.5, y: 0}
-  rightOffset: {x: 0.5, y: 0}
+  upOffset: {x: 0, y: 1.5}
+  downOffset: {x: 0, y: -1.5}
+  leftOffset: {x: -1.5, y: 0}
+  rightOffset: {x: 1.5, y: 0}
   hitboxCollider: {fileID: 6107887541759429330}
   chaseSpeedMultiplier: 1.5
+  chaseMemoryDuration: 1.25
   startingFacingDir: {x: 0, y: -1}
 --- !u!114 &2745995694369271051
 MonoBehaviour:
@@ -391,8 +392,8 @@ Transform:
   m_GameObject: {fileID: 4790083141406613916}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.2, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalPosition: {x: 0, y: -1.5, z: 0}
+  m_LocalScale: {x: 2.8, y: 2.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8982923994586581582}
@@ -435,8 +436,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1076961029
-  m_SortingLayer: 5
+  m_SortingLayerID: -2142590473
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
