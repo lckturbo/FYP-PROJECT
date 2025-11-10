@@ -203,7 +203,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             exitBtn.onClick.RemoveAllListeners();
             exitBtn.onClick.AddListener(() =>
             {
-                SaveLoadSystem.instance.NewGame();
+                //SaveLoadSystem.instance.NewGame();
                 GameManager.instance.ChangeScene("Main");
             });
         }
