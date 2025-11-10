@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class RedLightGreenLightMinigame : BaseMinigame
 {
+    [SerializeField] private GameObject animPanel;
+    [SerializeField] private Animator anim;
+
     [Header("Minigame UIs")]
     [SerializeField] private RectTransform starter;
     [SerializeField] private RectTransform player;
@@ -56,8 +59,29 @@ public class RedLightGreenLightMinigame : BaseMinigame
     {
         BattleManager.instance?.SetBattlePaused(true);
 
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(6.2f);
+        }
+
+        animPanel.SetActive(false);
         instructionPanel.SetActive(true);
         minigamePanel.SetActive(false);
+
+        if (instructionPanel.activeSelf)
+        {
+            while (instructionTime > 0)
+            {
+                instructionTime -= Time.unscaledDeltaTime;
+                if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
+                yield return null;
+            }
+        }
+
+        instructionPanel.SetActive(false);
+        minigamePanel.SetActive(true);
 
         while (instructionTime > 0)
         {
@@ -70,6 +94,8 @@ public class RedLightGreenLightMinigame : BaseMinigame
         minigamePanel.SetActive(true);
 
         yield return StartCoroutine(RunMinigame());
+
+        BattleManager.instance?.SetBattlePaused(false);
     }
 
     private IEnumerator RunMinigame()
