@@ -134,7 +134,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
     void FixedUpdate()
     {
         float speed = GetWalkSpeed();
-        Debug.Log($"[Speed Debug] base={stats.Speed} mult={combatSpeedMultiplier} final={speed}");
+        //Debug.Log($"[Speed Debug] base={stats.Speed} mult={combatSpeedMultiplier} final={speed}");
         if (speed <= 0f || moveDir == Vector2.zero) return;
 
         Vector2 next = rb.position + moveDir * (speed * Time.fixedDeltaTime);

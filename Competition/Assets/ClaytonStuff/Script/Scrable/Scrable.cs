@@ -532,7 +532,7 @@ public class ScrabbleGame : BaseMinigame
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(1.5f);
+            yield return new WaitForSecondsRealtime(2.5f);
         }
 
         animationPanel.SetActive(false);
