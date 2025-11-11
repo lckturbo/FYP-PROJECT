@@ -1,8 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
-using UnityEngine.Networking;
+    using System.Collections;
+    using System.Collections.Generic;
+    using TMPro;
+    using UnityEngine;
+    using UnityEngine.Networking;
 
 public class Wordle : BaseMinigame
 {
@@ -315,6 +315,7 @@ public class Wordle : BaseMinigame
         if (anim)
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            tutoralPanel.SetActive(false);
             anim.SetTrigger("start");
             yield return new WaitForSecondsRealtime(1.5f);
         }

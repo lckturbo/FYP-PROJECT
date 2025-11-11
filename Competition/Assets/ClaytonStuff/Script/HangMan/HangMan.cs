@@ -15,6 +15,10 @@ public class HangMan : BaseMinigame
     [Header("Hangman Drawing Parts")]
     public List<GameObject> hangmanParts;
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+
     [Header("Game Settings")]
     public string secretWord = "UNITY";
     public int maxAttempts = 6;
@@ -194,6 +198,18 @@ public class HangMan : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        animationPanel.SetActive(true);
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(1.5f);
+        }
+
+        animationPanel.SetActive(false);
+
         while (!gameOver)
             yield return null;
         BattleManager.instance?.SetBattlePaused(false);
