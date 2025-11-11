@@ -8,6 +8,7 @@ public class InventoryUIManager : MonoBehaviour
     [Header("Inventory Panels")]
     [SerializeField] private GameObject mainInventoryPanel;
     [SerializeField] private GameObject subInventoryPanel;
+    [SerializeField] private GameObject InfroPanel;
 
     [Header("Slot Prefab")]
     [SerializeField] private GameObject slotPrefab;
@@ -48,6 +49,7 @@ public class InventoryUIManager : MonoBehaviour
 
         mainInventoryPanel.SetActive(true);
         subInventoryPanel.SetActive(false);
+        InfroPanel.SetActive(false);
 
         RefreshUI();
 
@@ -67,6 +69,7 @@ public class InventoryUIManager : MonoBehaviour
             {
                 subInventoryOpen = false;
                 subInventoryPanel.SetActive(false);
+                InfroPanel.SetActive(false);
                 mainInventoryPanel.SetActive(false);
                 descriptionPanel.SetActive(false);
             }
@@ -81,6 +84,7 @@ public class InventoryUIManager : MonoBehaviour
         {
             mainInventoryPanel.SetActive(!subInventoryOpen);
             subInventoryPanel.SetActive(subInventoryOpen);
+            InfroPanel.SetActive(subInventoryOpen);
         }
 
         // --- Input Handling ---
@@ -332,6 +336,7 @@ public class InventoryUIManager : MonoBehaviour
             UpdateSubHighlight();
             mainInventoryPanel.SetActive(false);
             subInventoryPanel.SetActive(true);
+            InfroPanel.SetActive(true);
             descriptionPanel.SetActive(true);
         }
         else
@@ -340,6 +345,7 @@ public class InventoryUIManager : MonoBehaviour
             playerMovement.enabled = true; // <--- DISABLE MOVEMENT
             selectedSubSlot = -1;
             subInventoryPanel.SetActive(false);
+            InfroPanel.SetActive(false);
             mainInventoryPanel.SetActive(true);
             descriptionPanel.SetActive(false);
         }
