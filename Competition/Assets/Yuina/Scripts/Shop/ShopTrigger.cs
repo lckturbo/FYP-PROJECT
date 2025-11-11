@@ -4,13 +4,14 @@ using UnityEngine.InputSystem;
 public class ShopTrigger : MonoBehaviour
 {
     private bool playerInRange = false;
-
     private PlayerInput playerInput;
     private InputAction interactAction;
+    private ShopDialogueUI dialogueUI;
 
     void Awake()
     {
-        // Get PlayerInput from NewPlayerMovement
+        dialogueUI = FindObjectOfType<ShopDialogueUI>();
+
         NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
         if (playerMovement != null)
         {
@@ -25,23 +26,28 @@ public class ShopTrigger : MonoBehaviour
 
     void Update()
     {
-        if (playerInRange)
-        {
-            if (playerInput == null)
-            {
-                var movement = FindObjectOfType<NewPlayerMovement>();
-                if (movement != null)
-                    playerInput = movement.GetComponent<PlayerInput>();
-            }
+        if (!playerInRange || dialogueUI == null) return;
 
-            if (playerInput != null && ShopManager.Instance.isSellOpen == false)
+        // Block input while dialogue or shop is open
+        if (dialogueUI.IsActive() || ShopManager.Instance.IsShopActive || ShopManager.Instance.isSellOpen)
+            return;
+
+        if (playerInput == null)
+        {
+            var movement = FindObjectOfType<NewPlayerMovement>();
+            if (movement != null)
+                playerInput = movement.GetComponent<PlayerInput>();
+        }
+
+        if (playerInput != null)
+        {
+            var action = playerInput.actions["Interaction"];
+            if (action.WasPressedThisFrame())
             {
-                var action = playerInput.actions["Interaction"];
-                if (action.WasPressedThisFrame())
-                {
-                    ShopManager.Instance.ToggleShop();
-                    
-                }
+                dialogueUI.Show(
+                    confirmAction: () => ShopManager.Instance.ToggleShop(),
+                    cancelAction: () => Debug.Log("Shop declined.")
+                );
             }
         }
     }
@@ -49,12 +55,7 @@ public class ShopTrigger : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
-        {
             playerInRange = true;
-            Debug.Log("Collide with player");
-        }
-
-
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -62,17 +63,13 @@ public class ShopTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = false;
-            Debug.Log("Out of Collide with player");
 
-
-            //  Auto close when leaving range
-            if (ShopManager.Instance && ShopManager.Instance.IsShopActive && ShopManager.Instance.isSellOpen == false)
+            if (ShopManager.Instance)
             {
-                ShopManager.Instance.CloseShop();
-            }
-            else
-            {
-                ShopManager.Instance.CloseSellMenu();
+                if (ShopManager.Instance.IsShopActive && !ShopManager.Instance.isSellOpen)
+                    ShopManager.Instance.CloseShop();
+                else
+                    ShopManager.Instance.CloseSellMenu();
             }
         }
     }

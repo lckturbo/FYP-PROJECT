@@ -61,9 +61,15 @@ public class InventoryUIManager : MonoBehaviour
     {
         // --- Handle Dialogue Lock ---
         bool dialogueActive = DialogueManager.Instance?.IsDialogueActive == true;
+        bool shopDialogueActive = false;
 
-        // When dialogue starts, force-close sub-inventory
-        if (dialogueActive)
+        // Detect active shop dialogue
+        var shopDialogue = FindObjectOfType<ShopDialogueUI>();
+        if (shopDialogue != null)
+            shopDialogueActive = shopDialogue.IsActive();
+
+        // When dialogue or shop dialog starts, force-close sub-inventory
+        if (dialogueActive || shopDialogueActive)
         {
             if (subInventoryOpen)
             {
@@ -76,9 +82,10 @@ public class InventoryUIManager : MonoBehaviour
             else
             {
                 mainInventoryPanel.SetActive(false);
+                InfroPanel.SetActive(false);
             }
 
-            return; // completely stop inventory updates during dialogue
+            return; // completely stop inventory updates during dialogue or shop dialog
         }
         else
         {
