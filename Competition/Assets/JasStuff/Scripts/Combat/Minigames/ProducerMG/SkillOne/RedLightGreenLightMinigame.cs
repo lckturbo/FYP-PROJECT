@@ -95,6 +95,9 @@ public class RedLightGreenLightMinigame : BaseMinigame
 
         yield return StartCoroutine(RunMinigame());
 
+        statusText.text = Result.ToString();
+        yield return new WaitForSecondsRealtime(1.0f);
+
         BattleManager.instance?.SetBattlePaused(false);
     }
 
@@ -148,6 +151,14 @@ public class RedLightGreenLightMinigame : BaseMinigame
 
         while (elapsed < warningDuration)
         {
+            timer -= Time.unscaledDeltaTime;
+            durationText.text = timer.ToString("F2");
+            if (timer <= 0f)
+            {
+                running = false;
+                yield break;
+            }
+
             lightIndicator.color = (Mathf.FloorToInt(elapsed * 10) % 2 == 0)
                 ? Color.green
                 : Color.yellow;
