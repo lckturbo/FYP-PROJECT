@@ -16,7 +16,26 @@ public class QuestUIManager : MonoBehaviour
     private Dictionary<Quest, GameObject> activeQuestEntries = new Dictionary<Quest, GameObject>();
     private HashSet<string> shownPopups = new HashSet<string>(); // <-- new tracker
 
+    [Header("Slide Settings")]
+    [SerializeField] private RectTransform questListRect; // Assign questListParent here in Inspector
+    [SerializeField] private float slideDistance = 400f;   // How far to slide right
+    [SerializeField] private float slideSpeed = 6f;
+
+    private bool isHidden = false;
+    private Vector2 shownPosition;
+    private Vector2 hiddenPosition;
+
     private QuestManager questManager;
+
+    private void Awake()
+    {
+        if (questListParent != null)
+        {
+            questListRect = questListParent.GetComponent<RectTransform>();
+            shownPosition = questListRect.anchoredPosition;
+            hiddenPosition = shownPosition + new Vector2(slideDistance, 0f);
+        }
+    }
 
     private void Start()
     {
@@ -153,5 +172,29 @@ public class QuestUIManager : MonoBehaviour
         }
 
         Destroy(popup);
+    }
+
+    private void LateUpdate()
+    {
+        HandleQuestToggle();
+
+        // Smooth slide transition
+        if (questListRect != null)
+        {
+            Vector2 target = isHidden ? hiddenPosition : shownPosition;
+            questListRect.anchoredPosition = Vector2.Lerp(
+                questListRect.anchoredPosition,
+                target,
+                Time.unscaledDeltaTime * slideSpeed
+            );
+        }
+    }
+
+    private void HandleQuestToggle()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            isHidden = !isHidden;
+        }
     }
 }

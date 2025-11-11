@@ -212,36 +212,54 @@ public class PlayerAttack : MonoBehaviour
     // ---- ANIMATION EVENTS ---- //
     public void PerformAttack()
     {
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
-         attackPoint.position,
-         CurrentAttackRange,
-         enemyLayer
-         );
-        foreach (var enemyCollider in hitEnemies)
-        {
-            Debug.Log($"Melee hit {enemyCollider.name}, dealt {attackDamage}");
+        Item item = null;
 
-            EnemyBase enemy = enemyCollider.GetComponent<EnemyBase>();
-            if (enemy != null)
+        // --- Use the currently highlighted inventory item if available ---
+        if (inventoryUI != null)
+            item = inventoryUI.GetHighlightedWeapon();
+
+        // --- Otherwise, fallback to currently held item ---
+        if (item == null && heldItem != null)
+            item = heldItem.GetEquippedItem();
+        if (!item.isBow)
+        {
+            Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+             attackPoint.position,
+             CurrentAttackRange,
+             enemyLayer
+             );
+            foreach (var enemyCollider in hitEnemies)
             {
-                EnemyParty party = enemy.GetComponent<EnemyParty>();
-                if (party != null)
+                Debug.Log($"Melee hit {enemyCollider.name}, dealt {attackDamage}");
+
+                EnemyBase enemy = enemyCollider.GetComponent<EnemyBase>();
+                if (enemy != null)
                 {
-                    BattleManager.instance.HandleBattleTransition(party);
-                    BattleManager.instance.SetBattleMode(true);
+                    EnemyParty party = enemy.GetComponent<EnemyParty>();
+                    if (party != null)
+                    {
+                        BattleManager.instance.HandleBattleTransition(party);
+                        BattleManager.instance.SetBattleMode(true);
+                    }
                 }
             }
-        }
-        Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, CurrentAttackRange);
-        foreach (var hit in hits)
-        {
-            var breakable = hit.GetComponent<BreakableObject>();
-            if (breakable != null)
+            Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, CurrentAttackRange);
+            foreach (var hit in hits)
             {
-                breakable.TakeHit();
-                Debug.Log($"Hit breakable object: {hit.name}");
+                var breakable = hit.GetComponent<BreakableObject>();
+                if (breakable != null)
+                {
+                    breakable.TakeHit();
+                    Debug.Log($"Hit breakable object: {hit.name}");
+                }
             }
+
         }
+        else
+        {
+            return;
+        }
+
     }
 
     public void PerformShoot()
