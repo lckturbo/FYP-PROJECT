@@ -18,6 +18,7 @@ public class HangMan : BaseMinigame
     [Header("Animator")]
     [SerializeField] private Animator anim;
     [SerializeField] private GameObject animationPanel;
+    [SerializeField] private GameObject tutoralPanel;
 
     [Header("Game Settings")]
     public string secretWord = "UNITY";
@@ -34,6 +35,7 @@ public class HangMan : BaseMinigame
     private int totalMistakes = 0; // <-- NEW: includes wrong guesses + timeouts
 
     private bool canStart = false;
+
 
     public void BeginMinigame()
     {
@@ -200,6 +202,7 @@ public class HangMan : BaseMinigame
         BattleManager.instance?.SetBattlePaused(true);
 
         animationPanel.SetActive(true);
+        tutoralPanel.SetActive(false);
 
         if (anim)
         {
@@ -209,6 +212,7 @@ public class HangMan : BaseMinigame
         }
 
         animationPanel.SetActive(false);
+        tutoralPanel.SetActive(true);
 
         while (!gameOver)
             yield return null;

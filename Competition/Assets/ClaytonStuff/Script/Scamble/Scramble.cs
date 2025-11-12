@@ -22,6 +22,7 @@ public class Scramble : BaseMinigame
     [Header("Animator")]
     [SerializeField] private Animator anim;
     [SerializeField] private GameObject animationPanel;
+    [SerializeField] private GameObject tutoralPanel;
 
     private string targetWord;
     private string scrambledWord;
@@ -171,6 +172,7 @@ public class Scramble : BaseMinigame
         BattleManager.instance?.SetBattlePaused(true);
 
         animationPanel.SetActive(true);
+        tutoralPanel.SetActive(false);
 
         if (anim)
         {
@@ -180,6 +182,7 @@ public class Scramble : BaseMinigame
         }
 
         animationPanel.SetActive(false);
+        tutoralPanel.SetActive(true);
 
         while (!gameOver)
             yield return null;

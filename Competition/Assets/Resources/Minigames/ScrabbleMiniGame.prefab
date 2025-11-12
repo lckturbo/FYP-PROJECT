@@ -1600,7 +1600,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4571339603095726006
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3714,6 +3714,7 @@ MonoBehaviour:
   rackSize: 8
   letters: ABCDEFGHIJKLMNOPQRSTUVWXYZ
   turnDuration: 30
+  tutoralPanel: {fileID: 2576142645156998377}
   anim: {fileID: 5445432594481062980}
   animationPanel: {fileID: 8439659424174923335}
 --- !u!114 &4402874418299202867

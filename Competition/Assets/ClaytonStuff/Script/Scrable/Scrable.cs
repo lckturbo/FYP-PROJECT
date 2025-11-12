@@ -37,6 +37,8 @@ public class ScrabbleGame : BaseMinigame
     private bool turnActive = false;
     private bool gameOver = false;
 
+    [SerializeField] private GameObject tutoralPanel;
+
     // Simple dictionary for demo (you can replace with a real one)
     private HashSet<string> dictionary = new HashSet<string>()
     {
@@ -527,6 +529,7 @@ public class ScrabbleGame : BaseMinigame
         BattleManager.instance?.SetBattlePaused(true);
 
         animationPanel.SetActive(true);
+        tutoralPanel.SetActive(false);
 
         if (anim)
         {
@@ -536,6 +539,7 @@ public class ScrabbleGame : BaseMinigame
         }
 
         animationPanel.SetActive(false);
+        tutoralPanel.SetActive(true);
 
         while (!gameOver)
             yield return null;

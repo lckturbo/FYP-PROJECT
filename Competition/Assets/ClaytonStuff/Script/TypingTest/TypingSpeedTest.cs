@@ -23,6 +23,7 @@ public class TypingSpeedTest : BaseMinigame
     [Header("Animator")]
     [SerializeField] private Animator anim;
     [SerializeField] private GameObject animationPanel;
+    [SerializeField] private GameObject tutoralPanel;
 
     private string currentSentence = "";
     private string playerInput = "";
@@ -165,6 +166,7 @@ public class TypingSpeedTest : BaseMinigame
         BattleManager.instance?.SetBattlePaused(true);
 
         animationPanel.SetActive(true);
+        tutoralPanel.SetActive(false);
 
         if (anim)
         {
@@ -174,6 +176,7 @@ public class TypingSpeedTest : BaseMinigame
         }
 
         animationPanel.SetActive(false);
+        tutoralPanel.SetActive(true);
 
         // Wait until the game is over
         while (!gameOver)
