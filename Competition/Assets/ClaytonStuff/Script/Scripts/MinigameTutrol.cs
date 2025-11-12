@@ -28,7 +28,7 @@ public class MinigameTutrol : MonoBehaviour
 
     void Start()
     {
-        if (tutorialPanel) tutorialPanel.SetActive(true);
+        if (tutorialPanel) tutorialPanel.SetActive(false);
         if (minigamePanel) minigamePanel.SetActive(false);
 
         if (countdownText)
