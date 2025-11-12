@@ -312,7 +312,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (!pauseUI) return;
         pauseUI.SetActive(v);
         Debug.Log($"[UIManager] Pause toggled: {v}, timeScale = {Time.timeScale}");
-        if (v && statsDisplay) statsDisplay.DisplayStats();
+       // if (v && statsDisplay) statsDisplay.DisplayStats(stats);
     }
 
     // ---- SAVELOAD ---- //

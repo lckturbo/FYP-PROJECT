@@ -99,15 +99,15 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         if (!def || def.stats == null) return;
 
         selectedStore.Set(def, currentIndex);
-        var allies = new List<NewCharacterDefinition>();
-        allies.Add(def); // leader
-        for (int i = 0; i <= roster.Length; i++)
-        {
-            if (i == currentIndex) continue;
-            if (allies.Count > 2) break;
-            allies.Add(roster[i]);
-        }
-        PlayerParty.instance.SetupParty(def, allies);
+        //var allies = new List<NewCharacterDefinition>();
+        //allies.Add(def); // leader
+        //for (int i = 0; i < roster.Length; i++)
+        //{
+        //    if (i == currentIndex) continue;
+        //    if (allies.Count > 2) break;
+        //    allies.Add(roster[i]);
+        //}
+        //PlayerParty.instance.SetupParty(def, allies);
 
         nameText.text = def.displayName;
         descText.text = def.description;
@@ -217,6 +217,17 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
 
     private void Confirm()
     {
+        var def = roster[currentIndex];
+        var allies = new List<NewCharacterDefinition>();
+
+        for (int i = 0; i < roster.Length; i++)
+        {
+            if (i == currentIndex) continue; // Skip the leader
+            allies.Add(roster[i]); // Add all other roster members as allies
+        }
+
+        PlayerParty.instance.SetupParty(def, allies);
+
         SaveLoadSystem.instance.SaveGame();
         GameManager.instance.ChangeScene("SampleScene");
     }
