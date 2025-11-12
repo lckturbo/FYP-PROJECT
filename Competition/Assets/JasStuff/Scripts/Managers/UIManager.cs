@@ -133,7 +133,14 @@ public class UIManager : MonoBehaviour, IDataPersistence
             newBtn.onClick.AddListener(() =>
             {
                 SaveLoadSystem.instance.NewGame();
-                ASyncManager.instance.LoadLevelBtn("CharSelection");
+                if (CutsceneManager.instance != null)
+                {
+                    CutsceneManager.instance.PlayCutsceneThenLoad("CharSelection");
+                }
+                else
+                {
+                    ASyncManager.instance.LoadLevelBtn("CharSelection");
+                }
             });
 
             loadBtn.onClick.RemoveAllListeners();
