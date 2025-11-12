@@ -113,7 +113,7 @@ public class ColorblindChallenge : BaseMinigame
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(1.5f);
+            yield return new WaitForSecondsRealtime(2.8f);
         }
 
         animationPanel.SetActive(false);
