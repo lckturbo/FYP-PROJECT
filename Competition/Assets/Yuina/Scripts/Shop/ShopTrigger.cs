@@ -44,12 +44,10 @@ public class ShopTrigger : MonoBehaviour
             var action = playerInput.actions["Interaction"];
             if (action.WasPressedThisFrame())
             {
-                dialogueUI.Show(
-                    confirmAction: () => ShopManager.Instance.ToggleShop(),
-                    cancelAction: () => Debug.Log("Shop declined.")
-                );
+                dialogueUI.Show(); // now has built-in Buy / Sell / Cancel handling
             }
         }
+
     }
 
     private void OnTriggerEnter2D(Collider2D other)

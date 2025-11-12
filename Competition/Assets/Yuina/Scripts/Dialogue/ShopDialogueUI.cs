@@ -1,46 +1,78 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class ShopDialogueUI : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private TMP_Text dialogueText;
-    [SerializeField] private Button yesButton;
-    [SerializeField] private Button noButton;
+    [SerializeField] private Button buyButton;
+    [SerializeField] private Button sellButton;
+    [SerializeField] private Button cancelButton;
 
-    private System.Action onConfirm;
-    private System.Action onCancel;
+    private NewPlayerMovement playerMovement;
+    private PlayerInput playerInput;
 
     void Awake()
     {
         if (dialoguePanel != null)
             dialoguePanel.SetActive(false);
+
+        playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+            playerInput = playerMovement.GetComponent<PlayerInput>();
+    }
+    private void Update()
+    {
+        playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+            playerInput = playerMovement.GetComponent<PlayerInput>();
     }
 
-    public void Show(System.Action confirmAction, System.Action cancelAction)
+    public void Show()
     {
-        onConfirm = confirmAction;
-        onCancel = cancelAction;
-
-        dialogueText.text = "Do you want to browse the shop?";
+        dialogueText.text = "Welcome! What would you like to do?";
         dialoguePanel.SetActive(true);
 
-        yesButton.onClick.RemoveAllListeners();
-        noButton.onClick.RemoveAllListeners();
+        // Disable player movement during shop dialogue
+        if (playerInput != null)
+            playerInput.enabled = false;
 
-        yesButton.onClick.AddListener(() =>
+        buyButton.onClick.RemoveAllListeners();
+        sellButton.onClick.RemoveAllListeners();
+        cancelButton.onClick.RemoveAllListeners();
+
+        // --- BUY ---
+        buyButton.onClick.AddListener(() =>
         {
             dialoguePanel.SetActive(false);
-            onConfirm?.Invoke();
+            EnableMovement();
+            ShopManager.Instance.OpenShop(); // Open normal shop
         });
 
-        noButton.onClick.AddListener(() =>
+        // --- SELL ---
+        sellButton.onClick.AddListener(() =>
         {
             dialoguePanel.SetActive(false);
-            onCancel?.Invoke();
+            EnableMovement();
+            ShopManager.Instance.OpenSellMenu(); // Open sell menu
         });
+
+        // --- CANCEL ---
+        cancelButton.onClick.AddListener(() =>
+        {
+            dialoguePanel.SetActive(false);
+            EnableMovement();
+            Debug.Log("Player canceled shop interaction.");
+        });
+    }
+
+    private void EnableMovement()
+    {
+        if (playerInput != null)
+            playerInput.enabled = true;
     }
 
     public bool IsActive() => dialoguePanel != null && dialoguePanel.activeSelf;

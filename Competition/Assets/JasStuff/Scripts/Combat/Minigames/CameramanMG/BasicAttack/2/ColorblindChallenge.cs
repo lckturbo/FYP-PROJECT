@@ -26,6 +26,10 @@ public class ColorblindChallenge : BaseMinigame
     [SerializeField, Range(0f, 1f)] private float digitDotFraction = 0.90f;
     [SerializeField] private float edgePadding = 12f;
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+
     [Header("Colors")]
     [SerializeField]
     private Color[] backgroundPalette = new Color[]
@@ -102,6 +106,17 @@ public class ColorblindChallenge : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        animationPanel.SetActive(true);
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(1.5f);
+        }
+
+        animationPanel.SetActive(false);
 
         int num = Random.Range(numberRange.x, numberRange.y + 1);
         if (alwaysTwoDigits) num = Mathf.Clamp(num, 10, 99);
