@@ -22,10 +22,6 @@ public class ArrangeStory : BaseMinigame
     {
         slots.AddRange(slotsParent.GetComponentsInChildren<ArrangeSlot>(true));
     }
-    private void Start()
-    {
-        StartCoroutine(Run());
-    }
     public void StartInstructionCountdown()
     {
         instructionStarted = true;
