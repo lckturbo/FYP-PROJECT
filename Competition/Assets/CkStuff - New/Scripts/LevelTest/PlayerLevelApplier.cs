@@ -1,4 +1,3 @@
-// PlayerLevelApplier.cs  (additions marked // NEW)
 using System;
 using System.Collections;
 using UnityEngine;
@@ -7,6 +6,7 @@ using UnityEngine;
 public class PlayerLevelApplier : MonoBehaviour
 {
     public event Action<NewCharacterStats> OnStatsUpdated;
+
     [Header("References")]
     public NewCharacterDefinition definition;
     public LevelSystem levelSystem;
@@ -29,9 +29,8 @@ public class PlayerLevelApplier : MonoBehaviour
 
     private void OnEnable()
     {
-        // Try bind immediately; if not ready, wait a frame loop until it is.
-        if (!TryBind())
-            StartCoroutine(BindWhenReady());
+        // ALWAYS force a rebind when enabling (new scene, respawn, etc.)
+        StartCoroutine(ForceRebind());
     }
 
     private void OnDisable()
@@ -43,55 +42,62 @@ public class PlayerLevelApplier : MonoBehaviour
         }
     }
 
-    private bool TryBind()
+    private IEnumerator ForceRebind()
     {
-        if (levelSystem == null && PartyLevelSystem.Instance != null)
-            levelSystem = PartyLevelSystem.Instance.levelSystem;
-
-        if (levelSystem == null) return false;
-
-        // prevent double subscribe
-        if (!_bound)
-        {
-            levelSystem.OnLevelUp += HandleLevelUp;
-            _bound = true;
-            ApplyForLevel(levelSystem.level); // apply current party level now
-        }
-        return true;
-    }
-
-    private IEnumerator BindWhenReady()
-    {
-        // Wait until the PartyLevelSystem singleton exists
+        // Wait until PartyLevelSystem exists (fixes allies binding too early)
         while (PartyLevelSystem.Instance == null)
             yield return null;
 
-        TryBind();
+        // Assign shared level system
+        levelSystem = PartyLevelSystem.Instance.levelSystem;
+
+        // Clean old subscriptions to avoid double-binding
+        levelSystem.OnLevelUp -= HandleLevelUp;
+        levelSystem.OnLevelUp += HandleLevelUp;
+
+        _bound = true;
+
+        // Apply shared party level immediately when the overworld/battle loads
+        ApplyForLevel(levelSystem.level);
+
+        Debug.Log($"{name}: ForceRebind -> applied level {levelSystem.level}.");
     }
 
     private void HandleLevelUp(int newLevel)
     {
         ApplyForLevel(newLevel);
-        Debug.Log($"{name}: Level {newLevel} applied. HP {runtimeStats?.maxHealth}, ATK {runtimeStats?.atkDmg}");
+        Debug.Log($"{name}: LevelUp applied -> L{newLevel} HP:{runtimeStats?.maxHealth} ATK:{runtimeStats?.atkDmg}");
     }
 
     public void ApplyForLevel(int level)
     {
+        if (definition == null || growth == null)
+        {
+            Debug.LogWarning($"{name}: Missing definition/growth in PlayerLevelApplier!", this);
+            return;
+        }
+
+        // Build new runtime stats at the given level
         runtimeStats = StatsRuntimeBuilder.BuildRuntimeStats(definition.stats, level, growth);
+
+        // Push stats to components that need it
         health?.ApplyStats(runtimeStats);
         movement?.ApplyStats(runtimeStats);
-        if (combatant) combatant.stats = runtimeStats;
 
-        // Reapply buffs from BuffData
+        // Combatant only exists in battle (null in overworld)
+        if (combatant)
+            combatant.stats = runtimeStats;
+
+        // Reapply buffs if any exist
         if (BuffData.instance != null)
         {
             if (BuffData.instance.hasAttackBuff && BuffData.instance.attackTarget == runtimeStats)
                 runtimeStats.atkDmg += BuffData.instance.latestAttackBuff;
+
             if (BuffData.instance.hasDefenseBuff && BuffData.instance.defenseTarget == runtimeStats)
                 runtimeStats.attackreduction += BuffData.instance.latestDefenseBuff;
         }
 
         OnStatsUpdated?.Invoke(runtimeStats);
     }
-
 }
