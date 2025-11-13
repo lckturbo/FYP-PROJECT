@@ -225,10 +225,6 @@ public class Combatant : MonoBehaviour
         ActionEnded?.Invoke();
     }
 
-
-
-
-
     // Kept for compatibility
     public void Skill1(Combatant target)
     {

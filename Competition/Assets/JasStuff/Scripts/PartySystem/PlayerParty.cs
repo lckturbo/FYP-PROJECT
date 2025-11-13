@@ -91,5 +91,18 @@ public class PlayerParty : MonoBehaviour
         return appliers;
     }
 
+    public NewCharacterDefinition GetDefinitionFor(Combatant unit)
+    {
+        var applier = unit.GetComponent<PlayerLevelApplier>();
+        if (applier && applier.definition != null)
+            return applier.definition;
 
+        foreach (var member in GetFullParty())
+        {
+            if (member == null) continue;
+            if (unit.name.Contains(member.displayName))
+                return member;
+        }
+        return null;
+    }
 }
