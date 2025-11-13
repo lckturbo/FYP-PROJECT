@@ -48,7 +48,7 @@ public class ShopDialogueUI : MonoBehaviour
         buyButton.onClick.AddListener(() =>
         {
             dialoguePanel.SetActive(false);
-            EnableMovement();
+            //EnableMovement();
             ShopManager.Instance.OpenShop(); // Open normal shop
         });
 
@@ -56,7 +56,7 @@ public class ShopDialogueUI : MonoBehaviour
         sellButton.onClick.AddListener(() =>
         {
             dialoguePanel.SetActive(false);
-            EnableMovement();
+            //EnableMovement();
             ShopManager.Instance.OpenSellMenu(); // Open sell menu
         });
 
