@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class ShutterChanceBishi : BaseMinigame
 {
@@ -93,13 +94,8 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField, Range(0f, 1f)] private float bonusPortion = 0.3235f;
     [SerializeField, Range(0.1f, 0.95f)] private float goldenRopeAtPortion = 0.5455f;
 
-    [Header("Phases & Durations (non-gameplay)")]
-    [SerializeField] private float instructionSeconds = 7.5f;
+    [Header("Result & Hold Durations")]
     [SerializeField] private float resultHoldSeconds = 4.5f;
-
-    [Header("Instruction UI")]
-    [SerializeField] private GameObject instructionsPanel;
-    [SerializeField] private TMP_Text instructionsText;
 
     [Header("Result UI")]
     [SerializeField] private GameObject resultPanel;
@@ -149,6 +145,17 @@ public class ShutterChanceBishi : BaseMinigame
     [Header("Animator")]
     [SerializeField] private Animator anim;
     [SerializeField] private GameObject animationPanel;
+
+    // ===================== Intro / Instructions Video =====================
+    [Header("Intro / Instructions Video")]
+    [SerializeField] private bool useIntroVideo = true;
+    [SerializeField] private VideoPlayer videoPlayer;
+    [SerializeField] private GameObject videoRoot;   // object that shows the video (screen / RawImage / etc.)
+
+    // ========== Result thresholds (3-tier) ==========
+    [Header("Result Thresholds (3-tier)")]
+    [SerializeField] private int perfectScore = 1350;
+    [SerializeField] private int successScore = 600;
 
     private enum Lane { Left = 0, Mid = 1, Right = 2 }
 
@@ -224,7 +231,6 @@ public class ShutterChanceBishi : BaseMinigame
         }
         if (bonusParticles) bonusParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         if (okayCenterText) okayCenterText.gameObject.SetActive(false);
-        if (instructionsPanel) instructionsPanel.SetActive(false);
         if (resultPanel) resultPanel.SetActive(false);
         if (finishText) finishText.gameObject.SetActive(false);
 
@@ -258,6 +264,9 @@ public class ShutterChanceBishi : BaseMinigame
 
         skipRequested = false;
         SetupSkipUI(false);
+
+        // ensure video object starts hidden
+        if (videoRoot) videoRoot.SetActive(false);
     }
 
     private void HideLane(Lane lane)
@@ -276,9 +285,8 @@ public class ShutterChanceBishi : BaseMinigame
     {
         BattleManager.instance?.SetBattlePaused(true);
 
-        animationPanel.SetActive(true);
-        
-
+        // ===== Existing intro animation =====
+        if (animationPanel) animationPanel.SetActive(true);
 
         if (anim)
         {
@@ -287,74 +295,33 @@ public class ShutterChanceBishi : BaseMinigame
             yield return new WaitForSecondsRealtime(3.3f);
         }
 
-        animationPanel.SetActive(false);
+        if (animationPanel) animationPanel.SetActive(false);
 
-
-
+        // ===== Reset / start state =====
         score = 0;
         isShowingOkay = false;
 
-        if (instructionsPanel) instructionsPanel.SetActive(true);
         if (scoreText) scoreText.gameObject.SetActive(false);
-        SetupSkipUI(true);
 
-        if (instructionsText) instructionsText.text = "Aim! Don't miss out!\nShutter Chance!!";
-        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
-        if (skipRequested) goto SKIP_TO_GAMEPLAY;
+        // Use video instead of text instructions
+        SetupSkipUI(true);                 // allow skipping the video
+        yield return PlayIntroVideo();     // will stop early if skipRequested
 
-        if (instructionsText) instructionsText.text = "HOW TO PLAY\n";
-        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
-        if (skipRequested) goto SKIP_TO_GAMEPLAY;
+        SetupSkipUI(false);                // no skip during gameplay
+        skipRequested = false;             // reset skip flag
 
-        if (instructionsText)
-        {
-            instructionsText.text =
-                "HOW TO PLAY\n" +
-                "• Z / X / C to snap.\n" +
-                "• MODELS need multiple taps. TRASH is a mistake (-points).\n" +
-                "• Each BEAT shows a new layout. OKAY! flashes right before next spawn.";
-        }
-        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
-        if (skipRequested) goto SKIP_TO_GAMEPLAY;
-
-        if (instructionsText)
-        {
-            instructionsText.text =
-                 "HOW TO PLAY\n" +
-                 "• BONUS: spam pictures;\n" +
-                 "  when GOLDEN ROPE appears,\n" +
-                 "  press SPACE fast!";
-        }
-        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
-        if (skipRequested) goto SKIP_TO_GAMEPLAY;
-
-        if (instructionsText)
-        {
-            instructionsText.text =
-                "RATING      SCORE\n" +
-                "SSS         1650+\n" +
-                "SS          1550\n" +
-                "S           1450\n" +
-                "A           1300\n" +
-                "B           1150\n" +
-                "C           1000\n" +
-                "D           850\n" +
-                "E           700\n" +
-                "F           500\n" +
-                "Out of Rank  0";
-        }
-        yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
-
-    SKIP_TO_GAMEPLAY:
-        SetupSkipUI(false);
-        if (instructionsPanel) instructionsPanel.SetActive(false);
         if (scoreText) scoreText.gameObject.SetActive(true);
         ShowCameraman(true);
         EnsureBackground(bgTransition);
 
+        // READY / GO! (only after video is done or skipped)
         yield return ShowReadyGo();
 
-        float desiredBonusSeconds = Mathf.Clamp(gameplayTotalSeconds * bonusPortion, 0.5f, Mathf.Max(0.5f, gameplayTotalSeconds - 0.5f));
+        float desiredBonusSeconds = Mathf.Clamp(
+            gameplayTotalSeconds * bonusPortion,
+            0.5f,
+            Mathf.Max(0.5f, gameplayTotalSeconds - 0.5f)
+        );
         float normalBudget = Mathf.Max(0f, gameplayTotalSeconds - desiredBonusSeconds);
 
         float normalClock = 0f;
@@ -409,7 +376,8 @@ public class ShutterChanceBishi : BaseMinigame
                 yield return OKAYBeatFlash(normalBeatGapSeconds);
 
                 float remaining = Mathf.Max(0f, normalBudget - normalClock);
-                float minNeeded = (normalBeatSeconds * endAlignMinBeatFraction) + (normalBeatGapSeconds * 0.25f);
+                float minNeeded = (normalBeatSeconds * endAlignMinBeatFraction) +
+                                  (normalBeatGapSeconds * 0.25f);
 
                 if (remaining < minNeeded)
                 {
@@ -417,7 +385,9 @@ public class ShutterChanceBishi : BaseMinigame
                 }
                 else
                 {
-                    float p = (normalBudget <= 0.001f) ? 1f : Mathf.Clamp01(normalClock / normalBudget);
+                    float p = (normalBudget <= 0.001f)
+                        ? 1f
+                        : Mathf.Clamp01(normalClock / normalBudget);
                     SpawnBeatLayout(p);
                     EnsureBackground(bgPhoto);
                 }
@@ -430,6 +400,7 @@ public class ShutterChanceBishi : BaseMinigame
         ClearAllLanes();
         EnsureBackground(bgTransition);
 
+        // ========== BONUS PHASE ==========
         bonusPhase = true;
         EnterBonusVisuals();
         goldenActive = false;
@@ -438,7 +409,11 @@ public class ShutterChanceBishi : BaseMinigame
 
         float bonusWindow = desiredBonusSeconds;
         float bonusTimer = 0f;
-        float goldenAppearAt = Mathf.Clamp(bonusWindow * goldenRopeAtPortion, 0.15f, Mathf.Max(0.2f, bonusWindow - 0.1f));
+        float goldenAppearAt = Mathf.Clamp(
+            bonusWindow * goldenRopeAtPortion,
+            0.15f,
+            Mathf.Max(0.2f, bonusWindow - 0.1f)
+        );
         bool feverActivated = false;
 
         while (bonusTimer < bonusWindow)
@@ -490,7 +465,8 @@ public class ShutterChanceBishi : BaseMinigame
         {
             finishText.rectTransform.SetAsLastSibling();
             finishText.text = "FINISH!!";
-            var c = finishText.color; finishText.color = new Color(c.r, c.g, c.b, 0f);
+            var c = finishText.color;
+            finishText.color = new Color(c.r, c.g, c.b, 0f);
             finishText.gameObject.SetActive(true);
 
             yield return FadeTMPAlpha(finishText, 0f, 1f, 0.25f);
@@ -499,17 +475,19 @@ public class ShutterChanceBishi : BaseMinigame
             finishText.gameObject.SetActive(false);
         }
 
-        var rank = JudgeRank(score);
-        Result = (rank == Rank.SSS) ? MinigameManager.ResultType.Perfect
-             : (score > 0 ? MinigameManager.ResultType.Success
-                          : MinigameManager.ResultType.Fail);
+        // ======= Final 3-tier result only =======
+        Result = (score >= perfectScore)
+            ? MinigameManager.ResultType.Perfect
+            : (score >= successScore)
+                ? MinigameManager.ResultType.Success
+                : MinigameManager.ResultType.Fail;
 
         yield return Flash();
 
         ShowCameraman(false);
         if (scoreText) scoreText.gameObject.SetActive(false);
         if (resultPanel) resultPanel.SetActive(true);
-        if (resultText) resultText.text = $"RESULT\nRank: {rank}\nScore: {score}";
+        if (resultText) resultText.text = $"RESULT\n{Result}\nScore: {score}";
 
         float rt = 0f;
         while (rt < resultHoldSeconds)
@@ -522,13 +500,57 @@ public class ShutterChanceBishi : BaseMinigame
         BattleManager.instance?.SetBattlePaused(false);
     }
 
+    // ===================== Intro Video Coroutine =====================
+    private IEnumerator PlayIntroVideo()
+    {
+        if (!useIntroVideo || !videoPlayer)
+            yield break;
+
+        // Silent video
+        videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
+
+        // Show the video screen / object
+        if (videoRoot) videoRoot.SetActive(true);
+
+        skipRequested = false;
+
+        videoPlayer.Stop();
+        videoPlayer.time = 0.0;
+        videoPlayer.Prepare();
+
+        // Wait until prepared or skipped
+        while (!videoPlayer.isPrepared && !skipRequested)
+            yield return null;
+
+        if (skipRequested)
+        {
+            try { videoPlayer.Stop(); } catch { }
+            if (videoRoot) videoRoot.SetActive(false);
+            yield break;
+        }
+
+        // Play
+        videoPlayer.Play();
+
+        // Wait until finished or skipped
+        while (videoPlayer.isPlaying && !skipRequested)
+            yield return null;
+
+        try { videoPlayer.Stop(); } catch { }
+
+        // Hide video object so it doesn't sit in the background
+        if (videoRoot) videoRoot.SetActive(false);
+    }
+
     private void SpawnBeatLayout(float progress01)
     {
         hitsThisBeat = 0;
         missesThisBeat = 0;
         lastBeatOutcome = BeatOutcome.Good;
 
-        int models = Mathf.RoundToInt(Mathf.Lerp(minModelsPerBeat, maxModelsPerBeat, Mathf.Clamp01(progress01)));
+        int models = Mathf.RoundToInt(
+            Mathf.Lerp(minModelsPerBeat, maxModelsPerBeat, Mathf.Clamp01(progress01))
+        );
         models = Mathf.Clamp(models, 1, 3);
 
         ClearAllLanes();
@@ -589,7 +611,6 @@ public class ShutterChanceBishi : BaseMinigame
         if (goldenHint) goldenHint.gameObject.SetActive(false);
         if (goldenRope) goldenRope.gameObject.SetActive(false);
 
-        // ==== Decide label + color + sprite based on outcome
         string label;
         Color labelColor;
         Sprite desiredCamSprite = cameramanDefaultSprite;
@@ -597,13 +618,13 @@ public class ShutterChanceBishi : BaseMinigame
         if (lastBeatOutcome == BeatOutcome.Good)
         {
             label = "OKAY!";
-            labelColor = new Color(0.3f, 1f, 0.45f, 1f); // green-ish
+            labelColor = new Color(0.3f, 1f, 0.45f, 1f);
             if (cameramanThumbsSprite) desiredCamSprite = cameramanThumbsSprite;
         }
         else
         {
             label = "MISS!";
-            labelColor = new Color(1f, 0.3f, 0.3f, 1f);  // red-ish
+            labelColor = new Color(1f, 0.3f, 0.3f, 1f);
             if (cameramanFailSprite) desiredCamSprite = cameramanFailSprite;
         }
 
@@ -611,7 +632,9 @@ public class ShutterChanceBishi : BaseMinigame
         {
             okayCenterText.text = label;
             var baseCol = okayCenterText.color;
-            okayCenterText.color = new Color(labelColor.r, labelColor.g, labelColor.b, baseCol.a);
+            okayCenterText.color = new Color(
+                labelColor.r, labelColor.g, labelColor.b, baseCol.a
+            );
             okayCenterText.gameObject.SetActive(true);
         }
 
@@ -624,22 +647,37 @@ public class ShutterChanceBishi : BaseMinigame
         if (cameramanImage && desiredCamSprite)
             cameramanImage.sprite = desiredCamSprite;
 
-        float show = Mathf.Clamp(gapSeconds * 0.8f, 0.06f, Mathf.Max(0.06f, gapSeconds));
+        float show = Mathf.Clamp(
+            gapSeconds * 0.8f, 0.06f, Mathf.Max(0.06f, gapSeconds)
+        );
         float blank = Mathf.Max(0f, gapSeconds - show);
 
         float popUp = Mathf.Min(0.10f, show * 0.35f);
         float popDown = Mathf.Min(0.12f, show * 0.35f);
         float hold = Mathf.Max(0f, show - popUp - popDown);
 
-        // little scale pop
         if (cameraman)
         {
             float t = 0f;
             Vector3 peak = prevCamScale * 1.07f;
-            while (t < popUp) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(prevCamScale, peak, t / Mathf.Max(0.01f, popUp)); yield return null; }
+            while (t < popUp)
+            {
+                t += Time.unscaledDeltaTime;
+                cameraman.localScale = Vector3.Lerp(
+                    prevCamScale, peak, t / Mathf.Max(0.01f, popUp)
+                );
+                yield return null;
+            }
             if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
             t = 0f;
-            while (t < popDown) { t += Time.unscaledDeltaTime; cameraman.localScale = Vector3.Lerp(peak, prevCamScale, t / Mathf.Max(0.01f, popDown)); yield return null; }
+            while (t < popDown)
+            {
+                t += Time.unscaledDeltaTime;
+                cameraman.localScale = Vector3.Lerp(
+                    peak, prevCamScale, t / Mathf.Max(0.01f, popDown)
+                );
+                yield return null;
+            }
             cameraman.localScale = prevCamScale;
         }
         else
@@ -651,7 +689,9 @@ public class ShutterChanceBishi : BaseMinigame
         if (blank > 0f) yield return new WaitForSecondsRealtime(blank);
 
         if (cameramanImage)
-            cameramanImage.sprite = cameramanDefaultSprite ? cameramanDefaultSprite : prevCamSprite;
+            cameramanImage.sprite = cameramanDefaultSprite
+                                    ? cameramanDefaultSprite
+                                    : prevCamSprite;
 
         if (scoreText) scoreText.gameObject.SetActive(scoreWasActive);
         if (goldenHint) goldenHint.gameObject.SetActive(hintWasActive);
@@ -796,7 +836,9 @@ public class ShutterChanceBishi : BaseMinigame
             float s = 1f + goldenHintScaleAmp * Mathf.Sin(tPulse);
             rt.localScale = new Vector3(s, s, 1f);
 
-            float alpha = 1f - goldenHintAlphaAmp + goldenHintAlphaAmp * (0.5f + 0.5f * Mathf.Sin(tPulse));
+            float alpha = 1f - goldenHintAlphaAmp +
+                          goldenHintAlphaAmp *
+                          (0.5f + 0.5f * Mathf.Sin(tPulse));
             float colorLerp = 0.5f + 0.5f * Mathf.Sin(tPulse);
             Color col = Color.Lerp(goldenHintColorA, goldenHintColorB, colorLerp);
             col.a = alpha;
@@ -1078,9 +1120,30 @@ public class ShutterChanceBishi : BaseMinigame
 
         bool blockLaneSnaps = bonusPhase && goldenWindowActive;
 
-        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.Z)) { StartCoroutine(Flash()); TriggerCameramanGag(); TriggerCameramanHop(); TriggerScreenShake(); HandleSnap(Lane.Left, normalPhase); }
-        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.X)) { StartCoroutine(Flash()); TriggerCameramanGag(); TriggerCameramanHop(); TriggerScreenShake(); HandleSnap(Lane.Mid, normalPhase); }
-        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.C)) { StartCoroutine(Flash()); TriggerCameramanGag(); TriggerCameramanHop(); TriggerScreenShake(); HandleSnap(Lane.Right, normalPhase); }
+        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.Z))
+        {
+            StartCoroutine(Flash());
+            TriggerCameramanGag();
+            TriggerCameramanHop();
+            TriggerScreenShake();
+            HandleSnap(Lane.Left, normalPhase);
+        }
+        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.X))
+        {
+            StartCoroutine(Flash());
+            TriggerCameramanGag();
+            TriggerCameramanHop();
+            TriggerScreenShake();
+            HandleSnap(Lane.Mid, normalPhase);
+        }
+        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.C))
+        {
+            StartCoroutine(Flash());
+            TriggerCameramanGag();
+            TriggerCameramanHop();
+            TriggerScreenShake();
+            HandleSnap(Lane.Right, normalPhase);
+        }
     }
 
     private bool HandleGoldenPressDuringBonus()
@@ -1158,21 +1221,6 @@ public class ShutterChanceBishi : BaseMinigame
         if (scoreText) scoreText.text = score.ToString();
     }
 
-    private enum Rank { SSS, SS, S, A, B, C, D, E, F }
-    private Rank JudgeRank(int finalScore)
-    {
-        if (finalScore >= 1650) return Rank.SSS;
-        if (finalScore >= 1550) return Rank.SS;
-        if (finalScore >= 1450) return Rank.S;
-        if (finalScore >= 1300) return Rank.A;
-        if (finalScore >= 1150) return Rank.B;
-        if (finalScore >= 1000) return Rank.C;
-        if (finalScore >= 850) return Rank.D;
-        if (finalScore >= 700) return Rank.E;
-        if (finalScore >= 500) return Rank.F;
-        return Rank.F;
-    }
-
     private IEnumerator Flash()
     {
         yield return FlashColor(Color.white, flashHold, flashFade);
@@ -1215,6 +1263,13 @@ public class ShutterChanceBishi : BaseMinigame
         if (camHopCo != null) StopCoroutine(camHopCo);
         if (camWiggleCo != null) StopCoroutine(camWiggleCo);
         if (shakeCo != null) StopCoroutine(shakeCo);
+
+        // Safety: stop video & hide root if this object is disabled
+        if (videoPlayer)
+        {
+            try { videoPlayer.Stop(); } catch { }
+        }
+        if (videoRoot) videoRoot.SetActive(false);
     }
 
     private static void Shuffle<T>(IList<T> list)
@@ -1237,17 +1292,5 @@ public class ShutterChanceBishi : BaseMinigame
             skipButton.gameObject.SetActive(show);
         }
         if (!show) skipRequested = false;
-    }
-
-    private bool PollSkip() => skipRequested;
-
-    private IEnumerator WaitForRealtimeOrSkip(float seconds)
-    {
-        float t = 0f;
-        while (t < seconds && !PollSkip())
-        {
-            t += Time.unscaledDeltaTime;
-            yield return null;
-        }
     }
 }
