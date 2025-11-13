@@ -14,11 +14,8 @@ public class TurnEngine : MonoBehaviour
     private bool _running;
 
     [SerializeField] private TargetSelector targetSelector;
+    [SerializeField] private TurnIndicator turnIndicator;
 
-    // Leader choice plumbing
-    //public event Action<Combatant> OnLeaderTurnStart;
-    //private bool _waitingForLeader;
-    //private Combatant _currentLeader;
     private bool _waitingForPlayerDecision;
     private Combatant _currPlayerUnit;
     public event Action<Combatant> OnPlayerTurnStart;
@@ -203,21 +200,23 @@ public class TurnEngine : MonoBehaviour
         actor.ActionEnded += OnActorActionEnded;
     }
 
-    private void OnActorActionBegan() { _resolvingAction = true; }
-    private void OnActorActionEnded() { _resolvingAction = false; }
+    private void OnActorActionBegan()
+    {
+        _resolvingAction = true;
 
-    // === Leader actions ===
-    //public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
-    //{
-    //    if (!_waitingForLeader || _currentLeader == null) return;
+        turnIndicator.HideArrow();
+        _currPlayerUnit = null;
 
-    //    var target = ValidateOrFallback(explicitTarget);
-    //    if (target == null) return;
+        //if (_currPlayerUnit != null)
+        //    turnIndicator.ShowArrow(_currPlayerUnit.transform);
+    }
+    private void OnActorActionEnded()
+    {
+        _resolvingAction = false;
+        //turnIndicator.HideArrow();
+        //_currPlayerUnit = null;
+    }
 
-    //    HookActionLock(_currentLeader);
-    //    _currentLeader.BasicAttack(target);
-    //    EndLeaderDecisionAndCheck();
-    //}
     public void PlayerChooseBasicAttackTarget(Combatant explicitTarget)
     {
         if (!_waitingForPlayerDecision || _currPlayerUnit == null) return;
@@ -266,60 +265,6 @@ public class TurnEngine : MonoBehaviour
         EndPlayerDecisionAndCheck();
     }
 
-
-    //public void LeaderChooseSkillTarget(int skillIndex, Combatant explicitTarget)
-    //{
-    //    if (!_waitingForLeader || _currentLeader == null) return;
-
-    //    HookActionLock(_currentLeader);
-    //    bool used = false;
-
-    //    if (skillIndex == 0)
-    //    {
-    //        // Skill 1 = normal offensive (enemy)
-    //        var target = ValidateOrFallback(explicitTarget);
-    //        if (target == null) { _resolvingAction = false; return; }
-    //        used = _currentLeader.TryUseSkill1(target);
-    //    }
-    //    else if (skillIndex == 1)
-    //    {
-    //        // Skill 2 logic
-    //        if (_currentLeader.Skill2IsSupport)
-    //        {
-    //            // Support Skill 2: auto-cast on self, no manual target required
-    //            used = _currentLeader.TryUseSkill2(_currentLeader);
-    //        }
-    //        else
-    //        {
-    //            // Normal offensive Skill2 (enemy)
-    //            var target = ValidateOrFallback(explicitTarget);
-    //            if (target == null) { _resolvingAction = false; return; }
-    //            used = _currentLeader.TryUseSkill2(target);
-    //        }
-    //    }
-
-    //    if (!used)
-    //    {
-    //        _resolvingAction = false;
-    //        return;
-    //    }
-
-    //    EndLeaderDecisionAndCheck();
-    //}
-
-
-    //private void EndLeaderDecisionAndCheck()
-    //{
-    //    _waitingForLeader = false;
-    //    _currentLeader = null;
-    //    targetSelector?.Disable();
-
-    //    if (IsTeamWiped(true) || IsTeamWiped(false))
-    //    {
-    //        bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-    //        ForceEnd(playerWon);
-    //    }
-    //}
     private void EndPlayerDecisionAndCheck()
     {
         _waitingForPlayerDecision = false;
@@ -332,23 +277,7 @@ public class TurnEngine : MonoBehaviour
             ForceEnd(playerWon);
         }
     }
-    //public void EnableForPlayerUnit(Combatant actingUnit)
-    //{
-    //    gameObject.SetActive(true);
-    //}
 
-    // === Helpers ===
-    //private Combatant ValidateOrFallback(Combatant explicitTarget)
-    //{
-    //    if (explicitTarget != null &&
-    //        _currentLeader != null &&
-    //        explicitTarget.IsAlive &&
-    //        explicitTarget.isPlayerTeam != _currentLeader.isPlayerTeam)
-    //    {
-    //        return explicitTarget;
-    //    }
-    //    return _currentLeader != null ? FindRandomAlive(!_currentLeader.isPlayerTeam) : null;
-    //}
     private Combatant ValidateOrFallback(Combatant explicitTarget)
     {
         if (explicitTarget != null &&
