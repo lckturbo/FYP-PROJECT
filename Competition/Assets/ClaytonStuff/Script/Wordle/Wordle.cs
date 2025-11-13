@@ -31,7 +31,6 @@ public class Wordle : BaseMinigame
     [SerializeField] private Animator anim;
     [SerializeField] private GameObject animationPanel;
     [SerializeField] private GameObject tutoralPanel;
-    [SerializeField] private GameObject minigamePanel;
 
     private string targetWord;
     private int currentAttempt = 0;
@@ -312,7 +311,6 @@ public class Wordle : BaseMinigame
 
         animationPanel.SetActive(true);
         tutoralPanel.SetActive(false);
-        minigamePanel.SetActive(false);
 
         if (anim)
         {
@@ -323,7 +321,7 @@ public class Wordle : BaseMinigame
 
         animationPanel.SetActive(false);
         tutoralPanel.SetActive(true);
-        minigamePanel.SetActive(true);
+
 
         while (!gameOver)
             yield return null;
