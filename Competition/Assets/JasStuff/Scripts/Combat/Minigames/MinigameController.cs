@@ -6,11 +6,10 @@ public class MinigameController : MonoBehaviour
     private Combatant currCombatant;
     private string globalMinigameID = "TakeABreak";
     private float globalMinigameChance = 2f;
-    private float minigameChance = 20;
+    private float minigameChance;
 
     private void Awake()
     {
-        //  Auto-find TurnEngine in scene if not assigned
         if (engine == null)
         {
             engine = FindObjectOfType<TurnEngine>();
@@ -21,20 +20,16 @@ public class MinigameController : MonoBehaviour
 
     public void TriggerMinigame(string id)
     {
-        //  Skip minigame if Auto Battle is ON
         if (engine != null && engine.autoBattle)
-        {
-            Debug.Log("[MINIGAME] Auto Battle is ON — skipping minigame trigger.");
             return;
-        }
 
         currCombatant = GetComponentInParent<Combatant>();
 
-        if (currCombatant == null || !currCombatant.isLeader)
-        {
-            Debug.Log("[MINIGAME] Not leader — minigame ignored.");
-            return;
-        }
+        if (!currCombatant.isLeader)
+            minigameChance = 15;
+        else
+            minigameChance = 45;
+
         if (MinigameManager.instance == null) return;
 
         float roll = Random.Range(0f, 100f);
@@ -42,7 +37,6 @@ public class MinigameController : MonoBehaviour
 
         string finalID = id;
 
-        //You can re - enable your chance logic later if desired
         if (roll < globalMinigameChance)
         {
             finalID = globalMinigameID;

@@ -8434,6 +8434,7 @@ GameObject:
   m_Component:
   - component: {fileID: 831640394}
   - component: {fileID: 831640395}
+  - component: {fileID: 831640396}
   m_Layer: 5
   m_Name: TargetSelector
   m_TagString: Untagged
@@ -8477,6 +8478,19 @@ MonoBehaviour:
     m_Bits: 512
   highlight: {r: 1, g: 0.0035049438, b: 0, a: 1}
   clickEmptyClears: 1
+--- !u!114 &831640396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 831640393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 948068a3422a43d4c9cd5910204a2e65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  arrowPrefab: {fileID: 3146985641704584890, guid: c986b9891d18f0b49b6a2132560fdb0e, type: 3}
 --- !u!1 &832514322
 GameObject:
   m_ObjectHideFlags: 0
@@ -9195,6 +9209,7 @@ MonoBehaviour:
   skillBtn: {fileID: 798715089}
   skill2Btn: {fileID: 1549859707}
   selector: {fileID: 831640395}
+  turnIndicator: {fileID: 831640396}
   infoLabel: {fileID: 860150699}
   skill1CdText: {fileID: 0}
   skill2CdText: {fileID: 0}
@@ -20694,6 +20709,7 @@ MonoBehaviour:
   atbFillSeconds: 3
   autoBattle: 0
   targetSelector: {fileID: 831640395}
+  turnIndicator: {fileID: 831640396}
 --- !u!1 &2073009326
 GameObject:
   m_ObjectHideFlags: 0
