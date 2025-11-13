@@ -146,6 +146,10 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private float endOKAYExtraSeconds = 0.12f;
     [SerializeField] private float bonusIntroHold = 0.45f;
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+
     private enum Lane { Left = 0, Mid = 1, Right = 2 }
 
     private struct Slot
@@ -271,6 +275,21 @@ public class ShutterChanceBishi : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        animationPanel.SetActive(true);
+        
+
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(3.3f);
+        }
+
+        animationPanel.SetActive(false);
+
+
 
         score = 0;
         isShowingOkay = false;

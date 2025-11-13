@@ -22,6 +22,10 @@ public class CaptchaSimple : BaseMinigame
     [Header("Timer")]
     [SerializeField, Min(0.5f)] private float timeLimitSeconds = 8f;
 
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
+
     private CaptchaData active;
     private readonly List<Button> cells = new();
     private readonly HashSet<int> selected = new();
@@ -43,6 +47,19 @@ public class CaptchaSimple : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+
+        animationPanel.SetActive(true);
+
+
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(2.7f);
+        }
+
+        animationPanel.SetActive(false);
 
         PickDataset();
         BuildGridFromData();
