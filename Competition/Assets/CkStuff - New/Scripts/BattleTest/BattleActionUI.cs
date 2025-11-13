@@ -1,6 +1,8 @@
+using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class BattleActionUI : MonoBehaviour
 {
@@ -16,7 +18,7 @@ public class BattleActionUI : MonoBehaviour
     [SerializeField] private TMP_Text skill1CdText;
     [SerializeField] private TMP_Text skill2CdText;
 
-    private Combatant _currentLeader;
+    private Combatant _currentUnit;
 
     private void Awake()
     {
@@ -29,45 +31,49 @@ public class BattleActionUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (engine) engine.OnLeaderTurnStart += ShowForLeader;
+        if (engine) engine.OnPlayerTurnStart += ShowForUnit;
         if (selector) selector.OnSelectionChanged += HandleSelectionChanged;
     }
 
     private void OnDisable()
     {
-        if (engine) engine.OnLeaderTurnStart -= ShowForLeader;
+        if (engine) engine.OnPlayerTurnStart -= ShowForUnit;
         if (selector) selector.OnSelectionChanged -= HandleSelectionChanged;
     }
 
-    private void ShowForLeader(Combatant leader)
+    private void ShowForUnit(Combatant unit)
     {
-        _currentLeader = leader;
+        _currentUnit = unit;
         selector?.Clear();
         ShowMessage(null);
         if (panel) panel.SetActive(true);
 
-        if (_currentLeader)
+        if (_currentUnit)
         {
-            bool s1Ready = _currentLeader.IsSkill1Ready;
-            bool s2Ready = _currentLeader.IsSkill2Ready;
+            bool s1Ready = _currentUnit.IsSkill1Ready;
+            bool s2Ready = _currentUnit.IsSkill2Ready;
 
             if (skillBtn) skillBtn.interactable = s1Ready;
             if (skill2Btn) skill2Btn.interactable = s2Ready;
 
             if (skill1CdText)
             {
-                if (s1Ready) { skill1CdText.gameObject.SetActive(false); }
-                else { skill1CdText.gameObject.SetActive(true); skill1CdText.text = $"CD: {_currentLeader.Skill1Remaining}"; }
+                skill1CdText.gameObject.SetActive(!s1Ready);
+                if (!s1Ready) skill1CdText.text = $"CD: {_currentUnit.Skill1Remaining}";
             }
             if (skill2CdText)
             {
-                if (s2Ready) { skill2CdText.gameObject.SetActive(false); }
-                else { skill2CdText.gameObject.SetActive(true); skill2CdText.text = $"CD: {_currentLeader.Skill2Remaining}"; }
+                skill2CdText.gameObject.SetActive(!s2Ready);
+                if (!s2Ready) skill2CdText.text = $"CD: {_currentUnit.Skill2Remaining}";
             }
 
-            attackBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().basicAtk;
-            skillBtn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill1;
-            skill2Btn.GetComponent<Image>().sprite = PlayerParty.instance.GetLeader().skill2;
+            NewCharacterDefinition def = PlayerParty.instance.GetDefinitionFor(_currentUnit);
+            if (def != null)
+            {
+                attackBtn.GetComponent<Image>().sprite = def.basicAtk;
+                skillBtn.GetComponent<Image>().sprite = def.skill1;
+                skill2Btn.GetComponent<Image>().sprite = def.skill2;
+            }
         }
 
         ResetAllSpriteColors();
@@ -75,15 +81,11 @@ public class BattleActionUI : MonoBehaviour
 
     private void ResetAllSpriteColors()
     {
-        // Find all active NewHealth components in the scene
-        var allHealths = FindObjectsOfType<NewHealth>();
-        foreach (var health in allHealths)
+        foreach (var health in FindObjectsOfType<NewHealth>())
         {
             var sr = health.GetComponentInChildren<SpriteRenderer>();
             if (sr != null)
-            {
-                sr.color = Color.white; // restore to default (you can also store & use health.originalColor if you prefer)
-            }
+                sr.color = Color.white;
         }
     }
 
@@ -95,39 +97,34 @@ public class BattleActionUI : MonoBehaviour
     private void OnAttack()
     {
         var target = selector ? selector.Current : null;
-        if (target == null) { ShowMessage(infoLabel.text); return; }
+        if (target == null) { ShowMessage("Select a target first."); return; }
         if (panel) panel.SetActive(false);
-        engine.LeaderChooseBasicAttackTarget(target);
+        engine.PlayerChooseBasicAttackTarget(target);
     }
 
     private void OnSkill1()
     {
         var target = selector ? selector.Current : null;
-        if (target == null) { ShowMessage(infoLabel.text); return; }
-        if (_currentLeader && !_currentLeader.IsSkill1Ready) return;
+        if (target == null) { ShowMessage("Select a target first."); return; }
+        if (_currentUnit && !_currentUnit.IsSkill1Ready) return;
         if (panel) panel.SetActive(false);
-        engine.LeaderChooseSkillTarget(0, target);
+        engine.PlayerChooseSkillTarget(0, target);
     }
 
     private void OnSkill2()
     {
-        if (_currentLeader == null) return;
-        if (!_currentLeader.IsSkill2Ready) return;
+        if (_currentUnit == null) return;
+        if (!_currentUnit.IsSkill2Ready) return;
 
-        // Self-cast support Skill2 (Cameraman)
-        if (_currentLeader.Skill2IsSupport)
+        // Self-cast support Skill2
+        if (_currentUnit.Skill2IsSupport)
         {
             if (panel) panel.SetActive(false);
-
-            // Tell TurnEngine to use Skill2; it will auto-cast on self.
-            engine.LeaderChooseSkillTarget(1, _currentLeader);
-
-            // Make sure no leftover highlight
-            if (selector) selector.Clear();
+            engine.PlayerChooseSkillTarget(1, _currentUnit);
+            selector?.Clear();
             return;
         }
 
-        // ===== Normal offensive Skill2 (still needs enemy target) =====
         var target = selector ? selector.Current : null;
         if (target == null)
         {
@@ -136,14 +133,18 @@ public class BattleActionUI : MonoBehaviour
         }
 
         if (panel) panel.SetActive(false);
-        engine.LeaderChooseSkillTarget(1, target);
+        engine.PlayerChooseSkillTarget(1, target);
     }
-
 
     private void ShowMessage(string msg)
     {
         if (!infoLabel) return;
-        if (string.IsNullOrEmpty(msg)) { infoLabel.gameObject.SetActive(false); }
-        else { infoLabel.text = msg; infoLabel.gameObject.SetActive(true); }
+        if (string.IsNullOrEmpty(msg))
+            infoLabel.gameObject.SetActive(false);
+        else
+        {
+            infoLabel.text = msg;
+            infoLabel.gameObject.SetActive(true);
+        }
     }
 }

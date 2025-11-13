@@ -18,7 +18,7 @@ public class TargetSelector : MonoBehaviour
     public Combatant Current => _current;
     public event Action<Combatant> OnSelectionChanged;
 
-    public void EnableForLeaderTurn()
+    public void EnableForPlayerUnit(Combatant actingUnit)
     {
         _active = true;
     }
