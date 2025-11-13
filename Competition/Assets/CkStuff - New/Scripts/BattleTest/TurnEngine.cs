@@ -16,9 +16,12 @@ public class TurnEngine : MonoBehaviour
     [SerializeField] private TargetSelector targetSelector;
 
     // Leader choice plumbing
-    public event Action<Combatant> OnLeaderTurnStart;
-    private bool _waitingForLeader;
-    private Combatant _currentLeader;
+    //public event Action<Combatant> OnLeaderTurnStart;
+    //private bool _waitingForLeader;
+    //private Combatant _currentLeader;
+    private bool _waitingForPlayerDecision;
+    private Combatant _currPlayerUnit;
+    public event Action<Combatant> OnPlayerTurnStart;
 
     public event Action<bool> OnBattleEnd;
 
@@ -59,13 +62,13 @@ public class TurnEngine : MonoBehaviour
     public void Begin()
     {
         _running = true;
-        _waitingForLeader = false;
-        _currentLeader = null;
+        //_waitingForLeader = false;
+        //_currentLeader = null;
+        _waitingForPlayerDecision = false;
+        _currPlayerUnit = null;
         _nextIndex = 0;
         _resolvingAction = false;
         _ended = false; // reset end guard for fresh battle
-
-       // ResetBattleSettingsBasedOnLevel();
 
         // small random stagger
         for (int i = 0; i < _units.Count; i++)
@@ -85,8 +88,10 @@ public class TurnEngine : MonoBehaviour
         if (!_running) return;
 
         _running = false;
-        _waitingForLeader = false;
-        _currentLeader = null;
+        //_waitingForLeader = false;
+        //_currentLeader = null;
+        _waitingForPlayerDecision = false;
+        _currPlayerUnit = null;
         _resolvingAction = false;
 
         targetSelector?.Disable();
@@ -96,8 +101,6 @@ public class TurnEngine : MonoBehaviour
     private void Update()
     {
         if (!_running || _paused) return;
-
-        //Time.timeScale = battleSpeed;
 
         // ========= Global failsafes (run EVERY frame) =========
         // 1) If all ENEMIES are gone at any moment (DOT, projectile, etc.), end as WIN.
@@ -119,9 +122,7 @@ public class TurnEngine : MonoBehaviour
         // ======================================================
 
         // Pause the loop if an action is resolving (but after failsafes above)
-        if (_resolvingAction) return;
-
-        if (_waitingForLeader) return;
+        if (_resolvingAction || _waitingForPlayerDecision) return;
 
         float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
@@ -146,7 +147,7 @@ public class TurnEngine : MonoBehaviour
                 u.atb = 0f;
                 u.OnTurnStarted();
 
-                if (u.isPlayerTeam && u.isLeader)
+                if (u.isPlayerTeam)
                 {
                     if (autoBattle)
                     {
@@ -155,18 +156,14 @@ public class TurnEngine : MonoBehaviour
                     }
                     else
                     {
-                        _waitingForLeader = true;
-                        _currentLeader = u;
-                        OnLeaderTurnStart?.Invoke(u);
+                        _waitingForPlayerDecision = true;
+                        _currPlayerUnit = u;
+                        OnPlayerTurnStart?.Invoke(u);
 
                         if (targetSelector)
                         {
-                            if (targetSelector)
-                            {
-                                targetSelector.EnableForLeaderTurn();
-                                targetSelector.Clear();
-                            }
-
+                            targetSelector.EnableForPlayerUnit(u);
+                            targetSelector.Clear();
                         }
 
                         _nextIndex = (i + 1) % count;
@@ -210,46 +207,53 @@ public class TurnEngine : MonoBehaviour
     private void OnActorActionEnded() { _resolvingAction = false; }
 
     // === Leader actions ===
-    public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
+    //public void LeaderChooseBasicAttackTarget(Combatant explicitTarget)
+    //{
+    //    if (!_waitingForLeader || _currentLeader == null) return;
+
+    //    var target = ValidateOrFallback(explicitTarget);
+    //    if (target == null) return;
+
+    //    HookActionLock(_currentLeader);
+    //    _currentLeader.BasicAttack(target);
+    //    EndLeaderDecisionAndCheck();
+    //}
+    public void PlayerChooseBasicAttackTarget(Combatant explicitTarget)
     {
-        if (!_waitingForLeader || _currentLeader == null) return;
+        if (!_waitingForPlayerDecision || _currPlayerUnit == null) return;
 
         var target = ValidateOrFallback(explicitTarget);
         if (target == null) return;
 
-        HookActionLock(_currentLeader);
-        _currentLeader.BasicAttack(target);
-        EndLeaderDecisionAndCheck();
+        HookActionLock(_currPlayerUnit);
+        _currPlayerUnit.BasicAttack(target);
+        EndPlayerDecisionAndCheck();
     }
 
-    public void LeaderChooseSkillTarget(int skillIndex, Combatant explicitTarget)
+    public void PlayerChooseSkillTarget(int skillIndex, Combatant explicitTarget)
     {
-        if (!_waitingForLeader || _currentLeader == null) return;
+        if (!_waitingForPlayerDecision || _currPlayerUnit == null) return;
 
-        HookActionLock(_currentLeader);
+        HookActionLock(_currPlayerUnit);
         bool used = false;
 
         if (skillIndex == 0)
         {
-            // Skill 1 = normal offensive (enemy)
             var target = ValidateOrFallback(explicitTarget);
             if (target == null) { _resolvingAction = false; return; }
-            used = _currentLeader.TryUseSkill1(target);
+            used = _currPlayerUnit.TryUseSkill1(target);
         }
         else if (skillIndex == 1)
         {
-            // Skill 2 logic
-            if (_currentLeader.Skill2IsSupport)
+            if (_currPlayerUnit.Skill2IsSupport)
             {
-                // Support Skill 2: auto-cast on self, no manual target required
-                used = _currentLeader.TryUseSkill2(_currentLeader);
+                used = _currPlayerUnit.TryUseSkill2(_currPlayerUnit);
             }
             else
             {
-                // Normal offensive Skill2 (enemy)
                 var target = ValidateOrFallback(explicitTarget);
                 if (target == null) { _resolvingAction = false; return; }
-                used = _currentLeader.TryUseSkill2(target);
+                used = _currPlayerUnit.TryUseSkill2(target);
             }
         }
 
@@ -259,14 +263,67 @@ public class TurnEngine : MonoBehaviour
             return;
         }
 
-        EndLeaderDecisionAndCheck();
+        EndPlayerDecisionAndCheck();
     }
 
 
-    private void EndLeaderDecisionAndCheck()
+    //public void LeaderChooseSkillTarget(int skillIndex, Combatant explicitTarget)
+    //{
+    //    if (!_waitingForLeader || _currentLeader == null) return;
+
+    //    HookActionLock(_currentLeader);
+    //    bool used = false;
+
+    //    if (skillIndex == 0)
+    //    {
+    //        // Skill 1 = normal offensive (enemy)
+    //        var target = ValidateOrFallback(explicitTarget);
+    //        if (target == null) { _resolvingAction = false; return; }
+    //        used = _currentLeader.TryUseSkill1(target);
+    //    }
+    //    else if (skillIndex == 1)
+    //    {
+    //        // Skill 2 logic
+    //        if (_currentLeader.Skill2IsSupport)
+    //        {
+    //            // Support Skill 2: auto-cast on self, no manual target required
+    //            used = _currentLeader.TryUseSkill2(_currentLeader);
+    //        }
+    //        else
+    //        {
+    //            // Normal offensive Skill2 (enemy)
+    //            var target = ValidateOrFallback(explicitTarget);
+    //            if (target == null) { _resolvingAction = false; return; }
+    //            used = _currentLeader.TryUseSkill2(target);
+    //        }
+    //    }
+
+    //    if (!used)
+    //    {
+    //        _resolvingAction = false;
+    //        return;
+    //    }
+
+    //    EndLeaderDecisionAndCheck();
+    //}
+
+
+    //private void EndLeaderDecisionAndCheck()
+    //{
+    //    _waitingForLeader = false;
+    //    _currentLeader = null;
+    //    targetSelector?.Disable();
+
+    //    if (IsTeamWiped(true) || IsTeamWiped(false))
+    //    {
+    //        bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+    //        ForceEnd(playerWon);
+    //    }
+    //}
+    private void EndPlayerDecisionAndCheck()
     {
-        _waitingForLeader = false;
-        _currentLeader = null;
+        _waitingForPlayerDecision = false;
+        _currPlayerUnit = null;
         targetSelector?.Disable();
 
         if (IsTeamWiped(true) || IsTeamWiped(false))
@@ -275,19 +332,35 @@ public class TurnEngine : MonoBehaviour
             ForceEnd(playerWon);
         }
     }
+    //public void EnableForPlayerUnit(Combatant actingUnit)
+    //{
+    //    gameObject.SetActive(true);
+    //}
 
     // === Helpers ===
+    //private Combatant ValidateOrFallback(Combatant explicitTarget)
+    //{
+    //    if (explicitTarget != null &&
+    //        _currentLeader != null &&
+    //        explicitTarget.IsAlive &&
+    //        explicitTarget.isPlayerTeam != _currentLeader.isPlayerTeam)
+    //    {
+    //        return explicitTarget;
+    //    }
+    //    return _currentLeader != null ? FindRandomAlive(!_currentLeader.isPlayerTeam) : null;
+    //}
     private Combatant ValidateOrFallback(Combatant explicitTarget)
     {
         if (explicitTarget != null &&
-            _currentLeader != null &&
+            _currPlayerUnit != null &&
             explicitTarget.IsAlive &&
-            explicitTarget.isPlayerTeam != _currentLeader.isPlayerTeam)
+            explicitTarget.isPlayerTeam != _currPlayerUnit.isPlayerTeam)
         {
             return explicitTarget;
         }
-        return _currentLeader != null ? FindRandomAlive(!_currentLeader.isPlayerTeam) : null;
+        return _currPlayerUnit != null ? FindRandomAlive(!_currPlayerUnit.isPlayerTeam) : null;
     }
+
 
     private void AutoAct(Combatant actor, bool isLeaderAuto)
     {
@@ -358,24 +431,4 @@ public class TurnEngine : MonoBehaviour
                 return false;
         return true;
     }
-
-    //public void ResetBattleSettingsBasedOnLevel()
-    //{
-    //    if (PartyLevelSystem.Instance == null) return;
-
-    //    int currentLevel = PartyLevelSystem.Instance.levelSystem.level;
-
-    //    int autoBattleUnlockLevel = 3;  
-    //    int battleSpeedUnlockLevel = 2; 
-
-    //    if (currentLevel < autoBattleUnlockLevel)
-    //    {
-    //        autoBattle = false;
-    //    }
-
-    //    if (currentLevel < battleSpeedUnlockLevel)
-    //    {
-    //        BattleSpeed = 1f;
-    //    }
-    //}
 }
