@@ -137,6 +137,11 @@ public class BattleSystem : MonoBehaviour
         turnEngine.Register(cL);
         _playerCombatants.Add(cL);
 
+        if(leaderObj.name == "Leader_Producer")
+        {
+            cL.skill1IsCommand = true;
+            Debug.Log("[BattleSystem] Leader is Producer - Skill1 set as support.");
+        }
         if (leaderObj.name == "Leader_Cameraman")
         {
             cL.skill2IsSupport = true;
@@ -187,6 +192,12 @@ public class BattleSystem : MonoBehaviour
                 cA.stats = allyRT;
                 turnEngine.Register(cA);
                 _playerCombatants.Add(cA);
+
+                if(allyObj.name == "Ally_Producer")
+                {
+                    cL.skill1IsCommand = true;
+                    Debug.Log("[BattleSystem] Leader is Producer - Skill1 set as support.");
+                }
 
                 if (allyObj.name == "Ally_Cameraman") 
                 {
