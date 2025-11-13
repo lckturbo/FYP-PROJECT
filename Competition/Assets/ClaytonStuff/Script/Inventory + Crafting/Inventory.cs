@@ -133,6 +133,16 @@ public class Inventory : MonoBehaviour, IDataPersistence
         Money += amount;
     }
 
+    public void ClearInventory()
+    {
+        mainInventory.Clear();
+        subInventory.Clear();
+        Money = 0;
+
+        Debug.Log("[Inventory] Inventory cleared for New Game.");
+    }
+
+
     public void LoadData(GameData data)
     {
         mainInventory.Clear();

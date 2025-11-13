@@ -12,6 +12,7 @@ public class BattleActionUI : MonoBehaviour
     [SerializeField] private Button skillBtn;
     [SerializeField] private Button skill2Btn;
     [SerializeField] private TargetSelector selector;
+    [SerializeField] private TurnIndicator turnIndicator;
 
     [Header("Feedback")]
     [SerializeField] private TMP_Text infoLabel;
@@ -47,6 +48,9 @@ public class BattleActionUI : MonoBehaviour
         selector?.Clear();
         ShowMessage(null);
         if (panel) panel.SetActive(true);
+
+        if (unit != null)
+            turnIndicator.ShowArrow(unit.transform);
 
         if (_currentUnit)
         {
