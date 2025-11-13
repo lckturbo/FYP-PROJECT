@@ -54,7 +54,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
     private void Update()
     {
         if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby" || SceneManager.GetActiveScene().name == "Credits") return;
-        if (!canPause || ASyncManager.IsLoading || (MinigameManager.instance && MinigameManager.instance.IsMinigameActive()))
+        if (!canPause || (MinigameManager.instance && MinigameManager.instance.IsMinigameActive()))
             return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -147,7 +147,13 @@ public class UIManager : MonoBehaviour, IDataPersistence
             newBtn.onClick.RemoveAllListeners();
             newBtn.onClick.AddListener(() =>
             {
+                // Clear inventory at start of new game
+                Inventory playerInv = FindObjectOfType<Inventory>();
+                if (playerInv != null)
+                    playerInv.ClearInventory();
+
                 SaveLoadSystem.instance.NewGame();
+
                 if (CutsceneManager.instance != null)
                 {
                     CutsceneManager.instance.PlayCutsceneThenLoad("CharSelection");
@@ -157,6 +163,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
                     ASyncManager.instance.LoadLevelBtn("CharSelection");
                 }
             });
+
 
             loadBtn.onClick.RemoveAllListeners();
             loadBtn.onClick.AddListener(() =>
