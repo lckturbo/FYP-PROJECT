@@ -149,11 +149,8 @@ public class ShutterChanceBishi : BaseMinigame
     // ===================== Intro / Instructions Video =====================
     [Header("Intro / Instructions Video")]
     [SerializeField] private bool useIntroVideo = true;
-    [SerializeField] private RawImage videoTarget;
     [SerializeField] private VideoPlayer videoPlayer;
-    [SerializeField] private VideoClip introVideoClip;
-    [SerializeField] private AudioSource videoAudio;
-    [SerializeField] private RenderTexture videoRT;
+    [SerializeField] private GameObject videoRoot;   // object that shows the video (screen / RawImage / etc.)
 
     // ========== Result thresholds (3-tier) ==========
     [Header("Result Thresholds (3-tier)")]
@@ -237,9 +234,6 @@ public class ShutterChanceBishi : BaseMinigame
         if (resultPanel) resultPanel.SetActive(false);
         if (finishText) finishText.gameObject.SetActive(false);
 
-        // Hide intro video by default
-        if (videoTarget) videoTarget.gameObject.SetActive(false);
-
         gameplayActive = false;
         ShowCameraman(false);
 
@@ -270,6 +264,9 @@ public class ShutterChanceBishi : BaseMinigame
 
         skipRequested = false;
         SetupSkipUI(false);
+
+        // ensure video object starts hidden
+        if (videoRoot) videoRoot.SetActive(false);
     }
 
     private void HideLane(Lane lane)
@@ -308,7 +305,6 @@ public class ShutterChanceBishi : BaseMinigame
 
         // Use video instead of text instructions
         SetupSkipUI(true);                 // allow skipping the video
-
         yield return PlayIntroVideo();     // will stop early if skipRequested
 
         SetupSkipUI(false);                // no skip during gameplay
@@ -318,10 +314,14 @@ public class ShutterChanceBishi : BaseMinigame
         ShowCameraman(true);
         EnsureBackground(bgTransition);
 
-        // READY / GO!
+        // READY / GO! (only after video is done or skipped)
         yield return ShowReadyGo();
 
-        float desiredBonusSeconds = Mathf.Clamp(gameplayTotalSeconds * bonusPortion, 0.5f, Mathf.Max(0.5f, gameplayTotalSeconds - 0.5f));
+        float desiredBonusSeconds = Mathf.Clamp(
+            gameplayTotalSeconds * bonusPortion,
+            0.5f,
+            Mathf.Max(0.5f, gameplayTotalSeconds - 0.5f)
+        );
         float normalBudget = Mathf.Max(0f, gameplayTotalSeconds - desiredBonusSeconds);
 
         float normalClock = 0f;
@@ -376,7 +376,8 @@ public class ShutterChanceBishi : BaseMinigame
                 yield return OKAYBeatFlash(normalBeatGapSeconds);
 
                 float remaining = Mathf.Max(0f, normalBudget - normalClock);
-                float minNeeded = (normalBeatSeconds * endAlignMinBeatFraction) + (normalBeatGapSeconds * 0.25f);
+                float minNeeded = (normalBeatSeconds * endAlignMinBeatFraction) +
+                                  (normalBeatGapSeconds * 0.25f);
 
                 if (remaining < minNeeded)
                 {
@@ -384,7 +385,9 @@ public class ShutterChanceBishi : BaseMinigame
                 }
                 else
                 {
-                    float p = (normalBudget <= 0.001f) ? 1f : Mathf.Clamp01(normalClock / normalBudget);
+                    float p = (normalBudget <= 0.001f)
+                        ? 1f
+                        : Mathf.Clamp01(normalClock / normalBudget);
                     SpawnBeatLayout(p);
                     EnsureBackground(bgPhoto);
                 }
@@ -397,6 +400,7 @@ public class ShutterChanceBishi : BaseMinigame
         ClearAllLanes();
         EnsureBackground(bgTransition);
 
+        // ========== BONUS PHASE ==========
         bonusPhase = true;
         EnterBonusVisuals();
         goldenActive = false;
@@ -405,7 +409,11 @@ public class ShutterChanceBishi : BaseMinigame
 
         float bonusWindow = desiredBonusSeconds;
         float bonusTimer = 0f;
-        float goldenAppearAt = Mathf.Clamp(bonusWindow * goldenRopeAtPortion, 0.15f, Mathf.Max(0.2f, bonusWindow - 0.1f));
+        float goldenAppearAt = Mathf.Clamp(
+            bonusWindow * goldenRopeAtPortion,
+            0.15f,
+            Mathf.Max(0.2f, bonusWindow - 0.1f)
+        );
         bool feverActivated = false;
 
         while (bonusTimer < bonusWindow)
@@ -457,7 +465,8 @@ public class ShutterChanceBishi : BaseMinigame
         {
             finishText.rectTransform.SetAsLastSibling();
             finishText.text = "FINISH!!";
-            var c = finishText.color; finishText.color = new Color(c.r, c.g, c.b, 0f);
+            var c = finishText.color;
+            finishText.color = new Color(c.r, c.g, c.b, 0f);
             finishText.gameObject.SetActive(true);
 
             yield return FadeTMPAlpha(finishText, 0f, 1f, 0.25f);
@@ -467,9 +476,11 @@ public class ShutterChanceBishi : BaseMinigame
         }
 
         // ======= Final 3-tier result only =======
-        Result = (score >= perfectScore) ? MinigameManager.ResultType.Perfect
-               : (score >= successScore) ? MinigameManager.ResultType.Success
-               : MinigameManager.ResultType.Fail;
+        Result = (score >= perfectScore)
+            ? MinigameManager.ResultType.Perfect
+            : (score >= successScore)
+                ? MinigameManager.ResultType.Success
+                : MinigameManager.ResultType.Fail;
 
         yield return Flash();
 
@@ -492,69 +503,43 @@ public class ShutterChanceBishi : BaseMinigame
     // ===================== Intro Video Coroutine =====================
     private IEnumerator PlayIntroVideo()
     {
-        if (!useIntroVideo)
+        if (!useIntroVideo || !videoPlayer)
             yield break;
 
-        if (!videoPlayer || !videoTarget)
-            yield break;
+        // Silent video
+        videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 
-        if (introVideoClip)
-        {
-            videoPlayer.source = VideoSource.VideoClip;
-            videoPlayer.clip = introVideoClip;
-            videoPlayer.url = null;
-        }
-
-        if (videoAudio)
-        {
-            videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
-            videoPlayer.EnableAudioTrack(0, true);
-            videoPlayer.SetTargetAudioSource(0, videoAudio);
-        }
-        else
-        {
-            videoPlayer.audioOutputMode = VideoAudioOutputMode.Direct;
-        }
+        // Show the video screen / object
+        if (videoRoot) videoRoot.SetActive(true);
 
         skipRequested = false;
+
+        videoPlayer.Stop();
+        videoPlayer.time = 0.0;
         videoPlayer.Prepare();
 
+        // Wait until prepared or skipped
         while (!videoPlayer.isPrepared && !skipRequested)
             yield return null;
 
         if (skipRequested)
         {
             try { videoPlayer.Stop(); } catch { }
+            if (videoRoot) videoRoot.SetActive(false);
             yield break;
         }
 
-        if (!videoRT)
-        {
-            int w = Mathf.Max(16, (int)videoPlayer.width);
-            int h = Mathf.Max(16, (int)videoPlayer.height);
-            videoRT = new RenderTexture(w, h, 0, RenderTextureFormat.ARGB32)
-            {
-                name = "IntroVideoRT",
-                useMipMap = false,
-                autoGenerateMips = false
-            };
-        }
-
-        videoPlayer.targetTexture = videoRT;
-        videoTarget.texture = videoRT;
-        videoTarget.gameObject.SetActive(true);
-        videoTarget.rectTransform.SetAsLastSibling();
-
+        // Play
         videoPlayer.Play();
-        if (videoAudio) videoAudio.Play();
 
+        // Wait until finished or skipped
         while (videoPlayer.isPlaying && !skipRequested)
             yield return null;
 
         try { videoPlayer.Stop(); } catch { }
-        if (videoAudio) videoAudio.Stop();
 
-        videoTarget.gameObject.SetActive(false);
+        // Hide video object so it doesn't sit in the background
+        if (videoRoot) videoRoot.SetActive(false);
     }
 
     private void SpawnBeatLayout(float progress01)
@@ -563,7 +548,9 @@ public class ShutterChanceBishi : BaseMinigame
         missesThisBeat = 0;
         lastBeatOutcome = BeatOutcome.Good;
 
-        int models = Mathf.RoundToInt(Mathf.Lerp(minModelsPerBeat, maxModelsPerBeat, Mathf.Clamp01(progress01)));
+        int models = Mathf.RoundToInt(
+            Mathf.Lerp(minModelsPerBeat, maxModelsPerBeat, Mathf.Clamp01(progress01))
+        );
         models = Mathf.Clamp(models, 1, 3);
 
         ClearAllLanes();
@@ -624,7 +611,6 @@ public class ShutterChanceBishi : BaseMinigame
         if (goldenHint) goldenHint.gameObject.SetActive(false);
         if (goldenRope) goldenRope.gameObject.SetActive(false);
 
-        // Decide label + color + sprite based on outcome
         string label;
         Color labelColor;
         Sprite desiredCamSprite = cameramanDefaultSprite;
@@ -646,7 +632,9 @@ public class ShutterChanceBishi : BaseMinigame
         {
             okayCenterText.text = label;
             var baseCol = okayCenterText.color;
-            okayCenterText.color = new Color(labelColor.r, labelColor.g, labelColor.b, baseCol.a);
+            okayCenterText.color = new Color(
+                labelColor.r, labelColor.g, labelColor.b, baseCol.a
+            );
             okayCenterText.gameObject.SetActive(true);
         }
 
@@ -659,7 +647,9 @@ public class ShutterChanceBishi : BaseMinigame
         if (cameramanImage && desiredCamSprite)
             cameramanImage.sprite = desiredCamSprite;
 
-        float show = Mathf.Clamp(gapSeconds * 0.8f, 0.06f, Mathf.Max(0.06f, gapSeconds));
+        float show = Mathf.Clamp(
+            gapSeconds * 0.8f, 0.06f, Mathf.Max(0.06f, gapSeconds)
+        );
         float blank = Mathf.Max(0f, gapSeconds - show);
 
         float popUp = Mathf.Min(0.10f, show * 0.35f);
@@ -673,7 +663,9 @@ public class ShutterChanceBishi : BaseMinigame
             while (t < popUp)
             {
                 t += Time.unscaledDeltaTime;
-                cameraman.localScale = Vector3.Lerp(prevCamScale, peak, t / Mathf.Max(0.01f, popUp));
+                cameraman.localScale = Vector3.Lerp(
+                    prevCamScale, peak, t / Mathf.Max(0.01f, popUp)
+                );
                 yield return null;
             }
             if (hold > 0f) yield return new WaitForSecondsRealtime(hold);
@@ -681,7 +673,9 @@ public class ShutterChanceBishi : BaseMinigame
             while (t < popDown)
             {
                 t += Time.unscaledDeltaTime;
-                cameraman.localScale = Vector3.Lerp(peak, prevCamScale, t / Mathf.Max(0.01f, popDown));
+                cameraman.localScale = Vector3.Lerp(
+                    peak, prevCamScale, t / Mathf.Max(0.01f, popDown)
+                );
                 yield return null;
             }
             cameraman.localScale = prevCamScale;
@@ -695,7 +689,9 @@ public class ShutterChanceBishi : BaseMinigame
         if (blank > 0f) yield return new WaitForSecondsRealtime(blank);
 
         if (cameramanImage)
-            cameramanImage.sprite = cameramanDefaultSprite ? cameramanDefaultSprite : prevCamSprite;
+            cameramanImage.sprite = cameramanDefaultSprite
+                                    ? cameramanDefaultSprite
+                                    : prevCamSprite;
 
         if (scoreText) scoreText.gameObject.SetActive(scoreWasActive);
         if (goldenHint) goldenHint.gameObject.SetActive(hintWasActive);
@@ -840,7 +836,9 @@ public class ShutterChanceBishi : BaseMinigame
             float s = 1f + goldenHintScaleAmp * Mathf.Sin(tPulse);
             rt.localScale = new Vector3(s, s, 1f);
 
-            float alpha = 1f - goldenHintAlphaAmp + goldenHintAlphaAmp * (0.5f + 0.5f * Mathf.Sin(tPulse));
+            float alpha = 1f - goldenHintAlphaAmp +
+                          goldenHintAlphaAmp *
+                          (0.5f + 0.5f * Mathf.Sin(tPulse));
             float colorLerp = 0.5f + 0.5f * Mathf.Sin(tPulse);
             Color col = Color.Lerp(goldenHintColorA, goldenHintColorB, colorLerp);
             col.a = alpha;
@@ -1122,9 +1120,30 @@ public class ShutterChanceBishi : BaseMinigame
 
         bool blockLaneSnaps = bonusPhase && goldenWindowActive;
 
-        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.Z)) { StartCoroutine(Flash()); TriggerCameramanGag(); TriggerCameramanHop(); TriggerScreenShake(); HandleSnap(Lane.Left, normalPhase); }
-        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.X)) { StartCoroutine(Flash()); TriggerCameramanGag(); TriggerCameramanHop(); TriggerScreenShake(); HandleSnap(Lane.Mid, normalPhase); }
-        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.C)) { StartCoroutine(Flash()); TriggerCameramanGag(); TriggerCameramanHop(); TriggerScreenShake(); HandleSnap(Lane.Right, normalPhase); }
+        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.Z))
+        {
+            StartCoroutine(Flash());
+            TriggerCameramanGag();
+            TriggerCameramanHop();
+            TriggerScreenShake();
+            HandleSnap(Lane.Left, normalPhase);
+        }
+        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.X))
+        {
+            StartCoroutine(Flash());
+            TriggerCameramanGag();
+            TriggerCameramanHop();
+            TriggerScreenShake();
+            HandleSnap(Lane.Mid, normalPhase);
+        }
+        if (!blockLaneSnaps && Input.GetKeyDown(KeyCode.C))
+        {
+            StartCoroutine(Flash());
+            TriggerCameramanGag();
+            TriggerCameramanHop();
+            TriggerScreenShake();
+            HandleSnap(Lane.Right, normalPhase);
+        }
     }
 
     private bool HandleGoldenPressDuringBonus()
@@ -1245,15 +1264,12 @@ public class ShutterChanceBishi : BaseMinigame
         if (camWiggleCo != null) StopCoroutine(camWiggleCo);
         if (shakeCo != null) StopCoroutine(shakeCo);
 
-        // Clean up video resources
-        if (videoPlayer) videoPlayer.targetTexture = null;
-        if (videoTarget) videoTarget.texture = null;
-        if (videoRT)
+        // Safety: stop video & hide root if this object is disabled
+        if (videoPlayer)
         {
-            videoRT.Release();
-            Destroy(videoRT);
-            videoRT = null;
+            try { videoPlayer.Stop(); } catch { }
         }
+        if (videoRoot) videoRoot.SetActive(false);
     }
 
     private static void Shuffle<T>(IList<T> list)
