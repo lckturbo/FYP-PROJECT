@@ -19,16 +19,17 @@ public class UIManager : MonoBehaviour, IDataPersistence
     [Header("Pause UI/Buttons")]
     [SerializeField] private GameObject pauseUI;
     [SerializeField] private Button resumeBtn;
+    [SerializeField] private Button checkpointBtn;
     [SerializeField] private Button menuBtn;
+    [SerializeField] private Button desktopBtn;
 
     [Header("Settings UI/Buttons")]
     [SerializeField] private GameObject settingsUI;
+    [SerializeField] private Button playerStatsBtn;
+    [SerializeField] private Slider MasterSlider;
     [SerializeField] private Slider BGMSlider;
     [SerializeField] private Slider SFXSlider;
     [SerializeField] private Button backBtn;
-
-    [Header("Stats UI (For SampleScene)")]
-    [SerializeField] private StatsDisplay statsDisplay;
 
     private bool isOpen;
     private bool isPaused;
@@ -53,14 +54,28 @@ public class UIManager : MonoBehaviour, IDataPersistence
     private void Update()
     {
         if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby" || SceneManager.GetActiveScene().name == "Credits") return;
-        if (!canPause || isOpen || (MinigameManager.instance && MinigameManager.instance.IsMinigameActive())) return;
+        if (!canPause || (MinigameManager.instance && MinigameManager.instance.IsMinigameActive()))
+            return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isOpen)
+            {
+                ToggleSettings(false);
+            }
+
             TogglePause(!isPaused);
+        }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (settingsUI == null || settingsUI.Equals(null))
+            settingsUI = null;
+
+        if (pauseUI == null || pauseUI.Equals(null))
+            pauseUI = null;
+
         string scnName = scene.name;
         AudioManager.instance.StopAllSounds();
 
@@ -75,7 +90,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             case "Lobby":
                 AudioManager.instance.PlaySound("bgm");
                 SetupLobbyMenu();
-                RefreshLobbyButtons(); 
+                RefreshLobbyButtons();
                 return;
             case "CharSelection":
                 AudioManager.instance.PlaySound("MainMenuBGM");
@@ -157,7 +172,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
             exitBtn.onClick.AddListener(() =>
             {
                 GameManager.instance.ChangeScene("Main");
-                //SaveLoadSystem.instance.SaveGame();
             });
             RefreshLobbyButtons();
         }
@@ -186,20 +200,13 @@ public class UIManager : MonoBehaviour, IDataPersistence
     {
         SetupPauseUI();
         settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
-        if (settingsUI) SetupSettingUI();
-        if (pauseUI && !statsDisplay)
-        {
-            if (!statsDisplay)
-                statsDisplay = pauseUI.GetComponentsInChildren<StatsDisplay>().FirstOrDefault(s => s.name == "StatsContainer");
-            else
-                statsDisplay = null;
-        }
+        if (settingsUI) SetupMainSettingUI();
     }
     private void SetupBattleMenu()
     {
         SetupPauseUI();
         settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
-        if (settingsUI) SetupSettingUI();
+        if (settingsUI) SetupMainSettingUI();
     }
     private void SetupCreditsMenu()
     {
@@ -210,7 +217,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
             exitBtn.onClick.RemoveAllListeners();
             exitBtn.onClick.AddListener(() =>
             {
-                //SaveLoadSystem.instance.NewGame();
                 GameManager.instance.ChangeScene("Main");
             });
         }
@@ -221,28 +227,31 @@ public class UIManager : MonoBehaviour, IDataPersistence
     {
         if (settingsUI)
         {
+            MasterSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "MasterSlider");
             BGMSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "BGMSlider");
             SFXSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "SFXSlider");
             backBtn = settingsUI.GetComponentsInChildren<Button>(true).FirstOrDefault(s => s.name == "ExitBtn");
 
-            if (BGMSlider || SFXSlider || backBtn)
+            if (MasterSlider || BGMSlider || SFXSlider || backBtn)
             {
+                MasterSlider.SetValueWithoutNotify(AudioManager.instance.GetMasterVol());
                 BGMSlider.SetValueWithoutNotify(AudioManager.instance.GetBgmVol());
                 SFXSlider.SetValueWithoutNotify(AudioManager.instance.GetSFXVol());
 
+                MasterSlider.onValueChanged.RemoveAllListeners();
+                MasterSlider.onValueChanged.AddListener(SettingsManager.instance.OnMasterVolumeChanged);
+
                 BGMSlider.onValueChanged.RemoveAllListeners();
                 BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
-                //BGMSlider.value = AudioManager.instance.GetBgmVol();
 
                 SFXSlider.onValueChanged.RemoveAllListeners();
                 SFXSlider.onValueChanged.AddListener(SettingsManager.instance.OnSFXVolumeChanged);
-                //SFXSlider.value = AudioManager.instance.GetSFXVol();
 
                 backBtn.onClick.AddListener(() =>
                 {
                     ToggleSettings(false);
-                    
-                    if(SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby")
+
+                    if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby")
                         SaveLoadSystem.instance.SaveSettingsOnly();
                     else
                         SaveLoadSystem.instance.SaveGame();
@@ -253,12 +262,38 @@ public class UIManager : MonoBehaviour, IDataPersistence
             }
         }
     }
+    public void SetupMainSettingUI()
+    {
+        if (settingsUI)
+        {
+            MasterSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "MasterSlider");
+            BGMSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "BGMSlider");
+            SFXSlider = settingsUI.GetComponentsInChildren<Slider>(true).FirstOrDefault(s => s.name == "SFXSlider");
+
+            if (MasterSlider || BGMSlider || SFXSlider)
+            {
+                MasterSlider.SetValueWithoutNotify(AudioManager.instance.GetMasterVol());
+                BGMSlider.SetValueWithoutNotify(AudioManager.instance.GetBgmVol());
+                SFXSlider.SetValueWithoutNotify(AudioManager.instance.GetSFXVol());
+
+                MasterSlider.onValueChanged.RemoveAllListeners();
+                MasterSlider.onValueChanged.AddListener(SettingsManager.instance.OnMasterVolumeChanged);
+
+                BGMSlider.onValueChanged.RemoveAllListeners();
+                BGMSlider.onValueChanged.AddListener(SettingsManager.instance.OnBGMVolumeChanged);
+
+                SFXSlider.onValueChanged.RemoveAllListeners();
+                SFXSlider.onValueChanged.AddListener(SettingsManager.instance.OnSFXVolumeChanged);
+            }
+        }
+    }
     public void ToggleSettings(bool v)
     {
         if (settingsUI)
         {
             isOpen = v;
-            settingsUI.SetActive(v);
+            if (SceneManager.GetActiveScene().name != "SampleScene" || SceneManager.GetActiveScene().name != "jasBattle")
+                settingsUI.SetActive(v);
         }
     }
 
@@ -269,14 +304,49 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
         if (pauseUI)
         {
+            playerStatsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "StatsBtn");
+            if (playerStatsBtn) playerStatsBtn.onClick.AddListener(() =>
+            {
+                ToggleSettings(false);
+            });
+
+            checkpointBtn = pauseUI.GetComponentsInChildren<Button>().First(s => s.name == "StuckBtn");
+            checkpointBtn.onClick.RemoveAllListeners();
+            if (checkpointBtn) checkpointBtn.onClick.AddListener(() =>
+            {
+                CheckpointManager.instance.ReturnToCheckpoint();
+
+                Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
+                if (active != null)
+                {
+                    int index = CheckpointManager.instance.GetCheckpointIndex(active);
+                    checkpointBtn.interactable = index > 0;
+                }
+                else
+                {
+                    checkpointBtn.interactable = false;
+                }
+            });
+
+            desktopBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "DesktopBtn");
+            if (desktopBtn)
+            {
+                desktopBtn.onClick.RemoveAllListeners();
+                desktopBtn.onClick.AddListener(() => SaveLoadSystem.instance.SaveGame());
+                desktopBtn.onClick.AddListener(Application.Quit);
+            }
+
             resumeBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "ResumeBtn");
             if (resumeBtn) resumeBtn.onClick.AddListener(() => TogglePause(false));
+
             settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
             if (settingsBtn) settingsBtn.onClick.AddListener(() =>
             {
                 ToggleSettings(true);
-                ShowPauseUI(false);
+                if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby")
+                    ShowPauseUI(false);
             });
+
             menuBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "MainMenuBtn");
             if (menuBtn) menuBtn.onClick.AddListener(() =>
             {
@@ -284,17 +354,15 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 if (SceneManager.GetActiveScene().name == "SampleScene")
                     SaveLoadSystem.instance.SaveGame();
 
-                if(SceneManager.GetActiveScene().name == "jasBattle")
+                if (SceneManager.GetActiveScene().name == "jasBattle")
                 {
                     TurnEngine turnEngine = FindObjectOfType<TurnEngine>();
-                    if(turnEngine != null)
+                    if (turnEngine != null)
                         turnEngine.BattleSpeed = 1f;
                     Time.timeScale = 1f;
                 }
                 ASyncManager.instance.LoadLevelBtn("Main");
             });
-            if (statsDisplay == null)
-                statsDisplay = FindObjectOfType<StatsDisplay>();
         }
     }
 
@@ -319,7 +387,6 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (!pauseUI) return;
         pauseUI.SetActive(v);
         Debug.Log($"[UIManager] Pause toggled: {v}, timeScale = {Time.timeScale}");
-        if (v && statsDisplay) statsDisplay.DisplayStats();
     }
 
     // ---- SAVELOAD ---- //

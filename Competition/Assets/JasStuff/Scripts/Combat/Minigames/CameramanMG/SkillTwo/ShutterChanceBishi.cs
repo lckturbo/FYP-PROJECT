@@ -146,10 +146,9 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private float endOKAYExtraSeconds = 0.12f;
     [SerializeField] private float bonusIntroHold = 0.45f;
 
-    // ===== New 3-tier thresholds =====
-    [Header("Result Thresholds (3-tier)")]
-    [SerializeField] private int perfectScore = 1650;  // Perfect if score >= this
-    [SerializeField] private int successScore = 1;     // Success if score >= this (else Fail)
+    [Header("Animator")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private GameObject animationPanel;
 
     private enum Lane { Left = 0, Mid = 1, Right = 2 }
 
@@ -277,6 +276,21 @@ public class ShutterChanceBishi : BaseMinigame
     {
         BattleManager.instance?.SetBattlePaused(true);
 
+        animationPanel.SetActive(true);
+        
+
+
+        if (anim)
+        {
+            anim.updateMode = AnimatorUpdateMode.UnscaledTime;
+            anim.SetTrigger("start");
+            yield return new WaitForSecondsRealtime(3.3f);
+        }
+
+        animationPanel.SetActive(false);
+
+
+
         score = 0;
         isShowingOkay = false;
 
@@ -314,14 +328,20 @@ public class ShutterChanceBishi : BaseMinigame
         yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
         if (skipRequested) goto SKIP_TO_GAMEPLAY;
 
-        // ======= 3-tier scoring text =======
         if (instructionsText)
         {
             instructionsText.text =
-                $"SCORING\n" +
-                $"PERFECT : {perfectScore}+\n" +
-                $"SUCCESS : {successScore}+\n" +
-                $"FAIL    : < {successScore}";
+                "RATING      SCORE\n" +
+                "SSS         1650+\n" +
+                "SS          1550\n" +
+                "S           1450\n" +
+                "A           1300\n" +
+                "B           1150\n" +
+                "C           1000\n" +
+                "D           850\n" +
+                "E           700\n" +
+                "F           500\n" +
+                "Out of Rank  0";
         }
         yield return WaitForRealtimeOrSkip(instructionSeconds * 0.25f);
 
@@ -479,22 +499,22 @@ public class ShutterChanceBishi : BaseMinigame
             finishText.gameObject.SetActive(false);
         }
 
-        // ======= Final 3-tier result only =======
-        Result = (score >= perfectScore) ? MinigameManager.ResultType.Perfect
-               : (score >= successScore) ? MinigameManager.ResultType.Success
-               : MinigameManager.ResultType.Fail;
+        var rank = JudgeRank(score);
+        Result = (rank == Rank.SSS) ? MinigameManager.ResultType.Perfect
+             : (score > 0 ? MinigameManager.ResultType.Success
+                          : MinigameManager.ResultType.Fail);
 
         yield return Flash();
 
         ShowCameraman(false);
         if (scoreText) scoreText.gameObject.SetActive(false);
         if (resultPanel) resultPanel.SetActive(true);
-        if (resultText) resultText.text = $"RESULT\n{Result}\nScore: {score}";
+        if (resultText) resultText.text = $"RESULT\nRank: {rank}\nScore: {score}";
 
-        float rt2 = 0f;
-        while (rt2 < resultHoldSeconds)
+        float rt = 0f;
+        while (rt < resultHoldSeconds)
         {
-            rt2 += Time.unscaledDeltaTime;
+            rt += Time.unscaledDeltaTime;
             yield return null;
         }
         if (resultPanel) resultPanel.SetActive(false);
@@ -1136,6 +1156,21 @@ public class ShutterChanceBishi : BaseMinigame
     private void UpdateScoreHUD()
     {
         if (scoreText) scoreText.text = score.ToString();
+    }
+
+    private enum Rank { SSS, SS, S, A, B, C, D, E, F }
+    private Rank JudgeRank(int finalScore)
+    {
+        if (finalScore >= 1650) return Rank.SSS;
+        if (finalScore >= 1550) return Rank.SS;
+        if (finalScore >= 1450) return Rank.S;
+        if (finalScore >= 1300) return Rank.A;
+        if (finalScore >= 1150) return Rank.B;
+        if (finalScore >= 1000) return Rank.C;
+        if (finalScore >= 850) return Rank.D;
+        if (finalScore >= 700) return Rank.E;
+        if (finalScore >= 500) return Rank.F;
+        return Rank.F;
     }
 
     private IEnumerator Flash()

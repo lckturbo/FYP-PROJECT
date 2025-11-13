@@ -54,6 +54,7 @@ public class ShopManager : MonoBehaviour
     public bool IsShopActive => isOpen;
 
     // Reference to Inventory
+    private NewPlayerMovement playerMovement;
     private Inventory playerInventory;
     private InventoryUIManager inventoryUIManager;
 
@@ -71,7 +72,7 @@ public class ShopManager : MonoBehaviour
             purchasePanel.gameObject.SetActive(false);
 
         // Get PlayerInput & Inventory
-        NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+        playerMovement = FindObjectOfType<NewPlayerMovement>();
         if (playerMovement != null)
         {
             playerInput = playerMovement.GetComponent<PlayerInput>();
@@ -97,6 +98,10 @@ public class ShopManager : MonoBehaviour
     {
 
         if (!isOpen) return; // only run update logic when shop is open
+
+        playerMovement = FindObjectOfType<NewPlayerMovement>();
+        if (playerMovement != null)
+            playerInput = playerMovement.GetComponent<PlayerInput>();
 
         if (cancelAction != null && cancelAction.WasPressedThisFrame())
         {
@@ -293,6 +298,11 @@ public class ShopManager : MonoBehaviour
         inventoryUIManager.RefreshUI();
     }
 
+    private void EnableMovement(bool enabled)
+    {
+        if (playerInput != null)
+            playerInput.enabled = enabled;
+    }
 
     private void UpdateSellMoneyUI()
     {
@@ -322,6 +332,7 @@ public class ShopManager : MonoBehaviour
         if (sellUI != null) sellUI.SetActive(true);
 
         isSellOpen = true;
+        EnableMovement(!isSellOpen);
         PopulateSellMenu();
     }
 
@@ -331,6 +342,7 @@ public class ShopManager : MonoBehaviour
         if (sellUI != null) sellUI.SetActive(false);
 
         isSellOpen = false;
+        EnableMovement(!isSellOpen);
     }
 
 
@@ -542,6 +554,7 @@ public class ShopManager : MonoBehaviour
             shopUI.SetActive(true);
 
         isOpen = true;
+        EnableMovement(!isOpen);
         UpdateMoneyUI();
         ClearMessage();
 
@@ -556,6 +569,7 @@ public class ShopManager : MonoBehaviour
             shopUI.SetActive(false);
 
         isOpen = false;
+        EnableMovement(!isOpen);
         ClearMessage();
 
         UIManager.instance.canPause = true;

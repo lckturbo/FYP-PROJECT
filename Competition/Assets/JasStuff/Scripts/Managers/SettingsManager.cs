@@ -11,6 +11,10 @@ public class SettingsManager : MonoBehaviour, IDataPersistence
 
         DontDestroyOnLoad(gameObject);
     }
+    public void OnMasterVolumeChanged(float value)
+    {
+        AudioManager.instance.SetMasterVol(value);
+    }
     public void OnBGMVolumeChanged(float value)
     {
         AudioManager.instance.SetBgmVol(value);
@@ -22,12 +26,14 @@ public class SettingsManager : MonoBehaviour, IDataPersistence
     }
     public void LoadData(GameData data)
     {
+        AudioManager.instance.SetMasterVol(data.masterVolume);
         AudioManager.instance.SetBgmVol(data.bgmVolume);
         AudioManager.instance.SetSFXVol(data.sfxVolume);
     }
 
     public void SaveData(ref GameData data)
     {
+        data.masterVolume = AudioManager.instance.GetMasterVol();
         data.bgmVolume = AudioManager.instance.GetBgmVol();
         data.sfxVolume = AudioManager.instance.GetSFXVol();
     }
