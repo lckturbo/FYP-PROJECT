@@ -1,12 +1,13 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class Combatant : MonoBehaviour
 {
     [Header("Skill Behavior Flags")]
-    public bool skill1IsSupport = false;
-    public bool Skill1IsSupport => skill1IsSupport;
+    public bool skill1IsCommand = false;
+    public bool Skill1IsCommand => skill1IsCommand;
 
     public bool skill2IsSupport = false;
     public bool Skill2IsSupport => skill2IsSupport;
@@ -133,6 +134,12 @@ public class Combatant : MonoBehaviour
     public bool TryUseSkill1(Combatant target)
     {
         if (!IsSkill1Ready || !stats || !target || !target.health) return false;
+
+        if (skill1IsCommand)
+        {
+            StartCoroutine(CommandSkill1Routine(target));
+            return true;
+        }
         _skill1CD = Mathf.Max(1, skill1CooldownTurns);
         StartCoroutine(MoveRoutine(target, DoSkill1Damage, skill1StateName));
         return true;
@@ -157,16 +164,15 @@ public class Combatant : MonoBehaviour
         return true;
     }
 
-    // Support variant of Skill2: buff + extra turn, no damage
-    private void DoSkill2Support(Combatant target)
-    {
-        currentTarget = target;
-        currentAttackType = AttackType.Support;
+    //private void DoSkill2Support(Combatant target)
+    //{
+    //    currentTarget = target;
+    //    currentAttackType = AttackType.Support;
 
-        if (anim) anim.SetTrigger("skill2");
+    //    if (anim) anim.SetTrigger("skill2");
 
-        ApplyCameramanCritBuff(target);
-    }
+    //    ApplyCameramanCritBuff(target);
+    //}
 
 
     [Header("Support Skill2 Settings (Cameraman)")]
@@ -226,6 +232,53 @@ public class Combatant : MonoBehaviour
 
         ActionEnded?.Invoke();
     }
+    private IEnumerator CommandSkill1Routine(Combatant target)
+    {
+        ActionBegan?.Invoke();
+
+        currentTarget = target;
+        currentAttackType = AttackType.Skill1;
+
+        Transform mover = visualRoot ? visualRoot : transform;
+        Vector3 startPos = mover.position;
+        Vector3 backPos = startPos - transform.right * 1.0f; 
+
+        yield return SmoothMove(mover, startPos, backPos, backSpeed, 0f);
+
+        if (anim) anim.SetTrigger("skill1");
+        yield return WaitForAnimationRobust(anim, skill1StateName);
+
+        var allCombatants = FindObjectsOfType<Combatant>();
+        List<Combatant> livingEnemies = new List<Combatant>();
+        foreach (var c in allCombatants)
+        {
+            if (c.isPlayerTeam == this.isPlayerTeam) continue; 
+            if (!c.IsAlive) continue;
+            livingEnemies.Add(c);
+        }
+
+        int attacks = 0;
+
+        foreach (var ally in allCombatants)
+        {
+            if (ally == this) continue;
+            if (ally.isPlayerTeam != this.isPlayerTeam) continue; 
+            if (!ally.IsAlive) continue;
+
+            if (attacks >= 2) break;
+
+            ally.BasicAttack(target);
+            attacks++;
+
+            yield return new WaitForSeconds(0.5f); 
+        }
+
+        yield return SmoothMove(mover, backPos, startPos, goSpeed, 0f);
+        mover.position = startPos;
+
+        ActionEnded?.Invoke();
+    }
+
 
     // Kept for compatibility
     public void Skill1(Combatant target)
