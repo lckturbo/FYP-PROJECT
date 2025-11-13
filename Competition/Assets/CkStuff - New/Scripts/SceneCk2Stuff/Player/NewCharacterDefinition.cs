@@ -17,6 +17,9 @@ public class NewCharacterDefinition : ScriptableObject
     public Sprite portrait2;
     public Sprite icon;
 
+    [Header("UI Settings")]
+    public Color uiColor = Color.white;
+
     [Header("Gameplay")]
     public NewCharacterStats stats;
     //public UnitType unitType = UnitType.Melee;

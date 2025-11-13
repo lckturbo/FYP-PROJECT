@@ -13,17 +13,13 @@ public class GameManager : MonoBehaviour
             transform.SetParent(null);
 
         if (instance == null)
+        {
             instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
         else
             Destroy(gameObject);
-        DontDestroyOnLoad(gameObject);
     }
-
-    //private void Start()
-    //{
-    //    SaveLoadSystem.instance.NewGame();
-    //}
-
 
     public void Update()
     {
