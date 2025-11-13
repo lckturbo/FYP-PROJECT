@@ -4,8 +4,10 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class Combatant : MonoBehaviour
 {
-    // Identify characters whose Skill2 is a support/buff (e.g., Cameraman)
     [Header("Skill Behavior Flags")]
+    public bool skill1IsSupport = false;
+    public bool Skill1IsSupport => skill1IsSupport;
+
     public bool skill2IsSupport = false;
     public bool Skill2IsSupport => skill2IsSupport;
 
@@ -195,7 +197,7 @@ public class Combatant : MonoBehaviour
         Debug.Log($"{name} used Support Skill2 on {recipient.name}: Crit Rate x{skill2CritMultiplier}, extra turn granted.");
     }
 
-    private System.Collections.IEnumerator SupportSkill2Routine(Combatant rawTarget)
+    private IEnumerator SupportSkill2Routine(Combatant rawTarget)
     {
         ActionBegan?.Invoke();
 

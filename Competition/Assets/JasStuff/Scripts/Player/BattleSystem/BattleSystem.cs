@@ -137,8 +137,7 @@ public class BattleSystem : MonoBehaviour
         turnEngine.Register(cL);
         _playerCombatants.Add(cL);
 
-        // NEW: if this leader is Cameraman, use support Skill2
-        if (leaderObj.name == "Leader_Cameraman") // change to your actual Cameraman def name
+        if (leaderObj.name == "Leader_Cameraman")
         {
             cL.skill2IsSupport = true;
             Debug.Log("[BattleSystem] Leader is Cameraman - Skill2 set as support.");
@@ -189,8 +188,7 @@ public class BattleSystem : MonoBehaviour
                 turnEngine.Register(cA);
                 _playerCombatants.Add(cA);
 
-                // NEW: if this member is Cameraman, use support Skill2
-                if (allyObj.name == "Ally_Cameraman") // change to your actual Cameraman def name
+                if (allyObj.name == "Ally_Cameraman") 
                 {
                     cA.skill2IsSupport = true;
                     Debug.Log("[BattleSystem] Ally is Cameraman - Skill2 set as support.");
