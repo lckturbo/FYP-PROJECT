@@ -61,4 +61,35 @@ public class PlayerParty : MonoBehaviour
 
         return full;
     }
+    public List<PlayerLevelApplier> GetRuntimeParty()
+    {
+        List<PlayerLevelApplier> appliers = new List<PlayerLevelApplier>();
+
+        var playerObjs = FindObjectsOfType<PlayerLevelApplier>();
+        Debug.Log($"[Party] Found {playerObjs.Length} PlayerLevelAppliers in scene.");
+
+        List<NewCharacterDefinition> fullParty = GetFullParty();
+
+        foreach (var member in fullParty)
+        {
+            bool found = false;
+            foreach (var obj in playerObjs)
+            {
+                if (obj.definition == member)
+                {
+                    appliers.Add(obj);
+                    found = true;
+                    Debug.Log($"[Party] Matched {member.displayName} with {obj.name}");
+                    break;
+                }
+            }
+
+            if (!found)
+                Debug.LogWarning($"[Party] Could not find runtime object for {member.displayName}");
+        }
+
+        return appliers;
+    }
+
+
 }

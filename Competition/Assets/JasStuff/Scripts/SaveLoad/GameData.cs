@@ -98,6 +98,7 @@ public class GameData
     public List<string> defeatedEnemies;
 
     // audio //
+    public float masterVolume;
     public float bgmVolume;
     public float sfxVolume;
 
@@ -177,6 +178,7 @@ public class GameData
         defeatedEnemies = new List<string>();
 
         // audio //
+        masterVolume = 1f;
         bgmVolume = 1f;
         sfxVolume = 1f;
 

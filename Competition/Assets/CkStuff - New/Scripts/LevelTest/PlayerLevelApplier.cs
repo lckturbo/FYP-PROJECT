@@ -1,10 +1,12 @@
 // PlayerLevelApplier.cs  (additions marked // NEW)
-using UnityEngine;
+using System;
 using System.Collections;
+using UnityEngine;
 
 [RequireComponent(typeof(NewHealth))]
 public class PlayerLevelApplier : MonoBehaviour
 {
+    public event Action<NewCharacterStats> OnStatsUpdated;
     [Header("References")]
     public NewCharacterDefinition definition;
     public LevelSystem levelSystem;
@@ -88,6 +90,8 @@ public class PlayerLevelApplier : MonoBehaviour
             if (BuffData.instance.hasDefenseBuff && BuffData.instance.defenseTarget == runtimeStats)
                 runtimeStats.attackreduction += BuffData.instance.latestDefenseBuff;
         }
+
+        OnStatsUpdated?.Invoke(runtimeStats);
     }
 
 }

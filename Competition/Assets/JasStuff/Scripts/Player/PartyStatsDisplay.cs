@@ -10,15 +10,33 @@ public class PartyStatsDisplay : MonoBehaviour
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private Transform statsContainer;
     [SerializeField] private StatsDisplay statsDisplay;
+    private PlayerLevelApplier _applier;
 
-    public void SetData(NewCharacterDefinition character)
+    public void SetData(PlayerLevelApplier applier)
     {
-        if (!character) return;
+        if (!applier || applier.definition == null) return;
 
-        if (bgImage) bgImage.color = character.uiColor;
-        if (nameText) nameText.text = character.displayName.ToUpper();
+        if (_applier != null)
+            _applier.OnStatsUpdated -= RefreshStats;
 
-        if (statsDisplay)
-            statsDisplay.DisplayStats(character.stats);
+        _applier = applier;
+        _applier.OnStatsUpdated += RefreshStats;
+
+        if (bgImage) bgImage.color = applier.definition.uiColor;
+        if (nameText) nameText.text = applier.definition.displayName.ToUpper();
+
+        RefreshStats(applier.runtimeStats);
+    }
+
+    private void OnDisable()
+    {
+        if (_applier != null)
+            _applier.OnStatsUpdated -= RefreshStats;
+    }
+
+    private void RefreshStats(NewCharacterStats stats)
+    {
+        if (statsDisplay && stats != null)
+            statsDisplay.DisplayStats(stats);
     }
 }

@@ -96,4 +96,31 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
         checkpointList?.Clear();
         activeCheckpoint = null;
     }
+    public void ReturnToCheckpoint()
+    {
+        if (activeCheckpoint == null)
+            return;
+
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj == null)
+            return;
+
+        playerObj.transform.position = activeCheckpoint.transform.position;
+
+        Debug.Log($"[CheckpointManager] Player returned to checkpoint ID {activeCheckpoint.GetID()}");
+    }
+
+    public Checkpoint GetActiveCheckpoint()
+    {
+        return activeCheckpoint;
+    }
+
+    public int GetCheckpointIndex(Checkpoint checkpoint)
+    {
+        if (checkpointList == null || checkpoint == null)
+            return -1;
+
+        return checkpointList.IndexOf(checkpoint);
+    }
+
 }
