@@ -78,9 +78,13 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         inputRaw = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
 
         if (inputRaw.x != 0f)
+        {
             moveDir = new Vector2(Mathf.Sign(inputRaw.x), 0f);
+        }
         else if (inputRaw.y != 0f)
+        {
             moveDir = new Vector2(0f, Mathf.Sign(inputRaw.y));
+        }
         else
             moveDir = Vector2.zero;
 

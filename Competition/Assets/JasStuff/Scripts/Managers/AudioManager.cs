@@ -83,6 +83,33 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public void PlaySFXAtPoint(string clipName, Vector3 position, float volume = 1f)
+    {
+        if (!soundDictionary.ContainsKey(clipName))
+        {
+            Debug.LogWarning($"SFX '{clipName}' not found.");
+            return;
+        }
+
+        Sound sfx = soundDictionary[clipName];
+
+        // Create a temporary AudioSource at the position
+        GameObject tempObj = new GameObject($"SFX_{clipName}");
+        tempObj.transform.position = position;
+
+        AudioSource tempSource = tempObj.AddComponent<AudioSource>();
+        tempSource.clip = sfx.clip;
+        tempSource.volume = sfx.volume * volume;
+        tempSource.pitch = sfx.pitch;
+        tempSource.spatialBlend = 1f;               // <-- Enables 3D sound
+        tempSource.outputAudioMixerGroup = sfx.audioMixer;
+
+        tempSource.Play();
+
+        // Destroy object after the sound finishes
+        Destroy(tempObj, sfx.clip.length / tempSource.pitch);
+    }
+
 
     public void StopSound(string clipName)
     {
