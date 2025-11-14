@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MinigameController : MonoBehaviour
 {
-    [SerializeField] private TurnEngine engine; // Will auto-assign if left empty
+    [SerializeField] private TurnEngine engine;
     private Combatant currCombatant;
     private string globalMinigameID = "TakeABreak";
     private float globalMinigameChance = 2f;
@@ -20,8 +20,7 @@ public class MinigameController : MonoBehaviour
 
     public void TriggerMinigame(string id)
     {
-        if (engine != null && engine.autoBattle)
-            return;
+        if (engine != null && engine.autoBattle) return;
 
         currCombatant = GetComponentInParent<Combatant>();
 
