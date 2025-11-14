@@ -50,8 +50,6 @@ public class CaptchaSimple : BaseMinigame
 
         animationPanel.SetActive(true);
 
-
-
         if (anim)
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;

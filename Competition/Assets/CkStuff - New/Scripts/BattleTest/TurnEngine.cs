@@ -233,9 +233,16 @@ public class TurnEngine : MonoBehaviour
 
         if (skillIndex == 0)
         {
-            var target = ValidateOrFallback(explicitTarget);
-            if (target == null) { _resolvingAction = false; return; }
-            used = _currPlayerUnit.TryUseSkill1(target);
+            if (_currPlayerUnit.Skill1IsCommand)
+            {
+                used = _currPlayerUnit.TryUseSkill1(_currPlayerUnit);  
+            }
+            else
+            {
+                var target = ValidateOrFallback(explicitTarget);
+                if (target == null) { _resolvingAction = false; return; }
+                used = _currPlayerUnit.TryUseSkill1(target);
+            }
         }
         else if (skillIndex == 1)
         {
