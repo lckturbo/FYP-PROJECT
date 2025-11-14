@@ -65,7 +65,6 @@ public class ItemPickup : MonoBehaviour
 
     private void CollectItem()
     {
-        AudioManager.instance.PlaySFXAtPoint("ding-411634", transform.position);
         InventoryManager inv = FindObjectOfType<InventoryManager>();
         if (inv != null && inv.PlayerInventory != null)
         {
@@ -74,7 +73,7 @@ public class ItemPickup : MonoBehaviour
                 Debug.Log("Main inventory full! Cannot pick up item.");
                 return;
             }
-
+            AudioManager.instance.PlaySFXAtPoint("ding-411634", transform.position);
             inv.AddItemToInventory(item, 1);
         }
 

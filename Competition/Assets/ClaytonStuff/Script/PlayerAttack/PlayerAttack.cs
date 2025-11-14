@@ -223,6 +223,8 @@ public class PlayerAttack : MonoBehaviour
             item = heldItem.GetEquippedItem();
         if (!item.isBow)
         {
+            AudioManager.instance.PlaySFXAtPoint("whoosh-402320", transform.position);
+
             Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
              attackPoint.position,
              CurrentAttackRange,
@@ -277,6 +279,7 @@ public class PlayerAttack : MonoBehaviour
         // --- Check weapon type ---
         if (item.isBow)
         {
+            AudioManager.instance.PlaySFXAtPoint("bow-release-bow-and-arrow-4-101936", transform.position);
 
             GameObject arrowObj = arrowPool.Get();
             arrowObj.transform.position = attackPoint.position;
