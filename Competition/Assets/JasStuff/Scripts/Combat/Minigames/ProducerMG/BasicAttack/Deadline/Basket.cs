@@ -6,15 +6,15 @@ public class Basket : MonoBehaviour
     [SerializeField] private float moveSpeed = 800f;
 
     [Header("Dash Settings")]
-    [SerializeField] private float dashMultiplier = 2f;   // How much faster during dash
-    [SerializeField] private float dashDuration = 0.15f;
-    [SerializeField] private float dashCooldown = 0.5f;
+    [SerializeField] private float dashMultiplier = 2f;  
+   // [SerializeField] private float dashDuration = 0.15f;
+    //[SerializeField] private float dashCooldown = 0.5f;
 
     [SerializeField] private RectTransform movementBounds;
 
     private bool isDashing = false;
-    private float dashTimer = 0f;
-    private float cooldownTimer = 0f;
+    //private float dashTimer = 0f;
+    //private float cooldownTimer = 0f;
 
     private void Awake()
     {

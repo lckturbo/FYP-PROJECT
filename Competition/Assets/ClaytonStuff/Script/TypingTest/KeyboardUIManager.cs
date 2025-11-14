@@ -45,7 +45,7 @@ public class KeyboardUI : MonoBehaviour
 
     private void GenerateKeyboard()
     {
-        float startY = 0f;
+        //float startY = 0f;
         float totalHeight = (rows.Length * keySize.y) + ((rows.Length - 1) * rowSpacing);
         float topOffset = totalHeight / 2f - keySize.y / 2f;
 

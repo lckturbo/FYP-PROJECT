@@ -4,7 +4,7 @@ using UnityEngine;
 public class Arrow : MonoBehaviour
 {
     [SerializeField] private float speed = 10f;
-    [SerializeField] private int damage = 1;
+  //  [SerializeField] private int damage = 1;
     [SerializeField] private float lifeTime = 3f;
 
     private float timer;

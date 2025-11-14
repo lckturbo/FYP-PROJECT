@@ -24,9 +24,8 @@ public class CommandBurst : BaseMinigame
     private Dictionary<KeyCode, Sprite> keySprites;
     private List<Image> currentIcons = new List<Image>();
 
-
     [Header("Settings")]
-    [SerializeField] private float timePerPrompt = 1.5f;
+    //[SerializeField] private float timePerPrompt = 1.5f;
     [SerializeField] private int totalPrompts = 5;
 
     private KeyCode[] comboKeys = { KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.Mouse0, KeyCode.Mouse1 };

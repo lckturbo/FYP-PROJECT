@@ -32,10 +32,6 @@ public class TypingSpeedTest : BaseMinigame
     private bool gameOver = false;
     [SerializeField] private float maxTime = 30f; // Longer test time for Monkeytype feel
 
-    void Start()
-    {
-       //StartNewTest();
-    }
     public void BeginMinigame()
     {
         // Reset the test state

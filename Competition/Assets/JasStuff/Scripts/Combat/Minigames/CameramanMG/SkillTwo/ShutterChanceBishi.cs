@@ -20,7 +20,7 @@ public class ShutterChanceBishi : BaseMinigame
 
     [Header("OKAY! Centered")]
     [SerializeField] private TMP_Text okayCenterText;
-    [SerializeField] private float okayDisplayTime = 0.45f;
+    //[SerializeField] private float okayDisplayTime = 0.45f;
 
     [Header("Lane Images")]
     [SerializeField] private Image leftImage;
@@ -140,7 +140,7 @@ public class ShutterChanceBishi : BaseMinigame
     [Header("End-of-Normal Alignment")]
     [SerializeField, Range(0.2f, 1f)] private float endAlignMinBeatFraction = 0.35f;
     [SerializeField] private float endOKAYExtraSeconds = 0.12f;
-    [SerializeField] private float bonusIntroHold = 0.45f;
+    //[SerializeField] private float bonusIntroHold = 0.45f;
 
     [Header("Animator")]
     [SerializeField] private Animator anim;

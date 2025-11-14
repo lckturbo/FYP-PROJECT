@@ -14,7 +14,7 @@ public class ArrangeStory : BaseMinigame
     [SerializeField] private TMP_Text timerText;
 
     private float timer;
-    private bool running = false;
+    //private bool running = false;
     private List<ArrangeSlot> slots = new();
     private bool instructionStarted = false;
 
@@ -58,7 +58,7 @@ public class ArrangeStory : BaseMinigame
         minigamePanel.SetActive(true);
 
         timer = 20.0f;
-        running = true;
+       // running = true;
 
         while (timer > 0f)
         {
@@ -67,7 +67,7 @@ public class ArrangeStory : BaseMinigame
             yield return null;
         }
 
-        running = false;
+        //running = false;
 
         int correctCount = 0;
 

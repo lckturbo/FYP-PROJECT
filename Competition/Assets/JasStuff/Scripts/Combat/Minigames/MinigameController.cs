@@ -24,6 +24,12 @@ public class MinigameController : MonoBehaviour
 
         currCombatant = GetComponentInParent<Combatant>();
 
+        if (currCombatant != null && currCombatant.blockMinigames)
+        {
+            Debug.Log("[MINIGAME] Skipped because blockMinigames is TRUE.");
+            return;
+        }
+
         if (!currCombatant.isLeader)
             minigameChance = 15;
         else

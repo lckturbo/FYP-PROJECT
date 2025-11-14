@@ -43,12 +43,6 @@ public class Wordle : BaseMinigame
 
     private bool canStartTimer = false;
 
-    public void Start()
-    {
-        SetupGrid();
-        //StartNewGame();
-    }
-
     public void BeginMinigame()
     {
         StartNewGame();    // sets up topic, words, etc.
