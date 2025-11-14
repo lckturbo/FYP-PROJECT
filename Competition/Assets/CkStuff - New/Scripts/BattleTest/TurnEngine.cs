@@ -206,15 +206,10 @@ public class TurnEngine : MonoBehaviour
 
         turnIndicator.HideArrow();
         _currPlayerUnit = null;
-
-        //if (_currPlayerUnit != null)
-        //    turnIndicator.ShowArrow(_currPlayerUnit.transform);
     }
     private void OnActorActionEnded()
     {
         _resolvingAction = false;
-        //turnIndicator.HideArrow();
-        //_currPlayerUnit = null;
     }
 
     public void PlayerChooseBasicAttackTarget(Combatant explicitTarget)

@@ -240,12 +240,12 @@ public class Combatant : MonoBehaviour
         currentTarget = target;
         currentAttackType = AttackType.Skill1;
 
-        Transform mover = visualRoot ? visualRoot : transform;
-        Vector3 startPos = mover.position;
-        Vector3 backPos = startPos - transform.right * 1.0f;
+        //Transform mover = visualRoot ? visualRoot : transform;
+        //Vector3 startPos = mover.position;
+        //Vector3 backPos = startPos - transform.right * 1.0f;
 
         // Move backward before animation
-        yield return SmoothMove(mover, startPos, backPos, backSpeed, 0f);
+        //yield return SmoothMove(mover, startPos, backPos, backSpeed, 0f);
 
         // Play skill animation
         if (anim) anim.SetTrigger("skill1");
@@ -267,33 +267,34 @@ public class Combatant : MonoBehaviour
         // Allies attack with random targets
         foreach (var ally in allCombatants)
         {
-            if (ally == this) continue;                       
-            if (ally.isPlayerTeam != this.isPlayerTeam) continue; 
+            if (ally == this) continue;
+            if (ally.isPlayerTeam != this.isPlayerTeam) continue;
             if (!ally.IsAlive) continue;
 
             if (attacks >= 2) break;
 
             ally.blockMinigames = true;
 
-            // Select a random alive enemy
             if (livingEnemies.Count > 0)
             {
                 Combatant randomTarget = livingEnemies[Random.Range(0, livingEnemies.Count)];
 
-                ally.BasicAttack(randomTarget);
+                yield return ally.BasicAttackRoutine(randomTarget);
                 attacks++;
-
-                yield return new WaitForSeconds(0.5f);
             }
         }
 
         // Return to starting position
-        yield return SmoothMove(mover, backPos, startPos, goSpeed, 0f);
-        mover.position = startPos;
+        //yield return SmoothMove(mover, backPos, startPos, goSpeed, 0f);
+        //mover.position = startPos;
 
-        yield return new WaitForEndOfFrame();
-        yield return new WaitForEndOfFrame();
         ActionEnded?.Invoke();
+    }
+
+    public IEnumerator BasicAttackRoutine(Combatant target)
+    {
+        if (!stats || !target || !target.health) yield break;
+        yield return MoveRoutine(target, DoBasicAttackDamage, attackStateName);
     }
 
     // Kept for compatibility

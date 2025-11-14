@@ -43,6 +43,12 @@ public class Wordle : BaseMinigame
 
     private bool canStartTimer = false;
 
+    protected override void Start()
+    {
+        base.Start();
+        SetupGrid();
+    }
+
     public void BeginMinigame()
     {
         StartNewGame();    // sets up topic, words, etc.
