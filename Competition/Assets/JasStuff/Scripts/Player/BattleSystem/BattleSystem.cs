@@ -195,7 +195,7 @@ public class BattleSystem : MonoBehaviour
 
                 if(allyObj.name == "Ally_Producer")
                 {
-                    cL.skill1IsCommand = true;
+                    cA.skill1IsCommand = true;
                     Debug.Log("[BattleSystem] Leader is Producer - Skill1 set as support.");
                 }
 
