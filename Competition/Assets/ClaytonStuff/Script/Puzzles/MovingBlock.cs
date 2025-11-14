@@ -44,7 +44,6 @@ public class MovingBlock : MonoBehaviour
         if (Vector3.Distance(transform.position, target.position) < 0.05f)
             StartCoroutine(WaitAndMoveNext());
 
-        //AudioManager.instance.PlayLoopingSFXAtObject("toy-chainsaw-60479", gameObject, 0.5f);
     }
 
     private System.Collections.IEnumerator WaitAndMoveNext()
