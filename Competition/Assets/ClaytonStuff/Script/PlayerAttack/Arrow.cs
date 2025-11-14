@@ -52,6 +52,13 @@ public class Arrow : MonoBehaviour
             EnemyBase enemy = collision.GetComponent<EnemyBase>();
             if (enemy != null)
             {
+                var stats = enemy.GetEnemyStats();
+                if (stats != null && stats.type == EnemyStats.EnemyTypes.MiniBoss)
+                {
+                    Debug.Log("Cannot attack boss directly.");
+                    return;
+                }
+
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
                 if (party != null)
                 {
@@ -59,6 +66,7 @@ public class Arrow : MonoBehaviour
                     BattleManager.instance.SetBattleMode(true);
                 }
             }
+
 
             gameObject.SetActive(false);
             return;

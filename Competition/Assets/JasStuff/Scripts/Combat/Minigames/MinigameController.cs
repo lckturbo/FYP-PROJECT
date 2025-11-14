@@ -20,41 +20,41 @@ public class MinigameController : MonoBehaviour
 
     public void TriggerMinigame(string id)
     {
-        //if (engine != null && engine.autoBattle) return;
+        if (engine != null && engine.autoBattle) return;
 
-        //currCombatant = GetComponentInParent<Combatant>();
+        currCombatant = GetComponentInParent<Combatant>();
 
-        //if (currCombatant != null && currCombatant.blockMinigames)
-        //{
-        //    Debug.Log("[MINIGAME] Skipped because blockMinigames is TRUE.");
-        //    return;
-        //}
+        if (currCombatant != null && currCombatant.blockMinigames)
+        {
+            Debug.Log("[MINIGAME] Skipped because blockMinigames is TRUE.");
+            return;
+        }
 
-        //if (!currCombatant.isLeader)
-        //    minigameChance = 15;
-        //else
-        //    minigameChance = 45;
+        if (!currCombatant.isLeader)
+            minigameChance = 15;
+        else
+            minigameChance = 45;
 
-        //if (MinigameManager.instance == null) return;
+        if (MinigameManager.instance == null) return;
 
-        //float roll = Random.Range(0f, 100f);
-        //Debug.Log($"[MINIGAME] Rolled {roll:F1}% (threshold {minigameChance}%)");
+        float roll = Random.Range(0f, 100f);
+        Debug.Log($"[MINIGAME] Rolled {roll:F1}% (threshold {minigameChance}%)");
 
-        //string finalID = id;
+        string finalID = id;
 
-        //if (roll < globalMinigameChance)
-        //{
-        //    finalID = globalMinigameID;
-        //    MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        //}
-        //else if (roll > globalMinigameChance && roll <= minigameChance)
-        //{
-        //    MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
-        //}
-        //else
-        //{
-        //    Debug.Log("Nothing playing, no chance");
-        //}
+        if (roll < globalMinigameChance)
+        {
+            finalID = globalMinigameID;
+            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+        }
+        else if (roll > globalMinigameChance && roll <= minigameChance)
+        {
+            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+        }
+        else
+        {
+            Debug.Log("Nothing playing, no chance");
+        }
     }
 
     private void OnMinigameComplete(MinigameManager.ResultType result, string id)

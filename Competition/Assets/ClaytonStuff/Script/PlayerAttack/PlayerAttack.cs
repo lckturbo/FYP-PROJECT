@@ -235,6 +235,13 @@ public class PlayerAttack : MonoBehaviour
                 EnemyBase enemy = enemyCollider.GetComponent<EnemyBase>();
                 if (enemy != null)
                 {
+                    var stats = enemy.GetEnemyStats();
+                    if (stats != null && stats.type == EnemyStats.EnemyTypes.MiniBoss)
+                    {
+                        Debug.Log("Cannot attack boss directly.");
+                        return;
+                    }
+
                     EnemyParty party = enemy.GetComponent<EnemyParty>();
                     if (party != null)
                     {

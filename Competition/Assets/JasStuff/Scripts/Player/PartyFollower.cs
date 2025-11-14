@@ -3,9 +3,11 @@ using UnityEngine;
 public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
-    [SerializeField] private float followDistance = 0.9f;
+    [SerializeField] private float followDistance = 1.0f;
     [SerializeField] private float moveSpeed = 3.5f; // fallback if target has no movement script
     [SerializeField] private float stopDistance = 0.15f;
+    private Vector2 smoothMoveDir;
+    [SerializeField] private float directionSmooth = 10f;
 
     private Animator animator;
     private Vector2 lastMoveDirection;
@@ -58,10 +60,10 @@ public class PartyFollower : MonoBehaviour
 
         float distanceToTarget = Vector2.Distance(transform.position, target.position);
 
-        if (distanceToTarget > followDistance)
+        if (distanceToTarget > followDistance + 0.15f)
         {
-            Vector2 dir = ((Vector2)transform.position - (Vector2)target.position).normalized;
-            targetPosition = (Vector2)target.position + dir * followDistance;
+            Vector2 dir = ((Vector2)target.position - (Vector2)transform.position).normalized;
+            targetPosition = (Vector2)target.position - dir * followDistance;
             hasTargetPosition = true;
         }
 
@@ -71,12 +73,16 @@ public class PartyFollower : MonoBehaviour
 
             if (distanceToDestination > stopDistance)
             {
-                Vector2 moveDir = (targetPosition - (Vector2)transform.position).normalized;
-                lastMoveDirection = moveDir;
-
+                Vector2 rawDir = (targetPosition - (Vector2)transform.position).normalized;
+                smoothMoveDir = Vector2.Lerp(smoothMoveDir, rawDir, directionSmooth * Time.deltaTime);
+                lastMoveDirection = smoothMoveDir;
                 float usedSpeed = moveSpeed;
-                if (playerMovement != null)
-                    usedSpeed = playerMovement.GetWalkSpeed(); 
+
+                var targetMover = target.GetComponent<NewPlayerMovement>();
+                if (targetMover != null)
+                    usedSpeed = targetMover.GetWalkSpeed();
+
+                //usedSpeed *= 0.95f;
 
                 transform.position = Vector2.MoveTowards(
                     transform.position,
