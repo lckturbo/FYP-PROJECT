@@ -22,6 +22,7 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
 
     private bool puzzleStarted = false;
     private PuzzleZone lastZoneStepped;
+    private bool sequencePlayed = false;
 
     private void Start()
     {
@@ -42,21 +43,25 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
 
     private IEnumerator StartPuzzleSequence()
     {
-        yield return new WaitForSeconds(0.5f);
-        if (cam && cameraFocusPoint)
+        if (!sequencePlayed)
         {
-            yield return cam.StartCoroutine(cam.PanTo(cameraFocusPoint, cameraPanDuration));
-            yield return cam.StartCoroutine(cam.ZoomTo(10f, 1f));
-        }
+            sequencePlayed = true;
+            yield return new WaitForSeconds(0.5f);
+            if (cam && cameraFocusPoint)
+            {
+                yield return cam.StartCoroutine(cam.PanTo(cameraFocusPoint, cameraPanDuration));
+                yield return cam.StartCoroutine(cam.ZoomTo(10f, 1f));
+            }
 
 
-        yield return StartCoroutine(ShowCorrectPath());
-        yield return new WaitForSeconds(cameraHoldDuration);
+            yield return StartCoroutine(ShowCorrectPath());
+            yield return new WaitForSeconds(cameraHoldDuration);
 
-        if (cam)
-        {
-            yield return cam.StartCoroutine(cam.ZoomTo(5f, 1f));
-            yield return cam.StartCoroutine(cam.ReturnToPlayer(cameraPanDuration));
+            if (cam)
+            {
+                yield return cam.StartCoroutine(cam.ZoomTo(5f, 1f));
+                yield return cam.StartCoroutine(cam.ReturnToPlayer(cameraPanDuration));
+            }
         }
 
         canStep = true;

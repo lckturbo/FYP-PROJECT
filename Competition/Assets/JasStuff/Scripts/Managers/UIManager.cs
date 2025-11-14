@@ -317,23 +317,26 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 ToggleSettings(false);
             });
 
-            checkpointBtn = pauseUI.GetComponentsInChildren<Button>().First(s => s.name == "StuckBtn");
-            checkpointBtn.onClick.RemoveAllListeners();
-            if (checkpointBtn) checkpointBtn.onClick.AddListener(() =>
+            checkpointBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "StuckBtn");
+            if (checkpointBtn)
             {
-                CheckpointManager.instance.ReturnToCheckpoint();
+                checkpointBtn.onClick.RemoveAllListeners();
+                if (checkpointBtn) checkpointBtn.onClick.AddListener(() =>
+                {
+                    CheckpointManager.instance.ReturnToCheckpoint();
 
-                Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
-                if (active != null)
-                {
-                    int index = CheckpointManager.instance.GetCheckpointIndex(active);
-                    checkpointBtn.interactable = index > 0;
-                }
-                else
-                {
-                    checkpointBtn.interactable = false;
-                }
-            });
+                    Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
+                    if (active != null)
+                    {
+                        int index = CheckpointManager.instance.GetCheckpointIndex(active);
+                        checkpointBtn.interactable = index > 0;
+                    }
+                    else
+                    {
+                        checkpointBtn.interactable = false;
+                    }
+                });
+            }
 
             desktopBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "DesktopBtn");
             if (desktopBtn)
