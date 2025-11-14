@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerParty : MonoBehaviour
@@ -105,4 +106,41 @@ public class PlayerParty : MonoBehaviour
         }
         return null;
     }
+    public void ResetPartyPositions(Vector3 checkpointPos)
+    {
+        GameObject leaderObj = GameObject.FindGameObjectWithTag("Player");
+        if (leaderObj == null) return;
+
+        leaderObj.transform.position = checkpointPos;
+
+        List<NewCharacterDefinition> fullParty = GetFullParty();
+        Transform lastTarget = leaderObj.transform;
+
+        int index = 0;
+
+        foreach (var def in partyMembers)
+        {
+            var follower = FindObjectsOfType<PlayerLevelApplier>()
+                            .FirstOrDefault(a => a.definition == def);
+
+            if (follower == null)
+            {
+                Debug.LogWarning($"[Party] Missing runtime follower for {def.displayName}");
+                continue;
+            }
+
+            Vector3 spawnPos = checkpointPos + new Vector3(-1.2f * (index + 1), 0f, 0f);
+            follower.transform.position = spawnPos;
+
+            var pf = follower.GetComponent<PartyFollower>();
+            if (pf != null)
+                pf.SetTarget(lastTarget);
+
+            lastTarget = follower.transform;
+            index++;
+        }
+
+        Debug.Log("[Party] Party reset to checkpoint.");
+    }
+
 }

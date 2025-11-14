@@ -27,7 +27,6 @@ public class MiniBoss : EnemyBase
     protected override void Idle()
     {
         rb2d.velocity = Vector2.zero;
-        anim.SetFloat("speed", 0f);
 
         rotateTimer += Time.deltaTime;
         if (rotateTimer >= rotateInterval)

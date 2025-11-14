@@ -153,8 +153,8 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
                         cam.transform.position.z
                     );
                 }
-
-                RespawnPartyAtCheckpoint(activeCP);
+                PlayerParty.instance.ResetPartyPositions(activeCP.transform.position);
+                ResetPuzzle();
             }
         }
         if (player != null)
@@ -165,7 +165,6 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
         }
         ResetPuzzle();
     }
-
 
     private void ResetPuzzle(bool respawnToCheckpoint = false)
     {
@@ -184,71 +183,6 @@ public class PathPuzzle : MonoBehaviour, IDataPersistence
         if (respawnToCheckpoint && wasStarted)
             StartCoroutine(ReturnToCheckpoint());
     }
-
-    private void RespawnPartyAtCheckpoint(Checkpoint cp)
-    {
-        DestroyExistingFollowers();
-
-        if (PlayerParty.instance == null)
-        {
-            Debug.LogWarning("[PathPuzzle] No PlayerParty instance found!");
-            return;
-        }
-
-        var party = PlayerParty.instance;
-        var fullParty = party.GetFullParty();
-        var leaderDef = party.GetLeader();
-        Quaternion rot = Quaternion.identity;
-
-        Transform lastTarget = GameObject.FindGameObjectWithTag("Player").transform;
-        int index = 0;
-
-        foreach (var memberDef in fullParty)
-        {
-            if (memberDef == leaderDef) continue;
-            if (!memberDef.playerPrefab) continue;
-
-            // Spawn followers near checkpoint
-            Vector3 spawnPos = cp.transform.position + new Vector3(-1.5f * (index + 1), 0f, 0f);
-            var followerObj = Instantiate(memberDef.playerPrefab, spawnPos, rot);
-            followerObj.name = $"Follower_{memberDef.displayName}";
-
-            SetLayerRecursively(followerObj, LayerMask.NameToLayer("Ally"));
-
-            // Disable redundant player controls
-            Destroy(followerObj.GetComponentInChildren<NewPlayerMovement>());
-            Destroy(followerObj.GetComponentInChildren<PlayerHeldItem>());
-            Destroy(followerObj.GetComponentInChildren<PlayerAttack>());
-            Destroy(followerObj.GetComponentInChildren<PlayerBuffHandler>());
-
-            // Setup as follower
-            var follower = followerObj.AddComponent<PartyFollower>();
-            follower.SetTarget(lastTarget);
-
-            lastTarget = followerObj.transform;
-            index++;
-        }
-    }
-
-    private void DestroyExistingFollowers()
-    {
-        PartyFollower[] followers = FindObjectsOfType<PartyFollower>();
-
-        int destroyedCount = 0;
-        foreach (var follower in followers)
-        {
-            if (follower != null)
-            {
-                Destroy(follower.gameObject);
-                destroyedCount++;
-            }
-        }
-
-        if (destroyedCount > 0)
-            Debug.Log($"[PathPuzzle] Destroyed {destroyedCount} old follower(s).");
-    }
-
-
 
     private void SetLayerRecursively(GameObject obj, int layer)
     {
