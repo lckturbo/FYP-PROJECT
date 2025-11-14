@@ -24,6 +24,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
     [SerializeField] private Button desktopBtn;
 
     [Header("Settings UI/Buttons")]
+    [SerializeField] private GameObject statsUI;
     [SerializeField] private GameObject settingsUI;
     [SerializeField] private Button playerStatsBtn;
     [SerializeField] private Slider MasterSlider;
@@ -312,16 +313,20 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
         if (pauseUI)
         {
+            statsUI = pauseUI.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "StatsUI")?.gameObject;
+           // if (statsUI) statsUI.SetActive(true);
             playerStatsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "StatsBtn");
             if (playerStatsBtn) playerStatsBtn.onClick.AddListener(() =>
             {
+                if (statsUI) statsUI.SetActive(true);
                 ToggleSettings(false);
             });
 
-            checkpointBtn = pauseUI.GetComponentsInChildren<Button>().First(s => s.name == "StuckBtn");
-            checkpointBtn.onClick.RemoveAllListeners();
-            if (checkpointBtn) checkpointBtn.onClick.AddListener(() =>
+            checkpointBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "StuckBtn");
+            if (checkpointBtn)
             {
+                checkpointBtn.onClick.RemoveAllListeners();
+                checkpointBtn.onClick.AddListener(() => {
                 CheckpointManager.instance.ReturnToCheckpoint();
 
                 Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
@@ -333,8 +338,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 else
                 {
                     checkpointBtn.interactable = false;
-                }
-            });
+                } });
+            }
 
             desktopBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "DesktopBtn");
             if (desktopBtn)
@@ -350,7 +355,9 @@ public class UIManager : MonoBehaviour, IDataPersistence
             settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
             if (settingsBtn) settingsBtn.onClick.AddListener(() =>
             {
+                if (statsUI) statsUI.SetActive(false);
                 ToggleSettings(true);
+
                 if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby")
                     ShowPauseUI(false);
             });
@@ -388,6 +395,16 @@ public class UIManager : MonoBehaviour, IDataPersistence
         }
 
         ShowPauseUI(v);
+
+        if (v && statsUI != null)
+        {
+            statsUI.SetActive(true);     
+        }
+
+        if (v && settingsUI != null)
+        {
+            settingsUI.SetActive(false);  
+        }
     }
 
     public void ShowPauseUI(bool v)
