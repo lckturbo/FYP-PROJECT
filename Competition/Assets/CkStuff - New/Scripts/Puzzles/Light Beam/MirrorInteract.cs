@@ -50,28 +50,22 @@ public class MirrorInteract : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData data)
     {
-        var mirrorObjects = FindObjectsOfType<MirrorInteract>();
-
-        foreach (var m in mirrorObjects)
-        {
-            var entry = data.mirrors.Find(x => x.id == m.mirrorID);
-            if (entry != null)
-                m.SetRotation(entry.rotation);
-        }
+        var entry = data.mirrors.Find(x => x.id == mirrorID);
+        if (entry != null)
+            SetRotation(entry.rotation);
     }
 
     public void SaveData(ref GameData data)
     {
-        var mirrorObjects = FindObjectsOfType<MirrorInteract>();
-        data.mirrors.Clear();
+        var existing = data.mirrors.Find(x => x.id == mirrorID);
 
-        foreach (var m in mirrorObjects)
-        {
+        if (existing != null)
+            existing.rotation = GetRotation();
+        else
             data.mirrors.Add(new GameData.MirrorSaveEntry
             {
-                id = m.mirrorID,
-                rotation = m.GetRotation()
+                id = mirrorID,
+                rotation = GetRotation()
             });
-        }
     }
 }
