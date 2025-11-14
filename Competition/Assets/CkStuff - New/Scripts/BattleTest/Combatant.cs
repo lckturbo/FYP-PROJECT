@@ -129,6 +129,11 @@ public class Combatant : MonoBehaviour
     public void BasicAttack(Combatant target)
     {
         if (!stats || !target || !target.health) return;
+        //if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
+        //{
+        //    DoBasicAttackDamage(target);
+        //    return;
+        //}
         StartCoroutine(MoveRoutine(target, DoBasicAttackDamage, attackStateName));
     }
 
@@ -289,7 +294,6 @@ public class Combatant : MonoBehaviour
         ActionEnded?.Invoke();
     }
 
-
     public IEnumerator BasicAttackRoutine(Combatant target)
     {
         if (!stats || !target || !target.health) yield break;
@@ -339,25 +343,31 @@ public class Combatant : MonoBehaviour
         }
     }
 
-    public void OnZoom()
+    // BATTLE CAMERA / PARODY STUFF //
+    // private bool zoomFinished = false;
+
+    public void OnZoomIn()
     {
         if (parodyEffect != null)
-            parodyEffect.PlayParody(BattleParodyEffect.ParodyType.ZoomEffect, this, currentTarget);
+            parodyEffect.ZoomIn(this);
+    }
+    public void OnZoomOut()
+    {
+        if (parodyEffect != null)
+            parodyEffect.ZoomOut();
     }
 
     public void DealDamage()
     {
         if (currentTarget == null) return;
 
-        if (currentAttackType == AttackType.Support)
-            return;
+        if (currentAttackType == AttackType.Support || waitingForMinigameResult) return;
 
-        if (waitingForMinigameResult)
-        {
-            Debug.Log("Waiting for minigame result — skipping base damage.");
-            return;
-        }
+        // --- Important: reset suppression BEFORE any possible early return ---
+        bool wasSuppressed = _suppressSkillBonusNextHit;
+        _suppressSkillBonusNextHit = false;
 
+        // --- Handle minigame damage override ---
         if (pendingMinigameDamage > 0)
         {
             currentTarget.health.TakeDamage(pendingMinigameDamage, stats, NewElementType.None);
@@ -373,7 +383,7 @@ public class Combatant : MonoBehaviour
             case AttackType.Skill2: baseMultiplier = 1.5f; break;
         }
 
-        if (_suppressSkillBonusNextHit &&
+        if (wasSuppressed &&
             (currentAttackType == AttackType.Skill1 || currentAttackType == AttackType.Skill2))
         {
             baseMultiplier = 1.0f;
@@ -381,11 +391,24 @@ public class Combatant : MonoBehaviour
 
         int damage = CalculateDamage(currentTarget, baseMultiplier);
 
-        _suppressSkillBonusNextHit = false;
+        // boss attack
+        if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
+        {
+            Debug.Log("[BOSS] Attacks ALL player characters!");
+
+            Combatant[] all = FindObjectsOfType<Combatant>();
+            foreach (Combatant c in all)
+            {
+                if (c.isPlayerTeam && c.IsAlive)
+                {
+                    c.health.TakeDamage(damage, stats, NewElementType.None);
+                }
+            }
+            return;
+        }
 
         currentTarget.health.TakeDamage(damage, stats, NewElementType.None);
     }
-
 
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
     {
@@ -430,12 +453,19 @@ public class Combatant : MonoBehaviour
 
     private Vector3 ApproachPoint(Combatant target)
     {
+        if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
+            return visualRoot ? visualRoot.position : transform.position;
+
         Vector3 a = (visualRoot ? visualRoot.position : transform.position);
         Vector3 b = target.transform.position;
         Vector3 dir = (a - b).normalized;
-        if (dir.sqrMagnitude < 0.0001f) dir = Vector3.right;
+
+        if (dir.sqrMagnitude < 0.0001f)
+            dir = Vector3.right;
+
         return b + dir * approachDistance;
     }
+
 
     private IEnumerator SmoothMove(Transform mover, Vector3 from, Vector3 to, float speed, float arc)
     {
