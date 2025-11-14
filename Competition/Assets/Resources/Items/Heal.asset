@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46150ca44fb4ff242966ae9c3c9936ef, type: 3}
   m_Name: Heal
   m_EditorClassIdentifier: 
-  itemName: Heal Potion
+  itemName: Heal
   icon: {fileID: 21300000, guid: 4d8740bbd299cb640a11ba1a3da59889, type: 3}
   isStackable: 1
   category: 0
@@ -28,3 +28,6 @@ MonoBehaviour:
   isBuff: 0
   attackBuffAmount: 0
   buffDuration: 0
+  isDefenseBuff: 0
+  defenseBuffAmount: 0
+  defenseBuffDuration: 0

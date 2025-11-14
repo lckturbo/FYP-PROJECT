@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46150ca44fb4ff242966ae9c3c9936ef, type: 3}
   m_Name: Buff Potion
   m_EditorClassIdentifier: 
-  itemName: Strength potion
+  itemName: Buff Potion
   icon: {fileID: 21300000, guid: b6416dcb88a4bb04d94f2543f8745d14, type: 3}
   isStackable: 1
   category: 0
@@ -28,3 +28,6 @@ MonoBehaviour:
   isBuff: 1
   attackBuffAmount: 30
   buffDuration: 10
+  isDefenseBuff: 0
+  defenseBuffAmount: 0
+  defenseBuffDuration: 0
