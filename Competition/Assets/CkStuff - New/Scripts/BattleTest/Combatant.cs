@@ -134,13 +134,16 @@ public class Combatant : MonoBehaviour
 
     public bool TryUseSkill1(Combatant target)
     {
-        if (!IsSkill1Ready || !stats || !target || !target.health) return false;
+        if (!IsSkill1Ready || !stats) return false;
 
         if (skill1IsCommand)
         {
             StartCoroutine(CommandSkill1Routine(target));
             return true;
         }
+
+        if (!target || !target.health) return false;
+
         _skill1CD = Mathf.Max(1, skill1CooldownTurns);
         StartCoroutine(MoveRoutine(target, DoSkill1Damage, skill1StateName));
         return true;
@@ -240,56 +243,52 @@ public class Combatant : MonoBehaviour
         currentTarget = target;
         currentAttackType = AttackType.Skill1;
 
-        //Transform mover = visualRoot ? visualRoot : transform;
-        //Vector3 startPos = mover.position;
-        //Vector3 backPos = startPos - transform.right * 1.0f;
-
-        // Move backward before animation
-        //yield return SmoothMove(mover, startPos, backPos, backSpeed, 0f);
-
-        // Play skill animation
         if (anim) anim.SetTrigger("skill1");
         yield return WaitForAnimationRobust(anim, skill1StateName);
 
-        // Gather enemy list
+        // Collect living enemies
         var allCombatants = FindObjectsOfType<Combatant>();
         List<Combatant> livingEnemies = new List<Combatant>();
-
         foreach (var c in allCombatants)
         {
-            if (c.isPlayerTeam == this.isPlayerTeam) continue;
             if (!c.IsAlive) continue;
+            if (c.isPlayerTeam == this.isPlayerTeam) continue;
             livingEnemies.Add(c);
         }
 
         int attacks = 0;
+        List<Coroutine> runningCoroutines = new List<Coroutine>();
 
-        // Allies attack with random targets
         foreach (var ally in allCombatants)
         {
-            if (ally == this) continue;
-            if (ally.isPlayerTeam != this.isPlayerTeam) continue;
-            if (!ally.IsAlive) continue;
-
             if (attacks >= 2) break;
+            if (ally == this) continue;
+            if (!ally.IsAlive) continue;
+            if (ally.isPlayerTeam != this.isPlayerTeam) continue;
 
             ally.blockMinigames = true;
 
             if (livingEnemies.Count > 0)
             {
-                Combatant randomTarget = livingEnemies[Random.Range(0, livingEnemies.Count)];
+                int index = Random.Range(0, livingEnemies.Count);
+                Combatant randomTarget = livingEnemies[index];
 
-                yield return ally.BasicAttackRoutine(randomTarget);
+                livingEnemies.RemoveAt(index);
+
+                Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget));
+                runningCoroutines.Add(co);
+
                 attacks++;
             }
         }
 
-        // Return to starting position
-        //yield return SmoothMove(mover, backPos, startPos, goSpeed, 0f);
-        //mover.position = startPos;
+
+        while (runningCoroutines.Exists(c => c != null))
+            yield return null;
 
         ActionEnded?.Invoke();
     }
+
 
     public IEnumerator BasicAttackRoutine(Combatant target)
     {

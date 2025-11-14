@@ -108,17 +108,30 @@ public class BattleActionUI : MonoBehaviour
 
     private void OnSkill1()
     {
+        if (_currentUnit == null || !_currentUnit.IsSkill1Ready) return;
+
+        if (_currentUnit.skill1IsCommand)
+        {
+            if (panel) panel.SetActive(false);
+            engine.PlayerChooseSkillTarget(0, _currentUnit);
+            selector?.Clear();
+            return;
+        }
+
         var target = selector ? selector.Current : null;
-        if (target == null) { ShowMessage("Select a target first."); return; }
-        if (_currentUnit && !_currentUnit.IsSkill1Ready) return;
+        if (target == null)
+        {
+            ShowMessage("Select a target first.");
+            return;
+        }
+
         if (panel) panel.SetActive(false);
         engine.PlayerChooseSkillTarget(0, target);
     }
 
     private void OnSkill2()
     {
-        if (_currentUnit == null) return;
-        if (!_currentUnit.IsSkill2Ready) return;
+        if (_currentUnit == null || !_currentUnit.IsSkill2Ready) return;
 
         // Self-cast support Skill2
         if (_currentUnit.Skill2IsSupport)
