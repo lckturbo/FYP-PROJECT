@@ -65,6 +65,7 @@ public class ItemPickup : MonoBehaviour
 
     private void CollectItem()
     {
+        AudioManager.instance.PlaySFXAtPoint("ding-411634", transform.position);
         InventoryManager inv = FindObjectOfType<InventoryManager>();
         if (inv != null && inv.PlayerInventory != null)
         {

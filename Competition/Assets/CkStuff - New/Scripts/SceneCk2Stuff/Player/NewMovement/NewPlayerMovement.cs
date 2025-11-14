@@ -20,6 +20,8 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
 
     public bool IsFacingRight { get; private set; } = true;
 
+    private bool walkingSFXPlaying = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -106,6 +108,25 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             //animator.SetFloat("moveY", -1f); // jas add
             animator.SetBool("moving", false);
         }
+
+        // Walking SFX
+        if (moveDir != Vector2.zero)
+        {
+            if (!walkingSFXPlaying)
+            {
+                AudioManager.instance.PlayLoopingSFXAtObject("walking-96582", gameObject, 0.9f);
+                walkingSFXPlaying = true;
+            }
+        }
+        else
+        {
+            if (walkingSFXPlaying)
+            {
+                AudioManager.instance.StopLoopingSFX(gameObject);
+                walkingSFXPlaying = false;
+            }
+        }
+
 
         //Debug.Log("[NewPlayerMovement] moving2; " + animator.GetBool("moving"));
 

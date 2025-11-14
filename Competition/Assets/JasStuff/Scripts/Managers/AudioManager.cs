@@ -13,6 +13,8 @@ public class AudioManager : MonoBehaviour
     private Dictionary<string, float> savedMusicTime = new Dictionary<string, float>();
     private string currentMusic = "";
 
+    private Dictionary<GameObject, AudioSource> loopingSFX = new();
+
 
     private void Awake()
     {
@@ -108,6 +110,46 @@ public class AudioManager : MonoBehaviour
 
         // Destroy object after the sound finishes
         Destroy(tempObj, sfx.clip.length / tempSource.pitch);
+    }
+
+    public void PlayLoopingSFXAtObject(string clipName, GameObject target, float volume = 1f)
+    {
+        if (!soundDictionary.ContainsKey(clipName))
+        {
+            Debug.LogWarning($"Looping SFX '{clipName}' not found.");
+            return;
+        }
+
+        if (loopingSFX.ContainsKey(target))
+            return; // already playing
+
+        Sound sfx = soundDictionary[clipName];
+
+        AudioSource src = target.AddComponent<AudioSource>();
+        src.clip = sfx.clip;
+        src.volume = sfx.volume * volume;
+        src.pitch = sfx.pitch;
+        src.loop = true;
+        src.spatialBlend = 1f;
+        src.outputAudioMixerGroup = sfx.audioMixer;
+
+        src.Play();
+        loopingSFX[target] = src;
+    }
+
+    public void StopLoopingSFX(GameObject target)
+    {
+        if (!loopingSFX.ContainsKey(target))
+            return;
+
+        AudioSource src = loopingSFX[target];
+        if (src != null)
+        {
+            src.Stop();
+            Destroy(src);
+        }
+
+        loopingSFX.Remove(target);
     }
 
 

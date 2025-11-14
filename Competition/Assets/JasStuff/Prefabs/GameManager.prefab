@@ -148,6 +148,18 @@ MonoBehaviour:
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
     audioSource: {fileID: 0}
+  - clip: {fileID: 8300000, guid: 8097b70a35e0daf4a8562bdd9a017474, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+    audioSource: {fileID: 0}
+  - clip: {fileID: 8300000, guid: 2e0ddb6285647244db68948923fa19f2, type: 3}
+    volume: 0.35
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+    audioSource: {fileID: 0}
   audioMixer: {fileID: 24100000, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
 --- !u!114 &2743626251221848417
 MonoBehaviour:
@@ -161,18 +173,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 168f7ee1f07b4034e99a83e63f525c70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playBtn: {fileID: 0}
+  loadBtn: {fileID: 0}
+  newBtn: {fileID: 0}
   settingsBtn: {fileID: 0}
   creditsBtn: {fileID: 0}
   exitBtn: {fileID: 0}
   pauseUI: {fileID: 0}
   resumeBtn: {fileID: 0}
+  checkpointBtn: {fileID: 0}
   menuBtn: {fileID: 0}
+  desktopBtn: {fileID: 0}
   settingsUI: {fileID: 0}
+  playerStatsBtn: {fileID: 0}
+  MasterSlider: {fileID: 0}
   BGMSlider: {fileID: 0}
   SFXSlider: {fileID: 0}
   backBtn: {fileID: 0}
-  statsDisplay: {fileID: 0}
+  canPause: 1
 --- !u!114 &8335944949039016364
 MonoBehaviour:
   m_ObjectHideFlags: 0

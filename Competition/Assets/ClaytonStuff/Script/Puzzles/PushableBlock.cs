@@ -72,6 +72,8 @@ public class PushableBlock : MonoBehaviour, IDataPersistence
     {
         if (isMoving) return false;
 
+        AudioManager.instance.PlaySFXAtPoint("cinderblockmove2-107628", transform.position);
+
         Vector2 dir = GetCardinal(direction);
         if (dir == Vector2.zero) return false;
 
