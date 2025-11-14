@@ -10,6 +10,10 @@ public class AudioManager : MonoBehaviour
     private Dictionary<string, Sound> soundDictionary;
     [SerializeField] private AudioMixer audioMixer;
 
+    private Dictionary<string, float> savedMusicTime = new Dictionary<string, float>();
+    private string currentMusic = "";
+
+
     private void Awake()
     {
         if (!instance) instance = this;
@@ -33,11 +37,53 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void PlaySound(string clipName)
+    public void PlayMusic(string clipName)
     {
-        if (soundDictionary.ContainsKey(clipName))
-            soundDictionary[clipName].audioSource.Play();
+        if (!soundDictionary.ContainsKey(clipName))
+        {
+            Debug.LogWarning($"Music '{clipName}' not found.");
+            return;
+        }
+
+        Sound s = soundDictionary[clipName];
+
+        // Save which music is playing
+        currentMusic = clipName;
+
+        // Restore saved time if exists
+        if (savedMusicTime.TryGetValue(clipName, out float time))
+            s.audioSource.time = time;
+        else
+            s.audioSource.time = 0f;
+
+        s.audioSource.Play();
     }
+
+    public void PauseCurrentMusic()
+    {
+        if (string.IsNullOrEmpty(currentMusic)) return;
+
+        Sound s = soundDictionary[currentMusic];
+        if (s.audioSource.isPlaying)
+        {
+            savedMusicTime[currentMusic] = s.audioSource.time;
+            s.audioSource.Pause();
+        }
+    }
+    public void PauseAllMusic()
+    {
+        foreach (var pair in soundDictionary)
+        {
+            Sound s = pair.Value;
+            if (s.audioSource.isPlaying)
+            {
+                savedMusicTime[pair.Key] = s.audioSource.time;
+                s.audioSource.Pause();
+            }
+        }
+    }
+
+
     public void StopSound(string clipName)
     {
         if (soundDictionary.ContainsKey(clipName))

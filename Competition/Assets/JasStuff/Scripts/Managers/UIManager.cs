@@ -77,34 +77,35 @@ public class UIManager : MonoBehaviour, IDataPersistence
             pauseUI = null;
 
         string scnName = scene.name;
-        AudioManager.instance.StopAllSounds();
+        AudioManager.instance.PauseAllMusic();
+
 
         canPause = true;
 
         switch (scnName)
         {
             case "Main":
-                AudioManager.instance.PlaySound("NewAdventure");
+                AudioManager.instance.PlayMusic("NewAdventure");
                 SetupMainMenu();
                 return;
             case "Lobby":
-                AudioManager.instance.PlaySound("bgm");
+                AudioManager.instance.PlayMusic("bgm");
                 SetupLobbyMenu();
                 RefreshLobbyButtons();
                 return;
             case "CharSelection":
-                AudioManager.instance.PlaySound("MainMenuBGM");
+                AudioManager.instance.PlayMusic("MainMenuBGM");
                 return;
             case "SampleScene":
-                AudioManager.instance.PlaySound("BattleForPeace");
+                AudioManager.instance.PlayMusic("BattleForPeace");
                 SetupMainGameMenu();
                 return;
             case "jasBattle":
-                AudioManager.instance.PlaySound("Pride");
+                AudioManager.instance.PlayMusic("Pride");
                 SetupBattleMenu();
                 return;
             case "Credits":
-                AudioManager.instance.PlaySound("MainMenuBGM");
+                AudioManager.instance.PlayMusic("MainMenuBGM");
                 SetupCreditsMenu();
                 return;
         }
@@ -317,26 +318,23 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 ToggleSettings(false);
             });
 
-            checkpointBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "StuckBtn");
-            if (checkpointBtn)
+            checkpointBtn = pauseUI.GetComponentsInChildren<Button>().First(s => s.name == "StuckBtn");
+            checkpointBtn.onClick.RemoveAllListeners();
+            if (checkpointBtn) checkpointBtn.onClick.AddListener(() =>
             {
-                checkpointBtn.onClick.RemoveAllListeners();
-                if (checkpointBtn) checkpointBtn.onClick.AddListener(() =>
-                {
-                    CheckpointManager.instance.ReturnToCheckpoint();
+                CheckpointManager.instance.ReturnToCheckpoint();
 
-                    Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
-                    if (active != null)
-                    {
-                        int index = CheckpointManager.instance.GetCheckpointIndex(active);
-                        checkpointBtn.interactable = index > 0;
-                    }
-                    else
-                    {
-                        checkpointBtn.interactable = false;
-                    }
-                });
-            }
+                Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
+                if (active != null)
+                {
+                    int index = CheckpointManager.instance.GetCheckpointIndex(active);
+                    checkpointBtn.interactable = index > 0;
+                }
+                else
+                {
+                    checkpointBtn.interactable = false;
+                }
+            });
 
             desktopBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "DesktopBtn");
             if (desktopBtn)
