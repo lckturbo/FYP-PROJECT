@@ -20,7 +20,7 @@ public class NPCDialogueTrigger : MonoBehaviour
             }
             else
             {
-                DialogueManager.Instance.DisplayNextLine();
+                //DialogueManager.Instance.DisplayNextLine();
             }
         }
     }

@@ -26,6 +26,8 @@ public class DialogueManager : MonoBehaviour
 
     private NewPlayerMovement playerMovement;
 
+    private System.Action onDialogueEndCallback;
+
     private void Start()
     {
         playerMovement = FindObjectOfType<NewPlayerMovement>();
@@ -42,13 +44,27 @@ public class DialogueManager : MonoBehaviour
         dialogueUI.SetActive(false);
     }
 
+    private void Update()
+    {
+        if (!IsDialogueActive) return;
+
+        // Allow ANY key OR left mouse click to continue
+        if (Input.anyKeyDown || Input.GetMouseButtonDown(0))
+        {
+            DisplayNextLine();
+        }
+    }
+
+
     /// <summary>
     /// 会話開始
     /// </summary>
-    public void StartDialogue(DialogueData dialogueData)
+    public void StartDialogue(DialogueData dialogueData, System.Action onEnd = null)
     {
         dialogueUI.SetActive(true);
         UIManager.instance.canPause = false;
+
+        onDialogueEndCallback = onEnd;
 
         if (playerMovement != null)
             playerMovement.GetComponent<PlayerInput>().enabled = false;
@@ -59,6 +75,8 @@ public class DialogueManager : MonoBehaviour
 
         DisplayNextLine();
     }
+
+
 
     /// <summary>
     /// 次の行を表示
@@ -125,7 +143,9 @@ public class DialogueManager : MonoBehaviour
 
         if (playerMovement != null)
             playerMovement.GetComponent<PlayerInput>().enabled = true;
-    }
 
+        onDialogueEndCallback?.Invoke();  // <-- DO THE NEXT ACTION (enter battle)
+        onDialogueEndCallback = null;
+    }
 
 }
