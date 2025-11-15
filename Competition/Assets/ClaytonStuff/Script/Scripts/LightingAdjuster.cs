@@ -1,18 +1,44 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Rendering.Universal;
 
 public class LightingAdjuster : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [Header("Light Reference")]
+    public Light2D globalLight;   // Assign your Global Light 2D here
+
+    [Header("UI Slider")]
+    public Slider intensitySlider;
+
+    [Header("Intensity Range")]
+    public float minIntensity = 0.3f;
+    public float maxIntensity = 2.5f;
+
+    private void Start()
     {
-        
+        if (globalLight == null)
+        {
+            Debug.LogWarning("No Light2D assigned!");
+            return;
+        }
+
+        if (intensitySlider != null)
+        {
+            // Set slider range
+            intensitySlider.minValue = minIntensity;
+            intensitySlider.maxValue = maxIntensity;
+
+            // Set initial value
+            intensitySlider.value = globalLight.intensity;
+
+            // Add event listener
+            intensitySlider.onValueChanged.AddListener(UpdateLightIntensity);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void UpdateLightIntensity(float value)
     {
-        
+        if (globalLight != null)
+            globalLight.intensity = value;
     }
 }
