@@ -30,6 +30,7 @@ public class Deadline : BaseMinigame
 
     private bool instructionStarted = false;
     private readonly List<GameObject> activePapers = new();
+
     public void StartInstructionCountdown()
     {
         instructionStarted = true;
@@ -39,6 +40,7 @@ public class Deadline : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+        SetupSkipUI(true);
 
         if (anim)
         {
@@ -53,17 +55,20 @@ public class Deadline : BaseMinigame
 
         instructionStarted = false;
         yield return null;
-        yield return new WaitUntil(() => instructionStarted);
+        while (!instructionStarted && !skipRequested) yield return null;
 
-        while (instructionTime > 0)
+        while (instructionTime > 0 && !skipRequested)
         {
             instructionTime -= Time.unscaledDeltaTime;
             if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
             yield return null;
         }
 
+        if (skipRequested) instructionTime = 0f;
+
         instructionPanel.SetActive(false);
         minigamePanel.SetActive(true);
+        SetupSkipUI(false);
 
         timer = 10.0f;
         running = true;
@@ -134,7 +139,7 @@ public class Deadline : BaseMinigame
 
     public void OnMiss()
     {
-        missed--;
+        missed++;
         StartCoroutine(SetMissedText());
         SetCaughtText(caught.ToString());
     }

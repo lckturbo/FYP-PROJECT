@@ -58,6 +58,7 @@ public class RedLightGreenLightMinigame : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+        SetupSkipUI(true);
 
         if (anim)
         {
@@ -70,28 +71,19 @@ public class RedLightGreenLightMinigame : BaseMinigame
         instructionPanel.SetActive(true);
         minigamePanel.SetActive(false);
 
-        if (instructionPanel.activeSelf)
-        {
-            while (instructionTime > 0)
-            {
-                instructionTime -= Time.unscaledDeltaTime;
-                if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
-                yield return null;
-            }
-        }
-
-        instructionPanel.SetActive(false);
-        minigamePanel.SetActive(true);
-
-        while (instructionTime > 0)
+        while (instructionTime > 0 && !skipRequested)
         {
             instructionTime -= Time.unscaledDeltaTime;
             if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
             yield return null;
         }
 
+        if (skipRequested)
+            instructionTime = 0f;
+
         instructionPanel.SetActive(false);
         minigamePanel.SetActive(true);
+        SetupSkipUI(false);
 
         yield return StartCoroutine(RunMinigame());
 

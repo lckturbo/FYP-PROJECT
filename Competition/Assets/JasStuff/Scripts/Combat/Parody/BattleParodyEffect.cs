@@ -11,7 +11,7 @@ public class BattleParodyEffect : MonoBehaviour
     [Header("ZoomCrit Settings")]
     [SerializeField] private float zoomSize = 2.5f;
     [SerializeField] private float zoomDuration = 0.3f;
-    [SerializeField] private float holdDuration = 1f;
+    //[SerializeField] private float holdDuration = 1f;
 
     private void Awake()
     {

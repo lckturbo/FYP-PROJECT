@@ -105,10 +105,15 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
         if (playerObj == null)
             return;
 
-        playerObj.transform.position = activeCheckpoint.transform.position;
+        Vector3 cpPos = activeCheckpoint.transform.position;
+        playerObj.transform.position = cpPos;
+
+        if (PlayerParty.instance != null)
+            PlayerParty.instance.ResetPartyPositions(cpPos);
 
         Debug.Log($"[CheckpointManager] Player returned to checkpoint ID {activeCheckpoint.GetID()}");
     }
+
 
     public Checkpoint GetActiveCheckpoint()
     {

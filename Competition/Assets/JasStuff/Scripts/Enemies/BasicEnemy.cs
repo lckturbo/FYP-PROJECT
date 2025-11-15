@@ -21,6 +21,7 @@ public class BasicEnemy : EnemyBase
             }
         }
     }
+
     protected override void Idle()
     {
         base.Idle();

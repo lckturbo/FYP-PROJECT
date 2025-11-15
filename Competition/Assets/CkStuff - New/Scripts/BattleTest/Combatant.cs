@@ -422,33 +422,34 @@ public class Combatant : MonoBehaviour
     // === Movement + wait-for-animation routine ===
     private IEnumerator MoveRoutine(Combatant target, System.Action<Combatant> doHit, string stateToWait)
     {
-        if (target == null || !target.IsAlive) yield break;
-
         ActionBegan?.Invoke();
 
-        // Disable collisions for the duration of the lunge (and return)
-        if (disablePhysicsWhileActing) EnterNonColliding();
+        try
+        {
+            if (target == null || !target.IsAlive)
+                yield break;
 
-        Transform mover = visualRoot ? visualRoot : transform;
-        Vector3 startPos = mover.position;
-        Vector3 tgtPos = ApproachPoint(target);
+            if (disablePhysicsWhileActing) EnterNonColliding();
 
-        yield return SmoothMove(mover, startPos, tgtPos, goSpeed, hopArcHeight);
+            Transform mover = visualRoot ? visualRoot : transform;
+            Vector3 startPos = mover.position;
+            Vector3 tgtPos = ApproachPoint(target);
 
-        // play animation + apply damage
-        doHit?.Invoke(target);
-        yield return null; // let Animator process trigger
+            yield return SmoothMove(mover, startPos, tgtPos, goSpeed, hopArcHeight);
 
-        // wait until the specific state finishes (with timeouts/fallbacks)
-        yield return WaitForAnimationRobust(anim, stateToWait);
+            doHit?.Invoke(target);
+            yield return null;
 
-        // then move back
-        yield return SmoothMove(mover, tgtPos, startPos, backSpeed, hopArcHeight);
-        mover.position = startPos;
+            yield return WaitForAnimationRobust(anim, stateToWait);
 
-        if (disablePhysicsWhileActing) ExitNonColliding();
-
-        ActionEnded?.Invoke();
+            yield return SmoothMove(mover, tgtPos, startPos, backSpeed, hopArcHeight);
+            mover.position = startPos;
+        }
+        finally
+        {
+            if (disablePhysicsWhileActing) ExitNonColliding();
+            ActionEnded?.Invoke();  
+        }
     }
 
     private Vector3 ApproachPoint(Combatant target)
