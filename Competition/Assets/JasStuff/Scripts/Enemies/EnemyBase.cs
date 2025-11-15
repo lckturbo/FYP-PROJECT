@@ -56,12 +56,15 @@ public abstract class EnemyBase : MonoBehaviour
 
     public event Action<EnemyParty> OnAttackPlayer;
     protected Vector2 lastMoveDir = Vector2.down;
+    protected bool fullyBlockingAlert = false;
 
     protected bool isAttacking;
+    protected bool alertCoroutineStarted = false;
     public bool IsAttacking() => isAttacking;
     protected float attackCooldownTimer = 0f;
 
     protected bool isAlerting = false;
+    protected bool returningFromChase = false;
 
     [Header("Chase Settings")]
     [SerializeField] private float chaseSpeedMultiplier = 1.5f;
@@ -110,6 +113,8 @@ public abstract class EnemyBase : MonoBehaviour
             if (enemyHitBox)
                 enemyHitBox.Init(this);
         }
+
+
     }
 
     private void Update()
@@ -160,6 +165,13 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (!aiPath) return;
 
+        if (returningFromChase)
+        {
+            currId = GetNearestWaypointIndex();
+            currTarget = waypoints[currId].position;
+            returningFromChase = false;
+        }
+
         aiPath.canMove = true;
         aiPath.destination = currTarget;
         UpdateAnim();
@@ -187,11 +199,22 @@ public abstract class EnemyBase : MonoBehaviour
     // ---- ALERT ---- //
     protected virtual void Alert()
     {
-        if (isAlerting) return;
-        isAlerting = true;
+        if (!alertCoroutineStarted)
+        {
+            alertCoroutineStarted = true;
 
-        aiPath.canMove = false;
-        rb2d.velocity = Vector2.zero;
+            aiPath.isStopped = true;
+            aiPath.canMove = false;
+            rb2d.velocity = Vector2.zero;
+
+            anim.SetFloat("speed", 0f);
+            anim.Update(0f);
+
+            anim.SetTrigger("alert");
+
+            StartCoroutine(AlertDelay());
+        }
+
 
         if (player)
         {
@@ -200,24 +223,36 @@ public abstract class EnemyBase : MonoBehaviour
             anim.SetFloat("moveY", lookDir.y);
             lastMoveDir = lookDir;
         }
-
-        if (anim) anim.SetTrigger("alert");
-        if (player != null)
-        {
-            NewPlayerMovement pm = player.GetComponent<NewPlayerMovement>();
-            if (pm != null)
-                pm.SetCombatSlow(0.8f);
-        }
-        StartCoroutine(AlertDelay());
     }
+
+
+
 
     private IEnumerator AlertDelay()
     {
-        yield return new WaitForSeconds(0.2f);
+        yield return null;
 
-        isAlerting = false;
+        while (!anim.GetCurrentAnimatorStateInfo(0).IsName("alert"))
+            yield return null;
+
+        AnimatorStateInfo info = anim.GetCurrentAnimatorStateInfo(0);
+        float alertLength = info.length;
+
+        yield return new WaitForSeconds(alertLength);
+
+        alertCoroutineStarted = false;
+
+        aiPath.isStopped = false;
+        aiPath.canMove = true;
+        chaseTime = 0f;
+        chaseMemoryTimer = chaseMemoryDuration;
+
+        returningFromChase = true;
         enemyStates = EnemyStates.Chase;
     }
+
+
+
 
     // ---- ATTACK ---- //
     protected virtual void Attack()
@@ -275,7 +310,6 @@ public abstract class EnemyBase : MonoBehaviour
         if (!player) return;
 
         float dist = Vector2.Distance(rb2d.position, player.position);
-
         if (!CanSeePlayer())
         {
             chaseMemoryTimer -= Time.deltaTime;
@@ -283,10 +317,9 @@ public abstract class EnemyBase : MonoBehaviour
             {
                 aiPath.destination = rb2d.position;
                 aiPath.maxSpeed = enemyStats.Speed;
-                NewPlayerMovement pm = player.GetComponent<NewPlayerMovement>();
-                if (pm != null) pm.ResetCombatSlow();
 
                 chaseTime = 0f;
+                returningFromChase = true;
                 enemyStates = EnemyStates.Idle;
                 return;
             }
@@ -295,8 +328,8 @@ public abstract class EnemyBase : MonoBehaviour
         {
             chaseMemoryTimer = chaseMemoryDuration;
         }
-
         aiPath.canMove = true;
+        aiPath.isStopped = false;
 
         Vector2 playerVel = player.GetComponent<Rigidbody2D>().velocity;
         Vector2 predictedPos = (Vector2)player.position + playerVel * 0.6f;
@@ -311,6 +344,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         UpdateAnim();
     }
+
 
     protected virtual bool CanSeePlayer()
     {
@@ -361,4 +395,22 @@ public abstract class EnemyBase : MonoBehaviour
 
         UpdateHitboxDirection();
     }
+
+    protected int GetNearestWaypointIndex()
+    {
+        int nearest = 0;
+        float minDist = float.MaxValue;
+
+        for (int i = 0; i < waypoints.Count; i++)
+        {
+            float d = Vector2.Distance(transform.position, waypoints[i].position);
+            if (d < minDist)
+            {
+                minDist = d;
+                nearest = i;
+            }
+        }
+        return nearest;
+    }
+
 }

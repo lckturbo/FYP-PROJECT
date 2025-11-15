@@ -10,7 +10,12 @@ public class StaticEnemy : EnemyBase
     protected override void Start()
     {
         base.Start();
+
         originalPosition = transform.position;
+
+        var nn = AstarPath.active.GetNearest(originalPosition);
+        originalPosition = nn.position;
+
         originalFacingDir = startingFacingDir.normalized;
 
         if (anim)
@@ -22,6 +27,7 @@ public class StaticEnemy : EnemyBase
         lastMoveDir = originalFacingDir;
         UpdateHitboxDirection();
     }
+
     protected override void Idle()
     {
         base.Idle();
@@ -30,16 +36,32 @@ public class StaticEnemy : EnemyBase
 
         if (CanSeePlayer())
         {
+
+            //aiPath.isStopped = true;
+            //aiPath.canMove = false;
+            //rb2d.velocity = Vector2.zero;
+
+
             enemyStates = EnemyStates.Alert;
             return;
         }
     }
-
     protected override void Patrol()
     {
         aiPath.canMove = true;
         aiPath.destination = originalPosition;
         UpdateAnim();
+
+        if (CanSeePlayer())
+        {
+            //aiPath.isStopped = true;
+            //aiPath.canMove = false;
+            //rb2d.velocity = Vector2.zero;
+
+            //isAlerting = true;
+            enemyStates = EnemyStates.Alert;
+            return;
+        }
 
         if (Vector2.Distance(transform.position, originalPosition) < 0.2f)
         {
@@ -52,7 +74,6 @@ public class StaticEnemy : EnemyBase
             UpdateHitboxDirection();
         }
     }
-
     protected override void Chase()
     {
         if (!player) return;
@@ -74,25 +95,25 @@ public class StaticEnemy : EnemyBase
         UpdateAnim();
     }
 
-    protected override void StateMachine()
-    {
-        switch (enemyStates)
-        {
-            case EnemyStates.Idle:
-                Idle();
-                break;
-            case EnemyStates.Patrol:
-                Patrol();
-                break;
-            case EnemyStates.Alert:
-                Alert();
-                break;
-            case EnemyStates.Chase:
-                Chase();
-                break;
-            case EnemyStates.Attack:
-                Attack(); // trigger battle scene
-                break;
-        }
-    }
+    //protected override void StateMachine()
+    //{
+    //    switch (enemyStates)
+    //    {
+    //        case EnemyStates.Idle:
+    //            Idle();
+    //            break;
+    //        case EnemyStates.Patrol:
+    //            Patrol();
+    //            break;
+    //        case EnemyStates.Alert:
+    //            Alert();
+    //            break;
+    //        case EnemyStates.Chase:
+    //            Chase();
+    //            break;
+    //        case EnemyStates.Attack:
+    //            Attack(); // trigger battle scene
+    //            break;
+    //    }
+    //}
 }
