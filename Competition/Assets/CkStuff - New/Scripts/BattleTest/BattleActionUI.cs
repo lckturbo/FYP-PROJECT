@@ -1,6 +1,5 @@
-using System.Collections.Generic;
+using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,15 +18,31 @@ public class BattleActionUI : MonoBehaviour
     [SerializeField] private TMP_Text skill1CdText;
     [SerializeField] private TMP_Text skill2CdText;
 
+    [Header("Selection Visuals")]
+    [SerializeField] private Color normalButtonColor = Color.white;
+    [SerializeField] private Color selectedButtonColor = new Color(1f, 0.9f, 0.3f);
+
     private Combatant _currentUnit;
+
+    private enum PendingAction
+    {
+        None,
+        Basic,
+        Skill1,
+        Skill2
+    }
+
+    private PendingAction _pendingAction = PendingAction.None;
 
     private void Awake()
     {
         if (panel) panel.SetActive(false);
-        if (attackBtn) attackBtn.onClick.AddListener(OnAttack);
-        if (skillBtn) skillBtn.onClick.AddListener(OnSkill1);
-        if (skill2Btn) skill2Btn.onClick.AddListener(OnSkill2);
+        if (attackBtn) attackBtn.onClick.AddListener(OnAttackClicked);
+        if (skillBtn) skillBtn.onClick.AddListener(OnSkill1Clicked);
+        if (skill2Btn) skill2Btn.onClick.AddListener(OnSkill2Clicked);
         ShowMessage(null);
+
+        ResetButtonVisuals();
     }
 
     private void OnEnable()
@@ -45,8 +60,13 @@ public class BattleActionUI : MonoBehaviour
     private void ShowForUnit(Combatant unit)
     {
         _currentUnit = unit;
+        _pendingAction = PendingAction.None;
+
+        selector?.Disable();
         selector?.Clear();
         ShowMessage(null);
+        ResetButtonVisuals();
+
         if (panel) panel.SetActive(true);
 
         if (unit != null)
@@ -93,71 +113,154 @@ public class BattleActionUI : MonoBehaviour
         }
     }
 
-    private void HandleSelectionChanged(Combatant c)
+    private void HandleSelectionChanged(Combatant target)
     {
-        if (c != null) ShowMessage(null);
+        if (_pendingAction == PendingAction.None)
+        {
+            if (target != null) ShowMessage(null);
+            return;
+        }
+
+        if (target == null)
+        {
+            ShowMessage("Select a target.");
+            return;
+        }
+
+        if (!target.IsAlive || target.isPlayerTeam)
+        {
+            ShowMessage("Invalid target.");
+            return;
+        }
+
+        ShowMessage(null);
+
+        StartCoroutine(ExecutePendingActionAfterDelay(target));
     }
 
-    private void OnAttack()
+    private IEnumerator ExecutePendingActionAfterDelay(Combatant target)
     {
-        var target = selector ? selector.Current : null;
-        if (target == null) { ShowMessage("Select a target first."); return; }
+        var action = _pendingAction;
+        _pendingAction = PendingAction.None;
+
+        yield return new WaitForSeconds(0.15f);
+
         if (panel) panel.SetActive(false);
-        engine.PlayerChooseBasicAttackTarget(target);
+        selector?.Disable();
+
+        ResetButtonVisuals();
+
+        switch (action)
+        {
+            case PendingAction.Basic:
+                engine.PlayerChooseBasicAttackTarget(target);
+                break;
+
+            case PendingAction.Skill1:
+                engine.PlayerChooseSkillTarget(0, target);
+                break;
+
+            case PendingAction.Skill2:
+                engine.PlayerChooseSkillTarget(1, target);
+                break;
+        }
     }
 
-    private void OnSkill1()
+    private void OnAttackClicked()
+    {
+        if (_currentUnit == null || !_currentUnit.IsAlive) return;
+
+        _pendingAction = PendingAction.Basic;
+        ShowMessage("Attack selected. Choose a target.");
+        UpdateButtonVisualsForSelection();
+
+        if (selector) selector.EnableForPlayerUnit(_currentUnit);
+    }
+
+    private void OnSkill1Clicked()
     {
         if (_currentUnit == null || !_currentUnit.IsSkill1Ready) return;
 
         if (_currentUnit.skill1IsCommand)
         {
             if (panel) panel.SetActive(false);
-            engine.PlayerChooseSkillTarget(0, _currentUnit);
+            selector?.Disable();
             selector?.Clear();
+            ResetButtonVisuals();
+
+            engine.PlayerChooseSkillTarget(0, _currentUnit);
             return;
         }
 
-        var target = selector ? selector.Current : null;
-        if (target == null)
-        {
-            ShowMessage("Select a target first.");
-            return;
-        }
+        _pendingAction = PendingAction.Skill1;
+        ShowMessage("Skill 1 selected. Choose a target.");
+        UpdateButtonVisualsForSelection();
 
-        if (panel) panel.SetActive(false);
-        engine.PlayerChooseSkillTarget(0, target);
+        if (selector) selector.EnableForPlayerUnit(_currentUnit);
     }
 
-    private void OnSkill2()
+    private void OnSkill2Clicked()
     {
         if (_currentUnit == null || !_currentUnit.IsSkill2Ready) return;
 
-        // Self-cast support Skill2
         if (_currentUnit.Skill2IsSupport)
         {
             if (panel) panel.SetActive(false);
-            engine.PlayerChooseSkillTarget(1, _currentUnit);
+            selector?.Disable();
             selector?.Clear();
+            ResetButtonVisuals();
+
+            engine.PlayerChooseSkillTarget(1, _currentUnit);
             return;
         }
 
-        var target = selector ? selector.Current : null;
-        if (target == null)
+        _pendingAction = PendingAction.Skill2;
+        ShowMessage("Skill 2 selected. Choose a target.");
+        UpdateButtonVisualsForSelection();
+
+        if (selector) selector.EnableForPlayerUnit(_currentUnit);
+    }
+
+    private void ResetButtonVisuals()
+    {
+        if (attackBtn)
+            attackBtn.GetComponent<Image>().color = normalButtonColor;
+        if (skillBtn)
+            skillBtn.GetComponent<Image>().color = normalButtonColor;
+        if (skill2Btn)
+            skill2Btn.GetComponent<Image>().color = normalButtonColor;
+    }
+
+    private void UpdateButtonVisualsForSelection()
+    {
+        ResetButtonVisuals();
+
+        switch (_pendingAction)
         {
-            ShowMessage("Select a target first.");
-            return;
-        }
+            case PendingAction.Basic:
+                if (attackBtn)
+                    attackBtn.GetComponent<Image>().color = selectedButtonColor;
+                break;
 
-        if (panel) panel.SetActive(false);
-        engine.PlayerChooseSkillTarget(1, target);
+            case PendingAction.Skill1:
+                if (skillBtn)
+                    skillBtn.GetComponent<Image>().color = selectedButtonColor;
+                break;
+
+            case PendingAction.Skill2:
+                if (skill2Btn)
+                    skill2Btn.GetComponent<Image>().color = selectedButtonColor;
+                break;
+        }
     }
 
     private void ShowMessage(string msg)
     {
         if (!infoLabel) return;
         if (string.IsNullOrEmpty(msg))
+        {
             infoLabel.gameObject.SetActive(false);
+        }
         else
         {
             infoLabel.text = msg;

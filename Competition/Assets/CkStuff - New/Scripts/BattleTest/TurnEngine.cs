@@ -157,11 +157,11 @@ public class TurnEngine : MonoBehaviour
                         _currPlayerUnit = u;
                         OnPlayerTurnStart?.Invoke(u);
 
-                        if (targetSelector)
-                        {
-                            targetSelector.EnableForPlayerUnit(u);
-                            targetSelector.Clear();
-                        }
+                        //if (targetSelector)
+                        //{
+                        //    targetSelector.EnableForPlayerUnit(u);
+                        //    targetSelector.Clear();
+                        //}
 
                         _nextIndex = (i + 1) % count;
                         return;
