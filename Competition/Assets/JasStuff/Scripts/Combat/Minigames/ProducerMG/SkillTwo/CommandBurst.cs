@@ -32,13 +32,11 @@ public class CommandBurst : BaseMinigame
     private int successCount = 0;
     private float timer;
     private bool instructionStarted = false;
-
     public void StartInstructionCountdown()
     {
         instructionStarted = true;
         Debug.Log("instruction started: " + instructionStarted);
     }
-
     protected override void Start()
     {
         base.Start();
@@ -55,6 +53,7 @@ public class CommandBurst : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance.SetBattlePaused(true);
+        SetupSkipUI(true);
 
         instructionPanel.SetActive(true);
         minigamePanel.SetActive(false);
@@ -64,18 +63,24 @@ public class CommandBurst : BaseMinigame
             instrAnim.SetTrigger("start");
             instructionStarted = false;
             yield return null;
-            yield return new WaitUntil(() => instructionStarted);
+            while (!instructionStarted && !skipRequested) yield return null;
         }
 
-        while (instructionTime > 0)
+        while (instructionTime > 0f && !skipRequested)
         {
             instructionTime -= Time.unscaledDeltaTime;
-            if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
+
+            if (instructionTimerText)
+                instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
+
             yield return null;
         }
 
+        if (skipRequested) instructionTime = 0f;
+
         instructionPanel.SetActive(false);
         minigamePanel.SetActive(true);
+        SetupSkipUI(false);
 
         yield return StartCoroutine(PlaySequence());
 

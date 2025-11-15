@@ -31,7 +31,7 @@ public class FreezeFrame : BaseMinigame
     private int score = 0;
     private float timer;
     private bool running = false;
-    private int correctIndex;
+    //private int correctIndex;
     private Sprite currentCorrectPose;
     private RectTransform correctTargetZone;
     private bool canHit = true;
@@ -39,6 +39,8 @@ public class FreezeFrame : BaseMinigame
     public override IEnumerator Run()
     {
         BattleManager.instance?.SetBattlePaused(true);
+        SetupSkipUI(true);
+
         if (anim)
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
@@ -50,18 +52,21 @@ public class FreezeFrame : BaseMinigame
         instructionPanel.SetActive(true);
         minigamePanel.SetActive(false);
 
-        if (instructionPanel.activeSelf)
+        while (instructionTime > 0f && !skipRequested)
         {
-            while (instructionTime > 0)
-            {
-                instructionTime -= Time.unscaledDeltaTime;
-                if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
-                yield return null;
-            }
+            instructionTime -= Time.unscaledDeltaTime;
+            if (instructionTimerText)
+                instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
+
+            yield return null;
         }
+
+        if (skipRequested)
+            instructionTime = 0f;
 
         instructionPanel.SetActive(false);
         minigamePanel.SetActive(true);
+        SetupSkipUI(false);
 
         timer = 15.0f;
         running = true;
@@ -99,7 +104,7 @@ public class FreezeFrame : BaseMinigame
         float leftX = -markerParent.rect.width / 2f + markerRect.rect.width / 2f;
         float rightX = markerParent.rect.width / 2f - markerRect.rect.width / 2f;
 
-        float targetX = rightX; 
+        float targetX = rightX;
 
         while (running)
         {
@@ -109,7 +114,7 @@ public class FreezeFrame : BaseMinigame
                 moveSpeed * Time.unscaledDeltaTime
             );
 
-            if (Mathf.Abs(markerRect.anchoredPosition.x - targetX) < 1f)
+            if (Mathf.Abs(markerRect.anchoredPosition.x - targetX) < 1.2f)
                 targetX = (targetX == rightX) ? leftX : rightX;
 
             yield return null;
@@ -118,7 +123,7 @@ public class FreezeFrame : BaseMinigame
 
     private void CheckHit()
     {
-        if (!canHit) return; 
+        if (!canHit) return;
         canHit = false;
 
         RectTransform hitZone = GetClosestZone();

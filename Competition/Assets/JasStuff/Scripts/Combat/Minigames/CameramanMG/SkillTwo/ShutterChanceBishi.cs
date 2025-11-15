@@ -107,9 +107,9 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private float goSeconds = 0.5f;
     [SerializeField] private float readyGoPopScale = 1.2f;
 
-    [Header("Skip")]
-    [SerializeField] private Button skipButton;
-    private bool skipRequested = false;
+    //[Header("Skip")]
+    //[SerializeField] private Button skipButton;
+    //private bool skipRequested = false;
 
     private bool gameplayActive = false;
 
@@ -1281,16 +1281,16 @@ public class ShutterChanceBishi : BaseMinigame
         }
     }
 
-    private void RequestSkip() => skipRequested = true;
+    //private void RequestSkip() => skipRequested = true;
 
-    private void SetupSkipUI(bool show)
-    {
-        if (skipButton)
-        {
-            skipButton.onClick.RemoveListener(RequestSkip);
-            if (show) skipButton.onClick.AddListener(RequestSkip);
-            skipButton.gameObject.SetActive(show);
-        }
-        if (!show) skipRequested = false;
-    }
+    //private void SetupSkipUI(bool show)
+    //{
+    //    if (skipButton)
+    //    {
+    //        skipButton.onClick.RemoveListener(RequestSkip);
+    //        if (show) skipButton.onClick.AddListener(RequestSkip);
+    //        skipButton.gameObject.SetActive(show);
+    //    }
+    //    if (!show) skipRequested = false;
+    //}
 }

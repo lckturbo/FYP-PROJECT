@@ -34,20 +34,29 @@ public class ArrangeStory : BaseMinigame
         instructionPanel.SetActive(true);
         minigamePanel.SetActive(false);
 
+        SetupSkipUI(true);
+
         if (instrAnim)
         {
             instrAnim.SetTrigger("start");
             instructionStarted = false;
-            yield return null;
-            yield return new WaitUntil(() => instructionStarted);
+            yield return new WaitUntil(() => instructionStarted || skipRequested);
+
+            if (skipRequested)
+                instructionTime = 0f;
         }
 
-        while (instructionTime > 0)
+        while (instructionTime > 0 && !skipRequested)
         {
             instructionTime -= Time.unscaledDeltaTime;
             if (instructionTimerText) instructionTimerText.text = $"Starting in... {instructionTime:F0}s";
             yield return null;
         }
+
+        if (skipRequested)
+            instructionTime = 0f;
+
+        SetupSkipUI(false);
 
         if (anim)
         {
