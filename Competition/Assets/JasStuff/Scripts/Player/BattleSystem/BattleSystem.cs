@@ -139,6 +139,7 @@ public class BattleSystem : MonoBehaviour
 
         if(leaderObj.name == "Leader_Producer")
         {
+            cL.isProducer = true;
             cL.skill1IsCommand = true;
             Debug.Log("[BattleSystem] Leader is Producer - Skill1 set as support.");
         }
@@ -195,6 +196,7 @@ public class BattleSystem : MonoBehaviour
 
                 if(allyObj.name == "Ally_Producer")
                 {
+                    cA.isProducer = true;
                     cA.skill1IsCommand = true;
                     Debug.Log("[BattleSystem] Leader is Producer - Skill1 set as support.");
                 }
@@ -208,7 +210,7 @@ public class BattleSystem : MonoBehaviour
                 AddPlayerLevelApplier(allyObj, member);
                 SnapshotChar(member);
 
-                Destroy(allyObj.GetComponentInChildren<PlayerBuffHandler>());
+                //Destroy(allyObj.GetComponentInChildren<PlayerBuffHandler>()); //clayton are we suppose to destroy this?
             }
         }
 
