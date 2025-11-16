@@ -37,6 +37,9 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected int areaID;
     protected float idleTimer = 2;
 
+    [Header("Battle UI")]
+    public Sprite enemyPortrait;
+
     [Header("Hitboxes")]
     [SerializeField] private Transform attackHitbox;
     [SerializeField] private Vector2 upOffset = new Vector2(0f, 0.5f);
