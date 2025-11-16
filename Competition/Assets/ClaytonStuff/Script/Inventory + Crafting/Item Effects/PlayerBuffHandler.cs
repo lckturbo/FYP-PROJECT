@@ -5,6 +5,11 @@ public class PlayerBuffHandler : MonoBehaviour
     [Header("VFX")]
     [SerializeField] private GameObject attackBuffVFX;
     [SerializeField] private GameObject defenseBuffVFX;
+    [SerializeField] private GameObject Skill2BuffEffect;
+
+    private bool isSkill2BuffActive = false;
+    public bool IsSkill2BuffActive => isSkill2BuffActive;
+
 
     public PlayerLevelApplier levelApplier { get; private set; }
     private NewCharacterStats runtimeStats => levelApplier != null ? levelApplier.runtimeStats : null;
@@ -119,6 +124,20 @@ public class PlayerBuffHandler : MonoBehaviour
 
         UpdateBuffVFX();
     }
+    public void ApplySkill2Buff(float duration = 0f)
+    {
+        isSkill2BuffActive = true;
+
+        // No runtime stat changes here — Combatant already did it
+        UpdateBuffVFX();
+    }
+
+    public void RemoveSkill2Buff()
+    {
+        isSkill2BuffActive = false;
+        UpdateBuffVFX();
+    }
+
 
     private void UpdateBuffVFX()
     {
@@ -127,5 +146,9 @@ public class PlayerBuffHandler : MonoBehaviour
 
         if (defenseBuffVFX != null)
             defenseBuffVFX.SetActive(BuffData.instance.hasDefenseBuff);
+
+        if (Skill2BuffEffect != null)
+            Skill2BuffEffect.SetActive(isSkill2BuffActive);
     }
+
 }

@@ -207,6 +207,11 @@ public class Combatant : MonoBehaviour
         if (recipient == this)
             skill2BuffAppliedOnce = true;
 
+        // NEW: Trigger visual buff on the recipient
+        var buffHandler = recipient.GetComponent<PlayerBuffHandler>();
+        if (buffHandler != null)
+            buffHandler.ApplySkill2Buff();
+
         // Extra turn for the caster: instantly fill their ATB.
         atb = 1f;
 
@@ -381,6 +386,13 @@ public class Combatant : MonoBehaviour
         if (currentTarget == null) return;
 
         if (currentAttackType == AttackType.Support || waitingForMinigameResult) return;
+
+        var buff = GetComponent<PlayerBuffHandler>();
+        if (buff != null && buff.IsSkill2BuffActive)
+        {
+            buff.RemoveSkill2Buff();
+            Debug.Log("[Skill2] Cameraman crit buff removed after next action.");
+        }
 
         // --- Important: reset suppression BEFORE any possible early return ---
         bool wasSuppressed = _suppressSkillBonusNextHit;
