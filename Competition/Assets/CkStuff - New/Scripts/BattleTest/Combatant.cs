@@ -26,6 +26,7 @@ public class Combatant : MonoBehaviour
 
     public bool isPlayerTeam;
     public bool isLeader;
+    public bool isProducer;
 
     public BaseStats stats;
     public NewHealth health;
@@ -278,18 +279,36 @@ public class Combatant : MonoBehaviour
                 int index = Random.Range(0, livingEnemies.Count);
                 Combatant randomTarget = livingEnemies[index];
 
-                livingEnemies.RemoveAt(index);
+                if (livingEnemies.Count > 1) livingEnemies.RemoveAt(index);
+
+                // EXTRA DMG //
+                int bonusDamage = 3;
+
+                ally.stats.atkDmg += bonusDamage;
 
                 Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget));
                 runningCoroutines.Add(co);
+
+                yield return co;
+
+                ally.stats.atkDmg -= bonusDamage;
 
                 attacks++;
             }
         }
 
-
         while (runningCoroutines.Exists(c => c != null))
             yield return null;
+
+        foreach (var ally in allCombatants)
+        {
+            if (!ally.isPlayerTeam || !ally.IsAlive || ally == this)
+                continue;
+
+            var handler = ally.GetComponent<PlayerBuffHandler>();
+            if (handler)
+                handler.RemoveStoredBuffs();  
+        }
 
         ActionEnded?.Invoke();
     }
@@ -624,30 +643,66 @@ public class Combatant : MonoBehaviour
     {
         waitingForMinigameResult = false;
 
+        int buff = 0;
         int dmg = 0;
         switch (result)
         {
             case MinigameManager.ResultType.Fail:
-                if (id == "TakeABreak")
+                if (id == "CommandBurst")
+                    buff = 0;
+                else if (id == "TakeABreak")
                     dmg = 1;
                 else
                     dmg = Mathf.RoundToInt(stats.atkDmg);
                 break;
 
             case MinigameManager.ResultType.Success:
-                dmg = Mathf.RoundToInt(stats.atkDmg * 1.2f);
+                if (id == "CommandBurst")
+                    buff = 1;
+                else
+                    dmg = Mathf.RoundToInt(stats.atkDmg * 1.2f);
                 break;
 
             case MinigameManager.ResultType.Perfect:
-                if (id == "TakeABreak")
+                if (id == "CommandBurst")
+                    buff = 3;
+                else if (id == "TakeABreak")
                     dmg = currentTarget?.health.GetCurrHealth() ?? 0;
                 else
                     dmg = Mathf.RoundToInt(stats.atkDmg * 1.5f);
                 break;
         }
 
+        if (id == "CommandBurst" &&
+            isProducer &&
+            currentAttackType == AttackType.Skill1)
+        {
+            ApplyProducerRLGLBuff(buff);
+        }
+
         pendingMinigameDamage = dmg;
     }
+
+    private void ApplyProducerRLGLBuff(int buff)
+    {
+        foreach (var ally in FindObjectsOfType<Combatant>())
+        {
+            if (!ally.isPlayerTeam || !ally.IsAlive)
+                continue;
+
+            if (ally == this)
+                continue;
+
+            var buffHandler = ally.GetComponent<PlayerBuffHandler>();
+            if (buffHandler != null)
+            {
+                buffHandler.ApplyAttackBuff(buff, 999f);
+            }
+        }
+
+        Debug.Log($"[Producer] RLGL Buff Applied: +{buff} ATK to all allies");
+    }
+
 
     private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
     {

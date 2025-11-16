@@ -48,10 +48,8 @@ public class TakeABreak : BaseMinigame
         int final = Random.Range(1, 7);
         diceImage.sprite = diceSides[final - 1];
 
-        if (final == 6)
+        if (final >= 4)
             Result = MinigameManager.ResultType.Perfect;
-        else if (final >= 4)
-            Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
 
