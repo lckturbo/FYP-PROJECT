@@ -310,9 +310,9 @@ public class Combatant : MonoBehaviour
             if (!ally.isPlayerTeam || !ally.IsAlive || ally == this)
                 continue;
 
-            var handler = ally.GetComponent<PlayerBuffHandler>();
+            var handler = ally.GetComponent<BuffData>();
             if (handler)
-                handler.RemoveStoredBuffs();  
+                handler.ClearAttackBuff();
         }
 
         ActionEnded?.Invoke();
@@ -708,7 +708,7 @@ public class Combatant : MonoBehaviour
             var buffHandler = ally.GetComponent<PlayerBuffHandler>();
             if (buffHandler != null)
             {
-                buffHandler.ApplyAttackBuff(buff, 999f);
+                buffHandler.ApplyAttackBuff(buff, 3f);
             }
         }
 

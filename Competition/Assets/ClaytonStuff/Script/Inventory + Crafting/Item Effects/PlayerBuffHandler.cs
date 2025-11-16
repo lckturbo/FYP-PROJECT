@@ -82,7 +82,7 @@ public class PlayerBuffHandler : MonoBehaviour
             RemoveDefenseBuff();
     }
 
-    private void RemoveAttackBuff()
+    public void RemoveAttackBuff()
     {
         if (runtimeStats != null)
             runtimeStats.atkDmg -= currentAttackBuff;
