@@ -348,7 +348,6 @@ public abstract class EnemyBase : MonoBehaviour
         UpdateAnim();
     }
 
-
     protected virtual bool CanSeePlayer()
     {
         if (!player) return false;
@@ -359,14 +358,12 @@ public abstract class EnemyBase : MonoBehaviour
         Vector2 rayOrigin = rb2d.position;
         Vector2 dirToPlayer = ((Vector2)player.position - rayOrigin).normalized;
 
-        int mask = LayerMask.GetMask("Player", "Obstacles");
+        int mask = LayerMask.GetMask("Player", "Obstacle", "Beam");
         RaycastHit2D hit = Physics2D.Raycast(rayOrigin, dirToPlayer, enemyStats.chaseRange, mask);
         if (!hit.collider) return false;
 
         return hit.collider.CompareTag("Player");
     }
-
-
 
     protected void UpdateAnim()
     {
@@ -429,8 +426,6 @@ public abstract class EnemyBase : MonoBehaviour
             }
         }
     }
-
-
     private void OnDrawGizmos()
     {
         if (!enemyStats) return;
