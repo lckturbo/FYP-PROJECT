@@ -2,10 +2,12 @@ using Pathfinding;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class BattleSystem : MonoBehaviour
 {
@@ -171,6 +173,10 @@ public class BattleSystem : MonoBehaviour
         if (leaderPI) leaderPI.enabled = false;
         SetAnimatorBattleLayer(leaderObj);
 
+        Transform shadow = null;
+        shadow = leaderObj.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Shadow");
+        if (shadow != null) shadow.gameObject.SetActive(true);
+
         var leaderRT = StatsRuntimeBuilder.BuildRuntimeStats(leader.stats, _preBattlePartyLevel, playerGrowth);
         ApplyRuntimeStats(leaderObj, leaderRT);
         var cL = leaderObj.AddComponent<Combatant>();
@@ -241,6 +247,9 @@ public class BattleSystem : MonoBehaviour
                 SetAnimatorBattleLayer(allyObj);
                 playerAllies.Add(allyObj);
 
+                shadow = allyObj.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Shadow");
+                if (shadow != null) shadow.gameObject.SetActive(true);
+
                 var allyRT = StatsRuntimeBuilder.BuildRuntimeStats(member.stats, _preBattlePartyLevel, playerGrowth);
                 ApplyRuntimeStats(allyObj, allyRT);
                 var cA = allyObj.AddComponent<Combatant>();
@@ -300,6 +309,10 @@ public class BattleSystem : MonoBehaviour
                 enemy = Instantiate(spawnList[i], enemySpawnPt[i].position, Quaternion.identity);
                 enemy.transform.localScale = new Vector2(1.5f, 1.5f);
             }
+
+            shadow = enemy.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Shadow");
+            if (shadow != null) shadow.gameObject.SetActive(true);
+
             enemy.name = "Enemy_" + i;
             enemies.Add(enemy);
 
