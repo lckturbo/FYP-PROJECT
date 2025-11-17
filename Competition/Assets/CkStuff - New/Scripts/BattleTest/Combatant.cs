@@ -302,9 +302,6 @@ public class Combatant : MonoBehaviour
             }
         }
 
-        while (runningCoroutines.Exists(c => c != null))
-            yield return null;
-
         foreach (var ally in allCombatants)
         {
             if (!ally.isPlayerTeam || !ally.IsAlive || ally == this)
@@ -314,6 +311,10 @@ public class Combatant : MonoBehaviour
             if (handler)
                 handler.ClearAttackBuff();
         }
+
+        while (runningCoroutines.Exists(c => c != null))
+            yield return null;
+
 
         ActionEnded?.Invoke();
     }
