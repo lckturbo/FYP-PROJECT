@@ -87,16 +87,16 @@ public class BeamReceiver : MonoBehaviour, IDataPersistence
             skipCinematicOnce = false;
 
             if (doorBlock) doorBlock.Open();
-            else if (doorAnimator) doorAnimator.SetTrigger("Open");
+            else if (doorAnimator) doorAnimator.SetTrigger("OpenDoor");
 
             OnActivated?.Invoke(this);
             return;
         }
-        
+
         if (!openDuringCinematic)
         {
             if (doorBlock) doorBlock.Open();
-            else if (doorAnimator) doorAnimator.SetTrigger("Open");
+            else if (doorAnimator) doorAnimator.SetTrigger("OpenDoor");
         }
 
         if (!_coolingDown)
@@ -115,7 +115,7 @@ public class BeamReceiver : MonoBehaviour, IDataPersistence
         if (!latchOpen)
         {
             if (doorBlock) doorBlock.Close();
-            else if (doorAnimator) doorAnimator.SetTrigger("Close");
+            else if (doorAnimator) doorAnimator.SetTrigger("CloseDoor");
 
             if (!_coolingDown)
                 StartCoroutine(UseSequence(false));
@@ -156,7 +156,10 @@ public class BeamReceiver : MonoBehaviour, IDataPersistence
             }
             else if (doorAnimator)
             {
-                doorAnimator.SetTrigger(opening ? "Open" : "Close");
+                // Use the correct triggers from your Animator
+                doorAnimator.ResetTrigger("OpenDoor");
+                doorAnimator.ResetTrigger("CloseDoor");
+                doorAnimator.SetTrigger(opening ? "OpenDoor" : "CloseDoor");
             }
 
             if (blockAnimator)
@@ -175,10 +178,10 @@ public class BeamReceiver : MonoBehaviour, IDataPersistence
             if (receiverAnchor) Destroy(receiverAnchor.gameObject);
             if (blockAnchor) Destroy(blockAnchor.gameObject);
 
-            // Re-enable inputs
             SetPlayerControl(true);
             GameInputLock.inputLocked = false;
         }
+
         if (cooldown > 0f)
             yield return new WaitForSeconds(cooldown);
 
@@ -231,6 +234,7 @@ public class BeamReceiver : MonoBehaviour, IDataPersistence
         go.transform.position = worldPos;
         return go.transform;
     }
+
     public void LoadData(GameData data)
     {
         solved = data.beamReceiverSolved;
@@ -243,7 +247,6 @@ public class BeamReceiver : MonoBehaviour, IDataPersistence
     {
         data.beamReceiverSolved = solved;
     }
-
 
 #if UNITY_EDITOR
     private void OnDrawGizmos()

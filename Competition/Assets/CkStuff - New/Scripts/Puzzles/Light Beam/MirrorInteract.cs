@@ -4,55 +4,120 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Collider2D))]
 public class MirrorInteract : MonoBehaviour, IDataPersistence
 {
-    // save load
+    [Header("Save / Load")]
     public string mirrorID;
-    public float GetRotation() => mirrorObject.localEulerAngles.z;
-    public void SetRotation(float angle) => mirrorObject.localEulerAngles = new Vector3(0, 0, angle);
 
-
+    [Header("Mirror Logic Pivot")]
     public Transform mirrorObject;
+
+    [Header("Art")]
+    public Transform artRoot;
+    public SpriteRenderer mirrorRenderer;
+
+    public Sprite spriteAt0;
+    public Sprite spriteAt90;
+    public Sprite spriteAt180;
+    public Sprite spriteAt270;
+
+    [Header("Behaviour")]
     public bool rotateClockwise = true;
 
     private bool inRange;
 
-    private void Reset()
+    public float GetRotation() => mirrorObject ? mirrorObject.localEulerAngles.z : 0f;
+
+    public void SetRotation(float angle)
     {
-        var col = GetComponent<Collider2D>();
-        if (col) col.isTrigger = true;
-        if (!mirrorObject) mirrorObject = transform;
+        if (!mirrorObject) return;
+
+        float snapped = Mathf.Round(angle / 90f) * 90f;
+        mirrorObject.localEulerAngles = new Vector3(0f, 0f, snapped);
+
+        if (artRoot)
+            artRoot.localEulerAngles = new Vector3(0f, 0f, -snapped);
+
+        UpdateSpriteFromRotation(snapped);
     }
 
-    private void OnTriggerEnter2D(Collider2D c)
+    private void Awake()
     {
-        if (c.GetComponentInParent<NewPlayerMovement>())
+        if (!mirrorRenderer && artRoot)
+            mirrorRenderer = artRoot.GetComponentInChildren<SpriteRenderer>();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.GetComponentInParent<NewPlayerMovement>())
             inRange = true;
     }
 
-    private void OnTriggerExit2D(Collider2D c)
+    private void OnTriggerExit2D(Collider2D other)
     {
-        if (c.GetComponentInParent<NewPlayerMovement>())
+        if (other.GetComponentInParent<NewPlayerMovement>())
             inRange = false;
     }
 
     private void Update()
     {
-        if (GameInputLock.inputLocked)
+        if (GameInputLock.inputLocked || Keyboard.current == null)
             return;
 
-        if (!inRange || Keyboard.current == null) return;
+        if (!inRange || !mirrorObject)
+            return;
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-            float angle = rotateClockwise ? -90f : 90f;
-            mirrorObject.Rotate(0f, 0f, angle);
+            RotateOnce();
         }
+    }
+
+    private void RotateOnce()
+    {
+        float delta = rotateClockwise ? -90f : 90f;
+
+        Vector3 euler = mirrorObject.localEulerAngles;
+        float newZ = Mathf.Round((euler.z + delta) / 90f) * 90f;
+
+        mirrorObject.localEulerAngles = new Vector3(0f, 0f, newZ);
+
+        if (artRoot)
+            artRoot.localEulerAngles = new Vector3(0f, 0f, -newZ);
+
+        UpdateSpriteFromRotation(newZ);
+    }
+
+    private void UpdateSpriteFromRotation(float angle)
+    {
+        if (!mirrorRenderer)
+            return;
+
+        float z = Mathf.Repeat(angle, 360f);
+        int step = Mathf.RoundToInt(z / 90f) % 4;
+
+        Sprite chosen = null;
+        switch (step)
+        {
+            case 0: chosen = spriteAt0; break;
+            case 1: chosen = spriteAt90; break;
+            case 2: chosen = spriteAt180; break;
+            case 3: chosen = spriteAt270; break;
+        }
+
+        if (chosen != null)
+            mirrorRenderer.sprite = chosen;
     }
 
     public void LoadData(GameData data)
     {
         var entry = data.mirrors.Find(x => x.id == mirrorID);
         if (entry != null)
+        {
             SetRotation(entry.rotation);
+        }
+        else
+        {
+            SetRotation(GetRotation());
+        }
     }
 
     public void SaveData(ref GameData data)
