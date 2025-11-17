@@ -16,9 +16,15 @@ public class TurnEngine : MonoBehaviour
     [SerializeField] private TargetSelector targetSelector;
     [SerializeField] private TurnIndicator turnIndicator;
 
+    // Player control
     private bool _waitingForPlayerDecision;
     private Combatant _currPlayerUnit;
     public event Action<Combatant> OnPlayerTurnStart;
+
+    // NEW: fired whenever a unit actually gets a turn
+    // current = unit whose turn it is
+    // next    = best guess of the next alive unit in turn order (or null)
+    public event Action<Combatant, Combatant> OnTurnUnitStart;
 
     public event Action<bool> OnBattleEnd;
 
@@ -46,6 +52,7 @@ public class TurnEngine : MonoBehaviour
         _paused = paused;
         ApplyTimeScale();
     }
+
     private void ApplyTimeScale()
     {
         Time.timeScale = _paused ? 0f : battleSpeed;
@@ -59,8 +66,6 @@ public class TurnEngine : MonoBehaviour
     public void Begin()
     {
         _running = true;
-        //_waitingForLeader = false;
-        //_currentLeader = null;
         _waitingForPlayerDecision = false;
         _currPlayerUnit = null;
         _nextIndex = 0;
@@ -85,8 +90,6 @@ public class TurnEngine : MonoBehaviour
         if (!_running) return;
 
         _running = false;
-        //_waitingForLeader = false;
-        //_currentLeader = null;
         _waitingForPlayerDecision = false;
         _currPlayerUnit = null;
         _resolvingAction = false;
@@ -144,6 +147,12 @@ public class TurnEngine : MonoBehaviour
                 u.atb = 0f;
                 u.OnTurnStarted();
 
+                // Figure out who is likely NEXT in the round-robin list
+                Combatant nextUnit = FindNextAliveFromIndex(i);
+
+                // Fire the turn-start event for UI (portraits, "Turn/Next" text)
+                OnTurnUnitStart?.Invoke(u, nextUnit);
+
                 if (u.isPlayerTeam)
                 {
                     if (autoBattle)
@@ -156,12 +165,6 @@ public class TurnEngine : MonoBehaviour
                         _waitingForPlayerDecision = true;
                         _currPlayerUnit = u;
                         OnPlayerTurnStart?.Invoke(u);
-
-                        //if (targetSelector)
-                        //{
-                        //    targetSelector.EnableForPlayerUnit(u);
-                        //    targetSelector.Clear();
-                        //}
 
                         _nextIndex = (i + 1) % count;
                         return;
@@ -187,6 +190,23 @@ public class TurnEngine : MonoBehaviour
         }
     }
 
+    // ===== Helper: find the "next" alive unit for UI =====
+    private Combatant FindNextAliveFromIndex(int currentIndex)
+    {
+        int count = _units.Count;
+        if (count <= 1) return null;
+
+        for (int offset = 1; offset < count; offset++)
+        {
+            int idx = (currentIndex + offset) % count;
+            var candidate = _units[idx];
+            if (candidate != null && candidate.IsAlive)
+                return candidate;
+        }
+
+        return null;
+    }
+
     // === Action lock wiring ===
     private void HookActionLock(Combatant actor)
     {
@@ -207,6 +227,7 @@ public class TurnEngine : MonoBehaviour
         turnIndicator.HideArrow();
         _currPlayerUnit = null;
     }
+
     private void OnActorActionEnded()
     {
         _resolvingAction = false;
@@ -235,7 +256,7 @@ public class TurnEngine : MonoBehaviour
         {
             if (_currPlayerUnit.Skill1IsCommand)
             {
-                used = _currPlayerUnit.TryUseSkill1(_currPlayerUnit);  
+                used = _currPlayerUnit.TryUseSkill1(_currPlayerUnit);
             }
             else
             {
@@ -291,7 +312,6 @@ public class TurnEngine : MonoBehaviour
         }
         return _currPlayerUnit != null ? FindRandomAlive(!_currPlayerUnit.isPlayerTeam) : null;
     }
-
 
     private void AutoAct(Combatant actor, bool isLeaderAuto)
     {

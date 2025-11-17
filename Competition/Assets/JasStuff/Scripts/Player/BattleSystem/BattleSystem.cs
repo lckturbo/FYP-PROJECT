@@ -1,13 +1,14 @@
 using Pathfinding;
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class BattleSystem : MonoBehaviour
 {
-
+    // ===== Small timer helper =====
     private sealed class UpTimer
     {
         public bool Running { get; private set; }
@@ -20,21 +21,38 @@ public class BattleSystem : MonoBehaviour
         public void Tick(float dt) { if (Running) Elapsed += dt; }
     }
 
+    // ===== Turn icon slot for UI =====
+    [Serializable]
+    private struct TurnIconSlot
+    {
+        public Image icon;     // portrait image
+        public TMP_Text label; // "Turn" / "Next"
+    }
+
     [Header("SpawnPoints")]
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
     [SerializeField] private Transform bossSpawnPt;
 
-    [Header("UI")]
+    [Header("UI - Health Bars")]
     [SerializeField] private Slider[] playerHealth;
     [SerializeField] private Slider[] enemyHealth;
 
-    [SerializeField] private Slider[] playerATB;
-    [SerializeField] private Slider[] enemyATB;
+    [Header("Turn Order UI")]
+    [SerializeField] private TurnIconSlot[] playerTurnSlots;
+    [SerializeField] private TurnIconSlot[] enemyTurnSlots;
+    [SerializeField] private Color iconNormalColor = Color.white;
+    [SerializeField] private Color iconTurnColor = new Color32(0, 229, 255, 255); // cyan-ish
+    [SerializeField] private Color iconNextColor = new Color32(0, 0, 0, 160);     // darkened
+    [SerializeField] private float turnFlashSpeed = 4f;
+
+    private readonly Dictionary<Combatant, int> _playerIconIndex = new();
+    private readonly Dictionary<Combatant, int> _enemyIconIndex = new();
+    private Image _currentTurnIcon;
 
     private GameObject playerLeader;
-    private List<GameObject> playerAllies = new List<GameObject>();
-    private List<GameObject> enemies = new List<GameObject>();
+    private readonly List<GameObject> playerAllies = new();
+    private readonly List<GameObject> enemies = new();
 
     [Header("Systems")]
     [SerializeField] private TurnEngine turnEngine;
@@ -53,16 +71,16 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private bool trackBattleElapsed = true;
     [SerializeField] private bool resetTimerOnBattleEnd = true;
 
-    private readonly UpTimer _battleTimer = new UpTimer();
+    private readonly UpTimer _battleTimer = new();
     private bool _pausedForMenu = false;
     public float BattleElapsed => _battleTimer.Elapsed;
 
     private int _preBattlePartyLevel;
-    private List<PreBattleSnapshot> _snapshots = new();
+    private readonly List<PreBattleSnapshot> _snapshots = new();
     private bool _ended = false;
 
-    private readonly List<Combatant> _playerCombatants = new List<Combatant>();
-    private readonly List<Combatant> _enemyCombatants = new List<Combatant>();
+    private readonly List<Combatant> _playerCombatants = new();
+    private readonly List<Combatant> _enemyCombatants = new();
 
     public static event Action<GameObject> OnLeaderSpawned;
 
@@ -75,13 +93,19 @@ public class BattleSystem : MonoBehaviour
     private void OnEnable()
     {
         if (turnEngine)
+        {
             turnEngine.OnBattleEnd += HandleBattleEnd;
+            turnEngine.OnTurnUnitStart += HandleTurnUnitStart; // NEW
+        }
     }
 
     private void OnDisable()
     {
         if (turnEngine)
+        {
             turnEngine.OnBattleEnd -= HandleBattleEnd;
+            turnEngine.OnTurnUnitStart -= HandleTurnUnitStart; // NEW
+        }
     }
 
     private void Start()
@@ -96,6 +120,16 @@ public class BattleSystem : MonoBehaviour
     {
         if (trackBattleElapsed && !_ended && !_pausedForMenu)
             _battleTimer.Tick(Time.deltaTime);
+    }
+
+    private void LateUpdate()
+    {
+        // Flash current-turn portrait
+        if (_currentTurnIcon != null)
+        {
+            float t = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * turnFlashSpeed);
+            _currentTurnIcon.color = Color.Lerp(iconNormalColor, iconTurnColor, t);
+        }
     }
 
     private void SetupBattle()
@@ -113,10 +147,16 @@ public class BattleSystem : MonoBehaviour
             _battleTimer.Restart();
         }
 
-        _preBattlePartyLevel = (PartyLevelSystem.Instance != null) ? PartyLevelSystem.Instance.levelSystem.level : 1;
+        _preBattlePartyLevel = (PartyLevelSystem.Instance != null)
+            ? PartyLevelSystem.Instance.levelSystem.level
+            : 1;
+
         _snapshots.Clear();
         _playerCombatants.Clear();
         _enemyCombatants.Clear();
+        _playerIconIndex.Clear();
+        _enemyIconIndex.Clear();
+        ResetTurnIcons();
 
         // ===== LEADER =====
         GameObject leaderObj = Instantiate(leader.playerPrefab, allySpawnPt[0].position, Quaternion.identity);
@@ -137,7 +177,17 @@ public class BattleSystem : MonoBehaviour
         turnEngine.Register(cL);
         _playerCombatants.Add(cL);
 
-        if(leaderObj.name == "Leader_Producer")
+        int leaderCombatIndex = _playerCombatants.Count - 1;
+        if (leaderCombatIndex < playerTurnSlots.Length)
+        {
+            _playerIconIndex[cL] = leaderCombatIndex;
+
+            // dynamic leader portrait
+            if (playerTurnSlots[leaderCombatIndex].icon && leader.portrait)
+                playerTurnSlots[leaderCombatIndex].icon.sprite = leader.portrait;
+        }
+
+        if (leaderObj.name == "Leader_Producer")
         {
             cL.isProducer = true;
             cL.skill1IsCommand = true;
@@ -194,14 +244,24 @@ public class BattleSystem : MonoBehaviour
                 turnEngine.Register(cA);
                 _playerCombatants.Add(cA);
 
-                if(allyObj.name == "Ally_Producer")
+                int allyCombatIndex = _playerCombatants.Count - 1;
+                if (allyCombatIndex < playerTurnSlots.Length)
+                {
+                    _playerIconIndex[cA] = allyCombatIndex;
+
+                    // dynamic ally portrait
+                    if (playerTurnSlots[allyCombatIndex].icon && member.portrait)
+                        playerTurnSlots[allyCombatIndex].icon.sprite = member.portrait;
+                }
+
+                if (allyObj.name == "Ally_Producer")
                 {
                     cA.isProducer = true;
                     cA.skill1IsCommand = true;
-                    Debug.Log("[BattleSystem] Leader is Producer - Skill1 set as support.");
+                    Debug.Log("[BattleSystem] Ally is Producer - Skill1 set as support.");
                 }
 
-                if (allyObj.name == "Ally_Cameraman") 
+                if (allyObj.name == "Ally_Cameraman")
                 {
                     cA.skill2IsSupport = true;
                     Debug.Log("[BattleSystem] Ally is Cameraman - Skill2 set as support.");
@@ -210,7 +270,8 @@ public class BattleSystem : MonoBehaviour
                 AddPlayerLevelApplier(allyObj, member);
                 SnapshotChar(member);
 
-                //Destroy(allyObj.GetComponentInChildren<PlayerBuffHandler>()); //clayton are we suppose to destroy this?
+                // If Clayton still wants this destroyed, you can uncomment:
+                // Destroy(allyObj.GetComponentInChildren<PlayerBuffHandler>());
             }
         }
 
@@ -257,11 +318,24 @@ public class BattleSystem : MonoBehaviour
             turnEngine.Register(cE);
             _enemyCombatants.Add(cE);
 
+            int enemyCombatIndex = _enemyCombatants.Count - 1;
+            if (enemyCombatIndex < enemyTurnSlots.Length)
+            {
+                _enemyIconIndex[cE] = enemyCombatIndex;
+
+                // dynamic enemy portrait (from EnemyBase)
+                Sprite portrait = null;
+                if (eb && eb.enemyPortrait)
+                    portrait = eb.enemyPortrait;
+
+                if (enemyTurnSlots[enemyCombatIndex].icon && portrait)
+                    enemyTurnSlots[enemyCombatIndex].icon.sprite = portrait;
+            }
+
             AddEnemyScaler(enemy);
         }
 
         SetUpHealth();
-        SetUpATBBars();
         turnEngine.Begin();
     }
 
@@ -296,8 +370,14 @@ public class BattleSystem : MonoBehaviour
                 h.OnDeathComplete += (nh) =>
                 {
                     playerHealth[idx].gameObject.SetActive(false);
-                    if (idx < playerATB.Length && playerATB[idx])
-                        playerATB[idx].gameObject.SetActive(false);
+
+                    if (idx < playerTurnSlots.Length)
+                    {
+                        if (playerTurnSlots[idx].icon)
+                            playerTurnSlots[idx].icon.gameObject.SetActive(false);
+                        if (playerTurnSlots[idx].label)
+                            playerTurnSlots[idx].label.gameObject.SetActive(false);
+                    }
                 };
             }
         }
@@ -320,30 +400,16 @@ public class BattleSystem : MonoBehaviour
                 h.OnDeathComplete += (nh) =>
                 {
                     enemyHealth[idx].gameObject.SetActive(false);
-                    if (idx < enemyATB.Length && enemyATB[idx])
-                        enemyATB[idx].gameObject.SetActive(false);
+
+                    if (idx < enemyTurnSlots.Length)
+                    {
+                        if (enemyTurnSlots[idx].icon)
+                            enemyTurnSlots[idx].icon.gameObject.SetActive(false);
+                        if (enemyTurnSlots[idx].label)
+                            enemyTurnSlots[idx].label.gameObject.SetActive(false);
+                    }
                 };
             }
-        }
-    }
-
-    private void SetUpATBBars()
-    {
-        for (int i = 0; i < playerATB.Length; i++)
-        {
-            if (!playerATB[i]) continue;
-            playerATB[i].minValue = 0f;
-            playerATB[i].maxValue = 1f;
-            playerATB[i].value = 0f;
-            playerATB[i].interactable = false;
-        }
-        for (int i = 0; i < enemyATB.Length; i++)
-        {
-            if (!enemyATB[i]) continue;
-            enemyATB[i].minValue = 0f;
-            enemyATB[i].maxValue = 1f;
-            enemyATB[i].value = 0f;
-            enemyATB[i].interactable = false;
         }
     }
 
@@ -369,10 +435,12 @@ public class BattleSystem : MonoBehaviour
         var scaler = enemyGO.GetComponent<EnemyScaler>();
         if (!scaler) scaler = enemyGO.AddComponent<EnemyScaler>();
 
-        var field = typeof(EnemyScaler).GetField("enemyGrowth",
+        var field = typeof(EnemyScaler).GetField(
+            "enemyGrowth",
             System.Reflection.BindingFlags.Instance |
             System.Reflection.BindingFlags.Public |
             System.Reflection.BindingFlags.NonPublic);
+
         if (field != null)
             field.SetValue(scaler, enemyGrowth);
     }
@@ -386,6 +454,84 @@ public class BattleSystem : MonoBehaviour
             anim.SetLayerWeight(1, 1f);
         }
     }
+
+    // ===== Turn icon helpers =====
+
+    private void ResetTurnIcons()
+    {
+        _currentTurnIcon = null;
+
+        for (int i = 0; i < playerTurnSlots.Length; i++)
+        {
+            if (playerTurnSlots[i].icon)
+                playerTurnSlots[i].icon.color = iconNormalColor;
+            if (playerTurnSlots[i].label)
+                playerTurnSlots[i].label.text = "";
+        }
+
+        for (int i = 0; i < enemyTurnSlots.Length; i++)
+        {
+            if (enemyTurnSlots[i].icon)
+                enemyTurnSlots[i].icon.color = iconNormalColor;
+            if (enemyTurnSlots[i].label)
+                enemyTurnSlots[i].label.text = "";
+        }
+    }
+
+    private void HandleTurnUnitStart(Combatant current, Combatant next)
+    {
+        ResetTurnIcons();
+
+        // CURRENT TURN
+        if (current != null)
+        {
+            if (_playerIconIndex.TryGetValue(current, out int pi))
+            {
+                var slot = playerTurnSlots[pi];
+                if (slot.icon)
+                {
+                    _currentTurnIcon = slot.icon;
+                    slot.icon.color = iconTurnColor;
+                }
+                if (slot.label)
+                    slot.label.text = "Turn";
+            }
+            else if (_enemyIconIndex.TryGetValue(current, out int ei))
+            {
+                var slot = enemyTurnSlots[ei];
+                if (slot.icon)
+                {
+                    _currentTurnIcon = slot.icon;
+                    slot.icon.color = iconTurnColor;
+                }
+                if (slot.label)
+                    slot.label.text = "Turn";
+            }
+        }
+
+        // NEXT TURN
+        if (next != null && next != current)
+        {
+            if (_playerIconIndex.TryGetValue(next, out int pi))
+            {
+                var slot = playerTurnSlots[pi];
+                if (slot.icon)
+                    slot.icon.color = iconNextColor;
+                if (slot.label)
+                    slot.label.text = "Next";
+            }
+            else if (_enemyIconIndex.TryGetValue(next, out int ei))
+            {
+                var slot = enemyTurnSlots[ei];
+                if (slot.icon)
+                    slot.icon.color = iconNextColor;
+                if (slot.label)
+                    slot.label.text = "Next";
+            }
+        }
+    }
+
+    // ===== Battle end & results =====
 
     private void HandleBattleEnd(bool playerWon)
     {
@@ -437,8 +583,6 @@ public class BattleSystem : MonoBehaviour
                 {
                     resultsUI?.Show(payload, () =>
                     {
-                        //if (UIManager.instance)
-                        //    UIManager.instance.canPause = false;
                         OnBattleEnd?.Invoke(playerWon);
                     });
                 };
@@ -448,8 +592,6 @@ public class BattleSystem : MonoBehaviour
 
         resultsUI?.Show(payload, () =>
         {
-            //if (UIManager.instance)
-            //    UIManager.instance.canPause = false;
             OnBattleEnd?.Invoke(playerWon);
         });
     }
@@ -532,22 +674,5 @@ public class BattleSystem : MonoBehaviour
             }
         }
         return xp;
-    }
-
-    private void LateUpdate()
-    {
-        for (int i = 0; i < _playerCombatants.Count && i < playerATB.Length; i++)
-        {
-            var c = _playerCombatants[i];
-            if (!c || playerATB[i] == null) continue;
-            playerATB[i].value = Mathf.Clamp01(c.atb);
-        }
-
-        for (int i = 0; i < _enemyCombatants.Count && i < enemyATB.Length; i++)
-        {
-            var c = _enemyCombatants[i];
-            if (!c || enemyATB[i] == null) continue;
-            enemyATB[i].value = Mathf.Clamp01(c.atb);
-        }
     }
 }
