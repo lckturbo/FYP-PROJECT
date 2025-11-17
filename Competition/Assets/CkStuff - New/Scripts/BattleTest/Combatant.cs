@@ -692,7 +692,14 @@ public class Combatant : MonoBehaviour
                 if (id == "CommandBurst")
                     buff = 50;
                 else if (id == "TakeABreak")
-                    dmg = currentTarget?.health.GetCurrHealth() ?? 0;
+                {
+                    int hp = currentTarget?.health.GetCurrHealth() ?? 0;
+
+                    if (!currentTarget.isPlayerTeam && BattleManager.instance.IsBossBattle)
+                        dmg = Mathf.RoundToInt(hp * 0.5f);
+                    else
+                        dmg = hp;
+                }
                 else
                     dmg = Mathf.RoundToInt(stats.atkDmg * 1.5f);
                 break;

@@ -38,22 +38,22 @@ public class MinigameController : MonoBehaviour
         if (MinigameManager.instance == null) return;
 
         float roll = Random.Range(0f, 100f);
-        Debug.Log($"[MINIGAME] Rolled {roll:F1}% (threshold {minigameChance}%)");
+        Debug.Log($"Roll = {roll}");
 
-        string finalID = id;
+        bool playGlobal = roll < globalMinigameChance;
+        bool playLocal = !playGlobal && roll < minigameChance;
 
-        if (roll < globalMinigameChance)
+        if (playGlobal)
         {
-            finalID = globalMinigameID;
-            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+            MinigameManager.instance.TriggerMinigameFromAnimation(globalMinigameID, OnMinigameComplete);
         }
-        else if (roll > globalMinigameChance && roll <= minigameChance)
+        else if (playLocal)
         {
-            MinigameManager.instance.TriggerMinigameFromAnimation(finalID, OnMinigameComplete);
+            MinigameManager.instance.TriggerMinigameFromAnimation(id, OnMinigameComplete);
         }
         else
         {
-            Debug.Log("Nothing playing, no chance");
+            Debug.Log("No minigame triggered.");
         }
     }
 
