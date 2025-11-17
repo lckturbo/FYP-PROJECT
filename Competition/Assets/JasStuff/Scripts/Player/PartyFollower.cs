@@ -1,20 +1,21 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
-    [SerializeField] private float followDistance = 1.0f;
+    [SerializeField] private float followDistance = 0.8f;
     [SerializeField] private float moveSpeed = 3.5f; // fallback if target has no movement script
-    [SerializeField] private float stopDistance = 0.15f;
-    private Vector2 smoothMoveDir;
-    [SerializeField] private float directionSmooth = 10f;
+    [SerializeField] private float catchUpSpeed = 5f;
+    [SerializeField] private float stopDistance = 0.05f;
 
     private Animator animator;
     private Vector2 lastMoveDirection;
     private bool isMoving;
 
-    private Vector2 targetPosition;
-    private bool hasTargetPosition;
+    private Queue<Vector3> pathQueue = new Queue<Vector3>();
+    private Vector3 targetPathPosition;
+    private float recordDistance = 0.1f;
 
     private NewPlayerMovement playerMovement; // reference to player's movement
 
@@ -25,25 +26,27 @@ public class PartyFollower : MonoBehaviour
         if (target != null)
         {
             playerMovement = target.GetComponent<NewPlayerMovement>(); // get player movement speed source
-            targetPosition = target.position;
-            hasTargetPosition = true;
+            targetPathPosition = target.position;
+            pathQueue.Enqueue(target.position);
         }
 
         if (initialDirection != Vector2.zero)
-            lastMoveDirection = initialDirection;
+            lastMoveDirection = SnapToCardinal(initialDirection);
+        else
+            lastMoveDirection = Vector2.down;
     }
 
     public void FaceSameDirectionAs(Vector2 direction)
     {
         if (direction == Vector2.zero) return;
 
-        lastMoveDirection = direction;
+        lastMoveDirection = SnapToCardinal(direction);
         isMoving = false;
 
         if (animator)
         {
-            animator.SetFloat("moveX", direction.x);
-            animator.SetFloat("moveY", direction.y);
+            animator.SetFloat("moveX", lastMoveDirection.x);
+            animator.SetFloat("moveY", lastMoveDirection.y);
             animator.SetBool("moving", false);
             animator.speed = 1f;
         }
@@ -52,54 +55,100 @@ public class PartyFollower : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        lastMoveDirection = Vector2.down;
+    }
+
+    private Vector2 SnapToCardinal(Vector2 dir)
+    {
+        if (dir == Vector2.zero) return lastMoveDirection;
+
+        float absX = Mathf.Abs(dir.x);
+        float absY = Mathf.Abs(dir.y);
+
+        if (absX > absY)
+            return new Vector2(dir.x > 0 ? 1 : -1, 0);
+        else
+            return new Vector2(0, dir.y > 0 ? 1 : -1);
     }
 
     private void Update()
     {
         if (!target) return;
 
-        float distanceToTarget = Vector2.Distance(transform.position, target.position);
-
-        if (distanceToTarget > followDistance + 0.15f)
+        if (pathQueue.Count == 0 || Vector3.Distance(target.position, pathQueue.ToArray()[pathQueue.Count - 1]) >= recordDistance)
         {
-            Vector2 dir = ((Vector2)target.position - (Vector2)transform.position).normalized;
-            targetPosition = (Vector2)target.position - dir * followDistance;
-            hasTargetPosition = true;
+            pathQueue.Enqueue(target.position);
         }
 
-        if (hasTargetPosition)
+        float totalPathLength = 0f;
+        Vector3 lastPos = transform.position;
+        foreach (var pos in pathQueue)
         {
-            float distanceToDestination = Vector2.Distance(transform.position, targetPosition);
+            totalPathLength += Vector3.Distance(lastPos, pos);
+            lastPos = pos;
+        }
 
-            if (distanceToDestination > stopDistance)
+        while (pathQueue.Count > 1 && totalPathLength > followDistance)
+        {
+            Vector3 firstWaypoint = pathQueue.Peek();
+            float distToFirst = Vector3.Distance(transform.position, firstWaypoint);
+
+            if (distToFirst < stopDistance)
             {
-                Vector2 rawDir = (targetPosition - (Vector2)transform.position).normalized;
-                smoothMoveDir = Vector2.Lerp(smoothMoveDir, rawDir, directionSmooth * Time.deltaTime);
-                lastMoveDirection = smoothMoveDir;
-                float usedSpeed = moveSpeed;
-
-                var targetMover = target.GetComponent<NewPlayerMovement>();
-                if (targetMover != null)
-                    usedSpeed = targetMover.GetWalkSpeed();
-
-                //usedSpeed *= 0.95f;
-
-                transform.position = Vector2.MoveTowards(
-                    transform.position,
-                    targetPosition,
-                    usedSpeed * Time.deltaTime
-                );
-
-                isMoving = true;
-
-                if (animator && playerMovement != null && playerMovement.GetStats() != null)
-                    animator.speed = usedSpeed / playerMovement.GetStats().Speed;
+                pathQueue.Dequeue();
+                totalPathLength -= Vector3.Distance(transform.position, firstWaypoint);
             }
             else
             {
-                isMoving = false;
-                if (animator) animator.speed = 1f;
+                break;
             }
+        }
+
+        if (pathQueue.Count > 0)
+        {
+            targetPathPosition = pathQueue.Peek();
+        }
+
+        float distanceToWaypoint = Vector2.Distance(transform.position, targetPathPosition);
+
+        if (distanceToWaypoint > stopDistance)
+        {
+            Vector2 rawDir = (targetPathPosition - transform.position).normalized;
+
+            Vector2 cardinalDir = SnapToCardinal(rawDir);
+
+            if (distanceToWaypoint > 0.3f || Vector2.Dot(cardinalDir, lastMoveDirection) >= 0)
+            {
+                lastMoveDirection = cardinalDir;
+            }
+
+            float usedSpeed = moveSpeed;
+
+            var targetMover = target.GetComponent<NewPlayerMovement>();
+            if (targetMover != null)
+                usedSpeed = targetMover.GetWalkSpeed();
+
+            float distanceToTarget = Vector2.Distance(transform.position, target.position);
+            if (distanceToTarget > followDistance * 2f)
+                usedSpeed = catchUpSpeed;
+
+            //usedSpeed *= 0.95f;
+
+            transform.position = Vector2.MoveTowards(
+                transform.position,
+                (Vector2)transform.position + cardinalDir,
+                usedSpeed * Time.deltaTime
+            );
+
+            isMoving = true;
+
+            if (animator && playerMovement != null && playerMovement.GetStats() != null)
+                animator.speed = usedSpeed / playerMovement.GetStats().Speed;
+        }
+        else
+        {
+            isMoving = false;
+            if (animator) animator.speed = 1f;
         }
 
         if (animator)
