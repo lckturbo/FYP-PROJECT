@@ -9,6 +9,8 @@ public class PartyFollower : MonoBehaviour
     [SerializeField] private float catchUpSpeed = 5f;
     [SerializeField] private float stopDistance = 0.05f;
 
+    private Vector3 lastRecordedTargetPosition;
+    private bool hasInitialized = false;
     private Animator animator;
     private Vector2 lastMoveDirection;
     private bool isMoving;
@@ -25,9 +27,14 @@ public class PartyFollower : MonoBehaviour
 
         if (target != null)
         {
-            playerMovement = target.GetComponent<NewPlayerMovement>(); // get player movement speed source
-            targetPathPosition = target.position;
-            pathQueue.Enqueue(target.position);
+            playerMovement = target.GetComponent<NewPlayerMovement>();
+
+            targetPathPosition = transform.position;
+
+            pathQueue.Clear();
+            pathQueue.Enqueue(transform.position);
+            lastRecordedTargetPosition = target.position;
+            hasInitialized = true;
         }
 
         if (initialDirection != Vector2.zero)
@@ -35,6 +42,7 @@ public class PartyFollower : MonoBehaviour
         else
             lastMoveDirection = Vector2.down;
     }
+
 
     public void FaceSameDirectionAs(Vector2 direction)
     {
@@ -75,9 +83,15 @@ public class PartyFollower : MonoBehaviour
     {
         if (!target) return;
 
-        if (pathQueue.Count == 0 || Vector3.Distance(target.position, pathQueue.ToArray()[pathQueue.Count - 1]) >= recordDistance)
+        if (pathQueue.Count == 0)
+        {
+            pathQueue.Enqueue(transform.position);
+            lastRecordedTargetPosition = target.position;
+        }
+        else if (Vector3.Distance(target.position, lastRecordedTargetPosition) >= recordDistance)
         {
             pathQueue.Enqueue(target.position);
+            lastRecordedTargetPosition = target.position;
         }
 
         float totalPathLength = 0f;
@@ -87,6 +101,7 @@ public class PartyFollower : MonoBehaviour
             totalPathLength += Vector3.Distance(lastPos, pos);
             lastPos = pos;
         }
+
 
         while (pathQueue.Count > 1 && totalPathLength > followDistance)
         {
