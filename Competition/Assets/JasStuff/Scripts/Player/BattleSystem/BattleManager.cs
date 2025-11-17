@@ -17,6 +17,8 @@ public class BattleManager : MonoBehaviour
     private bool isBossBattle = false;
     public bool IsBossBattle => isBossBattle;
 
+    [SerializeField] private DialogueData dialogue;
+
     private void Awake()
     {
         if (!instance)
@@ -128,14 +130,25 @@ public class BattleManager : MonoBehaviour
 
         if (IsBossBattle && playerWon)
         {
-            SaveLoadSystem.instance.NewGame(false);
-            GameManager.instance.ChangeScene("Credits");
-            return;
+            Debug.Log("[BattleManager] Boss defeated, playing final dialogue.");
+
+            DialogueManager.Instance.StartDialogue(dialogue, OnFinalDialogueFinished);
+            return; // STOP HERE — do not change scene yet
         }
         else
+        {
             GameManager.instance.ChangeScene("SampleScene");
+        }
 
     }
+    private void OnFinalDialogueFinished()
+    {
+        Debug.Log("[BattleManager] Final dialogue finished, switching to credits.");
+
+        SaveLoadSystem.instance.NewGame(false);
+        GameManager.instance.ChangeScene("Credits");
+    }
+
     public void SetBattlePaused(bool paused)
     {
         var turnEngine = FindObjectOfType<TurnEngine>();

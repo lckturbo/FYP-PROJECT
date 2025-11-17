@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class CutsceneManager : MonoBehaviour
 {
@@ -8,9 +9,16 @@ public class CutsceneManager : MonoBehaviour
 
     [Header("Cutscene Prefab")]
     [SerializeField] private GameObject cutscenePrefab;
-    [SerializeField] private float cutsceneDuration = 5;
+    [SerializeField] private float cutsceneDuration = 5f;
+
+    [Header("Skip UI")]
+    [SerializeField] private GameObject skipButtonUI;   // optional
+    [SerializeField] private Button skipButton;          // optional
 
     private GameObject activeCutscene;
+    private Coroutine cutsceneRoutine;
+    private bool cutscenePlaying = false;
+    private string targetScene;
 
     void Awake()
     {
@@ -18,11 +26,10 @@ public class CutsceneManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    /// <summary>
-    /// Spawns the cutscene prefab and plays it before switching scene.
-    /// </summary>
     public void PlayCutsceneThenLoad(string nextScene)
     {
+        targetScene = nextScene;
+
         if (cutscenePrefab == null)
         {
             Debug.LogError("Cutscene prefab not assigned!");
@@ -31,33 +38,92 @@ public class CutsceneManager : MonoBehaviour
         }
 
         if (activeCutscene != null)
-        {
             Destroy(activeCutscene);
-        }
 
-        StartCoroutine(PlayCutsceneRoutine(nextScene));
+        if (skipButton != null)
+            skipButton.onClick.AddListener(SkipCutscene);
+
+        cutsceneRoutine = StartCoroutine(PlayCutsceneRoutine());
     }
 
-    private IEnumerator PlayCutsceneRoutine(string nextScene)
+    private IEnumerator PlayCutsceneRoutine()
     {
-        // Spawn the cutscene prefab
+        cutscenePlaying = true;
+
+        // Spawn cutscene
         activeCutscene = Instantiate(cutscenePrefab);
 
-        // Get animator if it exists
+        // Enable skip UI
+        if (skipButtonUI != null)
+            skipButtonUI.SetActive(true);
+
         Animator anim = activeCutscene.GetComponent<Animator>();
 
+        // Calculate duration if using animator
         if (anim != null)
         {
             AnimatorClipInfo[] clips = anim.GetCurrentAnimatorClipInfo(0);
             if (clips.Length > 0)
                 cutsceneDuration = clips[0].clip.length;
+
             anim.SetTrigger("Play");
         }
 
-        // Wait for animation to finish
-        yield return new WaitForSecondsRealtime(cutsceneDuration);
+        float t = 0f;
 
-        // Load next scene
-        SceneManager.LoadScene(nextScene);
+        while (t < cutsceneDuration)
+        {
+            if (!cutscenePlaying)
+                yield break; // stopped early by skip
+
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        FinishCutscene();
+    }
+
+    private void Update()
+    {
+        if (!cutscenePlaying) return;
+
+        // Keyboard skip:
+        if (Input.GetKeyDown(KeyCode.Escape) ||
+            Input.GetKeyDown(KeyCode.Space) ||
+            Input.GetKeyDown(KeyCode.Return))
+        {
+            SkipCutscene();
+        }
+    }
+
+    /// <summary>
+    /// Immediately skips the cutscene.
+    /// </summary>
+    public void SkipCutscene()
+    {
+        if (!cutscenePlaying) return;
+
+        Debug.Log("[Cutscene] Skipped");
+
+        cutscenePlaying = false;
+
+        // Stop coroutine
+        if (cutsceneRoutine != null)
+            StopCoroutine(cutsceneRoutine);
+
+        FinishCutscene();
+    }
+
+    private void FinishCutscene()
+    {
+        cutscenePlaying = false;
+
+        if (activeCutscene != null)
+            Destroy(activeCutscene);
+
+        if (skipButtonUI != null)
+            skipButtonUI.SetActive(false);
+
+        SceneManager.LoadScene(targetScene);
     }
 }
