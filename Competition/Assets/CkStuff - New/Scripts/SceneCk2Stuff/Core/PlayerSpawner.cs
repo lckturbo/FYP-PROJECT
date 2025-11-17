@@ -64,8 +64,8 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
             var anim = go.GetComponent<Animator>();
             if (anim != null)
             {
-                anim.SetFloat("moveX", 1f);
-                anim.SetFloat("moveY", 0f);
+                anim.SetFloat("moveX", 0f);
+                anim.SetFloat("moveY", -1f);
                 anim.SetBool("moving", false);
             }
         }
