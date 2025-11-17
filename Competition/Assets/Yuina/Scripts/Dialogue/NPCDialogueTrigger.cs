@@ -7,16 +7,19 @@ public class NPCDialogueTrigger : MonoBehaviour
 
     private bool playerInRange = false;
 
+    private bool Dialogiscomplete = false;
+
     void Update()
     {
         //if (InteractionLock.IsLocked) return; // block all interaction
 
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && Input.GetKeyDown(KeyCode.E) && Dialogiscomplete == false)
         {
             Debug.Log("is in range");
             if (!DialogueManager.Instance.IsDialogueActive)
             {
                 DialogueManager.Instance.StartDialogue(dialogue);
+                Dialogiscomplete = true;
             }
             else
             {
