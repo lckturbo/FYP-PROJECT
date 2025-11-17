@@ -416,4 +416,26 @@ public abstract class EnemyBase : MonoBehaviour
         return nearest;
     }
 
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player") && !isAttacking)
+        {
+            if (enemyStates == EnemyStates.Idle || enemyStates == EnemyStates.Patrol)
+            {
+                if (CanSeePlayer())
+                {
+                    enemyStates = EnemyStates.Alert;
+                }
+            }
+        }
+    }
+
+
+    private void OnDrawGizmos()
+    {
+        if (!enemyStats) return;
+
+        Gizmos.color = new Color(1f, 1f, 0f, 0.3f); 
+        Gizmos.DrawWireSphere(transform.position, enemyStats.chaseRange);
+    }
 }

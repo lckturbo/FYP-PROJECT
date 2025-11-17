@@ -117,7 +117,10 @@ public class PartyFollower : MonoBehaviour
 
             Vector2 cardinalDir = SnapToCardinal(rawDir);
 
-            if (distanceToWaypoint > 0.3f || Vector2.Dot(cardinalDir, lastMoveDirection) >= 0)
+            if (distanceToWaypoint <= 0.3f && Vector2.Dot(cardinalDir, lastMoveDirection) < 0)
+            {
+            }
+            else
             {
                 lastMoveDirection = cardinalDir;
             }
@@ -136,7 +139,7 @@ public class PartyFollower : MonoBehaviour
 
             transform.position = Vector2.MoveTowards(
                 transform.position,
-                (Vector2)transform.position + cardinalDir,
+                (Vector2)transform.position + lastMoveDirection,
                 usedSpeed * Time.deltaTime
             );
 
