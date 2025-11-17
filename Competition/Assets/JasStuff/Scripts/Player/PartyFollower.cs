@@ -5,9 +5,10 @@ public class PartyFollower : MonoBehaviour
 {
     [SerializeField] private Transform target;
     [SerializeField] private float followDistance = 0.8f;
-    [SerializeField] private float moveSpeed = 3.5f; // fallback if target has no movement script
+    [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float catchUpSpeed = 5f;
     [SerializeField] private float stopDistance = 0.05f;
+    [SerializeField] private int stepsBehind = 15;
 
     private Vector3 lastRecordedTargetPosition;
     private bool hasInitialized = false;
@@ -17,7 +18,7 @@ public class PartyFollower : MonoBehaviour
 
     private Queue<Vector3> pathQueue = new Queue<Vector3>();
     private Vector3 targetPathPosition;
-    private float recordDistance = 0.1f;
+    private float recordDistance = 0.05f;
 
     private NewPlayerMovement playerMovement; // reference to player's movement
 
@@ -94,34 +95,52 @@ public class PartyFollower : MonoBehaviour
             lastRecordedTargetPosition = target.position;
         }
 
-        float totalPathLength = 0f;
-        Vector3 lastPos = transform.position;
-        foreach (var pos in pathQueue)
+        //float totalPathLength = 0f;
+        //Vector3 lastPos = transform.position;
+        //foreach (var pos in pathQueue)
+        //{
+        //    totalPathLength += Vector3.Distance(lastPos, pos);
+        //    lastPos = pos;
+        //}
+
+        // while (pathQueue.Count > 1 &&
+        //Vector2.Distance(transform.position, pathQueue.Peek()) < stopDistance)
+        // {
+        //     pathQueue.Dequeue();
+        // }
+        int minWaypoints = stepsBehind + 5;
+
+        while (pathQueue.Count > minWaypoints)
         {
-            totalPathLength += Vector3.Distance(lastPos, pos);
-            lastPos = pos;
+            pathQueue.Dequeue();
         }
 
 
-        while (pathQueue.Count > 1 && totalPathLength > followDistance)
-        {
-            Vector3 firstWaypoint = pathQueue.Peek();
-            float distToFirst = Vector3.Distance(transform.position, firstWaypoint);
+        //while (pathQueue.Count > 1 && totalPathLength > followDistance)
+        //{
+        //    Vector3 firstWaypoint = pathQueue.Peek();
+        //    float distToFirst = Vector3.Distance(transform.position, firstWaypoint);
 
-            if (distToFirst < stopDistance)
-            {
-                pathQueue.Dequeue();
-                totalPathLength -= Vector3.Distance(transform.position, firstWaypoint);
-            }
-            else
-            {
-                break;
-            }
-        }
+        //    if (distToFirst < stopDistance)
+        //    {
+        //        pathQueue.Dequeue();
+        //        totalPathLength -= Vector3.Distance(transform.position, firstWaypoint);
+        //    }
+        //    else
+        //    {
+        //        break;
+        //    }
+        //}
 
+        //if (pathQueue.Count > 0)
+        //{
+        //    targetPathPosition = pathQueue.Peek();
+        //}
         if (pathQueue.Count > 0)
         {
-            targetPathPosition = pathQueue.Peek();
+            var arr = pathQueue.ToArray();
+            int index = Mathf.Clamp(arr.Length - stepsBehind, 0, arr.Length - 1);
+            targetPathPosition = arr[index];
         }
 
         float distanceToWaypoint = Vector2.Distance(transform.position, targetPathPosition);
@@ -154,7 +173,7 @@ public class PartyFollower : MonoBehaviour
 
             transform.position = Vector2.MoveTowards(
                 transform.position,
-                (Vector2)transform.position + lastMoveDirection,
+                targetPathPosition,
                 usedSpeed * Time.deltaTime
             );
 

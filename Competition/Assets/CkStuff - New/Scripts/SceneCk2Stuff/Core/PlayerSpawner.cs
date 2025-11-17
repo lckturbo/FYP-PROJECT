@@ -115,7 +115,7 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
             if (memberDef == def) continue;
             if (!memberDef.playerPrefab) continue;
 
-            Vector3 spawnPos = go.transform.position + new Vector3(-1.2f * (index + 1), 0f, 0f);
+            Vector3 spawnPos = go.transform.position + new Vector3(-1.0f * (index + 1), 0f, 0f);
             var followerObj = Instantiate(memberDef.playerPrefab, spawnPos, rot);
             followerObj.name = $"Follower_{memberDef.displayName}";
 
