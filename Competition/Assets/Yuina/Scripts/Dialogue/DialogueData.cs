@@ -9,6 +9,13 @@ public class DialogueData : ScriptableObject
 }
 
 [System.Serializable]
+public class DialogueChoice
+{
+    public string text;                   // What the button shows
+    public DialogueData nextDialogue;     // Which dialogue to jump to
+}
+
+[System.Serializable]
 public class DialogueLine
 {
     public string speakerName;   // Name of the speaker
@@ -20,4 +27,9 @@ public class DialogueLine
 
     public enum Side { Left, Right }
     public Side portraitSide;   // Which side this line uses
+
+    [Header("Branching (optional)")]
+    public bool hasChoices;
+    public DialogueChoice choiceA;
+    public DialogueChoice choiceB;
 }

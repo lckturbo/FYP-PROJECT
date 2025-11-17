@@ -25,7 +25,6 @@ public class NewCharacterDefinition : ScriptableObject
 
     [Header("Gameplay")]
     public NewCharacterStats stats;
-    //public UnitType unitType = UnitType.Melee;
 
     [Header("Prefab")]
     public GameObject playerPrefab;
@@ -34,8 +33,16 @@ public class NewCharacterDefinition : ScriptableObject
     public Sprite basicAtk;
     public Sprite skill1;
     public Sprite skill2;
-}
 
-//if we planning to add
+    [Header("Skill Info")]
+    public string basicSkillName = "Basic Attack";
+    [TextArea] public string basicDescription;
+
+    public string skill1Name = "Skill 1";
+    [TextArea] public string skill1Description;
+
+    public string skill2Name = "Skill 2";
+    [TextArea] public string skill2Description;
+}
 
 public enum UnitType { Melee, Ranged }

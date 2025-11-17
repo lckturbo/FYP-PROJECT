@@ -108,22 +108,26 @@ public class PlayerBuffHandler : MonoBehaviour
     {
         if (runtimeStats == null || BuffData.instance == null) return;
 
-        if (BuffData.instance.hasAttackBuff)
+        foreach (var buff in BuffData.instance.allBuffs)
         {
-            runtimeStats.atkDmg -= BuffData.instance.latestAttackBuff;
-            BuffData.instance.ClearAttackBuff();
-            currentAttackBuff = 0;
+            if (buff.target == runtimeStats)
+            {
+                if (buff.type == BuffData.BuffEntry.BuffType.Attack)
+                    runtimeStats.atkDmg -= buff.amount;
+
+                if (buff.type == BuffData.BuffEntry.BuffType.Defense)
+                    runtimeStats.attackreduction -= buff.amount;
+            }
         }
 
-        if (BuffData.instance.hasDefenseBuff)
-        {
-            runtimeStats.attackreduction -= BuffData.instance.latestDefenseBuff;
-            BuffData.instance.ClearDefenseBuff();
-            currentDefenseBuff = 0;
-        }
+        BuffData.instance.ClearAllBuffs();
+
+        currentAttackBuff = 0;
+        currentDefenseBuff = 0;
 
         UpdateBuffVFX();
     }
+
     public void ApplySkill2Buff(float duration = 0f)
     {
         isSkill2BuffActive = true;
