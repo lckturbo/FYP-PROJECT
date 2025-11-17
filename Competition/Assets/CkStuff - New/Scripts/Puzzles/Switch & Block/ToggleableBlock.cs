@@ -24,12 +24,13 @@ public class ToggleableBlock : MonoBehaviour, IDataPersistence
     [Header("Collider (blocks the player when CLOSED)")]
     public Collider2D[] blockColliders;
 
-    [Header("Visuals (hide when OPEN)")]
+    [Header("Visuals (SpriteRenderer or MeshRenderer)")]
     public Renderer[] visuals;
 
     private bool _isOpen;
-    public bool IsOpen => _isOpen;
     private int _resolvedChannel;
+
+    private float openHideDelay = 0.25f;
 
     private void OnEnable()
     {
@@ -41,7 +42,7 @@ public class ToggleableBlock : MonoBehaviour, IDataPersistence
     private void Start()
     {
         if (!SaveLoadSystem.instance || SaveLoadSystem.instance.IsNewGame)
-            SetOpenInternal(startOpen, applyInvert: true);
+            SetOpenInternal(startOpen, instant: true);
     }
 
     private void OnDisable()
@@ -52,68 +53,113 @@ public class ToggleableBlock : MonoBehaviour, IDataPersistence
 
     private void OnToggle()
     {
-        SetOpenInternal(!_isOpen, applyInvert: false);
+        SetOpenInternal(!_isOpen, instant: false);
     }
 
     private void OnSetState(bool open)
     {
-        SetOpenInternal(open, applyInvert: false);
+        SetOpenInternal(open, instant: false);
     }
 
-    public void Open()
-    {
-        SetOpenInternal(true, applyInvert: false);
-    }
+    public void Open() => SetOpenInternal(true, instant: false);
+    public void Close() => SetOpenInternal(false, instant: false);
+    public void SetOpen(bool open) => SetOpenInternal(open, instant: false);
 
-    public void Close()
-    {
-        SetOpenInternal(false, applyInvert: false);
-    }
-
-    public void SetOpen(bool open)
-    {
-        SetOpenInternal(open, applyInvert: false);
-    }
-
-    // ===== Core =====
-    private void SetOpenInternal(bool open, bool applyInvert)
+    private void SetOpenInternal(bool open, bool instant)
     {
         _isOpen = open;
+
         bool effectiveOpen = invert ? !open : open;
-        ApplyState(effectiveOpen);
+        ApplyState(effectiveOpen, instant);
     }
 
-    private void ApplyState(bool effectiveOpen)
+    private void ApplyState(bool effectiveOpen, bool instant)
     {
         if (blockColliders != null)
         {
-            for (int i = 0; i < blockColliders.Length; i++)
-            {
-                if (blockColliders[i] != null)
-                    blockColliders[i].enabled = !effectiveOpen;
-            }
+            foreach (var col in blockColliders)
+                if (col) col.enabled = !effectiveOpen;
         }
 
         if (visuals != null)
         {
-            for (int i = 0; i < visuals.Length; i++)
-            {
-                if (visuals[i] != null)
-                    visuals[i].enabled = !effectiveOpen;
-            }
+            foreach (var v in visuals)
+                if (v) v.enabled = true;
         }
 
         if (animator != null)
         {
-            if (effectiveOpen) animator.SetTrigger("Open");
-            else animator.SetTrigger("Close");
+            animator.ResetTrigger("OpenDoor");
+            animator.ResetTrigger("CloseDoor");
+
+            if (instant)
+            {
+                if (effectiveOpen)
+                {
+                    animator.Play("DoorOpen", 0, 1f);
+
+                    if (visuals != null)
+                    {
+                        foreach (var v in visuals)
+                            if (v) v.enabled = false;
+                    }
+                }
+                else
+                {
+                    animator.Play("DoorClosed", 0, 1f);
+
+                    if (visuals != null)
+                    {
+                        foreach (var v in visuals)
+                            if (v) v.enabled = true;
+                    }
+                }
+            }
+            else
+            {
+                if (effectiveOpen)
+                {
+                    animator.SetTrigger("OpenDoor");
+
+                    StopAllCoroutines();
+                    StartCoroutine(HideAfterDelay(openHideDelay));
+                }
+                else
+                {
+                    if (visuals != null)
+                    {
+                        foreach (var v in visuals)
+                            if (v) v.enabled = true;
+                    }
+
+                    animator.SetTrigger("CloseDoor");
+                }
+            }
+        }
+        else
+        {
+            if (visuals != null)
+            {
+                foreach (var v in visuals)
+                    if (v) v.enabled = !effectiveOpen;
+            }
         }
     }
+
+    private System.Collections.IEnumerator HideAfterDelay(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+
+        if (_isOpen && visuals != null)
+        {
+            foreach (var v in visuals)
+                if (v) v.enabled = false;
+        }
+    }
+
     public void LoadFromSave(bool openState)
     {
-        _isOpen = openState;
-        bool effectiveOpen = invert ? !openState : openState;
-        ApplyState(effectiveOpen);
+        SetOpenInternal(openState, instant: true);
     }
 
     public void LoadData(GameData data)
