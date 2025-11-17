@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class TurnEngine : MonoBehaviour
 {
-    // Seconds to fill ATB from 0 -> 1 when Speed = 1
     [SerializeField] private float atbFillSeconds = 3f;
 
     public bool autoBattle = false;
@@ -16,14 +15,10 @@ public class TurnEngine : MonoBehaviour
     [SerializeField] private TargetSelector targetSelector;
     [SerializeField] private TurnIndicator turnIndicator;
 
-    // Player control
     private bool _waitingForPlayerDecision;
     private Combatant _currPlayerUnit;
     public event Action<Combatant> OnPlayerTurnStart;
 
-    // NEW: fired whenever a unit actually gets a turn
-    // current = unit whose turn it is
-    // next    = best guess of the next alive unit in turn order (or null)
     public event Action<Combatant, Combatant> OnTurnUnitStart;
 
     public event Action<bool> OnBattleEnd;
@@ -52,7 +47,6 @@ public class TurnEngine : MonoBehaviour
         _paused = paused;
         ApplyTimeScale();
     }
-
     private void ApplyTimeScale()
     {
         Time.timeScale = _paused ? 0f : battleSpeed;
@@ -70,9 +64,8 @@ public class TurnEngine : MonoBehaviour
         _currPlayerUnit = null;
         _nextIndex = 0;
         _resolvingAction = false;
-        _ended = false; // reset end guard for fresh battle
+        _ended = false;
 
-        // small random stagger
         for (int i = 0; i < _units.Count; i++)
             if (_units[i])
                 _units[i].atb = UnityEngine.Random.Range(0.05f, 0.45f);
@@ -80,7 +73,6 @@ public class TurnEngine : MonoBehaviour
 
     public void ForceEnd(bool playerWon)
     {
-        // guard: only end once
         if (_ended) return;
         _ended = true;
 
@@ -102,8 +94,6 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running || _paused) return;
 
-        // ========= Global failsafes (run EVERY frame) =========
-        // 1) If all ENEMIES are gone at any moment (DOT, projectile, etc.), end as WIN.
         if (IsTeamWiped(false))
         {
             Debug.Log("[TurnEngine] Failsafe: no enemies alive — force end battle (WIN).");
@@ -111,7 +101,6 @@ public class TurnEngine : MonoBehaviour
             return;
         }
 
-        // 2) If the LEADER died at any moment, end as LOSS.
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
         {
@@ -119,14 +108,11 @@ public class TurnEngine : MonoBehaviour
             ForceEnd(false);
             return;
         }
-        // ======================================================
 
-        // Pause the loop if an action is resolving (but after failsafes above)
         if (_resolvingAction || _waitingForPlayerDecision) return;
 
         float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
-        // PASS 1: fill everyone's ATB
         for (int i = 0; i < _units.Count; i++)
         {
             var u = _units[i];
@@ -134,7 +120,6 @@ public class TurnEngine : MonoBehaviour
             u.atb += u.Speed * step;
         }
 
-        // PASS 2: pick exactly ONE ready unit to act
         int count = _units.Count;
         for (int s = 0; s < count; s++)
         {
@@ -147,24 +132,23 @@ public class TurnEngine : MonoBehaviour
                 u.atb = 0f;
                 u.OnTurnStarted();
 
-                // Figure out who is likely NEXT in the round-robin list
-                Combatant nextUnit = FindNextAliveFromIndex(i);
-
-                // Fire the turn-start event for UI (portraits, "Turn/Next" text)
-                OnTurnUnitStart?.Invoke(u, nextUnit);
+                Combatant predictedNext = PredictNextFromIndex(i);
 
                 if (u.isPlayerTeam)
                 {
                     if (autoBattle)
                     {
                         HookActionLock(u);
+                        OnTurnUnitStart?.Invoke(u, predictedNext);
                         AutoAct(u, true);
                     }
                     else
                     {
                         _waitingForPlayerDecision = true;
                         _currPlayerUnit = u;
+
                         OnPlayerTurnStart?.Invoke(u);
+                        OnTurnUnitStart?.Invoke(u, predictedNext);
 
                         _nextIndex = (i + 1) % count;
                         return;
@@ -173,10 +157,10 @@ public class TurnEngine : MonoBehaviour
                 else
                 {
                     HookActionLock(u);
+                    OnTurnUnitStart?.Invoke(u, predictedNext);
                     AutoAct(u, false);
                 }
 
-                // Standard end check after any action
                 if (IsTeamWiped(true) || IsTeamWiped(false))
                 {
                     bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
@@ -190,29 +174,46 @@ public class TurnEngine : MonoBehaviour
         }
     }
 
-    // ===== Helper: find the "next" alive unit for UI =====
-    private Combatant FindNextAliveFromIndex(int currentIndex)
+    private Combatant PredictNextFromIndex(int currentIndex)
     {
         int count = _units.Count;
-        if (count <= 1) return null;
+        if (count == 0) return null;
 
-        for (int offset = 1; offset < count; offset++)
+        int start = (currentIndex + 1) % count;
+        for (int s = 0; s < count; s++)
         {
-            int idx = (currentIndex + offset) % count;
-            var candidate = _units[idx];
-            if (candidate != null && candidate.IsAlive)
-                return candidate;
+            int idx = (start + s) % count;
+            if (idx == currentIndex) continue;
+
+            var u = _units[idx];
+            if (u == null || !u.IsAlive) continue;
+
+            if (u.atb >= 1f)
+                return u;
         }
 
-        return null;
+        float bestAtb = -1f;
+        Combatant best = null;
+        for (int i = 0; i < count; i++)
+        {
+            if (i == currentIndex) continue;
+            var u = _units[i];
+            if (u == null || !u.IsAlive) continue;
+
+            if (u.atb > bestAtb)
+            {
+                bestAtb = u.atb;
+                best = u;
+            }
+        }
+
+        return best;
     }
 
-    // === Action lock wiring ===
     private void HookActionLock(Combatant actor)
     {
         if (actor == null) return;
 
-        // avoid double-subscribe
         actor.ActionBegan -= OnActorActionBegan;
         actor.ActionEnded -= OnActorActionEnded;
 

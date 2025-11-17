@@ -149,6 +149,7 @@ public class BattleActionUI : MonoBehaviour
         selector?.Disable();
 
         ResetButtonVisuals();
+        ShowMessage(null);
 
         switch (action)
         {
@@ -183,6 +184,9 @@ public class BattleActionUI : MonoBehaviour
 
         if (_currentUnit.skill1IsCommand)
         {
+            _pendingAction = PendingAction.None;
+            ShowMessage(null);
+
             if (panel) panel.SetActive(false);
             selector?.Disable();
             selector?.Clear();
@@ -205,6 +209,9 @@ public class BattleActionUI : MonoBehaviour
 
         if (_currentUnit.Skill2IsSupport)
         {
+            _pendingAction = PendingAction.None;
+            ShowMessage(null);
+
             if (panel) panel.SetActive(false);
             selector?.Disable();
             selector?.Clear();
