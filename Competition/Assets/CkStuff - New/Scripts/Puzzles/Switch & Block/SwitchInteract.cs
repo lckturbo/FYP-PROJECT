@@ -27,12 +27,12 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
 
     [Header("Spam Control")]
     public float cooldown = 0.25f;
-    
+
     // runtime
     private bool _coolingDown;
     private int _resolvedChannel;
     private bool _playerInRange;
-    private bool _isActivated;
+    private bool _isActivated;    // false = OFF (left), true = ON (right)
 
     private PlayerInput _playerInput;
     private NewPlayerMovement _playerMove;
@@ -120,6 +120,9 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
         if (blockFocus)
             blockAnchor = CreateTempAnchor(blockFocus.position, "CamTemp_Block");
 
+        // cache current state BEFORE toggling
+        bool turningOn = !_isActivated;   // false -> true  (OFF -> ON)  or true -> false (ON -> OFF)
+
         try
         {
             // 1) SHOW SWITCH ANIM (camera settles on switch)
@@ -128,8 +131,22 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
 
             if (switchAnimator)
             {
-                switchAnimator.ResetTrigger("Use");
-                switchAnimator.SetTrigger("Use");
+                // clear both direction triggers first
+                switchAnimator.ResetTrigger("UseOn");
+                switchAnimator.ResetTrigger("UseOff");
+
+                // choose which flip animation to play
+                if (turningOn)
+                {
+                    // OFF -> ON (flip to the right)
+                    switchAnimator.SetTrigger("UseOn");
+                }
+                else
+                {
+                    // ON -> OFF (flip back to the left)
+                    switchAnimator.SetTrigger("UseOff");
+                }
+
                 yield return WaitForCurrentAnimOrFallback(switchAnimator, switchAnimFallback);
             }
 
@@ -285,20 +302,19 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
             }
         }
 
-
         if (switchAnimator)
         {
-            switchAnimator.ResetTrigger("Use");
+            switchAnimator.ResetTrigger("UseOn");
+            switchAnimator.ResetTrigger("UseOff");
             switchAnimator.ResetTrigger("On");
             switchAnimator.ResetTrigger("Off");
 
             if (_isActivated)
-                switchAnimator.Play("On", 0, 1f);
+                switchAnimator.Play("On", 0, 1f); 
             else
                 switchAnimator.Play("Off", 0, 1f);
         }
     }
-
 
 #if UNITY_EDITOR
     private void OnValidate()

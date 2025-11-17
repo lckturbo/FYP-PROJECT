@@ -26,7 +26,7 @@ public class BattleActionUI : MonoBehaviour
     [SerializeField] private GameObject tooltipPanel;
     [SerializeField] private TMP_Text tooltipTitle;
     [SerializeField] private TMP_Text tooltipDescription;
-    [SerializeField] private float hoverDelaySeconds = 3f;
+    [SerializeField] private float hoverDelaySeconds = 0.75f;
 
     private Combatant _currentUnit;
 
