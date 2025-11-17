@@ -135,6 +135,7 @@ public class Combatant : MonoBehaviour
         //    DoBasicAttackDamage(target);
         //    return;
         //}
+        currentAttackType = AttackType.Basic;
         StartCoroutine(MoveRoutine(target, DoBasicAttackDamage, attackStateName));
     }
 
@@ -151,6 +152,7 @@ public class Combatant : MonoBehaviour
         if (!target || !target.health) return false;
 
         _skill1CD = Mathf.Max(1, skill1CooldownTurns);
+        currentAttackType = AttackType.Skill1;
         StartCoroutine(MoveRoutine(target, DoSkill1Damage, skill1StateName));
         return true;
     }
@@ -170,6 +172,7 @@ public class Combatant : MonoBehaviour
         // Normal offensive Skill 2 (existing behaviour)
         if (target == null || !target.health) return false;
         _skill2CD = Mathf.Max(1, skill2CooldownTurns);
+        currentAttackType = AttackType.Skill2;
         StartCoroutine(MoveRoutine(target, DoSkill2Damage, skill2StateName));
         return true;
     }
@@ -498,7 +501,8 @@ public class Combatant : MonoBehaviour
 
     private Vector3 ApproachPoint(Combatant target)
     {
-        if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
+        if (!isPlayerTeam && BattleManager.instance.IsBossBattle 
+            || !isPlayerTeam && currentAttackType == AttackType.Skill1 && !BattleManager.instance.IsBossBattle)
             return visualRoot ? visualRoot.position : transform.position;
 
         Vector3 a = (visualRoot ? visualRoot.position : transform.position);
