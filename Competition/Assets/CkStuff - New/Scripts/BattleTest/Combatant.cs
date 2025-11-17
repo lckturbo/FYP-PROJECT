@@ -762,4 +762,10 @@ public class Combatant : MonoBehaviour
         int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
         return finalDamage;
     }
+
+    public void Hitstop(float duration)
+    {
+        HitstopManager.instance.TriggerHitstop(duration);
+    }
+
 }

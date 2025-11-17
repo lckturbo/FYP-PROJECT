@@ -89,6 +89,7 @@ public class BattleSystem : MonoBehaviour
     private readonly List<Combatant> _enemyCombatants = new();
 
     public static event Action<GameObject> OnLeaderSpawned;
+    private int _finishedDeathAnimations;
 
     private struct PreBattleSnapshot
     {
@@ -333,6 +334,19 @@ public class BattleSystem : MonoBehaviour
             var eh = enemy.GetComponentInChildren<NewHealth>();
             if (eh && enemyRT != null) eh.ApplyStats(enemyRT);
 
+            if (eh)
+            {
+                eh.OnDeathComplete += (h) =>
+                {
+                    _finishedDeathAnimations++;
+                    if (_finishedDeathAnimations >= _enemyCombatants.Count)
+                    {
+                        Debug.Log("All enemy death animations completed. Showing results.");
+                        turnEngine?.ForceEnd(true);
+                    }
+                };
+            }
+
             var cE = enemy.AddComponent<Combatant>();
             var conE = enemy.AddComponent<MinigameController>();
             cE.isPlayerTeam = false;
@@ -340,6 +354,8 @@ public class BattleSystem : MonoBehaviour
             cE.stats = enemyRT ?? baseEnemyStats;
             turnEngine.Register(cE);
             _enemyCombatants.Add(cE);
+
+            Destroy(enemy.GetComponentInChildren<CircleCollider2D>());
 
             int enemyCombatIndex = _enemyCombatants.Count - 1;
             if (enemyCombatIndex < enemyTurnSlots.Length)

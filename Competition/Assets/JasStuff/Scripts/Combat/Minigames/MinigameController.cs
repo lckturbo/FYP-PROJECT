@@ -31,13 +31,13 @@ public class MinigameController : MonoBehaviour
         }
 
         if (!currCombatant.isLeader)
-            minigameChance = 7;
+            minigameChance = 10;
         else
-            minigameChance = 15;
+            minigameChance = 20;
 
         if (MinigameManager.instance == null) return;
 
-        float roll = Random.Range(0f, 50f);
+        float roll = Random.Range(0f, 100f);
         Debug.Log($"Roll = {roll}");
 
         bool playGlobal = roll < globalMinigameChance;

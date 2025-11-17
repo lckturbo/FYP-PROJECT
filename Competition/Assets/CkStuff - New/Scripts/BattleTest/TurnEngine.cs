@@ -98,12 +98,12 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running || _paused) return;
 
-        if (IsTeamWiped(false))
-        {
-            Debug.Log("[TurnEngine] Failsafe: no enemies alive — force end battle (WIN).");
-            ForceEnd(true);
-            return;
-        }
+        //if (IsTeamWiped(false))
+        //{
+        //    Debug.Log("[TurnEngine] Failsafe: no enemies alive — force end battle (WIN).");
+        //    ForceEnd(true);
+        //    return;
+        //}
 
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)

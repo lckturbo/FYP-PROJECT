@@ -22,32 +22,32 @@ AnimationClip:
     curve:
     - time: 0
       value: {fileID: 819184912, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.083333336
+    - time: 0.1
       value: {fileID: -1937239701, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.16666667
+    - time: 0.2
       value: {fileID: 332104149, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.25
+    - time: 0.3
       value: {fileID: 941124983, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.33333334
+    - time: 0.4
       value: {fileID: -800046042, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.41666666
-      value: {fileID: 2060403033, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
     - time: 0.5
+      value: {fileID: 2060403033, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
+    - time: 0.6
       value: {fileID: -1206571571, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.5833333
+    - time: 0.7
       value: {fileID: 660166014, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.6666667
+    - time: 0.8
       value: {fileID: 869576663, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.75
+    - time: 0.9
       value: {fileID: -332126360, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
-    - time: 0.8333333
+    - time: 1
       value: {fileID: -977189031, guid: d4734d39fbe60664eaef307800c170fe, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
     script: {fileID: 0}
     flags: 2
-  m_SampleRate: 12
+  m_SampleRate: 10
   m_WrapMode: 0
   m_Bounds:
     m_Center: {x: 0, y: 0, z: 0}
@@ -80,7 +80,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 0.9166666
+    m_StopTime: 1.1
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -99,4 +99,11 @@ AnimationClip:
   m_EulerEditorCurves: []
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
-  m_Events: []
+  m_Events:
+  - time: 1
+    functionName: EndDeath
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: ee0553fc6e73e02408c5b05dfc319b81, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
