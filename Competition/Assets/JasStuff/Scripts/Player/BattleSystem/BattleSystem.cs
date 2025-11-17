@@ -346,6 +346,8 @@ public class BattleSystem : MonoBehaviour
         }
 
         SetUpHealth();
+        UpdateTurnSlotVisibility();
+        UpdateHealthbarVisibility();
         turnEngine.Begin();
     }
 
@@ -493,6 +495,51 @@ public class BattleSystem : MonoBehaviour
                 enemyTurnSlots[i].label.text = "";
         }
     }
+
+    private void UpdateTurnSlotVisibility()
+    {
+        // Player side
+        for (int i = 0; i < playerTurnSlots.Length; i++)
+        {
+            bool shouldBeActive = i < _playerCombatants.Count;
+
+            if (playerTurnSlots[i].icon)
+                playerTurnSlots[i].icon.gameObject.SetActive(shouldBeActive);
+            if (playerTurnSlots[i].label)
+                playerTurnSlots[i].label.gameObject.SetActive(shouldBeActive);
+        }
+
+        // Enemy side
+        for (int i = 0; i < enemyTurnSlots.Length; i++)
+        {
+            bool shouldBeActive = i < _enemyCombatants.Count;
+
+            if (enemyTurnSlots[i].icon)
+                enemyTurnSlots[i].icon.gameObject.SetActive(shouldBeActive);
+            if (enemyTurnSlots[i].label)
+                enemyTurnSlots[i].label.gameObject.SetActive(shouldBeActive);
+        }
+    }
+
+    private void UpdateHealthbarVisibility()
+    {
+        // Player healthbars
+        for (int i = 0; i < playerHealth.Length; i++)
+        {
+            bool shouldBeActive = i < _playerCombatants.Count;
+            if (playerHealth[i])
+                playerHealth[i].gameObject.SetActive(shouldBeActive);
+        }
+
+        // Enemy healthbars
+        for (int i = 0; i < enemyHealth.Length; i++)
+        {
+            bool shouldBeActive = i < _enemyCombatants.Count;
+            if (enemyHealth[i])
+                enemyHealth[i].gameObject.SetActive(shouldBeActive);
+        }
+    }
+
 
     private void HandleTurnUnitStart(Combatant current, Combatant next)
     {
