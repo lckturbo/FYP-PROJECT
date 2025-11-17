@@ -17,6 +17,9 @@ public class NewCharacterDefinition : ScriptableObject
     public Sprite portrait2;
     public Sprite icon;
 
+    [Header("Battle Portraits")]
+    public Sprite battlePortrait;
+
     [Header("UI Settings")]
     public Color uiColor = Color.white;
 
