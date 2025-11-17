@@ -28,11 +28,10 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
     [Header("Spam Control")]
     public float cooldown = 0.25f;
 
-    // runtime
     private bool _coolingDown;
     private int _resolvedChannel;
     private bool _playerInRange;
-    private bool _isActivated;    // false = OFF (left), true = ON (right)
+    private bool _isActivated;
 
     private PlayerInput _playerInput;
     private NewPlayerMovement _playerMove;
@@ -120,45 +119,36 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
         if (blockFocus)
             blockAnchor = CreateTempAnchor(blockFocus.position, "CamTemp_Block");
 
-        // cache current state BEFORE toggling
-        bool turningOn = !_isActivated;   // false -> true  (OFF -> ON)  or true -> false (ON -> OFF)
+        bool turningOn = !_isActivated;
 
         try
         {
-            // 1) SHOW SWITCH ANIM (camera settles on switch)
             if (cam && switchAnchor)
                 yield return cam.PanTo(switchAnchor, panDuration);
 
             if (switchAnimator)
             {
-                // clear both direction triggers first
                 switchAnimator.ResetTrigger("UseOn");
                 switchAnimator.ResetTrigger("UseOff");
 
-                // choose which flip animation to play
                 if (turningOn)
                 {
-                    // OFF -> ON (flip to the right)
                     switchAnimator.SetTrigger("UseOn");
                 }
                 else
                 {
-                    // ON -> OFF (flip back to the left)
                     switchAnimator.SetTrigger("UseOff");
                 }
 
                 yield return WaitForCurrentAnimOrFallback(switchAnimator, switchAnimFallback);
             }
 
-            // 2) PAN TO BLOCK
             if (cam && blockAnchor)
                 yield return cam.PanTo(blockAnchor, panDuration);
 
-            // 3) Toggle AFTER we've framed the block (target can safely disable now)
             SwitchBus.Toggle(_resolvedChannel);
             _isActivated = !_isActivated;
 
-            // 4) Wait for block anim or fallback, then optional hold
             if (blockAnimator)
                 yield return WaitForCurrentAnimOrFallback(blockAnimator, blockAnimFallback);
             else
@@ -167,11 +157,9 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
             if (holdOnBlock > 0f)
                 yield return new WaitForSeconds(holdOnBlock);
 
-            // 5) PAN BACK TO SWITCH
             if (cam && switchAnchor)
                 yield return cam.PanTo(switchAnchor, panDuration);
 
-            // 6) RETURN / RECONNECT TO PLAYER
             if (cam)
                 yield return cam.ReturnToPlayer(panDuration);
         }
@@ -195,7 +183,11 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
 
     private IEnumerator WaitForCurrentAnimOrFallback(Animator anim, float fallbackSeconds)
     {
-        if (!anim) { yield return new WaitForSeconds(fallbackSeconds); yield break; }
+        if (!anim)
+        {
+            yield return new WaitForSeconds(fallbackSeconds);
+            yield break;
+        }
 
         float clipLen = fallbackSeconds;
         var info = anim.GetCurrentAnimatorClipInfo(0);
@@ -310,7 +302,7 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
             switchAnimator.ResetTrigger("Off");
 
             if (_isActivated)
-                switchAnimator.Play("On", 0, 1f); 
+                switchAnimator.Play("On", 0, 1f);
             else
                 switchAnimator.Play("Off", 0, 1f);
         }
