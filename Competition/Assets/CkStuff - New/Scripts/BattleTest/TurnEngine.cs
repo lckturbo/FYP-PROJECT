@@ -87,6 +87,10 @@ public class TurnEngine : MonoBehaviour
         _resolvingAction = false;
 
         targetSelector?.Disable();
+
+        if (turnIndicator != null)
+            turnIndicator.HideArrow();
+
         OnBattleEnd?.Invoke(playerWon);
     }
 
@@ -131,6 +135,9 @@ public class TurnEngine : MonoBehaviour
             {
                 u.atb = 0f;
                 u.OnTurnStarted();
+
+                if (turnIndicator != null)
+                    turnIndicator.ShowArrow(u.transform);
 
                 Combatant predictedNext = PredictNextFromIndex(i);
 
@@ -225,7 +232,10 @@ public class TurnEngine : MonoBehaviour
     {
         _resolvingAction = true;
 
-        turnIndicator.HideArrow();
+        if (turnIndicator != null)
+            turnIndicator.HideArrow(0.50f);
+
+
         _currPlayerUnit = null;
     }
 

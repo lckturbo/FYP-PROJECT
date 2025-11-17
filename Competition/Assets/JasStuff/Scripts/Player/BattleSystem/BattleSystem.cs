@@ -1,5 +1,6 @@
 using Pathfinding;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -44,11 +45,15 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private Color iconNormalColor = Color.white;
     [SerializeField] private Color iconTurnColor = new Color32(0, 229, 255, 255); // cyan-ish
     [SerializeField] private Color iconNextColor = new Color32(0, 0, 0, 160);     // darkened
+
     [SerializeField] private float turnFlashSpeed = 4f;
+    [SerializeField] private float turnScaleMultiplier = 1.2f;
+    [SerializeField] private float turnScaleDuration = 0.18f;
 
     private readonly Dictionary<Combatant, int> _playerIconIndex = new();
     private readonly Dictionary<Combatant, int> _enemyIconIndex = new();
     private Image _currentTurnIcon;
+    private Coroutine _turnScaleRoutine;
 
     private GameObject playerLeader;
     private readonly List<GameObject> playerAllies = new();
@@ -66,7 +71,6 @@ public class BattleSystem : MonoBehaviour
     [Header("Results UI")]
     [SerializeField] private BattleResultsUI resultsUI;
 
-    // ===== Battle timer settings =====
     [Header("Battle Timer")]
     [SerializeField] private bool trackBattleElapsed = true;
     [SerializeField] private bool resetTimerOnBattleEnd = true;
@@ -95,7 +99,7 @@ public class BattleSystem : MonoBehaviour
         if (turnEngine)
         {
             turnEngine.OnBattleEnd += HandleBattleEnd;
-            turnEngine.OnTurnUnitStart += HandleTurnUnitStart; // NEW
+            turnEngine.OnTurnUnitStart += HandleTurnUnitStart;
         }
     }
 
@@ -104,7 +108,7 @@ public class BattleSystem : MonoBehaviour
         if (turnEngine)
         {
             turnEngine.OnBattleEnd -= HandleBattleEnd;
-            turnEngine.OnTurnUnitStart -= HandleTurnUnitStart; // NEW
+            turnEngine.OnTurnUnitStart -= HandleTurnUnitStart;
         }
     }
 
@@ -182,9 +186,12 @@ public class BattleSystem : MonoBehaviour
         {
             _playerIconIndex[cL] = leaderCombatIndex;
 
-            // dynamic leader portrait
-            if (playerTurnSlots[leaderCombatIndex].icon && leader.portrait)
-                playerTurnSlots[leaderCombatIndex].icon.sprite = leader.portrait;
+            var slotIcon = playerTurnSlots[leaderCombatIndex].icon;
+            if (slotIcon)
+            {
+                if (leader.battlePortrait != null)
+                    slotIcon.sprite = leader.battlePortrait;
+            }
         }
 
         if (leaderObj.name == "Leader_Producer")
@@ -249,9 +256,12 @@ public class BattleSystem : MonoBehaviour
                 {
                     _playerIconIndex[cA] = allyCombatIndex;
 
-                    // dynamic ally portrait
-                    if (playerTurnSlots[allyCombatIndex].icon && member.portrait)
-                        playerTurnSlots[allyCombatIndex].icon.sprite = member.portrait;
+                    var slotIcon = playerTurnSlots[allyCombatIndex].icon;
+                    if (slotIcon)
+                    {
+                        if (member.battlePortrait != null)
+                            slotIcon.sprite = member.battlePortrait;
+                    }
                 }
 
                 if (allyObj.name == "Ally_Producer")
@@ -464,7 +474,10 @@ public class BattleSystem : MonoBehaviour
         for (int i = 0; i < playerTurnSlots.Length; i++)
         {
             if (playerTurnSlots[i].icon)
+            {
                 playerTurnSlots[i].icon.color = iconNormalColor;
+                playerTurnSlots[i].icon.rectTransform.localScale = Vector3.one;
+            }
             if (playerTurnSlots[i].label)
                 playerTurnSlots[i].label.text = "";
         }
@@ -472,7 +485,10 @@ public class BattleSystem : MonoBehaviour
         for (int i = 0; i < enemyTurnSlots.Length; i++)
         {
             if (enemyTurnSlots[i].icon)
+            {
                 enemyTurnSlots[i].icon.color = iconNormalColor;
+                enemyTurnSlots[i].icon.rectTransform.localScale = Vector3.one;
+            }
             if (enemyTurnSlots[i].label)
                 enemyTurnSlots[i].label.text = "";
         }
@@ -480,6 +496,14 @@ public class BattleSystem : MonoBehaviour
 
     private void HandleTurnUnitStart(Combatant current, Combatant next)
     {
+        // stop previous scaling
+        _currentTurnIcon = null;
+        if (_turnScaleRoutine != null)
+        {
+            StopCoroutine(_turnScaleRoutine);
+            _turnScaleRoutine = null;
+        }
+
         ResetTurnIcons();
 
         // CURRENT TURN
@@ -492,6 +516,7 @@ public class BattleSystem : MonoBehaviour
                 {
                     _currentTurnIcon = slot.icon;
                     slot.icon.color = iconTurnColor;
+                    StartTurnIconScale(slot.icon);
                 }
                 if (slot.label)
                     slot.label.text = "Turn";
@@ -503,6 +528,7 @@ public class BattleSystem : MonoBehaviour
                 {
                     _currentTurnIcon = slot.icon;
                     slot.icon.color = iconTurnColor;
+                    StartTurnIconScale(slot.icon);
                 }
                 if (slot.label)
                     slot.label.text = "Turn";
@@ -529,6 +555,40 @@ public class BattleSystem : MonoBehaviour
                     slot.label.text = "Next";
             }
         }
+    }
+
+    private void StartTurnIconScale(Image icon)
+    {
+        if (icon == null) return;
+
+        if (_turnScaleRoutine != null)
+            StopCoroutine(_turnScaleRoutine);
+
+        _turnScaleRoutine = StartCoroutine(AnimateTurnIconScale(icon.rectTransform));
+    }
+
+    private IEnumerator AnimateTurnIconScale(RectTransform rt)
+    {
+        if (rt == null) yield break;
+
+        Vector3 start = Vector3.one;
+        Vector3 target = Vector3.one * turnScaleMultiplier;
+        float t = 0f;
+
+        rt.localScale = start;
+
+        while (t < turnScaleDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float lerp = Mathf.Clamp01(t / turnScaleDuration);
+            // ease-out
+            float eased = 1f - (1f - lerp) * (1f - lerp);
+            rt.localScale = Vector3.Lerp(start, target, eased);
+            yield return null;
+        }
+
+        rt.localScale = target;
+        _turnScaleRoutine = null;
     }
 
     // ===== Battle end & results =====
