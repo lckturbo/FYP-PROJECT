@@ -32,6 +32,16 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private Image leftPortraitImage;
     [SerializeField] private Image rightPortraitImage;
 
+    [SerializeField] private GameObject choicePanel;
+    [SerializeField] private Button choiceButtonA;
+    [SerializeField] private Button choiceButtonB;
+
+    [SerializeField] private TMP_Text choiceAText;
+    [SerializeField] private TMP_Text choiceBText;
+
+    private bool waitingForChoice = false;
+
+
     private void Start()
     {
         playerMovement = FindObjectOfType<NewPlayerMovement>();
@@ -87,6 +97,8 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     public void DisplayNextLine()
     {
+        if (waitingForChoice) return; // prevent skipping during choices
+
         if (isTyping)
         {
             CompleteCurrentLine();
@@ -100,16 +112,50 @@ public class DialogueManager : MonoBehaviour
         }
 
         currentLine = linesQueue.Dequeue();
-
         nameText.text = currentLine.speakerName;
+        UpdatePortrait(currentLine);
 
-        UpdatePortrait(currentLine);        // <<< NEW
+        // If this line has choices  show choice UI instead of typing.
+        if (currentLine.hasChoices)
+        {
+            ShowChoices(currentLine);
+            return;
+        }
 
         if (typingCoroutine != null)
             StopCoroutine(typingCoroutine);
 
         typingCoroutine = StartCoroutine(TypeLine(currentLine.text));
     }
+
+
+    private void ShowChoices(DialogueLine line)
+    {
+        waitingForChoice = true;
+
+        choicePanel.SetActive(true);
+
+        choiceAText.text = line.choiceA.text;
+        choiceBText.text = line.choiceB.text;
+
+        // Remove old listeners
+        choiceButtonA.onClick.RemoveAllListeners();
+        choiceButtonB.onClick.RemoveAllListeners();
+
+        // Add new listeners
+        choiceButtonA.onClick.AddListener(() => ChooseBranch(line.choiceA.nextDialogue));
+        choiceButtonB.onClick.AddListener(() => ChooseBranch(line.choiceB.nextDialogue));
+    }
+
+    private void ChooseBranch(DialogueData nextDialogue)
+    {
+        choicePanel.SetActive(false);
+        waitingForChoice = false;
+
+        // Branch into the selected dialogue
+        StartDialogue(nextDialogue, onDialogueEndCallback);
+    }
+
 
     private void UpdatePortrait(DialogueLine line)
     {
