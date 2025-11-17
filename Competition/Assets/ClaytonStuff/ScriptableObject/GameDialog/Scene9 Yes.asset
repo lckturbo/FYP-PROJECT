@@ -12,4 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffc4d158180ed77419b404e371f98a5f, type: 3}
   m_Name: Scene9 Yes
   m_EditorClassIdentifier: 
-  lines: []
+  lines:
+  - speakerName: Lucas
+    text: After you, Princess.
+    portrait: {fileID: 21300000, guid: cf10a906de53d874ea56c7790fb58d74, type: 3}
+    portraitSide: 0
+    hasChoices: 0
+    choiceA:
+      text: 
+      nextDialogue: {fileID: 0}
+    choiceB:
+      text: 
+      nextDialogue: {fileID: 0}

@@ -12,4 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffc4d158180ed77419b404e371f98a5f, type: 3}
   m_Name: Scene9 No
   m_EditorClassIdentifier: 
-  lines: []
+  lines:
+  - speakerName: Princess
+    text: "You\u2019re insane. "
+    portrait: {fileID: 0}
+    portraitSide: 1
+    hasChoices: 0
+    choiceA:
+      text: 
+      nextDialogue: {fileID: 0}
+    choiceB:
+      text: 
+      nextDialogue: {fileID: 0}
+  - speakerName: Princess
+    text: "Whatever, take your time. I\u2019ll just wait here. "
+    portrait: {fileID: 0}
+    portraitSide: 1
+    hasChoices: 0
+    choiceA:
+      text: 
+      nextDialogue: {fileID: 0}
+    choiceB:
+      text: 
+      nextDialogue: {fileID: 0}
