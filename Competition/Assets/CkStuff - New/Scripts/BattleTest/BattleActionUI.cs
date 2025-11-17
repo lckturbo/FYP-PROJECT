@@ -22,7 +22,20 @@ public class BattleActionUI : MonoBehaviour
     [SerializeField] private Color normalButtonColor = Color.white;
     [SerializeField] private Color selectedButtonColor = new Color(1f, 0.9f, 0.3f);
 
+    [Header("Skill Tooltip UI")]
+    [SerializeField] private GameObject tooltipPanel;
+    [SerializeField] private TMP_Text tooltipTitle;
+    [SerializeField] private TMP_Text tooltipDescription;
+    [SerializeField] private float hoverDelaySeconds = 3f;
+
     private Combatant _currentUnit;
+
+    public enum SkillSlot
+    {
+        Basic,
+        Skill1,
+        Skill2
+    }
 
     private enum PendingAction
     {
@@ -34,15 +47,22 @@ public class BattleActionUI : MonoBehaviour
 
     private PendingAction _pendingAction = PendingAction.None;
 
+    private Coroutine _tooltipRoutine;
+    private SkillSlot _hoverSlot;
+    private bool _hoverActive = false;
+
     private void Awake()
     {
         if (panel) panel.SetActive(false);
         if (attackBtn) attackBtn.onClick.AddListener(OnAttackClicked);
         if (skillBtn) skillBtn.onClick.AddListener(OnSkill1Clicked);
         if (skill2Btn) skill2Btn.onClick.AddListener(OnSkill2Clicked);
-        ShowMessage(null);
 
+        ShowMessage(null);
         ResetButtonVisuals();
+
+        if (tooltipPanel)
+            tooltipPanel.SetActive(false);
     }
 
     private void OnEnable()
@@ -55,6 +75,8 @@ public class BattleActionUI : MonoBehaviour
     {
         if (engine) engine.OnPlayerTurnStart -= ShowForUnit;
         if (selector) selector.OnSelectionChanged -= HandleSelectionChanged;
+
+        HideTooltipImmediate();
     }
 
     private void ShowForUnit(Combatant unit)
@@ -66,6 +88,7 @@ public class BattleActionUI : MonoBehaviour
         selector?.Clear();
         ShowMessage(null);
         ResetButtonVisuals();
+        HideTooltipImmediate();
 
         if (panel) panel.SetActive(true);
 
@@ -94,9 +117,9 @@ public class BattleActionUI : MonoBehaviour
             NewCharacterDefinition def = PlayerParty.instance.GetDefinitionFor(_currentUnit);
             if (def != null)
             {
-                attackBtn.GetComponent<Image>().sprite = def.basicAtk;
-                skillBtn.GetComponent<Image>().sprite = def.skill1;
-                skill2Btn.GetComponent<Image>().sprite = def.skill2;
+                if (attackBtn) attackBtn.GetComponent<Image>().sprite = def.basicAtk;
+                if (skillBtn) skillBtn.GetComponent<Image>().sprite = def.skill1;
+                if (skill2Btn) skill2Btn.GetComponent<Image>().sprite = def.skill2;
             }
         }
 
@@ -147,9 +170,8 @@ public class BattleActionUI : MonoBehaviour
 
         if (panel) panel.SetActive(false);
         selector?.Disable();
-
         ResetButtonVisuals();
-        ShowMessage(null);
+        HideTooltipImmediate();
 
         switch (action)
         {
@@ -176,6 +198,7 @@ public class BattleActionUI : MonoBehaviour
         UpdateButtonVisualsForSelection();
 
         if (selector) selector.EnableForPlayerUnit(_currentUnit);
+        HideTooltipImmediate();
     }
 
     private void OnSkill1Clicked()
@@ -184,13 +207,11 @@ public class BattleActionUI : MonoBehaviour
 
         if (_currentUnit.skill1IsCommand)
         {
-            _pendingAction = PendingAction.None;
-            ShowMessage(null);
-
             if (panel) panel.SetActive(false);
             selector?.Disable();
             selector?.Clear();
             ResetButtonVisuals();
+            HideTooltipImmediate();
 
             engine.PlayerChooseSkillTarget(0, _currentUnit);
             return;
@@ -201,6 +222,7 @@ public class BattleActionUI : MonoBehaviour
         UpdateButtonVisualsForSelection();
 
         if (selector) selector.EnableForPlayerUnit(_currentUnit);
+        HideTooltipImmediate();
     }
 
     private void OnSkill2Clicked()
@@ -209,13 +231,11 @@ public class BattleActionUI : MonoBehaviour
 
         if (_currentUnit.Skill2IsSupport)
         {
-            _pendingAction = PendingAction.None;
-            ShowMessage(null);
-
             if (panel) panel.SetActive(false);
             selector?.Disable();
             selector?.Clear();
             ResetButtonVisuals();
+            HideTooltipImmediate();
 
             engine.PlayerChooseSkillTarget(1, _currentUnit);
             return;
@@ -226,6 +246,7 @@ public class BattleActionUI : MonoBehaviour
         UpdateButtonVisualsForSelection();
 
         if (selector) selector.EnableForPlayerUnit(_currentUnit);
+        HideTooltipImmediate();
     }
 
     private void ResetButtonVisuals()
@@ -273,5 +294,91 @@ public class BattleActionUI : MonoBehaviour
             infoLabel.text = msg;
             infoLabel.gameObject.SetActive(true);
         }
+    }
+
+    public void BeginHover(SkillSlot slot)
+    {
+        if (_currentUnit == null) return;
+
+        _hoverSlot = slot;
+        _hoverActive = true;
+
+        if (_tooltipRoutine != null)
+            StopCoroutine(_tooltipRoutine);
+
+        _tooltipRoutine = StartCoroutine(HoverDelayRoutine());
+    }
+
+    public void EndHover(SkillSlot slot)
+    {
+        if (!_hoverActive || slot != _hoverSlot)
+            return;
+
+        HideTooltipImmediate();
+    }
+
+    private IEnumerator HoverDelayRoutine()
+    {
+        float elapsed = 0f;
+        while (elapsed < hoverDelaySeconds && _hoverActive)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        _tooltipRoutine = null;
+
+        if (_hoverActive)
+            ShowTooltipForSlot(_hoverSlot);
+    }
+
+    private void ShowTooltipForSlot(SkillSlot slot)
+    {
+        if (tooltipPanel == null || tooltipTitle == null || tooltipDescription == null)
+            return;
+
+        if (_currentUnit == null) return;
+
+        NewCharacterDefinition def = PlayerParty.instance.GetDefinitionFor(_currentUnit);
+        if (def == null) return;
+
+        string title = "";
+        string desc = "";
+
+        switch (slot)
+        {
+            case SkillSlot.Basic:
+                title = def.basicSkillName;
+                desc = def.basicDescription;
+                break;
+
+            case SkillSlot.Skill1:
+                title = def.skill1Name;
+                desc = def.skill1Description;
+                break;
+
+            case SkillSlot.Skill2:
+                title = def.skill2Name;
+                desc = def.skill2Description;
+                break;
+        }
+
+        tooltipTitle.text = title;
+        tooltipDescription.text = desc;
+        tooltipPanel.SetActive(true);
+    }
+
+    private void HideTooltipImmediate()
+    {
+        _hoverActive = false;
+
+        if (_tooltipRoutine != null)
+        {
+            StopCoroutine(_tooltipRoutine);
+            _tooltipRoutine = null;
+        }
+
+        if (tooltipPanel)
+            tooltipPanel.SetActive(false);
     }
 }
