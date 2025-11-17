@@ -23,9 +23,12 @@ public class MiniMapOnoffbutton : MonoBehaviour
 
     private bool isMinimapOn = true;
 
+    // Scale values
+    private Vector3 activeScale = new Vector3(1.1f, 1.1f, 1f);
+    private Vector3 defaultScale = new Vector3(1f, 1f, 1f);
+
     private void Start()
     {
-        // Assign button events
         onButton.onClick.AddListener(TurnOnMiniMap);
         offButton.onClick.AddListener(TurnOffMiniMap);
 
@@ -52,11 +55,19 @@ public class MiniMapOnoffbutton : MonoBehaviour
         {
             onButtonImage.sprite = onActiveSprite;
             offButtonImage.sprite = offDefaultSprite;
+
+            // Scale active button
+            onButton.transform.localScale = activeScale;
+            offButton.transform.localScale = defaultScale;
         }
         else
         {
             onButtonImage.sprite = onDefaultSprite;
             offButtonImage.sprite = offActiveSprite;
+
+            // Scale active button
+            onButton.transform.localScale = defaultScale;
+            offButton.transform.localScale = activeScale;
         }
     }
 }
