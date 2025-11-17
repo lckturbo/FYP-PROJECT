@@ -25,7 +25,6 @@ public class CommandBurst : BaseMinigame
     private List<Image> currentIcons = new List<Image>();
 
     [Header("Settings")]
-    //[SerializeField] private float timePerPrompt = 1.5f;
     [SerializeField] private int totalPrompts = 5;
 
     private KeyCode[] comboKeys = { KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.Mouse0, KeyCode.Mouse1 };
@@ -49,10 +48,12 @@ public class CommandBurst : BaseMinigame
             { KeyCode.Mouse0, m1Sprite },
             { KeyCode.Mouse1, m2Sprite }
         };
+
+        StartCoroutine(Run());
     }
     public override IEnumerator Run()
     {
-        BattleManager.instance.SetBattlePaused(true);
+        //BattleManager.instance.SetBattlePaused(true);
         SetupSkipUI(true);
 
         instructionPanel.SetActive(true);
@@ -84,17 +85,20 @@ public class CommandBurst : BaseMinigame
 
         yield return StartCoroutine(PlaySequence());
 
-        if (successCount == totalPrompts)
+        float charge = energyBar.value;
+
+        if (charge >= 0.95f)
             Result = MinigameManager.ResultType.Perfect;
-        else if (successCount >= totalPrompts * 0.6f)
+        else if (charge >= 0.50f)
             Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
 
+
         promptText.text = Result + "!";
         yield return new WaitForSecondsRealtime(1.0f);
 
-        BattleManager.instance.SetBattlePaused(false);
+        //BattleManager.instance.SetBattlePaused(false);
     }
     private IEnumerator PlaySequence()
     {
@@ -121,19 +125,19 @@ public class CommandBurst : BaseMinigame
                     {
                         successCount++;
                         currentIndex++;
-                        energyBar.value = Mathf.Clamp01(energyBar.value + 0.02f);
+                        energyBar.value = Mathf.Clamp01(energyBar.value + 0.05f);
                         UpdateComboHighlight(currentIndex);
                     }
                     else
                     {
-                        energyBar.value = Mathf.Clamp01(energyBar.value - 0.1f);
+                        energyBar.value = Mathf.Clamp01(energyBar.value - 0.05f);
                         ShakeEnergyBar();
                     }
                 }
             }
             else
             {
-                yield return new WaitForSecondsRealtime(0.2f);
+                yield return new WaitForSecondsRealtime(0.1f);
                 combo = GenerateCombo();
                 currentIndex = 0;
                 DisplayCombo(combo, currentIndex);
