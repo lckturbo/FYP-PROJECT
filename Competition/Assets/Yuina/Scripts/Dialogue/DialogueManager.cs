@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -27,6 +28,9 @@ public class DialogueManager : MonoBehaviour
     private NewPlayerMovement playerMovement;
 
     private System.Action onDialogueEndCallback;
+
+    [SerializeField] private Image leftPortraitImage;
+    [SerializeField] private Image rightPortraitImage;
 
     private void Start()
     {
@@ -85,7 +89,6 @@ public class DialogueManager : MonoBehaviour
     {
         if (isTyping)
         {
-            // タイピング途中なら全文表示
             CompleteCurrentLine();
             return;
         }
@@ -97,13 +100,37 @@ public class DialogueManager : MonoBehaviour
         }
 
         currentLine = linesQueue.Dequeue();
+
         nameText.text = currentLine.speakerName;
+
+        UpdatePortrait(currentLine);        // <<< NEW
 
         if (typingCoroutine != null)
             StopCoroutine(typingCoroutine);
 
         typingCoroutine = StartCoroutine(TypeLine(currentLine.text));
     }
+
+    private void UpdatePortrait(DialogueLine line)
+    {
+        // Hide both first
+        leftPortraitImage.gameObject.SetActive(false);
+        rightPortraitImage.gameObject.SetActive(false);
+
+        if (line.portrait == null) return;
+
+        if (line.portraitSide == DialogueLine.Side.Left)
+        {
+            leftPortraitImage.sprite = line.portrait;
+            leftPortraitImage.gameObject.SetActive(true);
+        }
+        else
+        {
+            rightPortraitImage.sprite = line.portrait;
+            rightPortraitImage.gameObject.SetActive(true);
+        }
+    }
+
 
     private IEnumerator TypeLine(string line)
     {
