@@ -260,6 +260,7 @@ public class Combatant : MonoBehaviour
         // Collect living enemies
         var allCombatants = FindObjectsOfType<Combatant>();
         List<Combatant> livingEnemies = new List<Combatant>();
+
         foreach (var c in allCombatants)
         {
             if (!c.IsAlive) continue;
@@ -270,6 +271,7 @@ public class Combatant : MonoBehaviour
         int attacks = 0;
         List<Coroutine> runningCoroutines = new List<Coroutine>();
 
+        // === ALLY ATTACK LOOP ===
         foreach (var ally in allCombatants)
         {
             if (attacks >= 2) break;
@@ -284,9 +286,10 @@ public class Combatant : MonoBehaviour
                 int index = Random.Range(0, livingEnemies.Count);
                 Combatant randomTarget = livingEnemies[index];
 
-                if (livingEnemies.Count > 1) livingEnemies.RemoveAt(index);
+                if (livingEnemies.Count > 1)
+                    livingEnemies.RemoveAt(index);
 
-                // EXTRA DMG //
+                // EXTRA DMG
                 int bonusDamage = 3;
 
                 ally.stats.atkDmg += bonusDamage;
@@ -297,27 +300,36 @@ public class Combatant : MonoBehaviour
                 yield return co;
 
                 ally.stats.atkDmg -= bonusDamage;
-
                 attacks++;
             }
         }
 
-        foreach (var ally in allCombatants)
-        {
-            if (!ally.isPlayerTeam || !ally.IsAlive || ally == this)
-                continue;
-
-            var handler = ally.GetComponent<BuffData>();
-            if (handler)
-                handler.ClearAttackBuff();
-        }
-
+        // === WAIT FOR ALL REMAINING COROUTINES ===
         while (runningCoroutines.Exists(c => c != null))
             yield return null;
 
+        // === REMOVE BUFFS AFTER ALL ATTACKS ARE DONE ===
+        foreach (var ally in allCombatants)
+        {
+            if (!ally.isPlayerTeam) continue;
+            if (!ally.IsAlive) continue;
+            if (ally == this) continue;
+
+            var handler = ally.GetComponent<PlayerBuffHandler>();
+            if (handler != null)
+            {
+                handler.RemoveStoredBuffs();
+                Debug.LogWarning($"Buff removed from {ally.name}");
+            }
+            else
+            {
+                Debug.LogWarning($"{ally.name} has NO PlayerBuffHandler");
+            }
+        }
 
         ActionEnded?.Invoke();
     }
+
 
     public IEnumerator BasicAttackRoutine(Combatant target)
     {
@@ -671,14 +683,14 @@ public class Combatant : MonoBehaviour
 
             case MinigameManager.ResultType.Success:
                 if (id == "CommandBurst")
-                    buff = 1;
+                    buff = 30;
                 else
                     dmg = Mathf.RoundToInt(stats.atkDmg * 1.2f);
                 break;
 
             case MinigameManager.ResultType.Perfect:
                 if (id == "CommandBurst")
-                    buff = 3;
+                    buff = 50;
                 else if (id == "TakeABreak")
                     dmg = currentTarget?.health.GetCurrHealth() ?? 0;
                 else
