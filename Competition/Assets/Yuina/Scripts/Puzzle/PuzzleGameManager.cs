@@ -41,8 +41,11 @@ public class PuzzleGameManager : MonoBehaviour
             Debug.Log("PuzzleGameManager: All stages cleared!");
 
             // Player movement re-enabled
-            if (PlayerController.Instance != null)
-                PlayerController.Instance.SetCanMove(true);
+            // Restore movement using NewPlayerMovement
+            NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+            if (playerMovement != null)
+                playerMovement.enabled = true;
+
 
             return;
         }
