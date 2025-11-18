@@ -14,7 +14,7 @@ public class ShutterChanceBishi : BaseMinigame
 
     [Header("Bonus Visuals")]
     [SerializeField] private Image bonusTintOverlay;
-    [SerializeField] private ParticleSystem bonusParticles;
+    [SerializeField] private ParticleSystem[] bonusParticles;
     [SerializeField, Range(0f, 1f)] private float bonusTintAlpha = 0.35f;
     [SerializeField] private float bonusTintPulseSpeed = 2.0f;
 
@@ -229,7 +229,13 @@ public class ShutterChanceBishi : BaseMinigame
             bonusTintOverlay.color = c;
             bonusTintOverlay.gameObject.SetActive(true);
         }
-        if (bonusParticles) bonusParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        if (bonusParticles != null)
+        {
+            foreach (var ps in bonusParticles)
+                if (ps) ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
         if (okayCenterText) okayCenterText.gameObject.SetActive(false);
         if (resultPanel) resultPanel.SetActive(false);
         if (finishText) finishText.gameObject.SetActive(false);
@@ -884,23 +890,44 @@ public class ShutterChanceBishi : BaseMinigame
     {
         if (bonusTintOverlay)
         {
-            var c = bonusTintOverlay.color; c.a = 0f;
+            var c = bonusTintOverlay.color;
+            c.a = 0f;
             bonusTintOverlay.color = c;
-            if (tintPulseCo != null) StopCoroutine(tintPulseCo);
+
+            if (tintPulseCo != null)
+                StopCoroutine(tintPulseCo);
+
             tintPulseCo = StartCoroutine(PulseTint());
         }
-        if (bonusParticles) bonusParticles.Play(true);
+
+        if (bonusParticles != null)
+        {
+            foreach (var ps in bonusParticles)
+                if (ps) ps.Play(true);
+        }
     }
 
     private void ExitBonusVisuals()
     {
-        if (tintPulseCo != null) { StopCoroutine(tintPulseCo); tintPulseCo = null; }
+        if (tintPulseCo != null)
+        {
+            StopCoroutine(tintPulseCo);
+            tintPulseCo = null;
+        }
+
         if (bonusTintOverlay)
         {
-            var c = bonusTintOverlay.color; c.a = 0f;
+            var c = bonusTintOverlay.color;
+            c.a = 0f;
             bonusTintOverlay.color = c;
         }
-        if (bonusParticles) bonusParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+        if (bonusParticles != null)
+        {
+            foreach (var ps in bonusParticles)
+                if (ps) ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+
         if (goldenHint) goldenHint.gameObject.SetActive(false);
         if (goldenRope) goldenRope.gameObject.SetActive(false);
     }
