@@ -443,7 +443,7 @@ public class Combatant : MonoBehaviour
             baseMultiplier = 1.0f;
         }
 
-        int damage = Mathf.RoundToInt(stats.atkDmg * baseMultiplier);
+        int damage = CalculateDamage(this, baseMultiplier);
 
         if (isMultiHit)
         {
@@ -766,32 +766,31 @@ public class Combatant : MonoBehaviour
     }
 
 
-    //private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
-    //{
-    //    if (target == null || target.health == null) return 0;
+    private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
+    {
+        if (target == null || target.health == null) return 0;
 
-    //    float attackPower = stats ? stats.atkDmg : 0f;
-    //    float defensePower = target.stats ? target.stats.attackreduction : 0f;
+        float attackPower = stats ? stats.atkDmg : 0f;
+        float defensePower = target.stats ? target.stats.attackreduction : 0f;
 
-    //    // Apply buffs (if you have BuffData, keep this logic)
-    //    PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
-    //    PlayerBuffHandler targetBuffHandler = target.GetComponent<PlayerBuffHandler>();
+        PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
+        PlayerBuffHandler targetBuffHandler = target.GetComponent<PlayerBuffHandler>();
 
-    //    if (BuffData.instance != null)
-    //    {
-    //        if (BuffData.instance.hasAttackBuff && attackerBuffHandler != null &&
-    //            BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
-    //            attackPower += BuffData.instance.latestAttackBuff;
+        if (BuffData.instance != null)
+        {
+            if (BuffData.instance.hasAttackBuff && attackerBuffHandler != null &&
+                BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
+                attackPower += BuffData.instance.latestAttackBuff;
 
-    //        if (BuffData.instance.hasDefenseBuff && targetBuffHandler != null &&
-    //            BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
-    //            defensePower += BuffData.instance.latestDefenseBuff;
-    //    }
+            if (BuffData.instance.hasDefenseBuff && targetBuffHandler != null &&
+                BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
+                defensePower += BuffData.instance.latestDefenseBuff;
+        }
 
-    //    float rawDamage = (attackPower * multiplierOverride) - defensePower;
-    //    int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
-    //    return finalDamage;
-    //}
+        float rawDamage = (attackPower * multiplierOverride) - defensePower;
+        int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
+        return finalDamage;
+    }
 
     public void Hitstop(float duration)
     {
