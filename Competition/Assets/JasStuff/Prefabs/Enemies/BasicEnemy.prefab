@@ -105,6 +105,7 @@ GameObject:
   - component: {fileID: 2807965023668165633}
   - component: {fileID: 3861231205910328035}
   - component: {fileID: 6575021316109659210}
+  - component: {fileID: 4965230786856316006}
   m_Layer: 9
   m_Name: BasicEnemy
   m_TagString: Enemy
@@ -474,6 +475,23 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 2.21
+--- !u!114 &4965230786856316006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4249954731921599678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e2537241bd2077469676fdce976c7a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconSprite: {fileID: 38626241, guid: 9153db96c41812c4aaed44159202500e, type: 3}
+  offset: {x: 0, y: 0, z: -1}
+  iconScale: 10
+  normalOrder: 10
+  leaderOrder: 20
 --- !u!1 &6611196082467723058
 GameObject:
   m_ObjectHideFlags: 0
