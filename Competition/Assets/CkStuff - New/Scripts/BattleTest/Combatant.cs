@@ -61,7 +61,7 @@ public class Combatant : MonoBehaviour
     [SerializeField] private NewCharacterStats runtimeStats;
 
     // --- Minigame control ---
-   //private bool minigameTriggered = false;
+    //private bool minigameTriggered = false;
     private bool waitingForMinigameResult = false;
     private int pendingMinigameDamage = -1;
 
@@ -397,6 +397,9 @@ public class Combatant : MonoBehaviour
             parodyEffect.ZoomOut();
     }
 
+    public bool isMultiHit = false;
+    public int multiHitTotal = 5;
+    public int multiHitIndex = 0;
     public void DealDamage()
     {
         if (currentTarget == null) return;
@@ -425,7 +428,11 @@ public class Combatant : MonoBehaviour
         float baseMultiplier = 1f;
         switch (currentAttackType)
         {
-            case AttackType.Basic: baseMultiplier = 1.0f; break;
+            case AttackType.Basic:
+                if (!BattleManager.instance.IsBossBattle && !isPlayerTeam)
+                    isMultiHit = true;
+                baseMultiplier = 1.0f;
+                break;
             case AttackType.Skill1: baseMultiplier = 1.2f; break;
             case AttackType.Skill2: baseMultiplier = 1.5f; break;
         }
@@ -436,7 +443,25 @@ public class Combatant : MonoBehaviour
             baseMultiplier = 1.0f;
         }
 
-        int damage = CalculateDamage(currentTarget, baseMultiplier);
+        int damage = Mathf.RoundToInt(stats.atkDmg * baseMultiplier);
+
+        if (isMultiHit)
+        {
+            int perHit = damage / multiHitTotal;
+
+            if (multiHitIndex == multiHitTotal - 1)
+                perHit = damage - perHit * (multiHitTotal - 1);
+
+            damage = perHit;
+
+            multiHitIndex++;
+
+            if (multiHitIndex >= multiHitTotal)
+            {
+                isMultiHit = false;
+                multiHitIndex = 0;
+            }
+        }
 
         // boss attack
         if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
@@ -495,14 +520,13 @@ public class Combatant : MonoBehaviour
         finally
         {
             if (disablePhysicsWhileActing) ExitNonColliding();
-            ActionEnded?.Invoke();  
+            ActionEnded?.Invoke();
         }
     }
 
     private Vector3 ApproachPoint(Combatant target)
     {
-        if (!isPlayerTeam && BattleManager.instance.IsBossBattle 
-            || !isPlayerTeam && currentAttackType == AttackType.Skill1 && !BattleManager.instance.IsBossBattle)
+        if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
             return visualRoot ? visualRoot.position : transform.position;
 
         Vector3 a = (visualRoot ? visualRoot.position : transform.position);
@@ -512,6 +536,8 @@ public class Combatant : MonoBehaviour
         if (dir.sqrMagnitude < 0.0001f)
             dir = Vector3.right;
 
+        //if (!isPlayerTeam && currentAttackType == AttackType.Skill1 && !BattleManager.instance.IsBossBattle)
+        //    return b + dir * (approachDistance * 0.8f);
         return b + dir * approachDistance;
     }
 
@@ -740,32 +766,32 @@ public class Combatant : MonoBehaviour
     }
 
 
-    private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
-    {
-        if (target == null || target.health == null) return 0;
+    //private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
+    //{
+    //    if (target == null || target.health == null) return 0;
 
-        float attackPower = stats ? stats.atkDmg : 0f;
-        float defensePower = target.stats ? target.stats.attackreduction : 0f;
+    //    float attackPower = stats ? stats.atkDmg : 0f;
+    //    float defensePower = target.stats ? target.stats.attackreduction : 0f;
 
-        // Apply buffs (if you have BuffData, keep this logic)
-        PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
-        PlayerBuffHandler targetBuffHandler = target.GetComponent<PlayerBuffHandler>();
+    //    // Apply buffs (if you have BuffData, keep this logic)
+    //    PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
+    //    PlayerBuffHandler targetBuffHandler = target.GetComponent<PlayerBuffHandler>();
 
-        if (BuffData.instance != null)
-        {
-            if (BuffData.instance.hasAttackBuff && attackerBuffHandler != null &&
-                BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
-                attackPower += BuffData.instance.latestAttackBuff;
+    //    if (BuffData.instance != null)
+    //    {
+    //        if (BuffData.instance.hasAttackBuff && attackerBuffHandler != null &&
+    //            BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
+    //            attackPower += BuffData.instance.latestAttackBuff;
 
-            if (BuffData.instance.hasDefenseBuff && targetBuffHandler != null &&
-                BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
-                defensePower += BuffData.instance.latestDefenseBuff;
-        }
+    //        if (BuffData.instance.hasDefenseBuff && targetBuffHandler != null &&
+    //            BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
+    //            defensePower += BuffData.instance.latestDefenseBuff;
+    //    }
 
-        float rawDamage = (attackPower * multiplierOverride) - defensePower;
-        int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
-        return finalDamage;
-    }
+    //    float rawDamage = (attackPower * multiplierOverride) - defensePower;
+    //    int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
+    //    return finalDamage;
+    //}
 
     public void Hitstop(float duration)
     {
