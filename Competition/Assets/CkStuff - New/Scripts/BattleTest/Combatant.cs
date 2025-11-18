@@ -277,7 +277,16 @@ public class Combatant : MonoBehaviour
         // === ALLY ATTACK LOOP ===
         foreach (var ally in allCombatants)
         {
-            if (attacks >= 2) break;
+            if (attacks >= 2)
+            {
+                var handler = ally.GetComponent<PlayerBuffHandler>();
+                if (handler != null)
+                {
+                    handler.RemoveStoredBuffs();
+                    Debug.LogWarning($"Buff removed from {ally.name}");
+                }
+                break;
+            }
             if (ally == this) continue;
             if (!ally.IsAlive) continue;
             if (ally.isPlayerTeam != this.isPlayerTeam) continue;
@@ -311,24 +320,24 @@ public class Combatant : MonoBehaviour
         while (runningCoroutines.Exists(c => c != null))
             yield return null;
 
-        // === REMOVE BUFFS AFTER ALL ATTACKS ARE DONE ===
-        foreach (var ally in allCombatants)
-        {
-            if (!ally.isPlayerTeam) continue;
-            if (!ally.IsAlive) continue;
-            if (ally == this) continue;
+        //// === REMOVE BUFFS AFTER ALL ATTACKS ARE DONE ===
+        //foreach (var ally in allCombatants)
+        //{
+        //    if (!ally.isPlayerTeam) continue;
+        //    if (!ally.IsAlive) continue;
+        //    if (ally == this) continue;
 
-            var handler = ally.GetComponent<PlayerBuffHandler>();
-            if (handler != null)
-            {
-                handler.RemoveStoredBuffs();
-                Debug.LogWarning($"Buff removed from {ally.name}");
-            }
-            else
-            {
-                Debug.LogWarning($"{ally.name} has NO PlayerBuffHandler");
-            }
-        }
+        //    var handler = ally.GetComponent<PlayerBuffHandler>();
+        //    if (handler != null)
+        //    {
+        //        handler.RemoveStoredBuffs();
+        //        Debug.LogWarning($"Buff removed from {ally.name}");
+        //    }
+        //    else
+        //    {
+        //        Debug.LogWarning($"{ally.name} has NO PlayerBuffHandler");
+        //    }
+        //}
 
         ActionEnded?.Invoke();
     }
@@ -404,8 +413,10 @@ public class Combatant : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        if (currentAttackType == AttackType.Support || waitingForMinigameResult) return;
+        if (currentAttackType == AttackType.Support || waitingForMinigameResult)
+            return;
 
+        // Skill2 buff removal
         var buff = GetComponent<PlayerBuffHandler>();
         if (buff != null && buff.IsSkill2BuffActive)
         {
@@ -413,11 +424,10 @@ public class Combatant : MonoBehaviour
             Debug.Log("[Skill2] Cameraman crit buff removed after next action.");
         }
 
-        // --- Important: reset suppression BEFORE any possible early return ---
         bool wasSuppressed = _suppressSkillBonusNextHit;
         _suppressSkillBonusNextHit = false;
 
-        // --- Handle minigame damage override ---
+        // MINIGAME OVERRIDE
         if (pendingMinigameDamage > 0)
         {
             currentTarget.health.TakeDamage(pendingMinigameDamage, stats, NewElementType.None);
@@ -425,6 +435,7 @@ public class Combatant : MonoBehaviour
             return;
         }
 
+        // --- Base multiplier ---
         float baseMultiplier = 1f;
         switch (currentAttackType)
         {
@@ -433,26 +444,36 @@ public class Combatant : MonoBehaviour
                     isMultiHit = true;
                 baseMultiplier = 1.0f;
                 break;
-            case AttackType.Skill1: baseMultiplier = 1.2f; break;
-            case AttackType.Skill2: baseMultiplier = 1.5f; break;
+
+            case AttackType.Skill1:
+                baseMultiplier = 1.2f;
+                break;
+
+            case AttackType.Skill2:
+                baseMultiplier = 1.5f;
+                break;
         }
 
+        // Suppression removes bonus multiplier
         if (wasSuppressed &&
             (currentAttackType == AttackType.Skill1 || currentAttackType == AttackType.Skill2))
         {
             baseMultiplier = 1.0f;
         }
 
-        int damage = Mathf.RoundToInt(stats.atkDmg * baseMultiplier);
+        // === Actual Damage Calculation ===
+        int fullDamage = CalculateDamage(currentTarget, baseMultiplier);
+        int damageToApply = fullDamage;
 
+        // === Multi-hit system ===
         if (isMultiHit)
         {
-            int perHit = damage / multiHitTotal;
+            int perHit = fullDamage / multiHitTotal;
 
             if (multiHitIndex == multiHitTotal - 1)
-                perHit = damage - perHit * (multiHitTotal - 1);
+                perHit = fullDamage - perHit * (multiHitTotal - 1);
 
-            damage = perHit;
+            damageToApply = perHit;
 
             multiHitIndex++;
 
@@ -463,7 +484,7 @@ public class Combatant : MonoBehaviour
             }
         }
 
-        // boss attack
+        // === BOSS attacks all ===
         if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
         {
             Debug.Log("[BOSS] Attacks ALL player characters!");
@@ -473,14 +494,16 @@ public class Combatant : MonoBehaviour
             {
                 if (c.isPlayerTeam && c.IsAlive)
                 {
-                    c.health.TakeDamage(damage, stats, NewElementType.None);
+                    c.health.TakeDamage(damageToApply, stats, NewElementType.None);
                 }
             }
             return;
         }
 
-        currentTarget.health.TakeDamage(damage, stats, NewElementType.None);
+        // === Normal damage ===
+        currentTarget.health.TakeDamage(damageToApply, stats, NewElementType.None);
     }
+
 
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
     {
@@ -758,7 +781,7 @@ public class Combatant : MonoBehaviour
             var buffHandler = ally.GetComponent<PlayerBuffHandler>();
             if (buffHandler != null)
             {
-                buffHandler.ApplyAttackBuff(buff, 3f);
+                buffHandler.ApplyAttackBuff(buff, 999f);
             }
         }
 
@@ -766,32 +789,40 @@ public class Combatant : MonoBehaviour
     }
 
 
-    //private int CalculateDamage(Combatant target, float multiplierOverride = 1f)
-    //{
-    //    if (target == null || target.health == null) return 0;
+    private int CalculateDamage(Combatant target, float multiplierOverride)
+    {
+        if (target == null || target.health == null)
+            return 0;
 
-    //    float attackPower = stats ? stats.atkDmg : 0f;
-    //    float defensePower = target.stats ? target.stats.attackreduction : 0f;
+        float attackPower = stats ? stats.atkDmg : 0f;
+        float defensePower = target.stats ? target.stats.attackreduction : 0f;
 
-    //    // Apply buffs (if you have BuffData, keep this logic)
-    //    PlayerBuffHandler attackerBuffHandler = GetComponent<PlayerBuffHandler>();
-    //    PlayerBuffHandler targetBuffHandler = target.GetComponent<PlayerBuffHandler>();
+        // === BuffData Attack Buff ===
+        PlayerBuffHandler attackerBH = GetComponent<PlayerBuffHandler>();
+        if (BuffData.instance != null && BuffData.instance.hasAttackBuff)
+        {
+            if (attackerBH != null &&
+                BuffData.instance.attackTarget == attackerBH.levelApplier.runtimeStats)
+            {
+                attackPower += BuffData.instance.latestAttackBuff;
+            }
+        }
 
-    //    if (BuffData.instance != null)
-    //    {
-    //        if (BuffData.instance.hasAttackBuff && attackerBuffHandler != null &&
-    //            BuffData.instance.attackTarget == attackerBuffHandler.levelApplier.runtimeStats)
-    //            attackPower += BuffData.instance.latestAttackBuff;
+        // === BuffData Defense Buff (applied to target) ===
+        PlayerBuffHandler targetBH = target.GetComponent<PlayerBuffHandler>();
+        if (BuffData.instance != null && BuffData.instance.hasDefenseBuff)
+        {
+            if (targetBH != null &&
+                BuffData.instance.defenseTarget == targetBH.levelApplier.runtimeStats)
+            {
+                defensePower += BuffData.instance.latestDefenseBuff;
+            }
+        }
 
-    //        if (BuffData.instance.hasDefenseBuff && targetBuffHandler != null &&
-    //            BuffData.instance.defenseTarget == targetBuffHandler.levelApplier.runtimeStats)
-    //            defensePower += BuffData.instance.latestDefenseBuff;
-    //    }
+        float rawDamage = (attackPower * multiplierOverride) - defensePower;
+        return Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
+    }
 
-    //    float rawDamage = (attackPower * multiplierOverride) - defensePower;
-    //    int finalDamage = Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
-    //    return finalDamage;
-    //}
 
     public void Hitstop(float duration)
     {
