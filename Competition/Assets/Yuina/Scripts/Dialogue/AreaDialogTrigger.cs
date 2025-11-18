@@ -12,6 +12,8 @@ public class AreaDialogTrigger : MonoBehaviour, IDataPersistence
 
     [SerializeField]private GameObject MiniMapUi;
 
+    private bool hasExitArea = false;
+
     private void Update()
     {
         
@@ -28,18 +30,26 @@ public class AreaDialogTrigger : MonoBehaviour, IDataPersistence
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = true;
-        if(MiniMapUi != null)
-        MiniMapUi.gameObject.SetActive(false);
+        if (!hasExitArea)
+        {
+            if (other.CompareTag("Player"))
+                playerInRange = true;
+            if (MiniMapUi != null)
+                MiniMapUi.gameObject.SetActive(false);
+            hasExitArea = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = false;
-        if(MiniMapUi != null)
-        MiniMapUi.gameObject.SetActive(true);
+        if (hasExitArea)
+        {
+            if (other.CompareTag("Player"))
+                playerInRange = false;
+            if(MiniMapUi != null)
+            MiniMapUi.gameObject.SetActive(true);
+
+        }
     }
 
     public void LoadData(GameData data)
