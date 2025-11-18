@@ -14,6 +14,7 @@ public class AreaDialogTrigger : MonoBehaviour
 
     private void Update()
     {
+        
         if(playerInRange && Dialogiscomplete == false)
         {
             if (!DialogueManager.Instance.IsDialogueActive)
@@ -22,12 +23,14 @@ public class AreaDialogTrigger : MonoBehaviour
                 Dialogiscomplete = true;
             }
         }
+
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
             playerInRange = true;
+        if(MiniMapUi != null)
         MiniMapUi.gameObject.SetActive(false);
     }
 
@@ -35,6 +38,7 @@ public class AreaDialogTrigger : MonoBehaviour
     {
         if (other.CompareTag("Player"))
             playerInRange = false;
+        if(MiniMapUi != null)
         MiniMapUi.gameObject.SetActive(true);
     }
 }

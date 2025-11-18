@@ -58,6 +58,10 @@ public class CraftingUIManager : MonoBehaviour
     {
         if (craftingSystem == null)
             craftingSystem = FindObjectOfType<Crafting>();
+
+        if (ShopManager.Instance != null && ShopManager.Instance.IsShopActive)
+            return; // Shop open => crafting disabled
+
         // Toggle UI with C key
         if (Input.GetKeyDown(KeyCode.I))
         {
