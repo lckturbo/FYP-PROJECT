@@ -1,7 +1,5 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.PlayerLoop;
 
 public class PuzzleTrigger : MonoBehaviour
 {
@@ -9,6 +7,8 @@ public class PuzzleTrigger : MonoBehaviour
 
     private bool playerInRange = false;
     private NewPlayerMovement playerMovement;
+
+    public Vector3 SpawnPosition => transform.position;  // << Add this
 
     private void Start()
     {
@@ -19,15 +19,13 @@ public class PuzzleTrigger : MonoBehaviour
     {
         if (!playerInRange) return;
         playerMovement = FindObjectOfType<NewPlayerMovement>();
-
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
-            // STOP player movement
             if (playerMovement != null)
                 playerMovement.enabled = false;
 
-            // Start the puzzle
-            puzzleManager.StartSequence();
+            // Pass this trigger to manager
+            puzzleManager.StartSequenceFromTrigger(this);
         }
     }
 

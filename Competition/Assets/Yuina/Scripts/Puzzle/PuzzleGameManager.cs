@@ -14,10 +14,13 @@ public class PuzzleGameManager : MonoBehaviour
 
     private int currentIndex = -1;
     private GameObject currentStageInstance;
+    private PuzzleTrigger activeTrigger; // << store source trigger
+
 
     // Start Puzzle (Called from an external trigger)
-    public void StartSequence()
+    public void StartSequenceFromTrigger(PuzzleTrigger trigger)
     {
+        activeTrigger = trigger;
         currentIndex = -1;
         LoadNextStage();
     }
@@ -26,41 +29,34 @@ public class PuzzleGameManager : MonoBehaviour
     {
         currentIndex++;
 
-        // Clear the old stage
         if (currentStageInstance != null)
         {
             Destroy(currentStageInstance);
             DestroyArrow();
-
             currentStageInstance = null;
         }
 
-        // When everything is finished, it's over.
         if (currentIndex >= stagePrefabs.Count)
         {
-            Debug.Log("PuzzleGameManager: All stages cleared!");
-
-            // Player movement re-enabled
-            // Restore movement using NewPlayerMovement
             NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
-            if (playerMovement != null)
-                playerMovement.enabled = true;
-
-
+            if (playerMovement != null) playerMovement.enabled = true;
             return;
         }
 
-        // Generate a prefab and attach it to the UI
         GameObject prefab = stagePrefabs[currentIndex];
-        if (prefab == null)
-        {
-            Debug.LogError($"PuzzleGameManager: stagePrefabs[{currentIndex}] is null");
-            return;
-        }
 
         currentStageInstance = Instantiate(prefab, puzzleUI);
 
-        // Search for IcePuzzle and initialize
+        // Spawn at trigger world position
+        if (activeTrigger != null)
+        {
+            Transform stageRoot = currentStageInstance.transform.Find("StageRoot");
+            if (stageRoot != null)
+                stageRoot.position = activeTrigger.SpawnPosition;
+            else
+                currentStageInstance.transform.position = activeTrigger.SpawnPosition;
+        }
+
         IcePuzzle puzzle = currentStageInstance.GetComponentInChildren<IcePuzzle>();
         if (puzzle == null)
         {
@@ -68,17 +64,13 @@ public class PuzzleGameManager : MonoBehaviour
             return;
         }
 
-        // Callback registration upon clearing
         puzzle.OnStageClear = () =>
         {
-            Debug.Log($"Stage {currentIndex} cleared!");
             LoadNextStage();
         };
 
-        // Start
         puzzle.OpenPuzzle();
 
-        // Pass to the input script
         IcePuzzleInput input = GetComponent<IcePuzzleInput>();
         if (input != null)
         {
