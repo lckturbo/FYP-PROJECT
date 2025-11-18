@@ -8,7 +8,9 @@ public class PuzzleTrigger : MonoBehaviour
     private bool playerInRange = false;
     private NewPlayerMovement playerMovement;
 
-    public Vector3 SpawnPosition => transform.position;  // << Add this
+    private bool used = false;  // <<< NEW — single-use flag
+
+    public Vector3 SpawnPosition => transform.position;
 
     private void Start()
     {
@@ -17,6 +19,7 @@ public class PuzzleTrigger : MonoBehaviour
 
     void Update()
     {
+        if (used) return;                // <<< prevents re-use
         if (!playerInRange) return;
         playerMovement = FindObjectOfType<NewPlayerMovement>();
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
@@ -24,14 +27,15 @@ public class PuzzleTrigger : MonoBehaviour
             if (playerMovement != null)
                 playerMovement.enabled = false;
 
-            // Pass this trigger to manager
+            used = true;                // <<< mark as consumed
+
             puzzleManager.StartSequenceFromTrigger(this);
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (!used && other.CompareTag("Player"))
             playerInRange = true;
     }
 

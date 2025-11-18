@@ -16,6 +16,13 @@ public class PuzzleGameManager : MonoBehaviour
     private GameObject currentStageInstance;
     private PuzzleTrigger activeTrigger; // << store source trigger
 
+    public static PuzzleGameManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
 
     // Start Puzzle (Called from an external trigger)
     public void StartSequenceFromTrigger(PuzzleTrigger trigger)
