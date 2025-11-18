@@ -61,7 +61,7 @@ public class Combatant : MonoBehaviour
     [SerializeField] private NewCharacterStats runtimeStats;
 
     // --- Minigame control ---
-   //private bool minigameTriggered = false;
+    //private bool minigameTriggered = false;
     private bool waitingForMinigameResult = false;
     private int pendingMinigameDamage = -1;
 
@@ -431,7 +431,7 @@ public class Combatant : MonoBehaviour
             case AttackType.Basic:
                 if (!BattleManager.instance.IsBossBattle && !isPlayerTeam)
                     isMultiHit = true;
-                baseMultiplier = 1.0f; 
+                baseMultiplier = 1.0f;
                 break;
             case AttackType.Skill1: baseMultiplier = 1.2f; break;
             case AttackType.Skill2: baseMultiplier = 1.5f; break;
@@ -520,14 +520,13 @@ public class Combatant : MonoBehaviour
         finally
         {
             if (disablePhysicsWhileActing) ExitNonColliding();
-            ActionEnded?.Invoke();  
+            ActionEnded?.Invoke();
         }
     }
 
     private Vector3 ApproachPoint(Combatant target)
     {
-        if (!isPlayerTeam && BattleManager.instance.IsBossBattle 
-            || !isPlayerTeam && currentAttackType == AttackType.Skill1 && !BattleManager.instance.IsBossBattle)
+        if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
             return visualRoot ? visualRoot.position : transform.position;
 
         Vector3 a = (visualRoot ? visualRoot.position : transform.position);
@@ -537,6 +536,8 @@ public class Combatant : MonoBehaviour
         if (dir.sqrMagnitude < 0.0001f)
             dir = Vector3.right;
 
+        //if (!isPlayerTeam && currentAttackType == AttackType.Skill1 && !BattleManager.instance.IsBossBattle)
+        //    return b + dir * (approachDistance * 0.8f);
         return b + dir * approachDistance;
     }
 
