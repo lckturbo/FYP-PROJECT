@@ -6,6 +6,9 @@ public class StaticEnemy : EnemyBase
     [SerializeField] private Vector2 startingFacingDir = new Vector2(0, -1);
     private Vector2 originalFacingDir;
 
+    [Header("Battle Dialogue")]
+    public DialogueData attackDialogue;   // <-- assign per enemy in Inspector
+
 
     protected override void Start()
     {

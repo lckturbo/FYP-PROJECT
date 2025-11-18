@@ -178,11 +178,9 @@ public class IcePuzzle : MonoBehaviour
         while (moveQueue.Count > 0 && !reachedGoal)
         {
             Vector2Int dir = moveQueue.Dequeue();
-
-            // The queuedList is for debug display, so delete the top
             if (queuedList.Count > 0) queuedList.RemoveAt(0);
 
-            Debug.Log($"IcePuzzle: Start execution dir={dir} (remaining queue {moveQueue.Count})");
+            Debug.Log($"IcePuzzle: Start execution dir={dir} (remaining {moveQueue.Count})");
             yield return StartCoroutine(SlideCoroutine(dir));
         }
 
@@ -192,16 +190,20 @@ public class IcePuzzle : MonoBehaviour
         {
             Debug.Log("IcePuzzle: Stage clear notification");
             OnStageClear?.Invoke();
-            // It is recommended not to call ClosePuzzle() here, but to leave it to PuzzleGameManager.
         }
         else
         {
-            // Incorrect answer Å® Reset and allow retry
             Debug.Log("IcePuzzle: Incorrect. Reset the stage.");
+
+                   // <<< NEW : Clear arrows when FAIL
+                   if (PuzzleGameManager.Instance != null)
+                PuzzleGameManager.Instance.DestroyArrow();
+
             ResetStageToStart();
             isAcceptingInput = true;
         }
     }
+
 
     // Slide cell by cell in one direction until hitting a wall (with animation)
     private IEnumerator SlideCoroutine(Vector2Int dir)

@@ -1,7 +1,5 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.PlayerLoop;
 
 public class PuzzleTrigger : MonoBehaviour
 {
@@ -10,6 +8,10 @@ public class PuzzleTrigger : MonoBehaviour
     private bool playerInRange = false;
     private NewPlayerMovement playerMovement;
 
+    private bool used = false;  // <<< NEW — single-use flag
+
+    public Vector3 SpawnPosition => transform.position;
+
     private void Start()
     {
         playerMovement = FindObjectOfType<NewPlayerMovement>();
@@ -17,23 +19,23 @@ public class PuzzleTrigger : MonoBehaviour
 
     void Update()
     {
+        if (used) return;                // <<< prevents re-use
         if (!playerInRange) return;
         playerMovement = FindObjectOfType<NewPlayerMovement>();
-
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
-            // STOP player movement
             if (playerMovement != null)
                 playerMovement.enabled = false;
 
-            // Start the puzzle
-            puzzleManager.StartSequence();
+            used = true;                // <<< mark as consumed
+
+            puzzleManager.StartSequenceFromTrigger(this);
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (!used && other.CompareTag("Player"))
             playerInRange = true;
     }
 
