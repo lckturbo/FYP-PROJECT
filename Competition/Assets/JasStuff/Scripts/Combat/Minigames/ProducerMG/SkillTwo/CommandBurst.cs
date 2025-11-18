@@ -49,11 +49,11 @@ public class CommandBurst : BaseMinigame
             { KeyCode.Mouse1, m2Sprite }
         };
 
-        StartCoroutine(Run());
+        //StartCoroutine(Run());
     }
     public override IEnumerator Run()
     {
-        //BattleManager.instance.SetBattlePaused(true);
+        BattleManager.instance.SetBattlePaused(true);
         SetupSkipUI(true);
 
         instructionPanel.SetActive(true);
@@ -89,7 +89,7 @@ public class CommandBurst : BaseMinigame
 
         if (charge >= 0.95f)
             Result = MinigameManager.ResultType.Perfect;
-        else if (charge >= 0.50f)
+        else if (charge >= 0.10f)
             Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
@@ -98,7 +98,7 @@ public class CommandBurst : BaseMinigame
         promptText.text = Result + "!";
         yield return new WaitForSecondsRealtime(1.0f);
 
-        //BattleManager.instance.SetBattlePaused(false);
+        BattleManager.instance.SetBattlePaused(false);
     }
     private IEnumerator PlaySequence()
     {
