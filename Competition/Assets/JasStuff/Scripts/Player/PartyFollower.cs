@@ -147,16 +147,23 @@ public class PartyFollower : MonoBehaviour
 
         if (distanceToWaypoint > stopDistance)
         {
+            //Vector2 rawDir = (targetPathPosition - transform.position).normalized;
+
+            //Vector2 cardinalDir = SnapToCardinal(rawDir);
+
+            //if (distanceToWaypoint <= 0.3f && Vector2.Dot(cardinalDir, lastMoveDirection) < 0)
+            //{
+            //}
+            //else
+            //{
+            //    lastMoveDirection = cardinalDir;
+            //}
+
             Vector2 rawDir = (targetPathPosition - transform.position).normalized;
 
-            Vector2 cardinalDir = SnapToCardinal(rawDir);
-
-            if (distanceToWaypoint <= 0.3f && Vector2.Dot(cardinalDir, lastMoveDirection) < 0)
+            if (rawDir.sqrMagnitude > 0.001f)
             {
-            }
-            else
-            {
-                lastMoveDirection = cardinalDir;
+                lastMoveDirection = SnapToCardinal(rawDir);
             }
 
             float usedSpeed = moveSpeed;
