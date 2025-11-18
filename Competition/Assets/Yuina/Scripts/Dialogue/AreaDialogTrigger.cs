@@ -1,9 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using static GameData;
 
-public class AreaDialogTrigger : MonoBehaviour
+public class AreaDialogTrigger : MonoBehaviour, IDataPersistence
 {
+    [SerializeField] private string id;
     [SerializeField] private DialogueData dialogue;
 
     private bool playerInRange = false;
@@ -40,5 +40,35 @@ public class AreaDialogTrigger : MonoBehaviour
             playerInRange = false;
         if(MiniMapUi != null)
         MiniMapUi.gameObject.SetActive(true);
+    }
+
+    public void LoadData(GameData data)
+    {
+        foreach (var state in data.dialogueTriggerStates)
+        {
+            if (state.id == id)
+            {
+                Dialogiscomplete = state.completed;
+
+                if (Dialogiscomplete)
+                    this.enabled = false;
+
+                return;
+            }
+        }
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        foreach (var state in data.dialogueTriggerStates)
+        {
+            if (state.id == id)
+            {
+                state.completed = Dialogiscomplete;
+                return;
+            }
+        }
+
+        data.dialogueTriggerStates.Add(new DialogueTriggerState(id, Dialogiscomplete));
     }
 }
