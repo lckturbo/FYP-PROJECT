@@ -24,6 +24,9 @@ public class BattleItemButtonHandler : MonoBehaviour
     private NewCharacterStats playerStats;
     private NewHealth playerHealth;
 
+    [Header("Item Panel")]
+    public GameObject itemPanel;
+
     private void Start()
     {
         var playerParty = PlayerParty.instance;
@@ -48,12 +51,18 @@ public class BattleItemButtonHandler : MonoBehaviour
 
     private void OnEnable()
     {
+        TurnEngine engine = FindObjectOfType<TurnEngine>();
+        if (engine != null)
+            engine.OnPlayerTurnStart += HandleTurnStart;
         BattleSystem.OnLeaderSpawned += HandleLeaderSpawned;
         UpdateItemCounts(); // refresh counts when menu opens
     }
 
     private void OnDisable()
     {
+        TurnEngine engine = FindObjectOfType<TurnEngine>();
+        if (engine != null)
+            engine.OnPlayerTurnStart -= HandleTurnStart;
         BattleSystem.OnLeaderSpawned -= HandleLeaderSpawned;
     }
 
@@ -156,5 +165,18 @@ public class BattleItemButtonHandler : MonoBehaviour
         {
             Debug.Log("No defense buff item available!");
         }
+    }
+    private void HandleTurnStart(Combatant unit)
+    {
+        if (unit != null && unit.isPlayerTeam && unit.isLeader)
+            ShowItemUI(true);
+        else
+            ShowItemUI(false);
+    }
+
+    public void ShowItemUI(bool show)
+    {
+        if (itemPanel != null)
+            itemPanel.SetActive(show);
     }
 }
