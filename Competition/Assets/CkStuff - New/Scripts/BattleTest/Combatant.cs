@@ -287,6 +287,15 @@ public class Combatant : MonoBehaviour
                 }
                 break;
             }
+            else
+            {
+                var handler = ally.GetComponent<PlayerBuffHandler>();
+                if (handler != null)
+                {
+                    handler.RemoveAttackBuff();
+                    Debug.LogWarning($"Buff removed from {ally.name}");
+                }
+            }
             if (ally == this) continue;
             if (!ally.IsAlive) continue;
             if (ally.isPlayerTeam != this.isPlayerTeam) continue;

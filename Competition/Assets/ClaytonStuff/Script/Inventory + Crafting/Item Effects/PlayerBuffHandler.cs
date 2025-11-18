@@ -87,11 +87,13 @@ public class PlayerBuffHandler : MonoBehaviour
         if (runtimeStats != null)
             runtimeStats.atkDmg -= currentAttackBuff;
 
+        // remove only ONE buff belonging to this ally
+        BuffData.instance?.RemoveBuff(runtimeStats, BuffData.BuffEntry.BuffType.Attack);
+
         currentAttackBuff = 0;
-        BuffData.instance?.ClearAttackBuff();
         UpdateBuffVFX();
-        Debug.Log("Attack buff expired.");
     }
+
 
     private void RemoveDefenseBuff()
     {
@@ -99,7 +101,8 @@ public class PlayerBuffHandler : MonoBehaviour
             runtimeStats.attackreduction -= currentDefenseBuff;
 
         currentDefenseBuff = 0;
-        BuffData.instance?.ClearDefenseBuff();
+        BuffData.instance?.RemoveBuff(runtimeStats, BuffData.BuffEntry.BuffType.Defense);
+
         UpdateBuffVFX();
         Debug.Log("Defense buff expired.");
     }
@@ -143,13 +146,13 @@ public class PlayerBuffHandler : MonoBehaviour
     }
 
 
-    private void UpdateBuffVFX()
+    public void UpdateBuffVFX()
     {
         if (attackBuffVFX != null)
-            attackBuffVFX.SetActive(BuffData.instance.hasAttackBuff);
+            attackBuffVFX.SetActive(currentAttackBuff > 0);
 
         if (defenseBuffVFX != null)
-            defenseBuffVFX.SetActive(BuffData.instance.hasDefenseBuff);
+            defenseBuffVFX.SetActive(currentDefenseBuff > 0);
 
         if (Skill2BuffEffect != null)
             Skill2BuffEffect.SetActive(isSkill2BuffActive);
