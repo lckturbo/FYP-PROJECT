@@ -26,14 +26,28 @@ MonoBehaviour:
   uiColor: {r: 1, g: 0.8039216, b: 0.21176471, a: 1}
   stats: {fileID: 11400000, guid: 809ab4e15286b4b40813635ef86e5215, type: 2}
   playerPrefab: {fileID: 3200289770863024659, guid: 6e17d00d752e7bf49b335da7f5ce5e5a, type: 3}
-  basicAtk: {fileID: 1556820714, guid: 826386d3264e3f74e9fea1fe2f87e26e, type: 3}
-  skill1: {fileID: -469003305, guid: 826386d3264e3f74e9fea1fe2f87e26e, type: 3}
-  skill2: {fileID: -1889327969, guid: 826386d3264e3f74e9fea1fe2f87e26e, type: 3}
-  basicSkillName: Mic Bash
-  basicDescription: Strike the enemy with your boom microphone, dealing light damage.
-  skill1Name: Divine Light
-  skill1Description: Fire a full-power flash burst, blinding the target with overwhelming
-    light. Deals heavy damage.
-  skill2Name: Focus Boost
-  skill2Description: "Sharpen your senses, increasing Crit Rate by 100% and immediately
-    gaining an extra turn. Also refreshes Skill 1\u2019s cooldown"
+  basicAtk: {fileID: 1762894958, guid: 74e55e2859451c0468a9d894db0e0770, type: 3}
+  skill1: {fileID: 1144395821, guid: 74e55e2859451c0468a9d894db0e0770, type: 3}
+  skill2: {fileID: -906066027, guid: 74e55e2859451c0468a9d894db0e0770, type: 3}
+  basicSkillName: Mic Bash (Light Element)
+  basicDescription: 'Type: Light Damage (Single Target)
+
+
+    Description: Strike
+    the enemy with your boom mic, dealing slight Light damage.'
+  skill1Name: Divine Light (Light Element)
+  skill1Description: 'Type: Heavy Light Damage (Single Target)
+
+
+    Description:
+    Fire a full-power flash burst, blinding the target with overwhelming light.
+
+    Deals
+    heavy Light damage.'
+  skill2Name: Focus Boost (Self Buff)
+  skill2Description: 'Type: Buff / Turn Manipulation (Self Target)
+
+
+    Description:
+    Sharpen your senses, increasing Crit Rate by 100%, refreshing Skill 1, and immediately
+    granting an extra turn.'

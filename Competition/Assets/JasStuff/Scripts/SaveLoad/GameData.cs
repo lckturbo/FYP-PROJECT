@@ -69,12 +69,30 @@ public class GameData
         public string id;
         public bool isOpen;
     }
-
     [System.Serializable]
     public class MirrorSaveEntry
     {
         public string id;
         public float rotation;
+    }
+    [System.Serializable]
+    public class DialogueTriggerState
+    {
+        public string id;
+        public bool completed;
+
+        public DialogueTriggerState(string id, bool completed)
+        {
+            this.id = id;
+            this.completed = completed;
+        }
+    }
+
+    [System.Serializable]
+    public class EnemyPositionData
+    {
+        public string enemyID;
+        public float x, y;
     }
 
     public bool hasSavedGame;
@@ -131,6 +149,9 @@ public class GameData
     // beams
     public List<MirrorSaveEntry> mirrors;
     public bool beamReceiverSolved;
+
+    public List<DialogueTriggerState> dialogueTriggerStates;
+    public List<EnemyPositionData> enemyPositions;
 
     [System.Serializable]
     public class InventoryItemData
@@ -214,5 +235,8 @@ public class GameData
         savedPuzzles = new List<PuzzleSaveEntry>();
         hasSpawnedStartingItem = false;
         clearedFogIds = new List<string>();
+
+        dialogueTriggerStates = new List<DialogueTriggerState>();
+        enemyPositions = new List<EnemyPositionData>();
     }
 }

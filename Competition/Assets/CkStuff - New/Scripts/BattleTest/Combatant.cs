@@ -45,7 +45,7 @@ public class Combatant : MonoBehaviour
     public void ClearSkillBonusSuppression() { _suppressSkillBonusNextHit = false; }
 
 
-    // --- Physics we’ll toggle while lunging ---
+    // --- Physics weï¿½ll toggle while lunging ---
     [Header("Collision Control While Acting")]
     [SerializeField] private bool disablePhysicsWhileActing = true;
 
