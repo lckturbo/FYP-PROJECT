@@ -13,6 +13,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
     private Animator animator;
     private PlayerInput playerInput;
     private InputAction moveAction;
+    private PlayerAttack playerAttack;
 
     private Vector2 inputRaw;
     public Vector2 moveDir;
@@ -27,6 +28,7 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
+        playerAttack = GetComponent<PlayerAttack>();   // <-- Cache once
 
         rb.gravityScale = 0f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -63,13 +65,14 @@ public class NewPlayerMovement : MonoBehaviour, IDataPersistence
             return;
         }
 
-        if (GetComponent<PlayerAttack>().IsAttacking)
+        if (playerAttack != null && playerAttack.IsAttacking)
         {
             moveDir = Vector2.zero;
             animator.SetBool("moving", false);
             return;
         }
-        if (GetComponent<PlayerAttack>().IsAttacking)
+
+        if (playerAttack != null && playerAttack.IsAttacking)
         {
             moveDir = Vector2.zero;
             animator.SetBool("moving", false);

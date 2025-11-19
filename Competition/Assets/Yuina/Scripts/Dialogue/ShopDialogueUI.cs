@@ -26,9 +26,18 @@ public class ShopDialogueUI : MonoBehaviour
     }
     private void Update()
     {
-        playerMovement = FindObjectOfType<NewPlayerMovement>();
-        if (playerMovement != null)
-            playerInput = playerMovement.GetComponent<PlayerInput>();
+        // ---- GET REAL PLAYER ----
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObj == null)
+        {
+            Debug.LogError("[ShopManager] No Player FOUND with tag 'Player'.");
+            return;
+        }
+
+        // ---- ASSIGN ALL PLAYER COMPONENTS ----
+        playerMovement = playerObj.GetComponent<NewPlayerMovement>();
+        playerInput = playerObj.GetComponent<PlayerInput>();
     }
 
     public void Show()

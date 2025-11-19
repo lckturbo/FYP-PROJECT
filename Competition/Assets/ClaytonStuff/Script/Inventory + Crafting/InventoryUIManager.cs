@@ -31,7 +31,9 @@ public class InventoryUIManager : MonoBehaviour
     void Start()
     {
         inventoryManager = FindObjectOfType<InventoryManager>();
-        playerMovement = FindObjectOfType<NewPlayerMovement>();
+        playerMovement = GameObject.FindGameObjectWithTag("Player")
+            .GetComponent<NewPlayerMovement>();
+
 
         // Create UI slots (6 main, 30 sub)
         for (int i = 0; i < 6; i++)
@@ -97,7 +99,9 @@ public class InventoryUIManager : MonoBehaviour
         // --- Input Handling ---
         if (Input.GetKeyDown(KeyCode.I))
         {
-            playerMovement = FindObjectOfType<NewPlayerMovement>();
+            playerMovement = GameObject.FindGameObjectWithTag("Player")
+                .GetComponent<NewPlayerMovement>();
+
             if (UIManager.instance != null && UIManager.instance.IsPaused()) return;
             ToggleSubInventory();
         }
