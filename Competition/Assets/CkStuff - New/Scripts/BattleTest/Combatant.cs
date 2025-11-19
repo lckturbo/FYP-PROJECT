@@ -133,7 +133,9 @@ public class Combatant : MonoBehaviour
 
         stunTurnsLeft--;
         if (stunTurnsLeft <= 0)
+        {
             IsStunned = false;
+        }
     }
 
     public void OnTurnStarted()
@@ -289,7 +291,6 @@ public class Combatant : MonoBehaviour
         }
 
         int attacks = 0;
-        int active = 0;
         List<Coroutine> runningCoroutines = new List<Coroutine>();
 
         foreach (var ally in allCombatants)

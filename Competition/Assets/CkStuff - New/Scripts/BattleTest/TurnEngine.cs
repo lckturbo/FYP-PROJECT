@@ -14,6 +14,7 @@ public class TurnEngine : MonoBehaviour
 
     [SerializeField] private TargetSelector targetSelector;
     [SerializeField] private TurnIndicator turnIndicator;
+    [SerializeField] private StunIndicator stunIndicator;
 
     private bool _waitingForPlayerDecision;
     private Combatant _currPlayerUnit;
@@ -88,8 +89,8 @@ public class TurnEngine : MonoBehaviour
 
         targetSelector?.Disable();
 
-        if (turnIndicator != null)
-            turnIndicator.HideArrow();
+        if (turnIndicator != null) turnIndicator.HideArrow();
+        if (stunIndicator != null) stunIndicator.HideStun();
 
         OnBattleEnd?.Invoke(playerWon);
     }
@@ -105,7 +106,7 @@ public class TurnEngine : MonoBehaviour
         //    return;
         //}
 
-        Time.timeScale = BattleSpeed;
+        //Time.timeScale = BattleSpeed;
 
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
@@ -147,8 +148,7 @@ public class TurnEngine : MonoBehaviour
 
                 u.OnTurnStarted();
 
-                if (turnIndicator != null)
-                    turnIndicator.ShowArrow(u.transform);
+                if (turnIndicator != null) turnIndicator.ShowArrow(u.transform);
 
                 Combatant predictedNext = PredictNextFromIndex(i);
 
