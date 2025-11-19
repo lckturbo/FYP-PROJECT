@@ -63,7 +63,7 @@ public class ShopManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        else { Destroy(gameObject); return; }
 
         if (shopUI != null)
             shopUI.SetActive(false);
@@ -71,21 +71,33 @@ public class ShopManager : MonoBehaviour
         if (purchasePanel != null)
             purchasePanel.gameObject.SetActive(false);
 
-        // Get PlayerInput & Inventory
-        playerMovement = FindObjectOfType<NewPlayerMovement>();
-        if (playerMovement != null)
-        {
-            playerInput = playerMovement.GetComponent<PlayerInput>();
-            playerInventory = playerMovement.GetComponent<Inventory>(); //  attach Inventory to player
-            inventoryUIManager = playerMovement.GetComponent<InventoryUIManager>();
+        // ---- GET REAL PLAYER ----
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
 
-            if (playerInput != null)
-                cancelAction = playerInput.actions["Interaction"];
+        if (playerObj == null)
+        {
+            Debug.LogError("[ShopManager] No Player FOUND with tag 'Player'.");
+            return;
         }
 
-        AssignInventory();
+        // ---- ASSIGN ALL PLAYER COMPONENTS ----
+        playerMovement = playerObj.GetComponent<NewPlayerMovement>();
+        playerInput = playerObj.GetComponent<PlayerInput>();
 
+        // ---- LOG ERRORS IF MISSING ----
+        if (playerMovement == null)
+            Debug.LogError("[ShopManager] PlayerMovement missing on Player!");
+
+        if (playerInput == null)
+            Debug.LogError("[ShopManager] PlayerInput missing on Player!");
+
+        // ---- BIND INPUT ACTION SAFELY ----
+        if (playerInput != null)
+            cancelAction = playerInput.actions["Interaction"];
+
+        AssignInventory();
     }
+
 
     private void Start()
     {
@@ -96,12 +108,23 @@ public class ShopManager : MonoBehaviour
 
     private void Update()
     {
+        // ---- GET REAL PLAYER ----
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObj == null)
+        {
+            Debug.LogError("[ShopManager] No Player FOUND with tag 'Player'.");
+            return;
+        }
+
+        // ---- ASSIGN ALL PLAYER COMPONENTS ----
+        playerMovement = playerObj.GetComponent<NewPlayerMovement>();
+        playerInput = playerObj.GetComponent<PlayerInput>();
+
+        AssignInventory();
 
         if (!isOpen) return; // only run update logic when shop is open
 
-        playerMovement = FindObjectOfType<NewPlayerMovement>();
-        if (playerMovement != null)
-            playerInput = playerMovement.GetComponent<PlayerInput>();
 
         if (cancelAction != null && cancelAction.WasPressedThisFrame())
         {

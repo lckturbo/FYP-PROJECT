@@ -8,10 +8,16 @@ public class BattleParodyEffect : MonoBehaviour
     private float originalSize;
     private Coroutine activeCoroutine;
 
+    private Vector3 shakeOrigin;
+
     [Header("ZoomCrit Settings")]
     [SerializeField] private float zoomSize = 2.5f;
     [SerializeField] private float zoomDuration = 0.3f;
-    //[SerializeField] private float holdDuration = 1f;
+
+    [Header("Screen Shake Settings")]
+    [SerializeField] private float shakeDuration = 0.2f;
+    [SerializeField] private float shakeMagnitude = 0.15f;
+    [SerializeField] private float shakeFrequency = 25f;
 
     private void Awake()
     {
@@ -34,6 +40,14 @@ public class BattleParodyEffect : MonoBehaviour
         if (activeCoroutine != null) StopCoroutine(activeCoroutine);
         activeCoroutine = StartCoroutine(ZoomOutRoutine());
     }
+    public void ShakeScreen()
+    {
+        if (activeCoroutine != null) StopCoroutine(activeCoroutine);
+        shakeOrigin = cam.transform.position;
+
+        activeCoroutine = StartCoroutine(ScreenShakeRoutine());
+    }
+
     private IEnumerator ZoomInRoutine(Combatant attacker)
     {
         Vector3 focusPoint = attacker.transform.position + new Vector3(0, 0f, -10f);
@@ -66,6 +80,23 @@ public class BattleParodyEffect : MonoBehaviour
 
         cam.orthographicSize = originalSize;
         cam.transform.position = originalPos;
+    }
+    private IEnumerator ScreenShakeRoutine()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < shakeDuration)
+        {
+            float offsetX = (Mathf.PerlinNoise(Time.time * shakeFrequency, 0f) - 0.5f) * 2f * shakeMagnitude;
+            float offsetY = (Mathf.PerlinNoise(0f, Time.time * shakeFrequency) - 0.5f) * 2f * shakeMagnitude;
+
+            cam.transform.position = shakeOrigin + new Vector3(offsetX, offsetY, 0f);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        cam.transform.position = shakeOrigin;
     }
 
 }

@@ -105,6 +105,8 @@ public class TurnEngine : MonoBehaviour
         //    return;
         //}
 
+        Time.timeScale = BattleSpeed;
+
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
         {
@@ -134,6 +136,15 @@ public class TurnEngine : MonoBehaviour
             if (u.atb >= 1f)
             {
                 u.atb = 0f;
+
+                if (u.IsStunned)
+                {
+                    u.TickStun();
+                    Debug.Log($"{u.name} is stunned and skips the turn!");
+                    _nextIndex = (i + 1) % count;
+                    return;
+                }
+
                 u.OnTurnStarted();
 
                 if (turnIndicator != null)

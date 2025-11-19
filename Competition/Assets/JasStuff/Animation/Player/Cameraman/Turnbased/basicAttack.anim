@@ -138,6 +138,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 1
     messageOptions: 0
+  - time: 0.6666667
+    functionName: OnZoomIn
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: e3c70142dd108464b989f540f1311f01, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.1111112
     functionName: Hitstop
     data: 
@@ -145,8 +152,22 @@ AnimationClip:
     floatParameter: 0.3
     intParameter: 0
     messageOptions: 0
+  - time: 1.3333334
+    functionName: OnCamShake
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: e3c70142dd108464b989f540f1311f01, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.4444444
     functionName: DealDamage
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: e3c70142dd108464b989f540f1311f01, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1.6666666
+    functionName: OnZoomOut
     data: 
     objectReferenceParameter: {fileID: 11500000, guid: e3c70142dd108464b989f540f1311f01, type: 3}
     floatParameter: 0

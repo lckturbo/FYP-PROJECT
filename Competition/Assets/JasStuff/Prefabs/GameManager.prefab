@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 8335944949039016364}
   - component: {fileID: 467317816805142872}
   - component: {fileID: 4066129514252676507}
+  - component: {fileID: 5124740878337922744}
+  - component: {fileID: 8351228248855633065}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -124,67 +126,56 @@ MonoBehaviour:
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: 3a13251797f0ab84d8b4cf073084c2b1, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: e76382a825efe3145bf2ed95d066a096, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: fd1292787d1126a4bb3895568c80abde, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: 2c7a1969716106346a64052c23762561, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: 8097b70a35e0daf4a8562bdd9a017474, type: 3}
     volume: 1
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: 2e0ddb6285647244db68948923fa19f2, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: ca6301dff6a6c1e43a72127ad2fc72cc, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: e2adca0f468ec4740a3a140931da89c0, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: 7b360f7456857014c88679db6332e8d8, type: 3}
     volume: 0.05
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   - clip: {fileID: 8300000, guid: 34ab2ae4a66e89f4ca6dfb099ec0861f, type: 3}
     volume: 1
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-    audioSource: {fileID: 0}
   audioMixer: {fileID: 24100000, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
 --- !u!114 &2743626251221848417
 MonoBehaviour:
@@ -250,5 +241,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c794d27807b43e48b4f8791b845ee47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5124740878337922744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2040309138170306554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70615dd1629980143a245c76847377b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8351228248855633065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2040309138170306554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b32b9ed1ecb5ce489a9e8d43b7c80d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

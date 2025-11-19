@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -56,10 +57,26 @@ public class Arrow : MonoBehaviour
                 if (stats != null && stats.type == EnemyStats.EnemyTypes.MiniBoss)
                 {
                     Debug.Log("Cannot attack boss directly.");
+                    gameObject.SetActive(false);
                     return;
                 }
 
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
+
+                // Check if the enemy has a battle-start dialogue
+                if (enemy is StaticEnemy staticEnemy && staticEnemy.attackDialogue != null)
+                {
+                    // Play dialogue first
+                    DialogueManager.Instance.StartDialogue(staticEnemy.attackDialogue);
+
+                    // Continue to battle AFTER dialogue finishes
+                    StartCoroutine(StartBattleAfterDialogueArrow(party));
+
+                    gameObject.SetActive(false);
+                    return;
+                }
+
+                // No dialogue ? start battle immediately
                 if (party != null)
                 {
                     BattleManager.instance.HandleBattleTransition(party);
@@ -67,22 +84,36 @@ public class Arrow : MonoBehaviour
                 }
             }
 
-
             gameObject.SetActive(false);
             return;
         }
+
 
         // Hit Breakable Object
         BreakableObject breakable = collision.GetComponent<BreakableObject>();
         if (breakable != null)
         {
-            Debug.Log($"Arrow hit breakable object: {collision.name}");
             breakable.TakeHit();
             gameObject.SetActive(false);
             return;
         }
 
-        // Optional: stop arrow on any other collision
+        // Other collisions ? disable arrow
         gameObject.SetActive(false);
     }
+
+    private IEnumerator StartBattleAfterDialogueArrow(EnemyParty party)
+    {
+        // Wait until all dialogue text is finished
+        while (DialogueManager.Instance.IsDialogueActive)
+            yield return null;
+
+        if (party != null)
+        {
+            BattleManager.instance.HandleBattleTransition(party);
+            BattleManager.instance.SetBattleMode(true);
+        }
+    }
+
+
 }

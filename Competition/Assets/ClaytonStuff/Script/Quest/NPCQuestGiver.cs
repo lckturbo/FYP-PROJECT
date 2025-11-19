@@ -65,10 +65,15 @@ public class NPCQuestGiver : MonoBehaviour
             // ?? If quest is already active, don't start it again
             if (activeQuest == null)
             {
-                DialogueManager.Instance.StartDialogue(stage.startDialogue);
-                activeQuest = QuestManager.Instance.StartQuest(stage.questData);
-                activeQuest.OnQuestCompleted += HandleQuestCompleted;
+                DialogueManager.Instance.StartDialogue(stage.startDialogue, () =>
+                {
+                    activeQuest = QuestManager.Instance.StartQuest(stage.questData);
+                    activeQuest.OnQuestCompleted += HandleQuestCompleted;
+
+                    Debug.Log($"Quest '{stage.questData.questName}' started AFTER dialogue.");
+                });
             }
+
             else if (!activeQuest.isCompleted)
             {
                 if (stage.inProgressDialogue != null)
