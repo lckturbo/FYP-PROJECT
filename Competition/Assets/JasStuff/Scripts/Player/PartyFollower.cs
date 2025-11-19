@@ -19,7 +19,7 @@ public class PartyFollower : MonoBehaviour
 
     private Queue<Vector3> pathQueue = new Queue<Vector3>();
     private Vector3 targetPathPosition;
-    private float recordDistance = 0.05f;
+    private float recordDistance = 0.1f;
 
     private NewPlayerMovement playerMovement; // reference to player's movement
 
