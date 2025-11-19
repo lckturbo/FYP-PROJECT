@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -86,10 +87,9 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        GameObject obj = new GameObject($"SFX_{clipName}");
-        obj.transform.position = position;
+        AudioSource src = AudioPool.instance.GetSource();
 
-        AudioSource src = obj.AddComponent<AudioSource>();
+        src.transform.position = position;
         src.clip = sound.clip;
         src.volume = sound.volume * volume;
         src.pitch = sound.pitch;
@@ -99,8 +99,15 @@ public class AudioManager : MonoBehaviour
 
         src.Play();
 
-        Destroy(obj, sound.clip.length / Mathf.Abs(sound.pitch));
+        StartCoroutine(ReturnToPoolAfter(src, sound.clip.length / Mathf.Abs(sound.pitch)));
     }
+
+    private IEnumerator ReturnToPoolAfter(AudioSource src, float time)
+    {
+        yield return new WaitForSeconds(time);
+        AudioPool.instance.ReturnSource(src);
+    }
+
 
     public void PlayLoopingSFXAtObject(string clipName, GameObject target, float volume = 1f)
     {
