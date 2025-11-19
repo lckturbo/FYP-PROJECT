@@ -11407,7 +11407,6 @@ GameObject:
   - component: {fileID: 1055889863}
   - component: {fileID: 1055889867}
   - component: {fileID: 1055889866}
-  - component: {fileID: 1055889865}
   - component: {fileID: 1055889864}
   m_Layer: 5
   m_Name: Canvas
@@ -11450,23 +11449,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   battleSystem: {fileID: 579761202}
   timeText: {fileID: 1583830723}
---- !u!114 &1055889865
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1055889862}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &1055889866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22162,6 +22144,7 @@ MonoBehaviour:
   choiceButtonB: {fileID: 1615096336}
   choiceAText: {fileID: 1098987837}
   choiceBText: {fileID: 1581180094}
+  skipButton: {fileID: 0}
 --- !u!1 &1868421387
 GameObject:
   m_ObjectHideFlags: 0
