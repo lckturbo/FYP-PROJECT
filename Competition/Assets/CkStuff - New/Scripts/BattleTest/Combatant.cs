@@ -87,7 +87,7 @@ public class Combatant : MonoBehaviour
     // --- Approach / movement settings ---
     [Header("Approach")]
     [SerializeField] private Transform visualRoot;
-    [SerializeField] private float approachDistance = 1.0f;
+    [SerializeField] private float approachDistance = 1.5f;
     [SerializeField] private float goSpeed = 12f;
     [SerializeField] private float backSpeed = 8f;
     [SerializeField] private float hopArcHeight = 0.15f;
@@ -413,6 +413,11 @@ public class Combatant : MonoBehaviour
     {
         if (parodyEffect != null)
             parodyEffect.ZoomOut();
+    }
+    public void OnCamShake()
+    {
+        if (parodyEffect != null)
+            parodyEffect.ShakeScreen();
     }
 
     public bool isMultiHit = false;
