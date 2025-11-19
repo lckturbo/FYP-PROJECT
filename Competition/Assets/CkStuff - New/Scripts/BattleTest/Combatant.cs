@@ -45,7 +45,7 @@ public class Combatant : MonoBehaviour
     public void ClearSkillBonusSuppression() { _suppressSkillBonusNextHit = false; }
 
 
-    // --- Physics we�ll toggle while lunging ---
+    // --- Physics well toggle while lunging ---
     [Header("Collision Control While Acting")]
     [SerializeField] private bool disablePhysicsWhileActing = true;
 
@@ -117,11 +117,29 @@ public class Combatant : MonoBehaviour
     public int Skill1Remaining => Mathf.Max(0, _skill1CD);
     public int Skill2Remaining => Mathf.Max(0, _skill2CD);
 
+    // STUN SYSTEM //
+    public bool IsStunned { get; private set; }
+    private int stunTurnsLeft = 0;
+
+    public void ApplyStun(int turns)
+    {
+        stunTurnsLeft = turns;
+        IsStunned = true;
+    }
+
+    public void TickStun()
+    {
+        if (!IsStunned) return;
+
+        stunTurnsLeft--;
+        if (stunTurnsLeft <= 0)
+            IsStunned = false;
+    }
+
     public void OnTurnStarted()
     {
         if (_skill1CD > 0) _skill1CD--;
         if (_skill2CD > 0) _skill2CD--;
-
         turns++;
         Debug.Log("turns: " + turns);
     }
@@ -260,7 +278,6 @@ public class Combatant : MonoBehaviour
         if (anim) anim.SetTrigger("skill1");
         yield return WaitForAnimationRobust(anim, skill1StateName);
 
-        // Collect living enemies
         var allCombatants = FindObjectsOfType<Combatant>();
         List<Combatant> livingEnemies = new List<Combatant>();
 
@@ -272,9 +289,9 @@ public class Combatant : MonoBehaviour
         }
 
         int attacks = 0;
+        int active = 0;
         List<Coroutine> runningCoroutines = new List<Coroutine>();
 
-        // === ALLY ATTACK LOOP ===
         foreach (var ally in allCombatants)
         {
             if (attacks >= 2)
@@ -312,41 +329,17 @@ public class Combatant : MonoBehaviour
 
                 // EXTRA DMG
                 int bonusDamage = 3;
-
                 ally.stats.atkDmg += bonusDamage;
 
-                Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget));
-                runningCoroutines.Add(co);
-
+                Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget)); runningCoroutines.Add(co);
                 yield return co;
 
                 ally.stats.atkDmg -= bonusDamage;
                 attacks++;
             }
         }
-
-        // === WAIT FOR ALL REMAINING COROUTINES ===
         while (runningCoroutines.Exists(c => c != null))
             yield return null;
-
-        //// === REMOVE BUFFS AFTER ALL ATTACKS ARE DONE ===
-        //foreach (var ally in allCombatants)
-        //{
-        //    if (!ally.isPlayerTeam) continue;
-        //    if (!ally.IsAlive) continue;
-        //    if (ally == this) continue;
-
-        //    var handler = ally.GetComponent<PlayerBuffHandler>();
-        //    if (handler != null)
-        //    {
-        //        handler.RemoveStoredBuffs();
-        //        Debug.LogWarning($"Buff removed from {ally.name}");
-        //    }
-        //    else
-        //    {
-        //        Debug.LogWarning($"{ally.name} has NO PlayerBuffHandler");
-        //    }
-        //}
 
         ActionEnded?.Invoke();
     }

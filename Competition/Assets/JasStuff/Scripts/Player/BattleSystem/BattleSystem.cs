@@ -51,6 +51,16 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private float turnScaleMultiplier = 1.2f;
     [SerializeField] private float turnScaleDuration = 0.18f;
 
+    [Header("Boss Animation Transition")]
+    [SerializeField] private Animator bossIntroAnimator;
+    private bool bossIntroDone = false;
+
+    public void OnBossIntroFinished()
+    {
+        bossIntroDone = true;
+        BattleUIManager.instance.ShowAllUI();
+    }
+
     private readonly Dictionary<Combatant, int> _playerIconIndex = new();
     private readonly Dictionary<Combatant, int> _enemyIconIndex = new();
     private Image _currentTurnIcon;
@@ -116,10 +126,29 @@ public class BattleSystem : MonoBehaviour
 
     private void Start()
     {
-        SetupBattle();
+        if (BattleManager.instance && BattleManager.instance.IsBossBattle)
+            StartCoroutine(BossBattleStartupRoutine());
+        else
+            SetupBattle();
 
         if (BattleManager.instance)
             OnBattleEnd += BattleManager.instance.HandleBattleEnd;
+    }
+
+    private IEnumerator BossBattleStartupRoutine()
+    {
+        BattleManager.instance.SetBattlePaused(true);
+        BattleUIManager.instance.HideAllUI();
+        bossIntroDone = false;
+
+        bossIntroAnimator.SetTrigger("start");
+
+        yield return new WaitUntil(() => bossIntroDone);
+
+        BattleManager.instance.SetBattlePaused(false);
+        BattleUIManager.instance.ShowAllUI();
+
+        SetupBattle();
     }
 
     private void Update()
