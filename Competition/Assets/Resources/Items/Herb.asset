@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Herb
   m_EditorClassIdentifier: 
   itemName: Herb
-  icon: {fileID: 21300000, guid: 9bdf726430733464e925224e11f295b1, type: 3}
+  icon: {fileID: 21300000, guid: 8fa5e323e2579f24baea6e5ec38a9ea6, type: 3}
   isStackable: 1
   category: 1
   healing: 0
@@ -28,3 +28,6 @@ MonoBehaviour:
   isBuff: 0
   attackBuffAmount: 0
   buffDuration: 0
+  isDefenseBuff: 0
+  defenseBuffAmount: 0
+  defenseBuffDuration: 0
