@@ -9016,6 +9016,7 @@ GameObject:
   - component: {fileID: 831640394}
   - component: {fileID: 831640395}
   - component: {fileID: 831640396}
+  - component: {fileID: 831640397}
   m_Layer: 5
   m_Name: TargetSelector
   m_TagString: Untagged
@@ -9073,6 +9074,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arrowPrefab: {fileID: 3146985641704584890, guid: c986b9891d18f0b49b6a2132560fdb0e, type: 3}
   yOffset: 1.4
+--- !u!114 &831640397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 831640393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec70a028195f12149b5a772863d18cc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stunPrefab: {fileID: 3146985641704584890, guid: def0f14d14484474dba82574077314f6, type: 3}
+  yOffset: 1.2
 --- !u!1 &832514322
 GameObject:
   m_ObjectHideFlags: 0
@@ -9706,6 +9721,7 @@ MonoBehaviour:
   skill2Btn: {fileID: 1549859707}
   selector: {fileID: 831640395}
   turnIndicator: {fileID: 831640396}
+  stunIndicator: {fileID: 831640397}
   infoLabel: {fileID: 860150699}
   skill1CdText: {fileID: 1894014589}
   skill2CdText: {fileID: 325022898}
@@ -11407,7 +11423,6 @@ GameObject:
   - component: {fileID: 1055889863}
   - component: {fileID: 1055889867}
   - component: {fileID: 1055889866}
-  - component: {fileID: 1055889865}
   - component: {fileID: 1055889864}
   m_Layer: 5
   m_Name: Canvas
@@ -11450,23 +11465,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   battleSystem: {fileID: 579761202}
   timeText: {fileID: 1583830723}
---- !u!114 &1055889865
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1055889862}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &1055889866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22162,6 +22160,7 @@ MonoBehaviour:
   choiceButtonB: {fileID: 1615096336}
   choiceAText: {fileID: 1098987837}
   choiceBText: {fileID: 1581180094}
+  skipButton: {fileID: 0}
 --- !u!1 &1868421387
 GameObject:
   m_ObjectHideFlags: 0
@@ -23388,6 +23387,7 @@ MonoBehaviour:
   autoBattle: 0
   targetSelector: {fileID: 831640395}
   turnIndicator: {fileID: 831640396}
+  stunIndicator: {fileID: 831640397}
 --- !u!1 &2073009326
 GameObject:
   m_ObjectHideFlags: 0
