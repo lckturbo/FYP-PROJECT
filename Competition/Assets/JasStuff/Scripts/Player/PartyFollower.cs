@@ -8,7 +8,7 @@ public class PartyFollower : MonoBehaviour
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float catchUpSpeed = 5f;
     [SerializeField] private float stopDistance = 0.05f;
-    [SerializeField] private int stepsBehind = 15;
+    [SerializeField] private int stepsBehind = 8;
 
     private Vector3 lastRecordedTargetPosition;
     private bool hasInitialized = false;
