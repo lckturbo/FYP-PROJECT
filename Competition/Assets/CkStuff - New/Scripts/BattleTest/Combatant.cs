@@ -254,6 +254,9 @@ public class Combatant : MonoBehaviour
             StartCoroutine(SupportSkill2Routine(target));
             return true;
         }
+        if (!isPlayerTeam)
+            approachDistance = 2.2f;
+
         // Normal offensive Skill 2 (existing behaviour)
         if (target == null || !target.health) return false;
         _skill2CD = Mathf.Max(1, skill2CooldownTurns);
@@ -487,6 +490,38 @@ public class Combatant : MonoBehaviour
     {
         if (parodyEffect != null)
             parodyEffect.ShakeScreen();
+    }
+
+    public void OnRecoil()
+    {
+        StartCoroutine(RecoilRoutine());
+    }
+
+    private IEnumerator RecoilRoutine()
+    {
+        Vector3 startPos = transform.localPosition;
+        Vector3 recoilPos = startPos + new Vector3(-0.5f, 0, 0);
+
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 8f;
+            transform.localPosition = Vector3.Lerp(startPos, recoilPos, t);
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 8f;
+            transform.localPosition = Vector3.Lerp(recoilPos, startPos, t);
+            yield return null;
+        }
+    }
+    public void OnSnapPan()
+    {
+        if (parodyEffect != null)
+            parodyEffect.SnapPan();
     }
 
     public void DealDamage()

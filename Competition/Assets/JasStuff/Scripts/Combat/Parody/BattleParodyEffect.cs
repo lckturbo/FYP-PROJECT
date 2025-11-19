@@ -98,5 +98,50 @@ public class BattleParodyEffect : MonoBehaviour
 
         cam.transform.position = shakeOrigin;
     }
+    public void CameraRecoil(Vector2 direction, float strength = 0.3f, float returnTime = 0.25f)
+    {
+        if (activeCoroutine != null) StopCoroutine(activeCoroutine);
+        activeCoroutine = StartCoroutine(CameraRecoilRoutine(direction, strength, returnTime));
+    }
+
+    private IEnumerator CameraRecoilRoutine(Vector2 direction, float strength, float returnTime)
+    {
+        Vector3 startPos = cam.transform.position;
+        Vector3 recoilPos = startPos + (Vector3)(direction.normalized * strength);
+
+        float t = 0f;
+        const float pushTime = 0.06f;
+        while (t < pushTime)
+        {
+            cam.transform.position = Vector3.Lerp(startPos, recoilPos, t / pushTime);
+            t += Time.deltaTime;
+            yield return null;
+        }
+        cam.transform.position = recoilPos;
+
+        t = 0f;
+        while (t < returnTime)
+        {
+            cam.transform.position = Vector3.Lerp(recoilPos, startPos, t / returnTime);
+            t += Time.deltaTime;
+            yield return null;
+        }
+        cam.transform.position = startPos;
+    }
+
+    public void SnapPan()
+    {
+        StartCoroutine(SnapPanRoutine());
+    }
+
+    private IEnumerator SnapPanRoutine()
+    {
+        Vector3 original = cam.transform.position;
+        Vector3 offset = original + new Vector3(1.0f, 0, 0);
+
+        cam.transform.position = offset;
+        yield return new WaitForSeconds(0.05f);
+        cam.transform.position = original;
+    }
 
 }
