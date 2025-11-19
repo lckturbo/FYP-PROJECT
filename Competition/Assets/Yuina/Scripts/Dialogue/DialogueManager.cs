@@ -41,6 +41,8 @@ public class DialogueManager : MonoBehaviour
 
     private bool waitingForChoice = false;
 
+    [Header("Skip Button")]
+    [SerializeField] private Button skipButton;
 
     private void Start()
     {
@@ -56,14 +58,18 @@ public class DialogueManager : MonoBehaviour
 
         linesQueue = new Queue<DialogueLine>();
         dialogueUI.SetActive(false);
+
+        if (skipButton != null)
+            skipButton.onClick.AddListener(SkipDialogue);
     }
+
 
     private void Update()
     {
         if (!IsDialogueActive) return;
 
         // Allow ANY key OR left mouse click to continue
-        if (Input.anyKeyDown || Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             DisplayNextLine();
         }
@@ -205,6 +211,23 @@ public class DialogueManager : MonoBehaviour
         dialogueText.text = currentLine.text;
         isTyping = false;
     }
+    public void SkipDialogue()
+    {
+        // If typing ? instantly complete the current line
+        if (isTyping)
+        {
+            CompleteCurrentLine();
+            return;
+        }
+
+        // If choices are showing ? do nothing
+        if (waitingForChoice) return;
+
+        // Otherwise skip everything and end now
+        linesQueue.Clear();
+        EndDialogue();
+    }
+
 
     /// <summary>
     /// âÔòbèIóπ
