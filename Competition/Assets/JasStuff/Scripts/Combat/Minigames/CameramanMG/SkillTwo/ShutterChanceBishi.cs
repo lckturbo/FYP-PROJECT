@@ -14,13 +14,11 @@ public class ShutterChanceBishi : BaseMinigame
 
     [Header("Bonus Visuals")]
     [SerializeField] private Image bonusTintOverlay;
-    [SerializeField] private ParticleSystem[] bonusParticles;
     [SerializeField, Range(0f, 1f)] private float bonusTintAlpha = 0.35f;
     [SerializeField] private float bonusTintPulseSpeed = 2.0f;
 
     [Header("OKAY! Centered")]
     [SerializeField] private TMP_Text okayCenterText;
-    //[SerializeField] private float okayDisplayTime = 0.45f;
 
     [Header("Lane Images")]
     [SerializeField] private Image leftImage;
@@ -228,12 +226,6 @@ public class ShutterChanceBishi : BaseMinigame
             var c = bonusTintOverlay.color; c.a = 0f;
             bonusTintOverlay.color = c;
             bonusTintOverlay.gameObject.SetActive(true);
-        }
-
-        if (bonusParticles != null)
-        {
-            foreach (var ps in bonusParticles)
-                if (ps) ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
         if (okayCenterText) okayCenterText.gameObject.SetActive(false);
@@ -899,12 +891,6 @@ public class ShutterChanceBishi : BaseMinigame
 
             tintPulseCo = StartCoroutine(PulseTint());
         }
-
-        if (bonusParticles != null)
-        {
-            foreach (var ps in bonusParticles)
-                if (ps) ps.Play(true);
-        }
     }
 
     private void ExitBonusVisuals()
@@ -920,12 +906,6 @@ public class ShutterChanceBishi : BaseMinigame
             var c = bonusTintOverlay.color;
             c.a = 0f;
             bonusTintOverlay.color = c;
-        }
-
-        if (bonusParticles != null)
-        {
-            foreach (var ps in bonusParticles)
-                if (ps) ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
 
         if (goldenHint) goldenHint.gameObject.SetActive(false);
@@ -1307,17 +1287,4 @@ public class ShutterChanceBishi : BaseMinigame
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
-
-    //private void RequestSkip() => skipRequested = true;
-
-    //private void SetupSkipUI(bool show)
-    //{
-    //    if (skipButton)
-    //    {
-    //        skipButton.onClick.RemoveListener(RequestSkip);
-    //        if (show) skipButton.onClick.AddListener(RequestSkip);
-    //        skipButton.gameObject.SetActive(show);
-    //    }
-    //    if (!show) skipRequested = false;
-    //}
 }
