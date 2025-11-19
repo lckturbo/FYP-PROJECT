@@ -3,12 +3,13 @@ using System.Collections.Generic;
 
 public class PartyFollower : MonoBehaviour
 {
+    public int followerIndex = 0;
     [SerializeField] private Transform target;
     [SerializeField] private float followDistance = 0.8f;
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float catchUpSpeed = 5f;
     [SerializeField] private float stopDistance = 0.05f;
-    [SerializeField] private int stepsBehind = 8;
+    public int stepsBehind = 8;
 
     private Vector3 lastRecordedTargetPosition;
     private bool hasInitialized = false;
@@ -141,6 +142,9 @@ public class PartyFollower : MonoBehaviour
             var arr = pathQueue.ToArray();
             int index = Mathf.Clamp(arr.Length - stepsBehind, 0, arr.Length - 1);
             targetPathPosition = arr[index];
+
+            //float spacing = 0.20f;
+            //targetPathPosition.x += followerIndex * spacing;
         }
 
         float distanceToWaypoint = Vector2.Distance(transform.position, targetPathPosition);
