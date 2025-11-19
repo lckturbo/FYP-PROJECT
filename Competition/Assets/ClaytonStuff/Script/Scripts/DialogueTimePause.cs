@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DialogueTimePause : MonoBehaviour
 {
@@ -6,7 +7,7 @@ public class DialogueTimePause : MonoBehaviour
     {
         if (DialogueManager.Instance == null) return;
 
-        if (DialogueManager.Instance.IsDialogueActive)
+        if (DialogueManager.Instance.IsDialogueActive && SceneManager.GetActiveScene().name == "jasBattle")
         {
             // Pause gameplay
             if (Time.timeScale != 0f)
