@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Wood
   m_EditorClassIdentifier: 
   itemName: Wood
-  icon: {fileID: 21300000, guid: e4adaec79c37fff4c914de0b548176bd, type: 3}
+  icon: {fileID: 21300000, guid: 49edaf71a9bfad64f9f138919d451b75, type: 3}
   isStackable: 1
   category: 1
   healing: 0
@@ -28,3 +28,6 @@ MonoBehaviour:
   isBuff: 0
   attackBuffAmount: 0
   buffDuration: 0
+  isDefenseBuff: 0
+  defenseBuffAmount: 0
+  defenseBuffDuration: 0

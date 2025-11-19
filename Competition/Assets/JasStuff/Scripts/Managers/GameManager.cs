@@ -22,13 +22,14 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        // for testing
         if (SceneManager.GetActiveScene().name == "Main")
         {
             bool settingsOpen = UIManager.instance != null && UIManager.instance.IsSettingsOpen();
 
-            if (!settingsOpen && (Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject())
-                ASyncManager.instance.LoadLevelBtn("Lobby");
+            if (!settingsOpen && (Input.GetMouseButtonDown(0)) && !EventSystem.current.IsPointerOverGameObject() && UIManager.instance.IsCompleted)
+            {
+                StartCoroutine(UIManager.instance.titleEnd());
+            }
         }
     }
     public void ChangeScene(string scn)

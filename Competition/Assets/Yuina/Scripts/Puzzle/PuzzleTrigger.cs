@@ -14,14 +14,16 @@ public class PuzzleTrigger : MonoBehaviour
 
     private void Start()
     {
-        playerMovement = FindObjectOfType<NewPlayerMovement>();
+        playerMovement = GameObject.FindGameObjectWithTag("Player")
+            .GetComponent<NewPlayerMovement>();
     }
 
     void Update()
     {
         if (used) return;                // <<< prevents re-use
         if (!playerInRange) return;
-        playerMovement = FindObjectOfType<NewPlayerMovement>();
+        playerMovement = GameObject.FindGameObjectWithTag("Player")
+            .GetComponent<NewPlayerMovement>();
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             if (playerMovement != null)

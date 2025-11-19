@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sword
   m_EditorClassIdentifier: 
   itemName: Sword
-  icon: {fileID: 21300000, guid: 8bfc9dba751aa37438af653df1f49d0c, type: 3}
+  icon: {fileID: 21300000, guid: 6f1411e78a57b4d438b541101d0022d6, type: 3}
   isStackable: 0
   category: 0
   healing: 0
@@ -28,3 +28,6 @@ MonoBehaviour:
   isBuff: 0
   attackBuffAmount: 0
   buffDuration: 0
+  isDefenseBuff: 0
+  defenseBuffAmount: 0
+  defenseBuffDuration: 0
