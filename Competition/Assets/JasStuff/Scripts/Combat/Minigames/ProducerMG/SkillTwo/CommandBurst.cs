@@ -88,14 +88,21 @@ public class CommandBurst : BaseMinigame
         float charge = energyBar.value;
 
         if (charge >= 0.95f)
+        {
             Result = MinigameManager.ResultType.Perfect;
+            promptText.text = Result + "! " + "Max buffed Allies!";
+        }
         else if (charge >= 0.10f)
+        {
             Result = MinigameManager.ResultType.Success;
+            promptText.text = Result + "! " + "Buffed Allies!";
+        }
         else
+        {
             Result = MinigameManager.ResultType.Fail;
+            promptText.text = Result + "! " + "No Buffs!";
+        }
 
-
-        promptText.text = Result + "!";
         yield return new WaitForSecondsRealtime(1.0f);
 
         BattleManager.instance.SetBattlePaused(false);

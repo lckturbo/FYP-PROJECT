@@ -133,7 +133,7 @@ public class RedLightGreenLightMinigame : BaseMinigame
         isGreenLight = green;
         starter.rotation = Quaternion.Euler(0, green ? 0 : 180, 0);
         statusText.text = green ? "GREEN LIGHT" : "RED LIGHT";
-        lightIndicator.color = green ? Color.green : Color.red;
+        lightIndicator.color = green ? new Color(11f / 255f, 70f / 255f, 19f / 255f) : new Color(70f / 255f, 11f / 255f, 15f / 255f);
     }
 
     private IEnumerator ShowWarning()
