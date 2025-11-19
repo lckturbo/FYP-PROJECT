@@ -95,23 +95,44 @@ public class BattleActionUI : MonoBehaviour
         if (unit != null)
             turnIndicator.ShowArrow(unit.transform);
 
+
         if (_currentUnit)
         {
-            bool s1Ready = _currentUnit.IsSkill1Ready;
-            bool s2Ready = _currentUnit.IsSkill2Ready;
-
-            if (skillBtn) skillBtn.interactable = s1Ready;
-            if (skill2Btn) skill2Btn.interactable = s2Ready;
-
-            if (skill1CdText)
+            if (unit.IsSilenced)
             {
-                skill1CdText.gameObject.SetActive(!s1Ready);
-                if (!s1Ready) skill1CdText.text = $"CD: {_currentUnit.Skill1Remaining}";
+                if (skillBtn) skillBtn.interactable = false;
+                if (skill2Btn) skill2Btn.interactable = false;
+
+                if (skill1CdText)
+                {
+                    skill1CdText.gameObject.SetActive(true);
+                    skill1CdText.text = "SILENCE";
+                }
+                if (skill2CdText)
+                {
+                    skill2CdText.gameObject.SetActive(true);
+                    skill2CdText.text = "SILENCE";
+                }
             }
-            if (skill2CdText)
+            else
             {
-                skill2CdText.gameObject.SetActive(!s2Ready);
-                if (!s2Ready) skill2CdText.text = $"CD: {_currentUnit.Skill2Remaining}";
+                bool s1Ready = unit.IsSkill1Ready;
+                bool s2Ready = unit.IsSkill2Ready;
+
+                if (skillBtn) skillBtn.interactable = s1Ready;
+                if (skill2Btn) skill2Btn.interactable = s2Ready;
+
+                if (skill1CdText)
+                {
+                    skill1CdText.gameObject.SetActive(!s1Ready);
+                    if (!s1Ready) skill1CdText.text = $"CD: {unit.Skill1Remaining}";
+                }
+
+                if (skill2CdText)
+                {
+                    skill2CdText.gameObject.SetActive(!s2Ready);
+                    if (!s2Ready) skill2CdText.text = $"CD: {unit.Skill2Remaining}";
+                }
             }
 
             NewCharacterDefinition def = PlayerParty.instance.GetDefinitionFor(_currentUnit);

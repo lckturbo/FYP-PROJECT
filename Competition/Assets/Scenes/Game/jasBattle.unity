@@ -5806,7 +5806,7 @@ Animator:
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 50da5b18ec1ccbd458f9b4513baf4323, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 0
+  m_UpdateMode: 2
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
@@ -7787,8 +7787,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1605510227}
-  - {fileID: 548314526}
   - {fileID: 74920459}
+  - {fileID: 548314526}
   - {fileID: 1442009185}
   - {fileID: 2016506257}
   m_Father: {fileID: 579761203}
@@ -10641,7 +10641,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -22631,7 +22631,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 54}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1924910505
@@ -22886,7 +22886,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1040063675, guid: a6a681874de4ddd42b498308ab3a9ebc, type: 3}
+  m_Sprite: {fileID: 1035592469, guid: 388f3c6e479613743a830179007faab3, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

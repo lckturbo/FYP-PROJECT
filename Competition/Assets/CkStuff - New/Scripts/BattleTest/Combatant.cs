@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 [DisallowMultipleComponent]
 public class Combatant : MonoBehaviour
@@ -128,6 +130,11 @@ public class Combatant : MonoBehaviour
     public bool appliesStun = false;
     public int stunTurns = 1;
 
+    // === SILENCE SYSTEM ===
+    public bool silenceStun = false;
+    public bool IsSilenced { get; private set; }
+    private int silenceTurnsLeft = 0;
+
     public void ApplyStun(int turns)
     {
         stunTurnsLeft = turns;
@@ -150,12 +157,37 @@ public class Combatant : MonoBehaviour
             engine.stunIndicator.HideStun(transform);
         }
     }
+    public void ApplySilence(int turns)
+    {
+        silenceTurnsLeft = turns;
+        IsSilenced = true;
+
+        var engine = FindObjectOfType<TurnEngine>();
+        engine.ShowFloatingText(this, "SILENCED");
+    }
+
+    public void TickSilence()
+    {
+        if (!IsSilenced) return;
+
+        silenceTurnsLeft--;
+        if (silenceTurnsLeft <= 0)
+        {
+            IsSilenced = false;
+            var engine = FindObjectOfType<TurnEngine>();
+            engine.ShowFloatingText(this, "SILENCE END");
+        }
+    }
 
     public void OnTurnStarted()
     {
         if (_skill1CD > 0) _skill1CD--;
         if (_skill2CD > 0) _skill2CD--;
         turns++;
+
+        TickSilence(); 
+        TickStun();
+
         Debug.Log("turns: " + turns);
     }
 
@@ -169,7 +201,23 @@ public class Combatant : MonoBehaviour
 
     public bool TryUseSkill1(Combatant target)
     {
+        if (silenceStun) return false;
+        if (IsSilenced) return false;
         if (!IsSkill1Ready || !stats) return false;
+
+        if (isProducer && BattleManager.instance.IsBossBattle)
+        {
+            Combatant[] allies = FindObjectsOfType<Combatant>()
+                .Where(a => a.isPlayerTeam && a.IsAlive && a != this)
+                .ToArray();
+
+            if (allies.Length > 0 && allies.All(a => a.IsStunned))
+            {
+                Debug.Log("[Producer] Skill1 blocked: both allies stunned!");
+                var engine = FindObjectOfType<TurnEngine>();
+                return false;
+            }
+        }
 
         if (skill1IsCommand)
         {
@@ -183,6 +231,9 @@ public class Combatant : MonoBehaviour
             approachDistance = 2.0f;
         }
 
+        if (!isPlayerTeam)
+            silenceStun = true;
+
         if (!target || !target.health) return false;
 
         _skill1CD = Mathf.Max(1, skill1CooldownTurns);
@@ -193,6 +244,7 @@ public class Combatant : MonoBehaviour
 
     public bool TryUseSkill2(Combatant target)
     {
+        if (IsSilenced) return false;
         if (!IsSkill2Ready || !stats) return false;
 
         if (skill2IsSupport)
@@ -202,7 +254,6 @@ public class Combatant : MonoBehaviour
             StartCoroutine(SupportSkill2Routine(target));
             return true;
         }
-
         // Normal offensive Skill 2 (existing behaviour)
         if (target == null || !target.health) return false;
         _skill2CD = Mathf.Max(1, skill2CooldownTurns);
@@ -352,6 +403,8 @@ public class Combatant : MonoBehaviour
                 ally.stats.atkDmg -= bonusDamage;
                 attacks++;
             }
+
+            ally.blockMinigames = false;
         }
         while (runningCoroutines.Exists(c => c != null))
             yield return null;
@@ -462,13 +515,38 @@ public class Combatant : MonoBehaviour
             return;
         }
 
-        if (appliesStun)
+        float stunChance;
+        if (appliesStun && !BattleManager.instance.IsBossBattle)
         {
-            var engine = FindObjectOfType<TurnEngine>();
-            engine.ShowFloatingText(currentTarget, "STUNNED");
-            currentTarget.ApplyStun(stunTurns);
-            Debug.Log($"{name} stunned {currentTarget.name}!");
-            return;
+            stunChance = 0.25f;
+
+            if (UnityEngine.Random.value <= stunChance)
+            {
+                var engine = FindObjectOfType<TurnEngine>();
+                engine.ShowFloatingText(currentTarget, "STUNNED");
+
+                currentTarget.ApplyStun(stunTurns);
+                Debug.Log($"{name} stunned {currentTarget.name}! (Chance success)");
+
+                return;
+            }
+            else
+            {
+                Debug.Log($"{name} FAILED to stun {currentTarget.name}. (Chance fail)");
+            }
+        }
+
+        if (!isPlayerTeam && silenceStun)
+        {
+            if (UnityEngine.Random.value <= 1f)
+            {
+                var engine = FindObjectOfType<TurnEngine>();
+                engine.ShowFloatingText(currentTarget, "SILENCE");
+
+                currentTarget.ApplySilence(2);
+                Debug.Log($"{name} applied SILENCE to {currentTarget.name}");
+                return;
+            }
         }
 
         // --- Base multiplier ---
@@ -519,20 +597,55 @@ public class Combatant : MonoBehaviour
                 multiHitIndex = 0;
             }
         }
-
         // === BOSS attacks all ===
         if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
         {
-            Debug.Log("[BOSS] Attacks ALL player characters!");
+            Debug.Log("[BOSS] AoE attack with random stun!");
 
-            Combatant[] all = FindObjectsOfType<Combatant>();
-            foreach (Combatant c in all)
+            // Get all alive players
+            Combatant[] allPlayers = FindObjectsOfType<Combatant>()
+                .Where(c => c.isPlayerTeam && c.IsAlive)
+                .ToArray();
+
+            if (allPlayers.Length == 0)
+                return;
+
+            int toStun = UnityEngine.Random.Range(1, 4);
+            toStun = Mathf.Min(toStun, allPlayers.Length);
+
+            Combatant[] shuffled = allPlayers.OrderBy(x => UnityEngine.Random.value).ToArray();
+
+            HashSet<Combatant> stunnedPlayers = new HashSet<Combatant>();
+
+            stunChance = 0.35f;
+
+            for (int i = 0; i < toStun; i++)
             {
-                if (c.isPlayerTeam && c.IsAlive)
+                Combatant p = shuffled[i];
+
+                bool willStun = UnityEngine.Random.value <= stunChance;
+
+                if (willStun)
                 {
-                    c.health.TakeDamage(damageToApply, stats, NewElementType.None);
+                    stunnedPlayers.Add(p);
+
+                    var engine = FindObjectOfType<TurnEngine>();
+                    engine.ShowFloatingText(p, "STUNNED");
+
+                    p.ApplyStun(2);
+                    Debug.Log($"[BOSS] Stunned {p.name}");
                 }
             }
+
+            foreach (Combatant p in allPlayers)
+            {
+                if (stunnedPlayers.Contains(p))
+                    continue; 
+
+                p.health.TakeDamage(damageToApply, stats, NewElementType.None);
+                Debug.Log($"[BOSS] Damaged {p.name} for {damageToApply}");
+            }
+
             return;
         }
 
