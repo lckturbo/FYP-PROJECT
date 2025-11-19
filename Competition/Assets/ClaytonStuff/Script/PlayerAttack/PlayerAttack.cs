@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -213,6 +214,7 @@ public class PlayerAttack : MonoBehaviour
     public void PerformAttack()
     {
         Item item = null;
+        
 
         // --- Use the currently highlighted inventory item if available ---
         if (inventoryUI != null)
@@ -232,26 +234,38 @@ public class PlayerAttack : MonoBehaviour
              );
             foreach (var enemyCollider in hitEnemies)
             {
-                Debug.Log($"Melee hit {enemyCollider.name}, dealt {attackDamage}");
-
                 EnemyBase enemy = enemyCollider.GetComponent<EnemyBase>();
-                if (enemy != null)
-                {
-                    var stats = enemy.GetEnemyStats();
-                    if (stats != null && stats.type == EnemyStats.EnemyTypes.MiniBoss)
-                    {
-                        Debug.Log("Cannot attack boss directly.");
-                        return;
-                    }
+                if (enemy == null) continue;
 
-                    EnemyParty party = enemy.GetComponent<EnemyParty>();
-                    if (party != null)
-                    {
-                        BattleManager.instance.HandleBattleTransition(party);
-                        BattleManager.instance.SetBattleMode(true);
-                    }
+                // Mini-boss restriction
+                var stats = enemy.GetEnemyStats();
+                if (stats != null && stats.type == EnemyStats.EnemyTypes.MiniBoss)
+                {
+                    Debug.Log("Cannot attack boss directly.");
+                    return;
+                }
+
+                EnemyParty party = enemy.GetComponent<EnemyParty>();
+
+                // If enemy has START-OF-BATTLE dialogue
+                if (enemy is StaticEnemy staticEnemy && staticEnemy.attackDialogue != null)
+                {
+                    // Prevent double attacks during dialogue
+                    DialogueManager.Instance.StartDialogue(staticEnemy.attackDialogue);
+
+                    // Delay the battle until dialogue fully finishes
+                    StartCoroutine(StartBattleAfterDialogue(party));
+                    return;
+                }
+
+                // No dialogue ? start battle immediately
+                if (party != null)
+                {
+                    BattleManager.instance.HandleBattleTransition(party);
+                    BattleManager.instance.SetBattleMode(true);
                 }
             }
+
             Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, CurrentAttackRange);
             foreach (var hit in hits)
             {
@@ -313,6 +327,20 @@ public class PlayerAttack : MonoBehaviour
         }
 
     }
+
+    private IEnumerator StartBattleAfterDialogue(EnemyParty party)
+    {
+        // Wait until dialogue closes
+        while (DialogueManager.Instance.IsDialogueActive)
+            yield return null;
+
+        if (party != null)
+        {
+            BattleManager.instance.HandleBattleTransition(party);
+            BattleManager.instance.SetBattleMode(true);
+        }
+    }
+
 
     public void EndAttack()
     {
