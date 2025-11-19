@@ -260,7 +260,6 @@ public class Combatant : MonoBehaviour
         if (anim) anim.SetTrigger("skill1");
         yield return WaitForAnimationRobust(anim, skill1StateName);
 
-        // Collect living enemies
         var allCombatants = FindObjectsOfType<Combatant>();
         List<Combatant> livingEnemies = new List<Combatant>();
 
@@ -272,9 +271,9 @@ public class Combatant : MonoBehaviour
         }
 
         int attacks = 0;
+        int active = 0;
         List<Coroutine> runningCoroutines = new List<Coroutine>();
 
-        // === ALLY ATTACK LOOP ===
         foreach (var ally in allCombatants)
         {
             if (attacks >= 2)
@@ -312,41 +311,25 @@ public class Combatant : MonoBehaviour
 
                 // EXTRA DMG
                 int bonusDamage = 3;
-
                 ally.stats.atkDmg += bonusDamage;
+                active++;
 
-                Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget));
-                runningCoroutines.Add(co);
+                StartCoroutine(BasicAttackAndCount());
 
-                yield return co;
-
-                ally.stats.atkDmg -= bonusDamage;
+                IEnumerator BasicAttackAndCount()
+                {
+                    yield return ally.BasicAttackRoutine(randomTarget);
+                    ally.stats.atkDmg -= bonusDamage;
+                    active--;
+                }
                 attacks++;
             }
         }
 
-        // === WAIT FOR ALL REMAINING COROUTINES ===
-        while (runningCoroutines.Exists(c => c != null))
+        while (active > 0)
             yield return null;
-
-        //// === REMOVE BUFFS AFTER ALL ATTACKS ARE DONE ===
-        //foreach (var ally in allCombatants)
-        //{
-        //    if (!ally.isPlayerTeam) continue;
-        //    if (!ally.IsAlive) continue;
-        //    if (ally == this) continue;
-
-        //    var handler = ally.GetComponent<PlayerBuffHandler>();
-        //    if (handler != null)
-        //    {
-        //        handler.RemoveStoredBuffs();
-        //        Debug.LogWarning($"Buff removed from {ally.name}");
-        //    }
-        //    else
-        //    {
-        //        Debug.LogWarning($"{ally.name} has NO PlayerBuffHandler");
-        //    }
-        //}
+        //while (runningCoroutines.Exists(c => c != null))
+        //    yield return null;
 
         ActionEnded?.Invoke();
     }
