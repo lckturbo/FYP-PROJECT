@@ -90,13 +90,13 @@ public class BattleParodyEffect : MonoBehaviour
             float offsetX = (Mathf.PerlinNoise(Time.time * shakeFrequency, 0f) - 0.5f) * 2f * shakeMagnitude;
             float offsetY = (Mathf.PerlinNoise(0f, Time.time * shakeFrequency) - 0.5f) * 2f * shakeMagnitude;
 
-            cam.transform.position = originalPos + new Vector3(offsetX, offsetY, 0f);
+            cam.transform.position = shakeOrigin + new Vector3(offsetX, offsetY, 0f);
 
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        cam.transform.position = originalPos;
+        cam.transform.position = shakeOrigin;
     }
 
 }

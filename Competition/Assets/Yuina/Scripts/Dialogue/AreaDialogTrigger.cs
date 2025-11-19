@@ -61,7 +61,10 @@ public class AreaDialogTrigger : MonoBehaviour, IDataPersistence
                 Dialogiscomplete = state.completed;
 
                 if (Dialogiscomplete)
+                {
+                    hasExitArea = true;
                     this.enabled = false;
+                }
 
                 return;
             }

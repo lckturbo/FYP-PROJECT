@@ -407,12 +407,20 @@ public class Combatant : MonoBehaviour
     public void OnZoomIn()
     {
         if (parodyEffect != null)
+        {
+            if (BattleUIManager.instance)
+                BattleUIManager.instance.HideAllUI();
             parodyEffect.ZoomIn(this);
+        }
     }
     public void OnZoomOut()
     {
         if (parodyEffect != null)
+        {
+            if (BattleUIManager.instance)
+                BattleUIManager.instance.ShowAllUI();
             parodyEffect.ZoomOut();
+        }
     }
     public void OnCamShake()
     {
