@@ -45,7 +45,7 @@ public class Combatant : MonoBehaviour
     public void ClearSkillBonusSuppression() { _suppressSkillBonusNextHit = false; }
 
 
-    // --- Physics we�ll toggle while lunging ---
+    // --- Physics well toggle while lunging ---
     [Header("Collision Control While Acting")]
     [SerializeField] private bool disablePhysicsWhileActing = true;
 
@@ -117,11 +117,29 @@ public class Combatant : MonoBehaviour
     public int Skill1Remaining => Mathf.Max(0, _skill1CD);
     public int Skill2Remaining => Mathf.Max(0, _skill2CD);
 
+    // STUN SYSTEM //
+    public bool IsStunned { get; private set; }
+    private int stunTurnsLeft = 0;
+
+    public void ApplyStun(int turns)
+    {
+        stunTurnsLeft = turns;
+        IsStunned = true;
+    }
+
+    public void TickStun()
+    {
+        if (!IsStunned) return;
+
+        stunTurnsLeft--;
+        if (stunTurnsLeft <= 0)
+            IsStunned = false;
+    }
+
     public void OnTurnStarted()
     {
         if (_skill1CD > 0) _skill1CD--;
         if (_skill2CD > 0) _skill2CD--;
-
         turns++;
         Debug.Log("turns: " + turns);
     }
