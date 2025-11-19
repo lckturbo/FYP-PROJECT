@@ -192,11 +192,12 @@ public class DialogueManager : MonoBehaviour
         foreach (char c in line)
         {
             dialogueText.text += c;
-            yield return new WaitForSeconds(typingSpeed);
+            yield return new WaitForSecondsRealtime(typingSpeed); // FIX
         }
 
         isTyping = false;
     }
+
 
     /// <summary>
     /// タイピング中なら全文表示
