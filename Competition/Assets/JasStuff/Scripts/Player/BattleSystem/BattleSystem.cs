@@ -237,6 +237,7 @@ public class BattleSystem : MonoBehaviour
         }
         if (leaderObj.name == "Leader_Cameraman")
         {
+            cL.isCameraman = true;
             cL.skill2IsSupport = true;
             Debug.Log("[BattleSystem] Leader is Cameraman - Skill2 set as support.");
         }
@@ -311,6 +312,7 @@ public class BattleSystem : MonoBehaviour
 
                 if (allyObj.name == "Ally_Cameraman")
                 {
+                    cA.isCameraman = true;
                     cA.skill2IsSupport = true;
                     Debug.Log("[BattleSystem] Ally is Cameraman - Skill2 set as support.");
                 }

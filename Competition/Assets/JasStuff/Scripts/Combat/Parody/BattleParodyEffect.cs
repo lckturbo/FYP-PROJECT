@@ -15,9 +15,9 @@ public class BattleParodyEffect : MonoBehaviour
     [SerializeField] private float zoomDuration = 0.3f;
 
     [Header("Screen Shake Settings")]
-    [SerializeField] private float shakeDuration = 0.2f;
-    [SerializeField] private float shakeMagnitude = 0.15f;
-    [SerializeField] private float shakeFrequency = 25f;
+    [SerializeField] private float shakeDuration = 0.5f;
+    [SerializeField] private float shakeMagnitude = 0.25f;
+    [SerializeField] private float shakeFrequency = 45f;
 
     private void Awake()
     {

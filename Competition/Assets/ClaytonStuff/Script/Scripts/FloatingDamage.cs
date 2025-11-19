@@ -71,6 +71,21 @@ public class FloatingDamage : MonoBehaviour
         timer = 0f;
         popped = false;
     }
+    public void InitializeStatus(string statusText, Color statusColor)
+    {
+        if (!damageText) damageText = GetComponentInChildren<TextMeshProUGUI>();
+
+        damageText.text = statusText;
+        originalColor = statusColor;
+
+        damageText.color = originalColor;
+
+        transform.localPosition += offset;
+        originalScale = transform.localScale;
+        timer = 0f;
+        popped = false;
+    }
+
 
     void Update()
     {
