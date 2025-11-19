@@ -27,6 +27,7 @@ public class Combatant : MonoBehaviour
     public bool isPlayerTeam;
     public bool isLeader;
     public bool isProducer;
+    public bool isCameraman;
 
     public BaseStats stats;
     public NewHealth health;
@@ -57,6 +58,10 @@ public class Combatant : MonoBehaviour
     private BattleParodyEffect parodyEffect;
 
     private int turns;
+
+    public bool isMultiHit = false;
+    public int multiHitTotal = 5;
+    public int multiHitIndex = 0;
 
     [SerializeField] private NewCharacterStats runtimeStats;
 
@@ -120,21 +125,29 @@ public class Combatant : MonoBehaviour
     // STUN SYSTEM //
     public bool IsStunned { get; private set; }
     private int stunTurnsLeft = 0;
+    public bool appliesStun = false;
+    public int stunTurns = 1;
 
     public void ApplyStun(int turns)
     {
         stunTurnsLeft = turns;
         IsStunned = true;
+
+        var engine = FindObjectOfType<TurnEngine>();
+        engine.stunIndicator.ShowStun(transform);
+        Debug.Log("ApplyStun Called");
     }
 
     public void TickStun()
     {
         if (!IsStunned) return;
-
+        
         stunTurnsLeft--;
         if (stunTurnsLeft <= 0)
         {
             IsStunned = false;
+            var engine = FindObjectOfType<TurnEngine>();
+            engine.stunIndicator.HideStun(transform);
         }
     }
 
@@ -150,11 +163,6 @@ public class Combatant : MonoBehaviour
     public void BasicAttack(Combatant target)
     {
         if (!stats || !target || !target.health) return;
-        //if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
-        //{
-        //    DoBasicAttackDamage(target);
-        //    return;
-        //}
         currentAttackType = AttackType.Basic;
         StartCoroutine(MoveRoutine(target, DoBasicAttackDamage, attackStateName));
     }
@@ -167,6 +175,12 @@ public class Combatant : MonoBehaviour
         {
             StartCoroutine(CommandSkill1Routine(target));
             return true;
+        }
+
+        if (isCameraman)
+        {
+            appliesStun = true;
+            approachDistance = 2.0f;
         }
 
         if (!target || !target.health) return false;
@@ -422,9 +436,6 @@ public class Combatant : MonoBehaviour
             parodyEffect.ShakeScreen();
     }
 
-    public bool isMultiHit = false;
-    public int multiHitTotal = 5;
-    public int multiHitIndex = 0;
     public void DealDamage()
     {
         if (currentTarget == null) return;
@@ -448,6 +459,15 @@ public class Combatant : MonoBehaviour
         {
             currentTarget.health.TakeDamage(pendingMinigameDamage, stats, NewElementType.None);
             pendingMinigameDamage = -1;
+            return;
+        }
+
+        if (appliesStun)
+        {
+            var engine = FindObjectOfType<TurnEngine>();
+            engine.ShowFloatingText(currentTarget, "STUNNED");
+            currentTarget.ApplyStun(stunTurns);
+            Debug.Log($"{name} stunned {currentTarget.name}!");
             return;
         }
 

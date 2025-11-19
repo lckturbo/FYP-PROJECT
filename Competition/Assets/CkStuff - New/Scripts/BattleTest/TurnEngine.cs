@@ -14,7 +14,8 @@ public class TurnEngine : MonoBehaviour
 
     [SerializeField] private TargetSelector targetSelector;
     [SerializeField] private TurnIndicator turnIndicator;
-    [SerializeField] private StunIndicator stunIndicator;
+    public StunIndicator stunIndicator;
+    [SerializeField] private FloatingDamage floatingDamagePrefab;
 
     private bool _waitingForPlayerDecision;
     private Combatant _currPlayerUnit;
@@ -90,7 +91,7 @@ public class TurnEngine : MonoBehaviour
         targetSelector?.Disable();
 
         if (turnIndicator != null) turnIndicator.HideArrow();
-        if (stunIndicator != null) stunIndicator.HideStun();
+        if (stunIndicator != null) stunIndicator.HideAll();
 
         OnBattleEnd?.Invoke(playerWon);
     }
@@ -136,15 +137,15 @@ public class TurnEngine : MonoBehaviour
 
             if (u.atb >= 1f)
             {
-                u.atb = 0f;
-
                 if (u.IsStunned)
                 {
                     u.TickStun();
+
                     Debug.Log($"{u.name} is stunned and skips the turn!");
                     _nextIndex = (i + 1) % count;
                     return;
                 }
+                u.atb = 0f;
 
                 u.OnTurnStarted();
 
@@ -403,5 +404,12 @@ public class TurnEngine : MonoBehaviour
             if (u && u.isPlayerTeam == playerTeam && u.IsAlive)
                 return false;
         return true;
+    }
+    public void ShowFloatingText(Combatant target, string message)
+    {
+        if (floatingDamagePrefab == null || target == null) return;
+
+        var floatObj = Instantiate(floatingDamagePrefab, target.transform.position, Quaternion.identity);
+        floatObj.InitializeStatus(message, Color.yellow);  
     }
 }

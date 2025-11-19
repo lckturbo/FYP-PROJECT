@@ -12,7 +12,6 @@ public class BattleActionUI : MonoBehaviour
     [SerializeField] private Button skill2Btn;
     [SerializeField] private TargetSelector selector;
     [SerializeField] private TurnIndicator turnIndicator;
-    [SerializeField] private StunIndicator stunIndicator;
 
     [Header("Feedback")]
     [SerializeField] private TMP_Text infoLabel;
@@ -98,17 +97,6 @@ public class BattleActionUI : MonoBehaviour
 
         if (_currentUnit)
         {
-            if (_currentUnit.IsStunned)
-            {
-                if (attackBtn) attackBtn.interactable = false;
-                if (skillBtn) skillBtn.interactable = false;
-                if (skill2Btn) skill2Btn.interactable = false;
-
-                if(unit != null) stunIndicator.ShowStun(unit.transform);
-                HideTooltipImmediate();
-                return;
-            }
-
             bool s1Ready = _currentUnit.IsSkill1Ready;
             bool s2Ready = _currentUnit.IsSkill2Ready;
 
