@@ -9,6 +9,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
 {
     public static UIManager instance;
 
+    [SerializeField] private Animator mainAnim;
+
     [Header("MainMenu / Lobby Buttons")]
     [SerializeField] private Button loadBtn;
     [SerializeField] private Button newBtn;
@@ -34,6 +36,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
     private bool isOpen;
     private bool isPaused;
+    private bool isCompleted;
+    public bool IsCompleted => isCompleted;
     public bool IsSettingsOpen() => isOpen;
     public bool IsPaused() => isPaused;
     [HideInInspector] public bool canPause = true;
@@ -115,6 +119,13 @@ public class UIManager : MonoBehaviour, IDataPersistence
     // ---- SETUPS ---- //
     private void SetupMainMenu()
     {
+        mainAnim = GameObject.Find("MainUi")?.GetComponent<Animator>();
+        if (mainAnim != null)
+        {
+            mainAnim.enabled = true;
+            StartCoroutine(titleStart());
+        }
+
         settingsUI = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name == "SettingsUI");
         if (settingsUI) SetupSettingUI();
 
@@ -133,6 +144,26 @@ public class UIManager : MonoBehaviour, IDataPersistence
             exitBtn.onClick.RemoveAllListeners();
             exitBtn.onClick.AddListener(() => Application.Quit());
         }
+    }
+
+    private IEnumerator titleStart()
+    {
+        yield return new WaitForSeconds(2.15f);
+        if (mainAnim != null)
+        {
+            isCompleted = true;
+            mainAnim.SetTrigger("during");
+        }
+    }
+    public IEnumerator titleEnd()
+    {
+        if(mainAnim != null)
+        {
+            isCompleted = false;
+            mainAnim.SetTrigger("after");
+        }
+        yield return new WaitForSeconds(2.5f);
+        ASyncManager.instance.LoadLevelBtn("Lobby");
     }
     private void SetupLobbyMenu()
     {

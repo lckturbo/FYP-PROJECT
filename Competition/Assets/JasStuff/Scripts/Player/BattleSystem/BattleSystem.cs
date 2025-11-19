@@ -140,7 +140,7 @@ public class BattleSystem : MonoBehaviour
         BattleManager.instance.SetBattlePaused(true);
         BattleUIManager.instance.HideAllUI();
         bossIntroDone = false;
-
+       
         bossIntroAnimator.SetTrigger("start");
 
         yield return new WaitUntil(() => bossIntroDone);
