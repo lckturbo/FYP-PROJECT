@@ -105,6 +105,8 @@ public class TurnEngine : MonoBehaviour
         //    return;
         //}
 
+        Time.timeScale = BattleSpeed;
+
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
         {
