@@ -9,7 +9,7 @@ public class PartyFollower : MonoBehaviour
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float catchUpSpeed = 5f;
     [SerializeField] private float stopDistance = 0.05f;
-    public int stepsBehind = 8;
+    public int stepsBehind = 10;
 
     private Vector3 lastRecordedTargetPosition;
     private bool hasInitialized = false;
@@ -96,19 +96,6 @@ public class PartyFollower : MonoBehaviour
             lastRecordedTargetPosition = target.position;
         }
 
-        //float totalPathLength = 0f;
-        //Vector3 lastPos = transform.position;
-        //foreach (var pos in pathQueue)
-        //{
-        //    totalPathLength += Vector3.Distance(lastPos, pos);
-        //    lastPos = pos;
-        //}
-
-        // while (pathQueue.Count > 1 &&
-        //Vector2.Distance(transform.position, pathQueue.Peek()) < stopDistance)
-        // {
-        //     pathQueue.Dequeue();
-        // }
         int minWaypoints = stepsBehind + 5;
 
         while (pathQueue.Count > minWaypoints)
@@ -116,53 +103,17 @@ public class PartyFollower : MonoBehaviour
             pathQueue.Dequeue();
         }
 
-
-        //while (pathQueue.Count > 1 && totalPathLength > followDistance)
-        //{
-        //    Vector3 firstWaypoint = pathQueue.Peek();
-        //    float distToFirst = Vector3.Distance(transform.position, firstWaypoint);
-
-        //    if (distToFirst < stopDistance)
-        //    {
-        //        pathQueue.Dequeue();
-        //        totalPathLength -= Vector3.Distance(transform.position, firstWaypoint);
-        //    }
-        //    else
-        //    {
-        //        break;
-        //    }
-        //}
-
-        //if (pathQueue.Count > 0)
-        //{
-        //    targetPathPosition = pathQueue.Peek();
-        //}
         if (pathQueue.Count > 0)
         {
             var arr = pathQueue.ToArray();
             int index = Mathf.Clamp(arr.Length - stepsBehind, 0, arr.Length - 1);
             targetPathPosition = arr[index];
-
-            //float spacing = 0.20f;
-            //targetPathPosition.x += followerIndex * spacing;
         }
 
         float distanceToWaypoint = Vector2.Distance(transform.position, targetPathPosition);
 
         if (distanceToWaypoint > stopDistance)
         {
-            //Vector2 rawDir = (targetPathPosition - transform.position).normalized;
-
-            //Vector2 cardinalDir = SnapToCardinal(rawDir);
-
-            //if (distanceToWaypoint <= 0.3f && Vector2.Dot(cardinalDir, lastMoveDirection) < 0)
-            //{
-            //}
-            //else
-            //{
-            //    lastMoveDirection = cardinalDir;
-            //}
-
             Vector2 rawDir = (targetPathPosition - transform.position).normalized;
 
             if (rawDir.sqrMagnitude > 0.001f)
@@ -179,8 +130,6 @@ public class PartyFollower : MonoBehaviour
             float distanceToTarget = Vector2.Distance(transform.position, target.position);
             if (distanceToTarget > followDistance * 2f)
                 usedSpeed = catchUpSpeed;
-
-            //usedSpeed *= 0.95f;
 
             transform.position = Vector2.MoveTowards(
                 transform.position,

@@ -123,7 +123,9 @@ public class PlayerSpawner : MonoBehaviour, IDataPersistence
 
             followerObj.GetComponentInChildren<PlayerHeldItem>().handPoint.gameObject.SetActive(false);
             followerObj.tag = "Untagged";
-            Destroy(followerObj.GetComponentInChildren<NewPlayerMovement>());
+            var mv = followerObj.GetComponentInChildren<NewPlayerMovement>();
+            if (mv != null)
+                mv.enabled = false;
             Destroy(followerObj.GetComponentInChildren<PlayerHeldItem>());
             Destroy(followerObj.GetComponentInChildren<PlayerAttack>());
             Destroy(followerObj.GetComponentInChildren<PlayerBuffHandler>());
