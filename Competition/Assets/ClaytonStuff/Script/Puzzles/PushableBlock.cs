@@ -118,7 +118,10 @@ public class PushableBlock : MonoBehaviour, IDataPersistence
     private IEnumerator MoveTo(Vector2 target)
     {
         isMoving = true;
+
+        col.enabled = false;         // turn off collision
         rb.isKinematic = true;
+        rb.velocity = Vector2.zero;
 
         while ((rb.position - target).sqrMagnitude > 0.001f)
         {
@@ -127,10 +130,13 @@ public class PushableBlock : MonoBehaviour, IDataPersistence
         }
 
         rb.position = target;
+
         rb.isKinematic = false;
-        rb.velocity = Vector2.zero;
+        col.enabled = true;          // turn back on
+
         isMoving = false;
     }
+
 
     private Vector2 GetCardinal(Vector2 dir)
     {
