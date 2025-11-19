@@ -4,49 +4,40 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Collider2D))]
 public class LightActivator : MonoBehaviour
 {
-    [SerializeField] private Light2D light2D;  // auto-filled
-    [SerializeField] private float fadeSpeed = 3f;
-
-    private bool targetState = false;
-    private float maxIntensity;
+    [SerializeField] private GameObject lightObject; // object holding Light2D
 
     private void Awake()
     {
-        // Auto-assign Light2D if missing
-        if (light2D == null)
+        // Auto-assign the Light2D child if missing
+        if (lightObject == null)
         {
-            light2D = GetComponent<Light2D>();
-            if (light2D == null)
-                light2D = GetComponentInChildren<Light2D>();
-
-            if (light2D == null)
-                Debug.LogWarning($"[LightActivator] No Light2D found on {name} or its children.");
+            Light2D foundLight = GetComponentInChildren<Light2D>(true);
+            if (foundLight != null)
+            {
+                lightObject = foundLight.gameObject;
+            }
+            else
+            {
+                Debug.LogWarning($"[LightActivator] No Light2D child found on {name}");
+            }
         }
 
-        if (light2D != null)
-        {
-            maxIntensity = light2D.intensity;
-            light2D.intensity = 0f; // turn off at start
-        }
-    }
-
-    private void Update()
-    {
-        if (light2D == null) return;
-
-        float target = targetState ? maxIntensity : 0f;
-        light2D.intensity = Mathf.MoveTowards(light2D.intensity, target, fadeSpeed * Time.deltaTime);
+        // Start OFF
+        if (lightObject != null)
+            lightObject.SetActive(false);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (lightObject == null) return;
         if (other.CompareTag("Player"))
-            targetState = true;
+            lightObject.SetActive(true);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
+        if (lightObject == null) return;
         if (other.CompareTag("Player"))
-            targetState = false;
+            lightObject.SetActive(false);
     }
 }
