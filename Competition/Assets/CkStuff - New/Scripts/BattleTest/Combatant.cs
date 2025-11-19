@@ -330,24 +330,16 @@ public class Combatant : MonoBehaviour
                 // EXTRA DMG
                 int bonusDamage = 3;
                 ally.stats.atkDmg += bonusDamage;
-                active++;
 
-                StartCoroutine(BasicAttackAndCount());
+                Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget)); runningCoroutines.Add(co);
+                yield return co;
 
-                IEnumerator BasicAttackAndCount()
-                {
-                    yield return ally.BasicAttackRoutine(randomTarget);
-                    ally.stats.atkDmg -= bonusDamage;
-                    active--;
-                }
+                ally.stats.atkDmg -= bonusDamage;
                 attacks++;
             }
         }
-
-        while (active > 0)
+        while (runningCoroutines.Exists(c => c != null))
             yield return null;
-        //while (runningCoroutines.Exists(c => c != null))
-        //    yield return null;
 
         ActionEnded?.Invoke();
     }
