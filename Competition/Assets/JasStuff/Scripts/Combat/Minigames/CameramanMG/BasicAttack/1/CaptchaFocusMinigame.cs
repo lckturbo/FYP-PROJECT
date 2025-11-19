@@ -54,7 +54,7 @@ public class CaptchaSimple : BaseMinigame
         {
             anim.updateMode = AnimatorUpdateMode.UnscaledTime;
             anim.SetTrigger("start");
-            yield return new WaitForSecondsRealtime(4.1f);
+            yield return new WaitForSecondsRealtime(5.8f);
         }
 
         animationPanel.SetActive(false);
