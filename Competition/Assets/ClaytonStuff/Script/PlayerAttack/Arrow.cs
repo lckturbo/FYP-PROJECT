@@ -32,7 +32,7 @@ public class Arrow : MonoBehaviour
 
     private void Update()
     {
-        timer -= Time.unscaledDeltaTime;
+        timer -= Time.deltaTime;
         if (timer <= 0f)
             gameObject.SetActive(false);
     }
@@ -69,9 +69,11 @@ public class Arrow : MonoBehaviour
                     // Play dialogue first
                     DialogueManager.Instance.StartDialogue(staticEnemy.attackDialogue);
 
-                    StartCoroutine(ArrowBattleFlow(party));
-                    return;
+                    // Continue to battle AFTER dialogue finishes
+                    StartCoroutine(StartBattleAfterDialogueArrow(party));
 
+                    gameObject.SetActive(false);
+                    return;
                 }
 
                 // No dialogue ? start battle immediately
@@ -99,23 +101,6 @@ public class Arrow : MonoBehaviour
         // Other collisions ? disable arrow
         gameObject.SetActive(false);
     }
-
-    private IEnumerator ArrowBattleFlow(EnemyParty party)
-    {
-        // Wait for dialogue to end (ignores time scale)
-        while (DialogueManager.Instance.IsDialogueActive)
-            yield return new WaitForEndOfFrame();
-
-        if (party != null)
-        {
-            BattleManager.instance.HandleBattleTransition(party);
-            BattleManager.instance.SetBattleMode(true);
-        }
-
-        // NOW disable arrow AFTER battle started
-        gameObject.SetActive(false);
-    }
-
 
     private IEnumerator StartBattleAfterDialogueArrow(EnemyParty party)
     {
