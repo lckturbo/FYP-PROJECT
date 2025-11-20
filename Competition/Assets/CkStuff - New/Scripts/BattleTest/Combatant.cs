@@ -551,7 +551,7 @@ public class Combatant : MonoBehaviour
         }
 
         float stunChance;
-        if (appliesStun && !BattleManager.instance.IsBossBattle)
+        if (appliesStun && !BattleManager.instance.IsBossBattle && currentAttackType == AttackType.Skill1)
         {
             stunChance = 0.25f;
 
@@ -561,7 +561,7 @@ public class Combatant : MonoBehaviour
                 engine.ShowFloatingText(currentTarget, "STUNNED");
 
                 currentTarget.ApplyStun(stunTurns);
-                Debug.Log($"{name} stunned {currentTarget.name}! (Chance success)");
+                Debug.Log($"{name} stunned {currentTarget.name}! (Chance success)"); 
 
                 return;
             }
