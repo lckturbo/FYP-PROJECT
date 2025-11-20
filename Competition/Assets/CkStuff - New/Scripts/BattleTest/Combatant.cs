@@ -47,7 +47,6 @@ public class Combatant : MonoBehaviour
     public void SuppressSkillBonusOnce() { _suppressSkillBonusNextHit = true; }
     public void ClearSkillBonusSuppression() { _suppressSkillBonusNextHit = false; }
 
-
     // --- Physics well toggle while lunging ---
     [Header("Collision Control While Acting")]
     [SerializeField] private bool disablePhysicsWhileActing = true;
@@ -157,6 +156,7 @@ public class Combatant : MonoBehaviour
             engine.stunIndicator.HideStun(transform);
         }
     }
+
     public void ApplySilence(int turns)
     {
         silenceTurnsLeft = turns;
@@ -191,6 +191,18 @@ public class Combatant : MonoBehaviour
         Debug.Log("turns: " + turns);
     }
 
+    // ======= NEW: Check if Producer has any usable allies =======
+    private bool HasUsableAllies()
+    {
+        return FindObjectsOfType<Combatant>()
+            .Any(a =>
+                a.isPlayerTeam == this.isPlayerTeam && // same side
+                a.IsAlive &&                           // not dead
+                a != this &&                           // not Producer itself
+                !a.IsStunned                           // not stunned
+            );
+    }
+
     // === Public actions ===
     public void BasicAttack(Combatant target)
     {
@@ -205,16 +217,20 @@ public class Combatant : MonoBehaviour
         if (IsSilenced) return false;
         if (!IsSkill1Ready || !stats) return false;
 
-        if (isProducer && BattleManager.instance.IsBossBattle)
+        // Producer command: needs at least one alive & UNSTUNNED ally
+        if (isProducer)
         {
-            Combatant[] allies = FindObjectsOfType<Combatant>()
-                .Where(a => a.isPlayerTeam && a.IsAlive && a != this)
-                .ToArray();
-
-            if (allies.Length > 0 && allies.All(a => a.IsStunned))
+            if (!HasUsableAllies())
             {
-                Debug.Log("[Producer] Skill1 blocked: both allies stunned!");
+                Debug.Log("[Producer] Skill1 blocked: no usable allies (all dead or stunned).");
+
                 var engine = FindObjectOfType<TurnEngine>();
+                if (engine != null)
+                {
+                    // Optional feedback
+                    engine.ShowFloatingText(this, "NO ALLIES");
+                }
+
                 return false;
             }
         }
@@ -265,17 +281,6 @@ public class Combatant : MonoBehaviour
         return true;
     }
 
-    //private void DoSkill2Support(Combatant target)
-    //{
-    //    currentTarget = target;
-    //    currentAttackType = AttackType.Support;
-
-    //    if (anim) anim.SetTrigger("skill2");
-
-    //    ApplyCameramanCritBuff(target);
-    //}
-
-
     [Header("Support Skill2 Settings (Cameraman)")]
     [SerializeField] private float skill2CritMultiplier = 2f; // 100% increase
     private bool skill2BuffAppliedOnce = false;               // simple guard vs infinite stacking
@@ -293,7 +298,6 @@ public class Combatant : MonoBehaviour
         {
             ncs.critRate *= skill2CritMultiplier;
         }
-        // (If your stats type is different, adjust accordingly.)
 
         if (recipient == this)
             skill2BuffAppliedOnce = true;
@@ -338,6 +342,7 @@ public class Combatant : MonoBehaviour
 
         ActionEnded?.Invoke();
     }
+
     private IEnumerator CommandSkill1Routine(Combatant target)
     {
         ActionBegan?.Invoke();
@@ -382,9 +387,11 @@ public class Combatant : MonoBehaviour
                     Debug.LogWarning($"Buff removed from {ally.name}");
                 }
             }
+
             if (ally == this) continue;
             if (!ally.IsAlive) continue;
             if (ally.isPlayerTeam != this.isPlayerTeam) continue;
+            if (ally.IsStunned) continue;   // NEW: stunned allies can't be commanded
 
             ally.blockMinigames = true;
 
@@ -400,7 +407,8 @@ public class Combatant : MonoBehaviour
                 int bonusDamage = 3;
                 ally.stats.atkDmg += bonusDamage;
 
-                Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget)); runningCoroutines.Add(co);
+                Coroutine co = StartCoroutine(ally.BasicAttackRoutine(randomTarget));
+                runningCoroutines.Add(co);
                 yield return co;
 
                 ally.stats.atkDmg -= bonusDamage;
@@ -409,12 +417,12 @@ public class Combatant : MonoBehaviour
 
             ally.blockMinigames = false;
         }
+
         while (runningCoroutines.Exists(c => c != null))
             yield return null;
 
         ActionEnded?.Invoke();
     }
-
 
     public IEnumerator BasicAttackRoutine(Combatant target)
     {
@@ -466,8 +474,6 @@ public class Combatant : MonoBehaviour
     }
 
     // BATTLE CAMERA / PARODY STUFF //
-    // private bool zoomFinished = false;
-
     public void OnZoomIn()
     {
         if (parodyEffect != null)
@@ -477,6 +483,7 @@ public class Combatant : MonoBehaviour
             parodyEffect.ZoomIn(this);
         }
     }
+
     public void OnZoomOut()
     {
         if (parodyEffect != null)
@@ -486,6 +493,7 @@ public class Combatant : MonoBehaviour
             parodyEffect.ZoomOut();
         }
     }
+
     public void OnCamShake()
     {
         if (parodyEffect != null)
@@ -518,6 +526,7 @@ public class Combatant : MonoBehaviour
             yield return null;
         }
     }
+
     public void OnSnapPan()
     {
         if (parodyEffect != null)
@@ -551,6 +560,7 @@ public class Combatant : MonoBehaviour
         }
 
         float stunChance;
+
         if (appliesStun && !BattleManager.instance.IsBossBattle && currentAttackType == AttackType.Skill1)
         {
             if (currentTarget.IsStunned) return;
@@ -635,6 +645,7 @@ public class Combatant : MonoBehaviour
                 multiHitIndex = 0;
             }
         }
+
         // === BOSS attacks all ===
         if (!isPlayerTeam && BattleManager.instance.IsBossBattle)
         {
@@ -694,7 +705,6 @@ public class Combatant : MonoBehaviour
         currentTarget.health.TakeDamage(damageToApply, stats, NewElementType.None);
     }
 
-
     private bool HasAnimatorParameter(string name, AnimatorControllerParameterType type)
     {
         if (!anim) return false;
@@ -749,11 +759,8 @@ public class Combatant : MonoBehaviour
         if (dir.sqrMagnitude < 0.0001f)
             dir = Vector3.right;
 
-        //if (!isPlayerTeam && currentAttackType == AttackType.Skill1 && !BattleManager.instance.IsBossBattle)
-        //    return b + dir * (approachDistance * 0.8f);
         return b + dir * approachDistance;
     }
-
 
     private IEnumerator SmoothMove(Transform mover, Vector3 from, Vector3 to, float speed, float arc)
     {
@@ -978,7 +985,6 @@ public class Combatant : MonoBehaviour
         Debug.Log($"[Producer] RLGL Buff Applied: +{buff} ATK to all allies");
     }
 
-
     private int CalculateDamage(Combatant target, float multiplierOverride)
     {
         if (target == null || target.health == null)
@@ -1013,10 +1019,8 @@ public class Combatant : MonoBehaviour
         return Mathf.Max(Mathf.RoundToInt(rawDamage), 1);
     }
 
-
     public void Hitstop(float duration)
     {
         HitstopManager.instance.TriggerHitstop(duration);
     }
-
 }
