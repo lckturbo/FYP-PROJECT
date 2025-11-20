@@ -27,7 +27,10 @@ public abstract class BaseMinigame : MonoBehaviour
         if (skipButton)
         {
             skipButton.onClick.RemoveListener(RequestSkip);
-            if (show) skipButton.onClick.AddListener(RequestSkip);
+            if (show) skipButton.onClick.AddListener(()=> {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0,0,0));
+                RequestSkip();
+                });
             skipButton.gameObject.SetActive(show);
         }
         if (!show) skipRequested = false;

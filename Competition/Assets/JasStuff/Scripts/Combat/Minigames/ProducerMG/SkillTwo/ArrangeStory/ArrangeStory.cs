@@ -17,11 +17,11 @@ public class ArrangeStory : BaseMinigame
     //private bool running = false;
     private List<ArrangeSlot> slots = new();
     private bool instructionStarted = false;
+    private bool submitted = false;
 
     private void Awake()
     {
         slots.AddRange(slotsParent.GetComponentsInChildren<ArrangeSlot>(true));
-        StartCoroutine(Run());
     }
     public void StartInstructionCountdown()
     {
@@ -30,7 +30,7 @@ public class ArrangeStory : BaseMinigame
     }
     public override IEnumerator Run()
     {
-       // BattleManager.instance?.SetBattlePaused(true);
+        BattleManager.instance?.SetBattlePaused(true);
 
         instructionPanel.SetActive(true);
         minigamePanel.SetActive(false);
@@ -68,38 +68,28 @@ public class ArrangeStory : BaseMinigame
         minigamePanel.SetActive(true);
 
         timer = 20.0f;
-       // running = true;
 
-        while (timer > 0f)
+        while (timer > 0f && !submitted)
         {
             timer -= Time.unscaledDeltaTime;
             if (timerText) timerText.text = $"{timer:F1}s";
             yield return null;
         }
 
-        //running = false;
+        EvaluateResult();
 
-        int correctCount = 0;
-
-        foreach (var slot in slots)
-        {
-            if (slot.IsCorrect())
-                correctCount++;
-        }
-
-        if (correctCount == slots.Count)
-            Result = MinigameManager.ResultType.Perfect;
-        else if (correctCount >= Mathf.CeilToInt(slots.Count * 0.6f))
-            Result = MinigameManager.ResultType.Success;
-        else
-            Result = MinigameManager.ResultType.Fail;
-
-        if(timerText) timerText.text = Result + "!";
+        if (timerText) timerText.text = Result + "!";
         yield return new WaitForSecondsRealtime(1.0f);
 
-        //BattleManager.instance?.SetBattlePaused(false);
+        BattleManager.instance?.SetBattlePaused(false);
     }
     public void OnSubmit()
+    {
+        AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
+        submitted = true;
+    }
+
+    private void EvaluateResult()
     {
         int correctCount = 0;
 
@@ -115,7 +105,5 @@ public class ArrangeStory : BaseMinigame
             Result = MinigameManager.ResultType.Success;
         else
             Result = MinigameManager.ResultType.Fail;
-
-        Debug.Log(Result);
     }
 }
