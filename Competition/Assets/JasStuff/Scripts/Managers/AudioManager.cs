@@ -22,7 +22,7 @@ public class AudioManager : MonoBehaviour
         if (instance == null) instance = this;
         else { Destroy(gameObject); return; }
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
 
         soundDictionary = new Dictionary<string, Sound>();
         foreach (Sound s in sounds)

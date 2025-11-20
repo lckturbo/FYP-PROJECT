@@ -9,7 +9,7 @@ public class SettingsManager : MonoBehaviour, IDataPersistence
         if (!instance) instance = this;
         else Destroy(gameObject);
 
-        DontDestroyOnLoad(gameObject);
+       // DontDestroyOnLoad(gameObject);
     }
     public void OnMasterVolumeChanged(float value)
     {

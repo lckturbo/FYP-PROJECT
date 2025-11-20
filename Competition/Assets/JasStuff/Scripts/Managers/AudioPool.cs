@@ -13,7 +13,7 @@ public class AudioPool : MonoBehaviour
         if (instance == null) instance = this;
         else { Destroy(gameObject); return; }
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
 
         for (int i = 0; i < initialPoolSize; i++)
             pool.Enqueue(CreateNewSource());
