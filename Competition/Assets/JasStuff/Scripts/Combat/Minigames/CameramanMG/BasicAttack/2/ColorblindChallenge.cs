@@ -107,9 +107,6 @@ public class ColorblindChallenge : BaseMinigame
     {
         BattleManager.instance?.SetBattlePaused(true);
 
-        AudioManager.instance.PlaySFXAtPoint("Kahoot Music (30 Second Countdown) 13", transform.position);
-
-
         animationPanel.SetActive(true);
 
         if (anim)
@@ -136,6 +133,7 @@ public class ColorblindChallenge : BaseMinigame
         {
             timeLeft -= Time.unscaledDeltaTime;
             if (timerText) timerText.text = timeLeft.ToString("0.0");
+
             yield return null;
         }
 
@@ -143,7 +141,6 @@ public class ColorblindChallenge : BaseMinigame
 
         yield return new WaitForSecondsRealtime(0.6f);
         
-        AudioManager.instance.StopSFX();
 
         BattleManager.instance?.SetBattlePaused(false);
     }
