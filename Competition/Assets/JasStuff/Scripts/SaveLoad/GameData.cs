@@ -88,12 +88,12 @@ public class GameData
         }
     }
 
-    [System.Serializable]
-    public class EnemyPositionData
-    {
-        public string enemyID;
-        public float x, y;
-    }
+    //[System.Serializable]
+    //public class EnemyPositionData
+    //{
+    //    public string enemyID;
+    //    public float x, y;
+    //}
 
     public bool hasSavedGame;
 
@@ -151,7 +151,7 @@ public class GameData
     public bool beamReceiverSolved;
 
     public List<DialogueTriggerState> dialogueTriggerStates;
-    public List<EnemyPositionData> enemyPositions;
+    //public List<EnemyPositionData> enemyPositions;
 
     [System.Serializable]
     public class InventoryItemData
@@ -237,6 +237,6 @@ public class GameData
         clearedFogIds = new List<string>();
 
         dialogueTriggerStates = new List<DialogueTriggerState>();
-        enemyPositions = new List<EnemyPositionData>();
+        //enemyPositions = new List<EnemyPositionData>();
     }
 }
