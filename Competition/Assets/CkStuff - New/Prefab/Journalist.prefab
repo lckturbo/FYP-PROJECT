@@ -4951,6 +4951,7 @@ GameObject:
   - component: {fileID: -4074030254782739097}
   - component: {fileID: -571296118408834557}
   - component: {fileID: 710644137001952596}
+  - component: {fileID: 9094367645945210714}
   m_Layer: 8
   m_Name: Journalist
   m_TagString: Player
@@ -5397,6 +5398,18 @@ MonoBehaviour:
   defaultMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   battleMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   targetRenderer: {fileID: 0}
+--- !u!114 &9094367645945210714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200289770863024659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37f04204990bafe4aa593fe63560041f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5080612305008182421
 GameObject:
   m_ObjectHideFlags: 0
