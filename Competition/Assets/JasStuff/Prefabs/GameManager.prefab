@@ -122,16 +122,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sounds:
   - clip: {fileID: 8300000, guid: 145d6ba0f58dd274e902dc6ba87e164d, type: 3}
-    volume: 0.35
+    volume: 0.01
     pitch: 1
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-  - clip: {fileID: 8300000, guid: 3a13251797f0ab84d8b4cf073084c2b1, type: 3}
-    volume: 0.35
-    pitch: 1
-    loop: 1
-    audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-  - clip: {fileID: 8300000, guid: e76382a825efe3145bf2ed95d066a096, type: 3}
+  - clip: {fileID: 8300000, guid: 238ff92ae59cd1c4793fec39f6f34e2f, type: 3}
     volume: 0.35
     pitch: 1
     loop: 1
@@ -147,7 +142,7 @@ MonoBehaviour:
     loop: 1
     audioMixer: {fileID: -5758270451812648890, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
   - clip: {fileID: 8300000, guid: 8097b70a35e0daf4a8562bdd9a017474, type: 3}
-    volume: 1
+    volume: 0.5
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
@@ -176,20 +171,135 @@ MonoBehaviour:
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-  - clip: {fileID: 8300000, guid: cf86cf534d3088a45988796c78282aa2, type: 3}
-    volume: 1
-    pitch: 1
-    loop: 0
-    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
-  - clip: {fileID: 8300000, guid: fa1eb13a7ac37e048bfef29c5efc4af5, type: 3}
-    volume: 1
-    pitch: 1
-    loop: 0
-    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
   - clip: {fileID: 8300000, guid: 43f338e2b5667144a98ccc4338004d12, type: 3}
-    volume: 1
+    volume: 0.8
     pitch: 1
-    loop: 0
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 903949571ad1e3f4bbae374971e6b2b3, type: 3}
+    volume: 0.15
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 570aaed7b861eca4fb0164cae09d8c3a, type: 3}
+    volume: 0.8
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 479fd7aec7bc08045a002d995bbc4cb3, type: 3}
+    volume: 0.8
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: e1aa47b42ae2eb644b76a78bf13fd45e, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 55a20c2ea8a488e48b333489763e07c0, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 88a1a46e31786264fb589196e56b44e9, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: d0695765b641e2a4ca75dac69de6e791, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 30c8c4e054b87d24588b95bd13137249, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: a3123893c00397247b2a15567a9d8fd4, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 104a8e0939b450b46acdebc8cecfa60a, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 7053a930eb09cf147bbf9b5301ab95ad, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 645d3dd0b5b0f8e40ac8fd640a37b8ef, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: c140b1fc923b9aa4aa8a87d9a10d94ac, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 8b7e48636413b4c4db12e196ddf3a538, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 8b7e48636413b4c4db12e196ddf3a538, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 6ce874ea438de6e48bd6e446c44c474f, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: cdc2e537d2b26c740913b6a0e67b66da, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: c1717b27e05be054b9176256678a8190, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 6e9bf669dfad60d4f9013f95c10e8378, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 8864cdd55d747da448ea2d11042b18a2, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 30fd1553f779a6d46a898a97fdbac575, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 3a0281a4ed2a8a7498a7812571b639e0, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 9ba2745eb1daa2e4e8a0de3c8b826de7, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: d31cc6f6d15e7144cb1a52517b96afa0, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: 5a011dec1bd0e9944bf28c45c6542614, type: 3}
+    volume: 0.5
+    pitch: 1
+    loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
   audioMixer: {fileID: 24100000, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
 --- !u!114 &2743626251221848417

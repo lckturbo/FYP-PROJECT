@@ -1269,6 +1269,16 @@ MonoBehaviour:
   readySeconds: 0.7
   goSeconds: 0.5
   readyGoPopScale: 1.2
+  sfxSnapHit: camera-flash-204151
+  sfxSnapMiss: snap_miss
+  sfxGoldenStart: golden_start
+  sfxGoldenSuccess: golden_success
+  sfxGoldenFail: golden_fail
+  sfxReady: ui_ready
+  sfxGo: ui_go
+  sfxOkay: ui_okay
+  sfxMiss: ui_miss
+  sfxFinish: finish_fanfare
   normalBeatSeconds: 1.25
   normalBeatGapSeconds: 0.75
   normalHitsNeeded: {x: 8, y: 12}
