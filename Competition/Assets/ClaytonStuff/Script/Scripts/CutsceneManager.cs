@@ -87,13 +87,13 @@ public class CutsceneManager : MonoBehaviour
     {
         if (!cutscenePlaying) return;
 
-        // Keyboard skip:
-        if (Input.GetKeyDown(KeyCode.Escape) ||
-            Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.Return))
-        {
-            SkipCutscene();
-        }
+        //// Keyboard skip:
+        //if (Input.GetKeyDown(KeyCode.Escape) ||
+        //    Input.GetKeyDown(KeyCode.Space) ||
+        //    Input.GetKeyDown(KeyCode.Return))
+        //{
+        //    SkipCutscene();
+        //}
     }
 
     /// <summary>
@@ -118,11 +118,11 @@ public class CutsceneManager : MonoBehaviour
     {
         cutscenePlaying = false;
 
-        if (activeCutscene != null)
-            Destroy(activeCutscene);
+        //if (activeCutscene != null)
+        //    Destroy(activeCutscene);
 
-        if (skipButtonUI != null)
-            skipButtonUI.SetActive(false);
+        //if (skipButtonUI != null)
+        //    skipButtonUI.SetActive(false);
 
         SceneManager.LoadScene(targetScene);
     }
