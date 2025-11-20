@@ -24,8 +24,6 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
     {
         checkpointList = new List<Checkpoint>(FindObjectsOfType<Checkpoint>());
         checkpointList = checkpointList.Where(c => c != null).ToList();
-
-        Debug.Log($"[CheckpointManager] Registered {checkpointList.Count} checkpoints in scene {SceneManager.GetActiveScene().name}");
     }
     public void RegisterCheckpoint(Checkpoint checkpoint)
     {
