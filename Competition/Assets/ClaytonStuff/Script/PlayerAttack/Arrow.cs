@@ -6,7 +6,7 @@ public class Arrow : MonoBehaviour
 {
     [SerializeField] private float speed = 10f;
   //  [SerializeField] private int damage = 1;
-    [SerializeField] private float lifeTime = 3f;
+    [SerializeField] private float lifeTime = 5f;
 
     private float timer;
     private Vector2 direction;
@@ -47,7 +47,6 @@ public class Arrow : MonoBehaviour
     {
         if (collision == null) return;
 
-        // Hit Enemy
         if (collision.CompareTag("Enemy") || collision.CompareTag("Boss"))
         {
             EnemyBase enemy = collision.GetComponent<EnemyBase>();
@@ -63,33 +62,34 @@ public class Arrow : MonoBehaviour
 
                 EnemyParty party = enemy.GetComponent<EnemyParty>();
 
-                // Check if the enemy has a battle-start dialogue
+                // Dialogue BEFORE battle
                 if (enemy is StaticEnemy staticEnemy && staticEnemy.attackDialogue != null)
                 {
-                    // Play dialogue first
                     DialogueManager.Instance.StartDialogue(staticEnemy.attackDialogue);
 
-                    // Continue to battle AFTER dialogue finishes
-                    StartCoroutine(StartBattleAfterDialogueArrow(party));
-
-                    gameObject.SetActive(false);
+                    // DO NOT DISABLE ARROW HERE
+                    StartCoroutine(ArrowBattleFlow(party));
                     return;
                 }
 
-                // No dialogue ? start battle immediately
+                // No dialogue? Start battle immediately
                 if (party != null)
                 {
                     BattleManager.instance.HandleBattleTransition(party);
                     BattleManager.instance.SetBattleMode(true);
+
+                    // Only disable AFTER battle starts
+                    gameObject.SetActive(false);
+                    return;
                 }
             }
 
+            // Enemy but no party? Still disable
             gameObject.SetActive(false);
             return;
         }
 
-
-        // Hit Breakable Object
+        // Breakable object
         BreakableObject breakable = collision.GetComponent<BreakableObject>();
         if (breakable != null)
         {
@@ -98,13 +98,14 @@ public class Arrow : MonoBehaviour
             return;
         }
 
-        // Other collisions ? disable arrow
+        // Other collisions
         gameObject.SetActive(false);
     }
 
-    private IEnumerator StartBattleAfterDialogueArrow(EnemyParty party)
+
+    private IEnumerator ArrowBattleFlow(EnemyParty party)
     {
-        // Wait until all dialogue text is finished
+        // Wait until dialogue ends
         while (DialogueManager.Instance.IsDialogueActive)
             yield return null;
 
@@ -113,7 +114,11 @@ public class Arrow : MonoBehaviour
             BattleManager.instance.HandleBattleTransition(party);
             BattleManager.instance.SetBattleMode(true);
         }
+
+        // NOW disable arrow after battle starts
+        gameObject.SetActive(false);
     }
+
 
 
 }
