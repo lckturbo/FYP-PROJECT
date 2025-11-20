@@ -26,7 +26,7 @@ public class BattleManager : MonoBehaviour
         else
             Destroy(gameObject);
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
     }
 
     public void RegisterEnemy(EnemyBase enemy)

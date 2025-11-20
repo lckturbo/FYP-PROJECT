@@ -48,7 +48,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         {
             instance = this;
             SceneManager.sceneLoaded += OnSceneLoaded;
-            DontDestroyOnLoad(gameObject);
+           // DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
     }

@@ -13,7 +13,7 @@ public class EnemyTracker : MonoBehaviour, IDataPersistence
         else 
             Destroy(gameObject);
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
     }
 
     public void MarkDefeated(string id)

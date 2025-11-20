@@ -9,10 +9,12 @@ public class PartyLevelSystem : MonoBehaviour, IDataPersistence
 
     private void Awake()
     {
+        if (transform.parent != null)
+            transform.SetParent(null);
         if (Instance && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
     }
 
     // Call this after battles / quests / kills

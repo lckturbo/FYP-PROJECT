@@ -23,7 +23,7 @@ public class SaveLoadSystem : MonoBehaviour
         else
             Destroy(gameObject);
 
-        DontDestroyOnLoad(gameObject);
+       // DontDestroyOnLoad(gameObject);
         fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
         SceneManager.sceneLoaded += OnSceneLoaded;
     }

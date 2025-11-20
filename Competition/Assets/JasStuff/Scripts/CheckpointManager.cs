@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -62,11 +61,7 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
             {
                 activeCheckpoint = cp;
                 cp.Activate(); // optional: visually reactivate
-                Debug.Log($"[CheckpointManager] Restored checkpoint ID {data.lastCheckpointID}");
-            }
-            else
-            {
-                Debug.LogWarning($"[CheckpointManager] Could not find checkpoint ID {data.lastCheckpointID}");
+               // Debug.Log($"[CheckpointManager] Restored checkpoint ID {data.lastCheckpointID}");
             }
         }
     }
@@ -75,7 +70,7 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
     {
         if (checkpointList == null || checkpointList.Count == 0)
         {
-            Debug.Log("[CheckpointManager] No checkpoints in this scene — skipping save.");
+            //Debug.Log("[CheckpointManager] No checkpoints in this scene — skipping save.");
             return;
         }
 
@@ -111,7 +106,7 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
         if (PlayerParty.instance != null)
             PlayerParty.instance.ResetPartyPositions(cpPos);
 
-        Debug.Log($"[CheckpointManager] Player returned to checkpoint ID {activeCheckpoint.GetID()}");
+        //Debug.Log($"[CheckpointManager] Player returned to checkpoint ID {activeCheckpoint.GetID()}");
     }
 
 
