@@ -67,7 +67,8 @@ public class MovingBlock : MonoBehaviour
             return;
 
         // Find the player by layer
-        GameObject player = FindObjectOfType<NewPlayerMovement>()?.gameObject;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
         if (player == null)
         {
             Debug.LogWarning("No player found in scene.");
@@ -97,10 +98,16 @@ public class MovingBlock : MonoBehaviour
             if (ally.layer == allyLayer)
             {
                 ally.transform.position = leader.position;
-                Debug.Log($"Ally {ally.name} moved to leader position");
+
+                var follower = ally.GetComponent<PartyFollower>();
+                if (follower != null)
+                {
+                    follower.ResetFollower();
+                }
             }
         }
     }
+
 
     private void OnDrawGizmos()
     {

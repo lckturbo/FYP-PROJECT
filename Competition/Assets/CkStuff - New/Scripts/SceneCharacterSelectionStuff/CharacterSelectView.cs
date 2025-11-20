@@ -231,6 +231,8 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         SaveLoadSystem.instance.SaveGame();
 
         // PLAY CUTSCENE BEFORE LOADING
+        AudioManager.instance.StopMusic();
+        AudioManager.instance.PlayMusic("night");
         CutsceneManager.instance.PlayCutsceneThenLoad("SampleScene");
     }
 
