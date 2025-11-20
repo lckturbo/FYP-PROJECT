@@ -187,14 +187,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
                 SaveLoadSystem.instance.NewGame();
 
-                if (CutsceneManager.instance != null)
-                {
-                    CutsceneManager.instance.PlayCutsceneThenLoad("CharSelection");
-                }
-                else
-                {
-                    ASyncManager.instance.LoadLevelBtn("CharSelection");
-                }
+                ASyncManager.instance.LoadLevelBtn("CharSelection");
+
             });
 
 
