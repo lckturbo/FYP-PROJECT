@@ -9,11 +9,11 @@ public class BaseStats : ScriptableObject
     public float Speed;
 
     [Header("Health & Defense")]
-    public int maxHealth; //your current one @jas
-    public float attackreduction; //aka flat defense
+    public int maxHealth;
+    public float attackreduction;
 
     [Header("Combat")]
-    public int atkDmg; //your current one @jas
+    public int atkDmg;
     public float actionvaluespeed;
 
     [Range(0f, 1f)] public float critRate;
@@ -23,7 +23,6 @@ public class BaseStats : ScriptableObject
     public NewElementType attackElement = NewElementType.None;
     public NewElementType defenseElement = NewElementType.None;
 
-    // 1.0 = neutral, <1 = resists (less damage), >1 = weak (more damage)
     [Range(0f, 2f)] public float fireRes;
     [Range(0f, 2f)] public float waterRes;
     [Range(0f, 2f)] public float grassRes;
