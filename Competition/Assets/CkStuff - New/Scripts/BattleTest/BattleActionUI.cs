@@ -30,30 +30,25 @@ public class BattleActionUI : MonoBehaviour
 
     private Combatant _currentUnit;
 
-    public enum SkillSlot
-    {
-        Basic,
-        Skill1,
-        Skill2
-    }
+    public enum SkillSlot { Basic, Skill1, Skill2 }
 
-    private enum PendingAction
-    {
-        None,
-        Basic,
-        Skill1,
-        Skill2
-    }
-
+    private enum PendingAction { None, Basic, Skill1, Skill2 }
     private PendingAction _pendingAction = PendingAction.None;
 
     private Coroutine _tooltipRoutine;
     private SkillSlot _hoverSlot;
     private bool _hoverActive = false;
 
+    // === PAUSE HELPER ===
+    private bool IsPaused()
+    {
+        return UIManager.instance != null && UIManager.instance.IsPaused();
+    }
+
     private void Awake()
     {
         if (panel) panel.SetActive(false);
+
         if (attackBtn) attackBtn.onClick.AddListener(OnAttackClicked);
         if (skillBtn) skillBtn.onClick.AddListener(OnSkill1Clicked);
         if (skill2Btn) skill2Btn.onClick.AddListener(OnSkill2Clicked);
@@ -63,6 +58,13 @@ public class BattleActionUI : MonoBehaviour
 
         if (tooltipPanel)
             tooltipPanel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        // Ensure tooltip disappears immediately when paused
+        if (IsPaused() && tooltipPanel && tooltipPanel.activeSelf)
+            HideTooltipImmediate();
     }
 
     private void OnEnable()
@@ -94,7 +96,6 @@ public class BattleActionUI : MonoBehaviour
 
         if (unit != null)
             turnIndicator.ShowArrow(unit.transform);
-
 
         if (_currentUnit)
         {
@@ -159,6 +160,8 @@ public class BattleActionUI : MonoBehaviour
 
     private void HandleSelectionChanged(Combatant target)
     {
+        if (IsPaused()) return;
+
         if (_pendingAction == PendingAction.None)
         {
             if (target != null) ShowMessage(null);
@@ -178,7 +181,6 @@ public class BattleActionUI : MonoBehaviour
         }
 
         ShowMessage(null);
-
         StartCoroutine(ExecutePendingActionAfterDelay(target));
     }
 
@@ -193,6 +195,8 @@ public class BattleActionUI : MonoBehaviour
         selector?.Disable();
         ResetButtonVisuals();
         HideTooltipImmediate();
+
+        if (IsPaused()) yield break;
 
         switch (action)
         {
@@ -210,20 +214,24 @@ public class BattleActionUI : MonoBehaviour
         }
     }
 
+    // ================= BUTTON CLICK HANDLERS ======================
+
     private void OnAttackClicked()
     {
+        if (IsPaused()) return;
         if (_currentUnit == null || !_currentUnit.IsAlive) return;
 
         _pendingAction = PendingAction.Basic;
         ShowMessage("Attack selected. Choose a target.");
         UpdateButtonVisualsForSelection();
 
-        if (selector) selector.EnableForPlayerUnit(_currentUnit);
+        selector?.EnableForPlayerUnit(_currentUnit);
         HideTooltipImmediate();
     }
 
     private void OnSkill1Clicked()
     {
+        if (IsPaused()) return;
         if (_currentUnit == null || !_currentUnit.IsSkill1Ready) return;
 
         if (_currentUnit.skill1IsCommand)
@@ -242,12 +250,13 @@ public class BattleActionUI : MonoBehaviour
         ShowMessage("Skill 1 selected. Choose a target.");
         UpdateButtonVisualsForSelection();
 
-        if (selector) selector.EnableForPlayerUnit(_currentUnit);
+        selector?.EnableForPlayerUnit(_currentUnit);
         HideTooltipImmediate();
     }
 
     private void OnSkill2Clicked()
     {
+        if (IsPaused()) return;
         if (_currentUnit == null || !_currentUnit.IsSkill2Ready) return;
 
         if (_currentUnit.Skill2IsSupport)
@@ -266,18 +275,17 @@ public class BattleActionUI : MonoBehaviour
         ShowMessage("Skill 2 selected. Choose a target.");
         UpdateButtonVisualsForSelection();
 
-        if (selector) selector.EnableForPlayerUnit(_currentUnit);
+        selector?.EnableForPlayerUnit(_currentUnit);
         HideTooltipImmediate();
     }
 
+    // ================================================================
+
     private void ResetButtonVisuals()
     {
-        if (attackBtn)
-            attackBtn.GetComponent<Image>().color = normalButtonColor;
-        if (skillBtn)
-            skillBtn.GetComponent<Image>().color = normalButtonColor;
-        if (skill2Btn)
-            skill2Btn.GetComponent<Image>().color = normalButtonColor;
+        if (attackBtn) attackBtn.GetComponent<Image>().color = normalButtonColor;
+        if (skillBtn) skillBtn.GetComponent<Image>().color = normalButtonColor;
+        if (skill2Btn) skill2Btn.GetComponent<Image>().color = normalButtonColor;
     }
 
     private void UpdateButtonVisualsForSelection()
@@ -306,6 +314,7 @@ public class BattleActionUI : MonoBehaviour
     private void ShowMessage(string msg)
     {
         if (!infoLabel) return;
+
         if (string.IsNullOrEmpty(msg))
         {
             infoLabel.gameObject.SetActive(false);
@@ -317,8 +326,11 @@ public class BattleActionUI : MonoBehaviour
         }
     }
 
+    // ===================== TOOLTIP / HOVER ==========================
+
     public void BeginHover(SkillSlot slot)
     {
+        if (IsPaused()) return;
         if (_currentUnit == null) return;
 
         _hoverSlot = slot;
@@ -343,18 +355,25 @@ public class BattleActionUI : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < hoverDelaySeconds && _hoverActive)
         {
+            if (IsPaused())
+            {
+                HideTooltipImmediate();
+                yield break;
+            }
+
             elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
 
         _tooltipRoutine = null;
 
-        if (_hoverActive)
+        if (_hoverActive && !IsPaused())
             ShowTooltipForSlot(_hoverSlot);
     }
 
     private void ShowTooltipForSlot(SkillSlot slot)
     {
+        if (IsPaused()) return;
         if (tooltipPanel == null || tooltipTitle == null || tooltipDescription == null)
             return;
 

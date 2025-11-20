@@ -106,6 +106,12 @@ public class BattleSystem : MonoBehaviour
         public NewCharacterStats statsAtLevel;
     }
 
+    // ===== PAUSE HELPER =====
+    private bool IsPaused()
+    {
+        return UIManager.instance != null && UIManager.instance.IsPaused();
+    }
+
     private void OnEnable()
     {
         if (turnEngine)
@@ -140,7 +146,7 @@ public class BattleSystem : MonoBehaviour
         BattleManager.instance.SetBattlePaused(true);
         BattleUIManager.instance.HideAllUI();
         bossIntroDone = false;
-       
+
         bossIntroAnimator.SetTrigger("start");
 
         yield return new WaitUntil(() => bossIntroDone);
@@ -153,12 +159,21 @@ public class BattleSystem : MonoBehaviour
 
     private void Update()
     {
-        if (trackBattleElapsed && !_ended && !_pausedForMenu)
+        // Timer should NOT tick while paused
+        if (trackBattleElapsed && !_ended && !_pausedForMenu && !IsPaused())
             _battleTimer.Tick(Time.deltaTime);
     }
 
     private void LateUpdate()
     {
+        // Stop flashing when paused; keep solid "turn" color
+        if (IsPaused())
+        {
+            if (_currentTurnIcon != null)
+                _currentTurnIcon.color = iconTurnColor;
+            return;
+        }
+
         // Flash current-turn portrait
         if (_currentTurnIcon != null)
         {
@@ -685,6 +700,13 @@ public class BattleSystem : MonoBehaviour
 
         while (t < turnScaleDuration)
         {
+            // Pause the scale animation while game is paused
+            if (IsPaused())
+            {
+                yield return null;
+                continue;
+            }
+
             t += Time.unscaledDeltaTime;
             float lerp = Mathf.Clamp01(t / turnScaleDuration);
             // ease-out

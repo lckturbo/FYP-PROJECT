@@ -9,7 +9,7 @@ public class BattleUIManager : MonoBehaviour
 
     void Awake()
     {
-        if(instance == null)
+        if (instance == null)
             instance = this;
     }
 
@@ -23,5 +23,19 @@ public class BattleUIManager : MonoBehaviour
     {
         foreach (var c in canvases)
             if (c) c.gameObject.SetActive(true);
+    }
+
+    public void SetInteractable(bool enabled)
+    {
+        foreach (var c in canvases)
+        {
+            if (!c) continue;
+
+            var cg = c.GetComponent<CanvasGroup>();
+            if (!cg) cg = c.gameObject.AddComponent<CanvasGroup>();
+
+            cg.interactable = enabled;
+            cg.blocksRaycasts = enabled;
+        }
     }
 }
