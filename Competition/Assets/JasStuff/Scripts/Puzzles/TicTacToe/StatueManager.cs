@@ -72,6 +72,8 @@ public class StatueManager : BoardManager, IDataPersistence
     {
         if (puzzleSolved) return;
 
+        AudioManager.instance.PlaySFXAtPoint("computer-mouse-click-352734", transform.position);
+
         // SAVE AFTER EVERY MOVE
         if (SaveLoadSystem.instance != null)
         {

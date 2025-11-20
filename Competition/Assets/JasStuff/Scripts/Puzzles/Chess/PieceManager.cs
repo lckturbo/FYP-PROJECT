@@ -96,6 +96,8 @@ public class PieceManager : BoardManager, IDataPersistence
         var expectedMove = activeSolution.moves[currentStep];
         bool correctMove = (expectedMove.type == p.pieceType && expectedMove.isWhite == p.IsWhite() && expectedMove.targetCell == toCell);
 
+        AudioManager.instance.PlaySFXAtPoint("bottleput-88659", transform.position);
+
         if (correctMove)
         {
             Debug.Log($"Correct move ({currentStep + 1}/{activeSolution.moves.Count})");

@@ -68,7 +68,7 @@ public class ToggleableBlock : MonoBehaviour, IDataPersistence
     private void SetOpenInternal(bool open, bool instant)
     {
         _isOpen = open;
-
+        AudioManager.instance.PlaySFXAtPoint("irongate2-85045", transform.position);
         bool effectiveOpen = invert ? !open : open;
         ApplyState(effectiveOpen, instant);
     }

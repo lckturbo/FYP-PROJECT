@@ -76,6 +76,8 @@ public class Chest : MonoBehaviour, IDataPersistence
         if (opened) return;
         opened = true;
 
+        AudioManager.instance.PlaySFXAtPoint("chest-opening-87569 (1)", transform.position);
+
         if (spawnPoint == null) spawnPoint = transform;
 
         int itemCount = Random.Range(minItems, maxItems + 1);
