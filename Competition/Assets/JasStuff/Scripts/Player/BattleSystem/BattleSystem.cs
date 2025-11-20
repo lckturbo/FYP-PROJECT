@@ -31,6 +31,14 @@ public class BattleSystem : MonoBehaviour
         public TMP_Text label; // "Turn" / "Next"
     }
 
+    // ===== Element icon mapping =====
+    [Serializable]
+    private struct ElementIconEntry
+    {
+        public NewElementType element; // Fire/Water/Grass/Dark/Light/None
+        public Sprite icon;           // sprite for that element
+    }
+
     [Header("SpawnPoints")]
     [SerializeField] private Transform[] allySpawnPt;
     [SerializeField] private Transform[] enemySpawnPt;
@@ -50,6 +58,12 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private float turnFlashSpeed = 4f;
     [SerializeField] private float turnScaleMultiplier = 1.2f;
     [SerializeField] private float turnScaleDuration = 0.18f;
+
+    [Header("Element Icons")]
+    [SerializeField] private Image[] playerElementIcons;  // index 0 = leader, 1/2 = allies
+    [SerializeField] private Image[] enemyElementIcons;   // one per enemy slot
+    [SerializeField] private Sprite defaultElementIcon;
+    [SerializeField] private ElementIconEntry[] elementIconTable;
 
     [Header("Boss Animation Transition")]
     [SerializeField] private Animator bossIntroAnimator;
@@ -244,6 +258,9 @@ public class BattleSystem : MonoBehaviour
             }
         }
 
+        // Assign leader element icon (using attackElement)
+        AssignPlayerElementIcon(leaderCombatIndex, leaderRT);
+
         if (leaderObj.name == "Leader_Producer")
         {
             cL.isProducer = true;
@@ -317,6 +334,9 @@ public class BattleSystem : MonoBehaviour
                             slotIcon.sprite = member.battlePortrait;
                     }
                 }
+
+                // Assign ally element icon
+                AssignPlayerElementIcon(allyCombatIndex, allyRT);
 
                 if (allyObj.name == "Ally_Producer")
                 {
@@ -416,6 +436,9 @@ public class BattleSystem : MonoBehaviour
                     enemyTurnSlots[enemyCombatIndex].icon.sprite = portrait;
             }
 
+            // Assign enemy element icon (use runtime stats if available, else base)
+            AssignEnemyElementIcon(enemyCombatIndex, enemyRT ?? baseEnemyStats);
+
             AddEnemyScaler(enemy);
         }
 
@@ -464,6 +487,9 @@ public class BattleSystem : MonoBehaviour
                         if (playerTurnSlots[idx].label)
                             playerTurnSlots[idx].label.gameObject.SetActive(false);
                     }
+
+                    if (playerElementIcons != null && idx < playerElementIcons.Length && playerElementIcons[idx])
+                        playerElementIcons[idx].gameObject.SetActive(false);
                 };
             }
         }
@@ -494,6 +520,9 @@ public class BattleSystem : MonoBehaviour
                         if (enemyTurnSlots[idx].label)
                             enemyTurnSlots[idx].label.gameObject.SetActive(false);
                     }
+
+                    if (enemyElementIcons != null && idx < enemyElementIcons.Length && enemyElementIcons[idx])
+                        enemyElementIcons[idx].gameObject.SetActive(false);
                 };
             }
         }
@@ -541,6 +570,58 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
+    // ===== Element helpers =====
+
+    private Sprite GetElementSpriteFromStats(BaseStats stats)
+    {
+        if (stats == null) return defaultElementIcon;
+
+        // We use ATTACK element for the icon.
+        // If you want to show defense element instead, change to stats.defenseElement.
+        NewElementType elem = stats.attackElement;
+
+        return GetElementSpriteByType(elem);
+    }
+
+    private Sprite GetElementSpriteByType(NewElementType elem)
+    {
+        if (elementIconTable != null)
+        {
+            for (int i = 0; i < elementIconTable.Length; i++)
+            {
+                if (elementIconTable[i].element == elem && elementIconTable[i].icon != null)
+                    return elementIconTable[i].icon;
+            }
+        }
+        return defaultElementIcon;
+    }
+
+    private void AssignPlayerElementIcon(int index, BaseStats stats)
+    {
+        if (playerElementIcons == null) return;
+        if (index < 0 || index >= playerElementIcons.Length) return;
+
+        var img = playerElementIcons[index];
+        if (!img) return;
+
+        var sprite = GetElementSpriteFromStats(stats);
+        img.sprite = sprite;
+        img.enabled = (sprite != null);
+    }
+
+    private void AssignEnemyElementIcon(int index, BaseStats stats)
+    {
+        if (enemyElementIcons == null) return;
+        if (index < 0 || index >= enemyElementIcons.Length) return;
+
+        var img = enemyElementIcons[index];
+        if (!img) return;
+
+        var sprite = GetElementSpriteFromStats(stats);
+        img.sprite = sprite;
+        img.enabled = (sprite != null);
+    }
+
     // ===== Turn icon helpers =====
 
     private void ResetTurnIcons()
@@ -581,6 +662,9 @@ public class BattleSystem : MonoBehaviour
                 playerTurnSlots[i].icon.gameObject.SetActive(shouldBeActive);
             if (playerTurnSlots[i].label)
                 playerTurnSlots[i].label.gameObject.SetActive(shouldBeActive);
+
+            if (playerElementIcons != null && i < playerElementIcons.Length && playerElementIcons[i])
+                playerElementIcons[i].gameObject.SetActive(shouldBeActive);
         }
 
         // Enemy side
@@ -592,6 +676,9 @@ public class BattleSystem : MonoBehaviour
                 enemyTurnSlots[i].icon.gameObject.SetActive(shouldBeActive);
             if (enemyTurnSlots[i].label)
                 enemyTurnSlots[i].label.gameObject.SetActive(shouldBeActive);
+
+            if (enemyElementIcons != null && i < enemyElementIcons.Length && enemyElementIcons[i])
+                enemyElementIcons[i].gameObject.SetActive(shouldBeActive);
         }
     }
 
@@ -613,7 +700,6 @@ public class BattleSystem : MonoBehaviour
                 enemyHealth[i].gameObject.SetActive(shouldBeActive);
         }
     }
-
 
     private void HandleTurnUnitStart(Combatant current, Combatant next)
     {
