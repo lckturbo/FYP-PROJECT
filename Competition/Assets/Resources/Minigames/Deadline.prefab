@@ -51,6 +51,7 @@ MonoBehaviour:
   instructionTimerText: {fileID: 5634159937041070547}
   minigamePanel: {fileID: 8656314940565071825}
   instructionTime: 5
+  skipButton: {fileID: 0}
   anim: {fileID: 3916296575039882400}
   instrAnim: {fileID: 968426068031872078}
   paperParent:
@@ -758,7 +759,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7370380727816074452
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2034,8 +2035,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 800
   dashMultiplier: 2
-  dashDuration: 0.15
-  dashCooldown: 0.5
   movementBounds: {fileID: 8524106489102337483}
 --- !u!1 &8403971018571324762
 GameObject:

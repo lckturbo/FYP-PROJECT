@@ -109,6 +109,7 @@ GameObject:
   - component: {fileID: 1542961264267526567}
   - component: {fileID: 3931362745510428038}
   - component: {fileID: 450486051365907397}
+  - component: {fileID: 8884142094928461620}
   m_Layer: 0
   m_Name: BlackStatue
   m_TagString: Untagged
@@ -215,7 +216,42 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   m_ShapePathHash: 0
   m_Mesh: {fileID: 0}
-  m_InstanceId: 186154
+  m_InstanceId: 157584
   m_LocalBounds:
     m_Center: {x: 0, y: 0.0033894777, z: 0}
     m_Extent: {x: 0.5, y: 0.5033895, z: 0}
+--- !u!58 &8884142094928461620
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7527228350419252702}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0.03770739}
+  serializedVersion: 2
+  m_Radius: 0.28583103
