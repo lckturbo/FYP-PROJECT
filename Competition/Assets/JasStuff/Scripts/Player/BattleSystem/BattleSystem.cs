@@ -80,6 +80,8 @@ public class BattleSystem : MonoBehaviour
     private Image _currentTurnIcon;
     private Coroutine _turnScaleRoutine;
 
+    private TMP_Text _currentTurnLabel;
+
     private GameObject playerLeader;
     private readonly List<GameObject> playerAllies = new();
     private readonly List<GameObject> enemies = new();
@@ -185,16 +187,29 @@ public class BattleSystem : MonoBehaviour
         {
             if (_currentTurnIcon != null)
                 _currentTurnIcon.color = iconTurnColor;
+
+            if (_currentTurnLabel != null)
+                _currentTurnLabel.color = Color.white;  // solid text when paused
+
             return;
         }
 
-        // Flash current-turn portrait
+        // Flash current-turn portrait + label text
         if (_currentTurnIcon != null)
         {
             float t = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * turnFlashSpeed);
+
             _currentTurnIcon.color = Color.Lerp(iconNormalColor, iconTurnColor, t);
+
+            if (_currentTurnLabel != null)
+            {
+                Color baseLabelColor = Color.white;
+                Color flashLabelColor = iconTurnColor;
+                _currentTurnLabel.color = Color.Lerp(baseLabelColor, flashLabelColor, t);
+            }
         }
     }
+
 
     private void SetupBattle()
     {
@@ -627,6 +642,7 @@ public class BattleSystem : MonoBehaviour
     private void ResetTurnIcons()
     {
         _currentTurnIcon = null;
+        _currentTurnLabel = null;   // NEW
 
         for (int i = 0; i < playerTurnSlots.Length; i++)
         {
@@ -636,7 +652,10 @@ public class BattleSystem : MonoBehaviour
                 playerTurnSlots[i].icon.rectTransform.localScale = Vector3.one;
             }
             if (playerTurnSlots[i].label)
+            {
                 playerTurnSlots[i].label.text = "";
+                playerTurnSlots[i].label.color = Color.white;   // NEW: reset color
+            }
         }
 
         for (int i = 0; i < enemyTurnSlots.Length; i++)
@@ -647,9 +666,13 @@ public class BattleSystem : MonoBehaviour
                 enemyTurnSlots[i].icon.rectTransform.localScale = Vector3.one;
             }
             if (enemyTurnSlots[i].label)
+            {
                 enemyTurnSlots[i].label.text = "";
+                enemyTurnSlots[i].label.color = Color.white;    // NEW: reset color
+            }
         }
     }
+
 
     private void UpdateTurnSlotVisibility()
     {
@@ -716,6 +739,9 @@ public class BattleSystem : MonoBehaviour
         // CURRENT TURN
         if (current != null)
         {
+            // If the current unit is stunned, show "STUNNED" instead of "Turn"
+            string currentLabelText = current.IsStunned ? "STUNNED" : "Turn";
+
             if (_playerIconIndex.TryGetValue(current, out int pi))
             {
                 var slot = playerTurnSlots[pi];
@@ -726,7 +752,10 @@ public class BattleSystem : MonoBehaviour
                     StartTurnIconScale(slot.icon);
                 }
                 if (slot.label)
-                    slot.label.text = "Turn";
+                {
+                    slot.label.text = currentLabelText;
+                    _currentTurnLabel = slot.label;   // NEW: track this label for flashing
+                }
             }
             else if (_enemyIconIndex.TryGetValue(current, out int ei))
             {
@@ -738,7 +767,10 @@ public class BattleSystem : MonoBehaviour
                     StartTurnIconScale(slot.icon);
                 }
                 if (slot.label)
-                    slot.label.text = "Turn";
+                {
+                    slot.label.text = currentLabelText;
+                    _currentTurnLabel = slot.label;   // NEW: track this label for flashing
+                }
             }
         }
 

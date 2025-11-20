@@ -137,65 +137,72 @@ public class TurnEngine : MonoBehaviour
 
             if (u.atb >= 1f)
             {
-                if (u.IsStunned)
+                if (u.atb >= 1f)
                 {
-                    Debug.Log($"{u.name} is stunned and skips the turn!");
-                    _nextIndex = (i + 1) % count;
-                    return;
-                }
-                if (u.IsSilenced)
-                {
-                    _nextIndex = (i + 1) % count;
-                    return;
-                }
-                u.atb = 0f;
-
-                u.OnTurnStarted();
-
-                if (turnIndicator != null) turnIndicator.ShowArrow(u.transform);
-
-                Combatant predictedNext = PredictNextFromIndex(i);
-
-                if (u.isPlayerTeam)
-                {
-                    if (autoBattle)
+                    if (u.IsStunned)
                     {
-                        HookActionLock(u);
-                        OnTurnUnitStart?.Invoke(u, predictedNext);
-                        AutoAct(u, true);
-                    }
-                    else
-                    {
-                        _waitingForPlayerDecision = true;
-                        _currPlayerUnit = u;
+                        Combatant nextForUI = PredictNextFromIndex(i);
+                        OnTurnUnitStart?.Invoke(u, nextForUI);
 
-                        OnPlayerTurnStart?.Invoke(u);
-                        OnTurnUnitStart?.Invoke(u, predictedNext);
-
+                        Debug.Log($"{u.name} is stunned and skips the turn!");
                         _nextIndex = (i + 1) % count;
                         return;
                     }
-                }
-                else
-                {
-                    HookActionLock(u);
-                    OnTurnUnitStart?.Invoke(u, predictedNext);
-                    AutoAct(u, false);
-                }
+                    if (u.IsSilenced)
+                    {
+                        _nextIndex = (i + 1) % count;
+                        return;
+                    }
 
-                if (IsTeamWiped(true) || IsTeamWiped(false))
-                {
-                    bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-                    ForceEnd(playerWon);
+                    u.atb = 0f;
+
+                    u.OnTurnStarted();
+
+                    if (turnIndicator != null)
+                        turnIndicator.ShowArrow(u.transform);
+
+                    Combatant predictedNext = PredictNextFromIndex(i);
+
+                    if (u.isPlayerTeam)
+                    {
+                        if (autoBattle)
+                        {
+                            HookActionLock(u);
+                            OnTurnUnitStart?.Invoke(u, predictedNext);
+                            AutoAct(u, true);
+                        }
+                        else
+                        {
+                            _waitingForPlayerDecision = true;
+                            _currPlayerUnit = u;
+
+                            OnPlayerTurnStart?.Invoke(u);
+                            OnTurnUnitStart?.Invoke(u, predictedNext);
+
+                            _nextIndex = (i + 1) % count;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        HookActionLock(u);
+                        OnTurnUnitStart?.Invoke(u, predictedNext);
+                        AutoAct(u, false);
+                    }
+
+                    if (IsTeamWiped(true) || IsTeamWiped(false))
+                    {
+                        bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+                        ForceEnd(playerWon);
+                        return;
+                    }
+
+                    _nextIndex = (i + 1) % count;
                     return;
                 }
-
-                _nextIndex = (i + 1) % count;
-                return;
             }
         }
     }
-
     private Combatant PredictNextFromIndex(int currentIndex)
     {
         int count = _units.Count;
