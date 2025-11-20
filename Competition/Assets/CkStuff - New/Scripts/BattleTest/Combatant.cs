@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -112,8 +112,8 @@ public class Combatant : MonoBehaviour
 
     // --- Skill cooldowns ---
     [Header("Skill Cooldowns")]
-    [SerializeField] public int skill1CooldownTurns = 2;
-    [SerializeField] public int skill2CooldownTurns = 3;
+    [SerializeField] public int skill1CooldownTurns = 3;
+    [SerializeField] public int skill2CooldownTurns = 4;
 
     private int _skill1CD;
     private int _skill2CD;
@@ -123,16 +123,15 @@ public class Combatant : MonoBehaviour
     public int Skill1Remaining => Mathf.Max(0, _skill1CD);
     public int Skill2Remaining => Mathf.Max(0, _skill2CD);
 
-    // STUN SYSTEM //
     public bool IsStunned { get; private set; }
     private int stunTurnsLeft = 0;
     public bool appliesStun = false;
     public int stunTurns = 1;
 
-    [Header("Stun Cooldown")]
-    [SerializeField] private int stunCooldownTurns = 8;    // how many of THIS unit's turns
-    private int _stunCooldownRemaining = 0;
-    public int StunCooldownRemaining => Mathf.Max(0, _stunCooldownRemaining);
+    // NEW: temporary stun immunity after recovering, to prevent permachain
+    [SerializeField] private int stunImmunityTurnsAfterRecover = 1;
+    private int stunImmunityTurnsLeft = 0;
+    public bool IsStunImmune => stunImmunityTurnsLeft > 0;
 
     // === SILENCE SYSTEM ===
     public bool silenceStun = false;
@@ -141,24 +140,48 @@ public class Combatant : MonoBehaviour
 
     public void ApplyStun(int turns)
     {
+        // NEW: ignore new stun if already stunned or currently immune
+        if (IsStunned || IsStunImmune)
+        {
+            Debug.Log($"{name} resisted stun (already stunned or stun-immune).");
+            return;
+        }
+
         stunTurnsLeft = turns;
         IsStunned = true;
 
         var engine = FindObjectOfType<TurnEngine>();
-        engine.stunIndicator.ShowStun(transform);
+        if (engine != null && engine.stunIndicator != null)
+        {
+            engine.stunIndicator.ShowStun(transform);
+        }
         Debug.Log("ApplyStun Called");
     }
 
     public void TickStun()
     {
-        if (!IsStunned) return;
-
-        stunTurnsLeft--;
-        if (stunTurnsLeft <= 0)
+        // If currently stunned, tick stun duration first
+        if (IsStunned)
         {
-            IsStunned = false;
-            var engine = FindObjectOfType<TurnEngine>();
-            engine.stunIndicator.HideStun(transform);
+            stunTurnsLeft--;
+            if (stunTurnsLeft <= 0)
+            {
+                IsStunned = false;
+
+                var engine = FindObjectOfType<TurnEngine>();
+                if (engine != null && engine.stunIndicator != null)
+                    engine.stunIndicator.HideStun(transform);
+
+                // NEW: after recovering, grant temporary stun immunity
+                stunImmunityTurnsLeft = stunImmunityTurnsAfterRecover;
+                Debug.Log($"{name} stun ended -> stun immunity for {stunImmunityTurnsLeft} turn(s).");
+            }
+        }
+        else if (stunImmunityTurnsLeft > 0)
+        {
+            // Tick down stun immunity on this unit's turn
+            stunImmunityTurnsLeft--;
+            Debug.Log($"{name} stun immunity turns left: {stunImmunityTurnsLeft}");
         }
     }
 
@@ -168,7 +191,8 @@ public class Combatant : MonoBehaviour
         IsSilenced = true;
 
         var engine = FindObjectOfType<TurnEngine>();
-        engine.ShowFloatingText(this, "SILENCED");
+        if (engine != null)
+            engine.ShowFloatingText(this, "SILENCED");
     }
 
     public void TickSilence()
@@ -180,7 +204,8 @@ public class Combatant : MonoBehaviour
         {
             IsSilenced = false;
             var engine = FindObjectOfType<TurnEngine>();
-            engine.ShowFloatingText(this, "SILENCE END");
+            if (engine != null)
+                engine.ShowFloatingText(this, "SILENCE END");
         }
     }
 
@@ -188,10 +213,6 @@ public class Combatant : MonoBehaviour
     {
         if (_skill1CD > 0) _skill1CD--;
         if (_skill2CD > 0) _skill2CD--;
-
-        // NEW: tick stun cooldown
-        if (_stunCooldownRemaining > 0) _stunCooldownRemaining--;
-
         turns++;
 
         TickSilence();
@@ -231,18 +252,16 @@ public class Combatant : MonoBehaviour
         {
             if (!HasUsableAllies())
             {
-                Debug.Log("[Producer] Skill1 blocked: all allies are stunned or dead — let player choose again.");
+                Debug.Log("[Producer] Skill1 blocked: no usable allies (all dead or stunned).");
 
                 var engine = FindObjectOfType<TurnEngine>();
                 if (engine != null)
                 {
-                    // This shows feedback BUT does NOT consume the turn.
-                    // TurnEngine still has _waitingForPlayerDecision = true,
-                    // so the player can pick another action.
-                    engine.ShowFloatingText(this, "ALLIES STUNNED");
+                    // Optional feedback
+                    engine.ShowFloatingText(this, "NO ALLIES");
                 }
 
-                return false; // important: don't start action, keep player in decision mode
+                return false;
             }
         }
 
@@ -402,7 +421,7 @@ public class Combatant : MonoBehaviour
             if (ally == this) continue;
             if (!ally.IsAlive) continue;
             if (ally.isPlayerTeam != this.isPlayerTeam) continue;
-            if (ally.IsStunned) continue;   // NEW: stunned allies can't be commanded
+            if (ally.IsStunned) continue;   // stunned allies can't be commanded
 
             ally.blockMinigames = true;
 
@@ -572,45 +591,27 @@ public class Combatant : MonoBehaviour
 
         float stunChance;
 
-        // ===================== SINGLE-TARGET STUN (Skill1) ======================
+        // Normal stun (e.g., Cameraman Skill1) â€“ respect target immunity
         if (appliesStun && !BattleManager.instance.IsBossBattle && currentAttackType == AttackType.Skill1)
         {
-            if (_stunCooldownRemaining > 0)
+            if (currentTarget.IsStunned || currentTarget.IsStunImmune) return;
+
+            stunChance = 0.25f;
+
+            if (UnityEngine.Random.value <= stunChance)
             {
-                // Stun is on cooldown: do NOT re-stun, just deal damage normally.
-                Debug.Log($"{name} stun is on cooldown ({_stunCooldownRemaining} turns left) – dealing damage only.");
+                var engine = FindObjectOfType<TurnEngine>();
+                if (engine != null)
+                    engine.ShowFloatingText(currentTarget, "STUNNED");
+
+                currentTarget.ApplyStun(stunTurns);
+                Debug.Log($"{name} stunned {currentTarget.name}! (Chance success)");
+
+                return;
             }
             else
             {
-                if (!currentTarget.IsStunned) // don't refresh stun, just damage if already stunned
-                {
-                    stunChance = 0.25f;
-
-                    if (UnityEngine.Random.value <= stunChance)
-                    {
-                        var engine = FindObjectOfType<TurnEngine>();
-                        if (engine != null)
-                            engine.ShowFloatingText(currentTarget, "STUNNED");
-
-                        currentTarget.ApplyStun(stunTurns);
-
-                        // Start cooldown after a successful NEW stun
-                        _stunCooldownRemaining = stunCooldownTurns;
-
-                        Debug.Log($"{name} stunned {currentTarget.name}! (Chance success; stun CD = {_stunCooldownRemaining})");
-
-                        // On successful stun: this hit is pure CC, no damage.
-                        return;
-                    }
-                    else
-                    {
-                        Debug.Log($"{name} FAILED to stun {currentTarget.name}. (Chance fail)");
-                    }
-                }
-                else
-                {
-                    Debug.Log($"{name} tried to stun {currentTarget.name}, but they are already stunned – dealing damage only.");
-                }
+                Debug.Log($"{name} FAILED to stun {currentTarget.name}. (Chance fail)");
             }
         }
 
@@ -621,7 +622,8 @@ public class Combatant : MonoBehaviour
             if (UnityEngine.Random.value <= 1f)
             {
                 var engine = FindObjectOfType<TurnEngine>();
-                engine.ShowFloatingText(currentTarget, "SILENCE");
+                if (engine != null)
+                    engine.ShowFloatingText(currentTarget, "SILENCE");
 
                 currentTarget.ApplySilence(2);
                 Debug.Log($"{name} applied SILENCE to {currentTarget.name}");
@@ -698,54 +700,40 @@ public class Combatant : MonoBehaviour
 
             HashSet<Combatant> stunnedPlayers = new HashSet<Combatant>();
 
-            // Only attempt to stun if stun cooldown is ready
-            bool canStunThisTurn = (_stunCooldownRemaining <= 0);
+            stunChance = 0.35f;
 
-            if (canStunThisTurn)
+            for (int i = 0; i < toStun; i++)
             {
-                stunChance = 0.35f;
+                Combatant p = shuffled[i];
 
-                for (int i = 0; i < toStun; i++)
+                // If already stunned OR stun-immune, skip
+                if (p.IsStunned || p.IsStunImmune)
+                    continue;
+
+                bool willStun = UnityEngine.Random.value <= stunChance;
+
+                if (willStun)
                 {
-                    Combatant p = shuffled[i];
+                    stunnedPlayers.Add(p);
 
-                    // don't reapply stun to already stunned targets
-                    if (p.IsStunned)
-                        continue;
+                    var engine = FindObjectOfType<TurnEngine>();
+                    if (engine != null)
+                        engine.ShowFloatingText(p, "STUNNED");
 
-                    bool willStun = UnityEngine.Random.value <= stunChance;
-
-                    if (willStun)
-                    {
-                        stunnedPlayers.Add(p);
-
-                        var engine = FindObjectOfType<TurnEngine>();
-                        if (engine != null)
-                            engine.ShowFloatingText(p, "STUNNED");
-
-                        p.ApplyStun(2);
-                        Debug.Log($"[BOSS] Stunned {p.name}");
-                    }
-                }
-
-                // If we actually stunned at least one target, start the stun cooldown.
-                if (stunnedPlayers.Count > 0)
-                {
-                    _stunCooldownRemaining = stunCooldownTurns;
-                    Debug.Log($"[BOSS] Stun applied this turn – stun cooldown set to {_stunCooldownRemaining}.");
+                    p.ApplyStun(2);
+                    Debug.Log($"[BOSS] Stunned {p.name}");
+                    // no return here â€“ we still want to process damage for everyone
                 }
             }
-            else
-            {
-                Debug.Log($"[BOSS] Stun on cooldown ({_stunCooldownRemaining} turns left) – AoE only deals damage.");
-            }
 
-            // DAMAGE: everybody who wasn't newly stunned this turn takes damage
             foreach (Combatant p in allPlayers)
             {
+                // NEWLY stunned this turn: no damage (they just got CC'd)
                 if (stunnedPlayers.Contains(p))
                     continue;
 
+                // Everyone else, including players who were ALREADY stunned from before,
+                // takes damage.
                 p.health.TakeDamage(damageToApply, stats, NewElementType.None);
                 Debug.Log($"[BOSS] Damaged {p.name} for {damageToApply}");
             }
@@ -992,7 +980,9 @@ public class Combatant : MonoBehaviour
 
             case MinigameManager.ResultType.Perfect:
                 if (id == "CommandBurst")
+                {
                     buff = 50;
+                }
                 else if (id == "TakeABreak")
                 {
                     int hp = currentTarget?.health.GetCurrHealth() ?? 0;

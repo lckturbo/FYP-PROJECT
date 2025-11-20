@@ -21,6 +21,7 @@ public class TurnEngine : MonoBehaviour
     private Combatant _currPlayerUnit;
     public event Action<Combatant> OnPlayerTurnStart;
 
+    // (acting unit, predicted next)
     public event Action<Combatant, Combatant> OnTurnUnitStart;
 
     public event Action<bool> OnBattleEnd;
@@ -100,15 +101,7 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running || _paused) return;
 
-        //if (IsTeamWiped(false))
-        //{
-        //    Debug.Log("[TurnEngine] Failsafe: no enemies alive — force end battle (WIN).");
-        //    ForceEnd(true);
-        //    return;
-        //}
-
-        //Time.timeScale = BattleSpeed;
-
+        // Leader death = instant lose
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
         {
@@ -121,6 +114,7 @@ public class TurnEngine : MonoBehaviour
 
         float step = Time.deltaTime / Mathf.Max(0.01f, atbFillSeconds);
 
+        // Fill ATB for all alive units
         for (int i = 0; i < _units.Count; i++)
         {
             var u = _units[i];
@@ -137,72 +131,73 @@ public class TurnEngine : MonoBehaviour
 
             if (u.atb >= 1f)
             {
-                if (u.atb >= 1f)
+                // Always reset ATB & call OnTurnStarted first
+                u.atb = 0f;
+                u.OnTurnStarted();    // ticks stun, silence, cooldowns, immunity
+
+                // In case something killed them during OnTurnStarted
+                if (!u.IsAlive)
                 {
-                    if (u.IsStunned)
-                    {
-                        Combatant nextForUI = PredictNextFromIndex(i);
-                        OnTurnUnitStart?.Invoke(u, nextForUI);
-
-                        Debug.Log($"{u.name} is stunned and skips the turn!");
-                        _nextIndex = (i + 1) % count;
-                        return;
-                    }
-                    if (u.IsSilenced)
-                    {
-                        _nextIndex = (i + 1) % count;
-                        return;
-                    }
-
-                    u.atb = 0f;
-
-                    u.OnTurnStarted();
-
-                    if (turnIndicator != null)
-                        turnIndicator.ShowArrow(u.transform);
-
-                    Combatant predictedNext = PredictNextFromIndex(i);
-
-                    if (u.isPlayerTeam)
-                    {
-                        if (autoBattle)
-                        {
-                            HookActionLock(u);
-                            OnTurnUnitStart?.Invoke(u, predictedNext);
-                            AutoAct(u, true);
-                        }
-                        else
-                        {
-                            _waitingForPlayerDecision = true;
-                            _currPlayerUnit = u;
-
-                            OnPlayerTurnStart?.Invoke(u);
-                            OnTurnUnitStart?.Invoke(u, predictedNext);
-
-                            _nextIndex = (i + 1) % count;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        HookActionLock(u);
-                        OnTurnUnitStart?.Invoke(u, predictedNext);
-                        AutoAct(u, false);
-                    }
-
-                    if (IsTeamWiped(true) || IsTeamWiped(false))
-                    {
-                        bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
-                        ForceEnd(playerWon);
-                        return;
-                    }
-
                     _nextIndex = (i + 1) % count;
                     return;
                 }
+
+                Combatant predictedNext = PredictNextFromIndex(i);
+
+                // If still stunned AFTER OnTurnStarted, skip action
+                if (u.IsStunned)
+                {
+                    OnTurnUnitStart?.Invoke(u, predictedNext);
+                    Debug.Log($"{u.name} is stunned and skips the turn!");
+                    _nextIndex = (i + 1) % count;
+                    return;
+                }
+
+                // Only show arrow for actual acting unit
+                if (turnIndicator != null)
+                    turnIndicator.ShowArrow(u.transform);
+
+                if (u.isPlayerTeam)
+                {
+                    if (autoBattle)
+                    {
+                        HookActionLock(u);
+                        OnTurnUnitStart?.Invoke(u, predictedNext);
+                        AutoAct(u, true);
+                    }
+                    else
+                    {
+                        _waitingForPlayerDecision = true;
+                        _currPlayerUnit = u;
+
+                        OnPlayerTurnStart?.Invoke(u);
+                        OnTurnUnitStart?.Invoke(u, predictedNext);
+
+                        _nextIndex = (i + 1) % count;
+                        return;
+                    }
+                }
+                else
+                {
+                    HookActionLock(u);
+                    OnTurnUnitStart?.Invoke(u, predictedNext);
+                    AutoAct(u, false);
+                }
+
+                // Check victory/defeat after an action
+                if (IsTeamWiped(true) || IsTeamWiped(false))
+                {
+                    bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+                    ForceEnd(playerWon);
+                    return;
+                }
+
+                _nextIndex = (i + 1) % count;
+                return;
             }
         }
     }
+
     private Combatant PredictNextFromIndex(int currentIndex)
     {
         int count = _units.Count;
@@ -257,7 +252,6 @@ public class TurnEngine : MonoBehaviour
         if (turnIndicator != null)
             turnIndicator.HideArrow(0.50f);
 
-
         _currPlayerUnit = null;
     }
 
@@ -266,9 +260,35 @@ public class TurnEngine : MonoBehaviour
         _resolvingAction = false;
     }
 
+    // === NEW: safely cancel a turn if the deciding unit died ===
+    private void CancelDeadPlayerTurn()
+    {
+        Debug.Log("[TurnEngine] Current player unit died during decision – cancelling turn.");
+        _waitingForPlayerDecision = false;
+
+        if (targetSelector != null)
+            targetSelector.Disable();
+
+        _currPlayerUnit = null;
+
+        // After losing that unit, check end-of-battle
+        if (IsTeamWiped(true) || IsTeamWiped(false))
+        {
+            bool playerWon = IsTeamWiped(false) && !IsTeamWiped(true);
+            ForceEnd(playerWon);
+        }
+    }
+
     public void PlayerChooseBasicAttackTarget(Combatant explicitTarget)
     {
         if (!_waitingForPlayerDecision || _currPlayerUnit == null) return;
+
+        // NEW: if unit died while UI was open, cancel turn safely
+        if (!_currPlayerUnit.IsAlive)
+        {
+            CancelDeadPlayerTurn();
+            return;
+        }
 
         var target = ValidateOrFallback(explicitTarget);
         if (target == null) return;
@@ -281,6 +301,13 @@ public class TurnEngine : MonoBehaviour
     public void PlayerChooseSkillTarget(int skillIndex, Combatant explicitTarget)
     {
         if (!_waitingForPlayerDecision || _currPlayerUnit == null) return;
+
+        // NEW: if unit died while deciding, cancel the turn
+        if (!_currPlayerUnit.IsAlive)
+        {
+            CancelDeadPlayerTurn();
+            return;
+        }
 
         HookActionLock(_currPlayerUnit);
         bool used = false;
@@ -312,9 +339,16 @@ public class TurnEngine : MonoBehaviour
             }
         }
 
+        // If skill could NOT be used (e.g. Producer, no usable allies),
+        // keep the turn and let the player choose again.
         if (!used)
         {
+            Debug.Log("[TurnEngine] Skill could not be used – keeping player in decision state.");
             _resolvingAction = false;
+
+            if (_currPlayerUnit != null && _currPlayerUnit.IsAlive)
+                OnPlayerTurnStart?.Invoke(_currPlayerUnit);
+
             return;
         }
 
@@ -348,6 +382,8 @@ public class TurnEngine : MonoBehaviour
 
     private void AutoAct(Combatant actor, bool isLeaderAuto)
     {
+        if (actor == null || !actor.IsAlive) return; // safety
+
         var target = FindRandomAlive(!actor.isPlayerTeam);
         if (target == null) return;
 
@@ -415,11 +451,12 @@ public class TurnEngine : MonoBehaviour
                 return false;
         return true;
     }
+
     public void ShowFloatingText(Combatant target, string message)
     {
         if (floatingDamagePrefab == null || target == null) return;
 
         var floatObj = Instantiate(floatingDamagePrefab, target.transform.position, Quaternion.identity);
-        floatObj.InitializeStatus(message, Color.yellow);  
+        floatObj.InitializeStatus(message, Color.yellow);
     }
 }
