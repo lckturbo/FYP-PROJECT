@@ -160,11 +160,20 @@ public class Scramble : BaseMinigame
     void EndGame(int points)
     {
         if (points >= maxPoints * 0.5f)
+        {
+            AudioManager.instance.PlaySFXAtPoint("congratulations-male-spoken-264675", transform.position);
             Result = MinigameManager.ResultType.Perfect;
+        }
         else if (points >= maxPoints * 0.3f)
+        {
+            AudioManager.instance.PlaySFXAtPoint("congratulations-male-spoken-264675", transform.position);
             Result = MinigameManager.ResultType.Success;
+        }
         else
+        {
+            AudioManager.instance.PlaySFXAtPoint("echec-370391", transform.position);
             Result = MinigameManager.ResultType.Fail;
+        }
     }
 
     public override IEnumerator Run()

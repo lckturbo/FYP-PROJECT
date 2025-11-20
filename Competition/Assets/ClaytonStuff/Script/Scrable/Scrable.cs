@@ -528,6 +528,8 @@ public class ScrabbleGame : BaseMinigame
     {
         BattleManager.instance?.SetBattlePaused(true);
 
+        AudioManager.instance.PlaySFXAtPoint("Kahoot Music (30 Second Countdown) 13", transform.position);
+
         animationPanel.SetActive(true);
         tutoralPanel.SetActive(false);
 

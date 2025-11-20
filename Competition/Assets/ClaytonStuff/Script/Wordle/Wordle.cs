@@ -299,11 +299,20 @@ public class Wordle : BaseMinigame
     void EndGame()
     {
         if (score >= 50)
+        {
+            AudioManager.instance.PlaySFXAtPoint("congratulations-male-spoken-264675", transform.position);
             Result = MinigameManager.ResultType.Perfect;
+        }
         else if (score >= 30)
+        {
+            AudioManager.instance.PlaySFXAtPoint("congratulations-male-spoken-264675", transform.position);
             Result = MinigameManager.ResultType.Success;
+        }
         else
+        {
+            AudioManager.instance.PlaySFXAtPoint("echec-370391", transform.position);
             Result = MinigameManager.ResultType.Fail;
+        }
     }
 
     public override IEnumerator Run()
