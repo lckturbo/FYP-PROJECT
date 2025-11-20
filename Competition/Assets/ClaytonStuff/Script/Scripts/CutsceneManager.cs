@@ -9,7 +9,7 @@ public class CutsceneManager : MonoBehaviour
 
     [Header("Cutscene Prefab")]
     [SerializeField] private GameObject cutscenePrefab;
-    [SerializeField] private float cutsceneDuration = 5f;
+    [SerializeField] private float cutsceneDuration = 3f;
 
     [Header("Skip UI")]
     [SerializeField] private GameObject skipButtonUI;   // optional
