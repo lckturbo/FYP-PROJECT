@@ -162,4 +162,21 @@ public class PartyFollower : MonoBehaviour
             ySorter.SetLeader(target == null);
         }
     }
+    public void ResetFollower()
+    {
+        pathQueue.Clear();
+        pathQueue.Enqueue(transform.position);
+
+        lastRecordedTargetPosition = target.position;
+        targetPathPosition = transform.position;
+
+        isMoving = false;
+
+        if (animator)
+        {
+            animator.SetBool("moving", false);
+            animator.speed = 1f;
+        }
+    }
+
 }
