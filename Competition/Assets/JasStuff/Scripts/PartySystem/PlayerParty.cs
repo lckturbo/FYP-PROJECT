@@ -17,7 +17,7 @@ public class PlayerParty : MonoBehaviour
         else
             Destroy(gameObject);
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
     }
 
     public void SetupParty(NewCharacterDefinition leader, List<NewCharacterDefinition> partyMembers)
