@@ -271,7 +271,7 @@ public abstract class EnemyBase : MonoBehaviour
 
         AudioManager.instance.StopLoopingSFX(gameObject);
 
-
+        AudioManager.instance.PlaySFXAtPoint("angry-grunt-103204", transform.position);
         if (player)
         {
             Vector2 lookDir = (player.position - transform.position).normalized;
