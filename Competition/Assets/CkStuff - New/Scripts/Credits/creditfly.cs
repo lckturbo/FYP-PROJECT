@@ -59,22 +59,17 @@ public class creditfly : MonoBehaviour
                 var s = sections[i];
                 ApplySection(s);
 
-                // Fade in
                 yield return Fade(0f, 1f, fadeInSeconds);
 
-                // Hold fully visible
                 yield return new WaitForSeconds(Mathf.Max(0f, s.holdSeconds));
 
-                // Fade out
                 yield return Fade(1f, 0f, fadeOutSeconds);
 
-                // Small gap between sections
                 yield return new WaitForSeconds(betweenSectionsDelay);
             }
         }
         while (loop);
 
-        // Ensure hidden at the end
         if (canvasGroup) canvasGroup.alpha = 0f;
     }
 
@@ -103,7 +98,6 @@ public class creditfly : MonoBehaviour
         canvasGroup.alpha = to;
     }
 
-    // Your exact credits, same as before
     private void BuildDefaultSections()
     {
         sections = new List<Section>
@@ -111,13 +105,14 @@ public class creditfly : MonoBehaviour
             new Section{
                 title = "Game Title",
                 body =
-@"I GOT SUCKED INTO THIS DUNGEON AND NOW IM FORCED TO PLAY THIS
-A game by JUMONKEY",
+@"THE VEILED PRINCESS
+A game by JUMONKI",
                 holdSeconds = 3.0f
             },
             new Section{
                 title = "Director / Lead Developer",
-                body = "Lam Cheng Kel",
+                body = 
+"Lam Cheng Kel & Chua Ke En Chloe",
                 holdSeconds = 3.0f
             },
             new Section{
@@ -152,7 +147,8 @@ Matias XinXin Rose Ye",
             new Section{
                 title = "Sound Designer",
                 body =
-@"Jaslin Joo Chui Hoon
+@"Clayton Tan Wei Yu
+Jaslin Joo Chui Hoon
 Lam Cheng Kel",
                 holdSeconds = 3.0f
             },
@@ -161,32 +157,13 @@ Lam Cheng Kel",
                 body =
 @"Bonotan Faith Ann
 Chua Ke En Chloe
-Matias XinXin Rose Ye
-Lam Cheng Kel
-Jaslin Joo Chui Hoon",
+Matias XinXin Rose Ye",
                 holdSeconds = 3.0f
             },
             new Section{
                 title = "Additional Contributors",
-                body =
-@"GNDLF The Maker",
+                body = @"",
                 holdSeconds = 1.0f
-            },
-            new Section{
-                title = "QA / Playtesting",
-                body =
-@"Tan Kai Yang & his MSI Stealth 16 Studio A13V
-Foong Wen Wei 
-Huang XiaoZe 
-Leong Yu Hui, Kayden",
-                holdSeconds = 3.0f
-            },
-            new Section{
-                title = "Localization / Translation",
-                body =
-@"Jaslin Joo Chui Hoon
-Lam Cheng Kel",
-                holdSeconds = 3.0f
             },
             new Section{
                 title = "Tools & Technology",
@@ -210,14 +187,14 @@ Steven Melin - New Adventure",
             new Section{
                 title = "Publisher",
                 body =
-@"JUNMONKEY",
+@"JUMONKI",
                 holdSeconds = 2.5f
             },
             new Section{
                 title = "Legal / Copyright Info",
                 body =
-@"(C) JUMONKEY. All Rights Reserved.
-I GOT SUCKED INTO THIS DUNGEON AND NOW IM FORCED TO PLAY THIS is a trademark of JUNMONKEY LCK.",
+@"(C) JUMONKI. All Rights Reserved.
+THE VEILED PRINCESS is a trademark of JUMONKI.",
                 holdSeconds = 4.0f
             },
             new Section{
