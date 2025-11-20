@@ -209,7 +209,7 @@ THE VEILED PRINCESS is a trademark of JUMONKI.",
 Lewis Sang
 
 Kris Lee
-NicholasTey
+Nicholas Tey
 
 Eng Kai Suen
 Tan Kang Soon
