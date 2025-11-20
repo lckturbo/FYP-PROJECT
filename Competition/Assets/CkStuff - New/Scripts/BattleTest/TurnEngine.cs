@@ -143,11 +143,11 @@ public class TurnEngine : MonoBehaviour
                     _nextIndex = (i + 1) % count;
                     return;
                 }
-                if (u.IsSilenced)
-                {
-                    _nextIndex = (i + 1) % count;
-                    return;
-                }
+                //if (u.IsSilenced)
+                //{
+                //    _nextIndex = (i + 1) % count;
+                //    return;
+                //}
                 u.atb = 0f;
 
                 u.OnTurnStarted();
