@@ -156,6 +156,9 @@ public abstract class EnemyBase : MonoBehaviour
     // ---- IDLE ---- //
     protected virtual void Idle()
     {
+        AudioManager.instance.StopLoopingSFX(gameObject);
+
+
         rb2d.velocity = Vector2.zero;
         anim.SetFloat("speed", 0f);
 
@@ -167,6 +170,8 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Patrol()
     {
         if (!aiPath) return;
+
+        AudioManager.instance.PlayLoopingSFXAtObject("boots-on-pavement-66709", gameObject, 1);
 
         if (returningFromChase)
         {
@@ -202,6 +207,8 @@ public abstract class EnemyBase : MonoBehaviour
     // ---- ALERT ---- //
     protected virtual void Alert()
     {
+        AudioManager.instance.StopLoopingSFX(gameObject);
+
         if (!alertCoroutineStarted)
         {
             alertCoroutineStarted = true;
@@ -262,6 +269,9 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (isAttacking) return;
 
+        AudioManager.instance.StopLoopingSFX(gameObject);
+
+
         if (player)
         {
             Vector2 lookDir = (player.position - transform.position).normalized;
@@ -311,6 +321,8 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Chase()
     {
         if (!player) return;
+
+        AudioManager.instance.PlayLoopingSFXAtObject("boots-on-pavement-66709", gameObject, 1);
 
         float dist = Vector2.Distance(rb2d.position, player.position);
         if (!CanSeePlayer())

@@ -102,6 +102,7 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
     public void Interact()
     {
         if (_coolingDown) return;
+        AudioManager.instance.PlaySFXAtPoint("large-lever-pushed-amp-pulled-moving-the-lever-386435", transform.position);
         StartCoroutine(UseSequence());
     }
 

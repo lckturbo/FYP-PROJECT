@@ -129,6 +129,7 @@ public class PuzzleManager : MonoBehaviour, IDataPersistence
     private Vector3 FindPlayerPosition()
     {
         var player = FindObjectOfType<NewPlayerMovement>();
+        AudioManager.instance.PlaySFXAtPoint("irongate2-85045", player.transform.position);
         if (player != null)
             return player.transform.position;
         return Vector3.zero;

@@ -73,6 +73,9 @@ public class MirrorInteract : MonoBehaviour, IDataPersistence
 
     private void RotateOnce()
     {
+        AudioManager.instance.PlaySFXAtPoint("old-chair-moving-210885", transform.position);
+
+
         float delta = rotateClockwise ? -90f : 90f;
 
         Vector3 euler = mirrorObject.localEulerAngles;
