@@ -15,6 +15,10 @@ public class BattleManager : MonoBehaviour
     public static event Action OnClearAllBuffs;
 
     private bool isBossBattle = false;
+    public void SetBossBattle(bool isBossBattle)
+    {
+        this.isBossBattle = isBossBattle;
+    }
     public bool IsBossBattle => isBossBattle;
 
     [SerializeField] private DialogueData dialogue;
@@ -28,6 +32,23 @@ public class BattleManager : MonoBehaviour
 
         //DontDestroyOnLoad(gameObject);
     }
+    //private void Update()
+    //{
+    //    if (!inBattle) return;
+
+    //    if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O))
+    //    {
+    //        Debug.Log("[CHEAT] Forced WIN");
+    //        HandleBattleEnd(true);
+    //    }
+
+    //    // CHEAT: Instant Lose (Shift + L)
+    //    if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.L))
+    //    {
+    //        Debug.Log("[CHEAT] Forced LOSE");
+    //        HandleBattleEnd(false);
+    //    }
+    //}
 
     public void RegisterEnemy(EnemyBase enemy)
     {

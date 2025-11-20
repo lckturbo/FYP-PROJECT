@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 
 public class CheckpointManager : MonoBehaviour, IDataPersistence
 {
@@ -9,6 +10,7 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
 
     private List<Checkpoint> checkpointList;
     private Checkpoint activeCheckpoint;
+    private int cheatIndex = 0;
 
     private void Awake()
     {
@@ -19,11 +21,28 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
             Destroy(gameObject);
             return;
         }
+
+        checkpointList = FindObjectsOfType<Checkpoint>().OrderBy(c => c.GetID()).ToList();
     }
-    private void OnEnable()
+    //private void Update()
+    //{
+    //    if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.C))
+    //    {
+    //        TeleportToNextCheckpoint();
+    //    }
+    //}
+    private void TeleportToNextCheckpoint()
     {
-        checkpointList = new List<Checkpoint>(FindObjectsOfType<Checkpoint>());
-        checkpointList = checkpointList.Where(c => c != null).ToList();
+        if (checkpointList == null || checkpointList.Count == 0)
+            return;
+
+        cheatIndex++;
+        if (cheatIndex >= checkpointList.Count)
+            cheatIndex = 0;
+
+        activeCheckpoint = checkpointList[cheatIndex];
+        Debug.Log("[CheckpointManager] Cheat teleport to checkpoint: " + activeCheckpoint.GetID());
+        ReturnToCheckpoint();
     }
     public void RegisterCheckpoint(Checkpoint checkpoint)
     {
@@ -58,7 +77,7 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
             if (cp != null)
             {
                 activeCheckpoint = cp;
-                cp.Activate(); // optional: visually reactivate
+                cp.Activate(); 
                // Debug.Log($"[CheckpointManager] Restored checkpoint ID {data.lastCheckpointID}");
             }
         }
@@ -104,7 +123,15 @@ public class CheckpointManager : MonoBehaviour, IDataPersistence
         if (PlayerParty.instance != null)
             PlayerParty.instance.ResetPartyPositions(cpPos);
 
-        //Debug.Log($"[CheckpointManager] Player returned to checkpoint ID {activeCheckpoint.GetID()}");
+        //var fogs = FindObjectsOfType<FoggedTrigger>();
+
+        //foreach (var fog in fogs)
+        //{
+        //    if (fog.ContainsPoint(cpPos))
+        //    {
+        //        fog.ForceClear();
+        //    }
+        //}
     }
 
 

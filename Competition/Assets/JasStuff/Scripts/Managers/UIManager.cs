@@ -425,6 +425,8 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
                 if (SceneManager.GetActiveScene().name == "jasBattle")
                 {
+                    if (BattleManager.instance) 
+                        BattleManager.instance.SetBossBattle(false);
                     TurnEngine turnEngine = FindObjectOfType<TurnEngine>();
                     if (turnEngine != null)
                         turnEngine.BattleSpeed = 1f;

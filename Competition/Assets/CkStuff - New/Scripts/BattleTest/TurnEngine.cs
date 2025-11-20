@@ -101,6 +101,21 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running || _paused) return;
 
+        // cheat //
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O))
+        {
+            Debug.Log("[CHEAT] FORCE WIN");
+            ForceEnd(true);  // this triggers the normal win flow
+            return;
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.L))
+        {
+            Debug.Log("[CHEAT] FORCE LOSE");
+            ForceEnd(false); // this triggers the normal lose flow
+            return;
+        }
+
         // Leader death = instant lose
         var leader = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
         if (leader != null && !leader.IsAlive)
