@@ -113,5 +113,26 @@ public class FoggedTrigger : MonoBehaviour, IDataPersistence
             if (!data.clearedFogIds.Contains(fogId))
                 data.clearedFogIds.Add(fogId);
         }
+    }   
+    public void ForceClear()
+    {
+        if (cleared) return;
+
+        cleared = true;
+        if (col) col.enabled = false;
+
+        foreach (var r in spriteRenderers)
+            if (r) { var c = r.color; c.a = 0f; r.color = c; r.enabled = false; }
+
+        foreach (var r in tilemapRenderers)
+            if (r) { var c = r.material.color; c.a = 0f; r.material.color = c; r.enabled = false; }
+
+        Debug.Log($"[FoggedTrigger] InstantClear called on {name}");
     }
+    public bool ContainsPoint(Vector3 worldPos)
+    {
+        return col.OverlapPoint(worldPos);
+    }
+
+
 }
