@@ -131,12 +131,13 @@ public class BattleManager : MonoBehaviour
         if (IsBossBattle && playerWon)
         {
             Debug.Log("[BattleManager] Boss defeated, playing final dialogue.");
-
+            isBossBattle = false;
             DialogueManager.Instance.StartDialogue(dialogue, OnFinalDialogueFinished);
-            return; // STOP HERE — do not change scene yet
+            return; 
         }
         else
         {
+            isBossBattle = false;
             GameManager.instance.ChangeScene("SampleScene");
         }
 
