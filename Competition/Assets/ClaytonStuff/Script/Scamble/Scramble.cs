@@ -81,6 +81,7 @@ public class Scramble : BaseMinigame
 
         foreach (char c in Input.inputString)
         {
+            AudioManager.instance.PlaySFXAtPoint("keyboard-typing-one-short-1-292590", transform.position);
             if (c == '\b')
             {
                 if (currentInput.Length > 0)

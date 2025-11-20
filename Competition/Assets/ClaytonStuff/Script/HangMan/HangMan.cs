@@ -72,6 +72,7 @@ public class HangMan : BaseMinigame
     {
         foreach (char c in Input.inputString)
         {
+            AudioManager.instance.PlaySFXAtPoint("keyboard-typing-one-short-1-292590", transform.position);
             if (char.IsLetter(c))
             {
                 if (currentInput.Length < 1)
@@ -131,6 +132,7 @@ public class HangMan : BaseMinigame
         }
         else
         {
+            AudioManager.instance.PlaySFXAtPoint("shock-gasp-female-383751", transform.position);
             wrongLetters.Add(guessedChar);
             remainingAttempts--;
             totalMistakes++; // <-- Also increment here
