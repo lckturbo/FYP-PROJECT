@@ -137,14 +137,17 @@ public class TurnEngine : MonoBehaviour
 
             if (u.atb >= 1f)
             {
-                //if (u.IsStunned)
-                //{
-                //    u.TickStun();
-
-                //    Debug.Log($"{u.name} is stunned and skips the turn!");
-                //    _nextIndex = (i + 1) % count;
-                //    return;
-                //}
+                if (u.IsStunned)
+                {
+                    Debug.Log($"{u.name} is stunned and skips the turn!");
+                    _nextIndex = (i + 1) % count;
+                    return;
+                }
+                if (u.IsSilenced)
+                {
+                    _nextIndex = (i + 1) % count;
+                    return;
+                }
                 u.atb = 0f;
 
                 u.OnTurnStarted();
