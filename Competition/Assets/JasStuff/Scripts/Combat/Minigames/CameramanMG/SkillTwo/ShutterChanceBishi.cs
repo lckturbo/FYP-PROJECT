@@ -105,6 +105,21 @@ public class ShutterChanceBishi : BaseMinigame
     [SerializeField] private float goSeconds = 0.5f;
     [SerializeField] private float readyGoPopScale = 1.2f;
 
+    [Header("SFX Clip Names (AudioManager)")]
+    [SerializeField] private string sfxSnapHit = "snap_hit";
+    [SerializeField] private string sfxSnapMiss = "snap_miss";
+
+    [SerializeField] private string sfxGoldenStart = "golden_start";
+    [SerializeField] private string sfxGoldenSuccess = "golden_success";
+    [SerializeField] private string sfxGoldenFail = "golden_fail";
+
+    [SerializeField] private string sfxReady = "ui_ready";
+    [SerializeField] private string sfxGo = "ui_go";
+    [SerializeField] private string sfxOkay = "ui_okay";
+    [SerializeField] private string sfxMiss = "ui_miss";
+
+    [SerializeField] private string sfxFinish = "finish_fanfare";
+
     //[Header("Skip")]
     //[SerializeField] private Button skipButton;
     //private bool skipRequested = false;
@@ -435,6 +450,8 @@ public class ShutterChanceBishi : BaseMinigame
                 goldenStartTime = Time.unscaledTime;
                 if (goldenRope) goldenRope.gameObject.SetActive(true);
 
+                PlaySfxByName(sfxGoldenStart);
+
                 if (goldenHint)
                 {
                     goldenHint.text = "PRESS!";
@@ -449,6 +466,12 @@ public class ShutterChanceBishi : BaseMinigame
             HandleInput(normalPhase: false);
             UpdateScoreHUD();
             yield return null;
+        }
+
+        // If golden was active but player never pressed, treat as fail SFX
+        if (goldenActive && goldenWindowActive)
+        {
+            PlaySfxByName(sfxGoldenFail);
         }
 
         ExitBonusVisuals();
@@ -466,6 +489,8 @@ public class ShutterChanceBishi : BaseMinigame
             var c = finishText.color;
             finishText.color = new Color(c.r, c.g, c.b, 0f);
             finishText.gameObject.SetActive(true);
+
+            PlaySfxByName(sfxFinish);
 
             yield return FadeTMPAlpha(finishText, 0f, 1f, 0.25f);
             yield return new WaitForSecondsRealtime(finishHoldSeconds);
@@ -618,12 +643,14 @@ public class ShutterChanceBishi : BaseMinigame
             label = "OKAY!";
             labelColor = new Color(0.3f, 1f, 0.45f, 1f);
             if (cameramanThumbsSprite) desiredCamSprite = cameramanThumbsSprite;
+            PlaySfxByName(sfxOkay);
         }
         else
         {
             label = "MISS!";
             labelColor = new Color(1f, 0.3f, 0.3f, 1f);
             if (cameramanFailSprite) desiredCamSprite = cameramanFailSprite;
+            PlaySfxByName(sfxMiss);
         }
 
         if (okayCenterText && gapSeconds > 0f)
@@ -710,9 +737,17 @@ public class ShutterChanceBishi : BaseMinigame
         }
 
         readyGoText.gameObject.SetActive(true);
+
+        // READY
+        PlaySfxByName(sfxReady);
         yield return PopWord(readyGoText, "READY", readySeconds);
+
         yield return new WaitForSecondsRealtime(0.1f);
+
+        // GO!
+        PlaySfxByName(sfxGo);
         yield return PopWord(readyGoText, "GO!", goSeconds);
+
         readyGoText.gameObject.SetActive(false);
 
         gameplayActive = true;
@@ -1159,6 +1194,8 @@ public class ShutterChanceBishi : BaseMinigame
 
         if (goldenActive && goldenWindowActive)
         {
+            PlaySfxByName(sfxGoldenSuccess);
+
             float rt = Mathf.Max(0f, Time.unscaledTime - goldenStartTime);
             float raw = goldenReactionMaxPoints - (rt * goldenReactionDecayPerSecond);
             int bonus = Mathf.Max(goldenReactionMinPoints, Mathf.RoundToInt(raw));
@@ -1194,6 +1231,7 @@ public class ShutterChanceBishi : BaseMinigame
         {
             StartCoroutine(FlashColor(Color.red, flashHold * 0.6f, flashFade * 0.6f));
             TriggerScreenShake(0.65f);
+            PlaySfxByName(sfxSnapMiss);
             score += wrongLanePenalty;
             missesThisBeat++;
             UpdateScoreHUD();
@@ -1205,6 +1243,7 @@ public class ShutterChanceBishi : BaseMinigame
             if (bonusPhase)
             {
                 score += Mathf.Max(0, pointsPerHit);
+                PlaySfxByName(sfxSnapHit);
                 UpdateScoreHUD();
                 return;
             }
@@ -1215,6 +1254,8 @@ public class ShutterChanceBishi : BaseMinigame
             waveHitsRemaining = Mathf.Max(0, waveHitsRemaining - 1);
             score += Mathf.Max(0, pointsPerHit);
             hitsThisBeat++;
+
+            PlaySfxByName(sfxSnapHit);
 
             if (s.hitsToClear <= 0) s.cleared = true;
 
@@ -1277,6 +1318,19 @@ public class ShutterChanceBishi : BaseMinigame
             try { videoPlayer.Stop(); } catch { }
         }
         if (videoRoot) videoRoot.SetActive(false);
+    }
+
+    // ===================== SFX Helper (via AudioManager) =====================
+    private void PlaySfxByName(string clipName, float volume = 1f)
+    {
+        if (string.IsNullOrEmpty(clipName)) return;
+        if (AudioManager.instance == null) return;
+
+        Vector3 pos = Vector3.zero;
+        if (Camera.main != null)
+            pos = Camera.main.transform.position;
+
+        AudioManager.instance.PlaySFXAtPoint(clipName, pos, volume);
     }
 
     private static void Shuffle<T>(IList<T> list)

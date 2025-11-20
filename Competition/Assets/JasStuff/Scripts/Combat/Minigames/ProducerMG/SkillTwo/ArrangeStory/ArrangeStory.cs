@@ -21,6 +21,7 @@ public class ArrangeStory : BaseMinigame
     private void Awake()
     {
         slots.AddRange(slotsParent.GetComponentsInChildren<ArrangeSlot>(true));
+        StartCoroutine(Run());
     }
     public void StartInstructionCountdown()
     {
@@ -29,7 +30,7 @@ public class ArrangeStory : BaseMinigame
     }
     public override IEnumerator Run()
     {
-        BattleManager.instance?.SetBattlePaused(true);
+       // BattleManager.instance?.SetBattlePaused(true);
 
         instructionPanel.SetActive(true);
         minigamePanel.SetActive(false);
@@ -96,7 +97,7 @@ public class ArrangeStory : BaseMinigame
         if(timerText) timerText.text = Result + "!";
         yield return new WaitForSecondsRealtime(1.0f);
 
-        BattleManager.instance?.SetBattlePaused(false);
+        //BattleManager.instance?.SetBattlePaused(false);
     }
     public void OnSubmit()
     {

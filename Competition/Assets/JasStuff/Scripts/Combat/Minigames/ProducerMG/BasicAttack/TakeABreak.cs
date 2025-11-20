@@ -27,6 +27,7 @@ public class TakeABreak : BaseMinigame
     }
     private void OnRoll()
     {
+        if(AudioManager.instance) AudioManager.instance.PlaySFXAtPoint("dicedrop", new Vector3(0, 0, 0));
         rollButton.interactable = false;
         resultText.gameObject.SetActive(false);
         diceImage.gameObject.SetActive(true);

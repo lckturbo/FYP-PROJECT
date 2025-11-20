@@ -94,8 +94,9 @@ public class AudioManager : MonoBehaviour
         src.volume = Mathf.Pow(10, sound.volume / 20f) * volume;
         src.pitch = sound.pitch;
         src.loop = false;
-        src.spatialBlend = 1f;
+        src.spatialBlend = 0f;
         src.outputAudioMixerGroup = sound.audioMixer;
+       // src.ignoreListenerPause = true;
 
         src.Play();
 

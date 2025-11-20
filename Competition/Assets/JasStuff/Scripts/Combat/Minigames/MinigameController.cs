@@ -43,18 +43,18 @@ public class MinigameController : MonoBehaviour
         bool playGlobal = roll < globalMinigameChance;
         bool playLocal = !playGlobal && roll < minigameChance;
 
-        if (playGlobal)
-        {
+        //if (playGlobal)
+        //{
             MinigameManager.instance.TriggerMinigameFromAnimation(globalMinigameID, OnMinigameComplete);
-        }
-        else if (playLocal)
-        {
-            MinigameManager.instance.TriggerMinigameFromAnimation(id, OnMinigameComplete);
-        }
-        else
-        {
-            Debug.Log("No minigame triggered.");
-        }
+        //}
+        //else if (playLocal)
+        //{
+        //    MinigameManager.instance.TriggerMinigameFromAnimation(id, OnMinigameComplete);
+        //}
+        //else
+        //{
+        //    Debug.Log("No minigame triggered.");
+        //}
     }
 
     private void OnMinigameComplete(MinigameManager.ResultType result, string id)

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -48,7 +47,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
         {
             instance = this;
             SceneManager.sceneLoaded += OnSceneLoaded;
-           // DontDestroyOnLoad(gameObject);
+            // DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
     }
@@ -94,7 +93,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 SetupMainMenu();
                 return;
             case "Lobby":
-                AudioManager.instance.PlayMusic("bgm");
+                AudioManager.instance.PlayMusic("NewAdventure");
                 SetupLobbyMenu();
                 RefreshLobbyButtons();
                 return;
@@ -136,13 +135,25 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (settingsBtn || creditsBtn || exitBtn)
         {
             settingsBtn.onClick.RemoveAllListeners();
-            settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
+            settingsBtn.onClick.AddListener(() =>
+            {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
+                ToggleSettings(!isOpen);
+            });
 
             creditsBtn.onClick.RemoveAllListeners();
-            creditsBtn.onClick.AddListener(() => GameManager.instance.ChangeScene("Credits"));
+            creditsBtn.onClick.AddListener(() =>
+            {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
+                GameManager.instance.ChangeScene("Credits");
+            });
 
             exitBtn.onClick.RemoveAllListeners();
-            exitBtn.onClick.AddListener(() => Application.Quit());
+            exitBtn.onClick.AddListener(() =>
+            {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
+                Application.Quit();
+            });
         }
     }
 
@@ -157,7 +168,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
     }
     public IEnumerator titleEnd()
     {
-        if(mainAnim != null)
+        if (mainAnim != null)
         {
             isCompleted = false;
             mainAnim.SetTrigger("after");
@@ -185,6 +196,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
                 if (playerInv != null)
                     playerInv.ClearInventory();
 
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
                 SaveLoadSystem.instance.NewGame();
 
                 ASyncManager.instance.LoadLevelBtn("CharSelection");
@@ -195,16 +207,22 @@ public class UIManager : MonoBehaviour, IDataPersistence
             loadBtn.onClick.RemoveAllListeners();
             loadBtn.onClick.AddListener(() =>
             {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
                 SaveLoadSystem.instance.LoadGame();
                 ASyncManager.instance.LoadLevelBtn("SampleScene");
             });
 
             settingsBtn.onClick.RemoveAllListeners();
-            settingsBtn.onClick.AddListener(() => ToggleSettings(!isOpen));
+            settingsBtn.onClick.AddListener(() =>
+            {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
+                ToggleSettings(!isOpen);
+            });
 
             exitBtn.onClick.RemoveAllListeners();
             exitBtn.onClick.AddListener(() =>
             {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
                 GameManager.instance.ChangeScene("Main");
             });
             RefreshLobbyButtons();
@@ -283,6 +301,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
 
                 backBtn.onClick.AddListener(() =>
                 {
+                    AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
                     ToggleSettings(false);
 
                     if (SceneManager.GetActiveScene().name == "Main" || SceneManager.GetActiveScene().name == "Lobby")
@@ -339,10 +358,11 @@ public class UIManager : MonoBehaviour, IDataPersistence
         if (pauseUI)
         {
             statsUI = pauseUI.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "StatsUI")?.gameObject;
-           // if (statsUI) statsUI.SetActive(true);
+            // if (statsUI) statsUI.SetActive(true);
             playerStatsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "StatsBtn");
             if (playerStatsBtn) playerStatsBtn.onClick.AddListener(() =>
             {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
                 if (statsUI) statsUI.SetActive(true);
                 ToggleSettings(false);
             });
@@ -351,26 +371,33 @@ public class UIManager : MonoBehaviour, IDataPersistence
             if (checkpointBtn)
             {
                 checkpointBtn.onClick.RemoveAllListeners();
-                checkpointBtn.onClick.AddListener(() => {
-                CheckpointManager.instance.ReturnToCheckpoint();
+                checkpointBtn.onClick.AddListener(() =>
+                {
+                    AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
+                    CheckpointManager.instance.ReturnToCheckpoint();
 
-                Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
-                if (active != null)
-                {
-                    int index = CheckpointManager.instance.GetCheckpointIndex(active);
-                    checkpointBtn.interactable = index > 0;
-                }
-                else
-                {
-                    checkpointBtn.interactable = false;
-                } });
+                    Checkpoint active = CheckpointManager.instance.GetActiveCheckpoint();
+                    if (active != null)
+                    {
+                        int index = CheckpointManager.instance.GetCheckpointIndex(active);
+                        checkpointBtn.interactable = index > 0;
+                    }
+                    else
+                    {
+                        checkpointBtn.interactable = false;
+                    }
+                });
             }
 
             desktopBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "DesktopBtn");
             if (desktopBtn)
             {
                 desktopBtn.onClick.RemoveAllListeners();
-                desktopBtn.onClick.AddListener(() => SaveLoadSystem.instance.SaveGame());
+                desktopBtn.onClick.AddListener(() =>
+                {
+                    AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
+                    SaveLoadSystem.instance.SaveGame();
+                });
                 desktopBtn.onClick.AddListener(Application.Quit);
             }
 
@@ -380,6 +407,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             settingsBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "SettingsBtn");
             if (settingsBtn) settingsBtn.onClick.AddListener(() =>
             {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
                 if (statsUI) statsUI.SetActive(false);
                 ToggleSettings(true);
 
@@ -390,6 +418,7 @@ public class UIManager : MonoBehaviour, IDataPersistence
             menuBtn = pauseUI.GetComponentsInChildren<Button>().FirstOrDefault(s => s.name == "MainMenuBtn");
             if (menuBtn) menuBtn.onClick.AddListener(() =>
             {
+                AudioManager.instance.PlaySFXAtPoint("ButtonClick", new Vector3(0, 0, 0));
                 TogglePause(false);
                 if (SceneManager.GetActiveScene().name == "SampleScene")
                     SaveLoadSystem.instance.SaveGame();
