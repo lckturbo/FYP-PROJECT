@@ -176,6 +176,16 @@ MonoBehaviour:
     pitch: 1
     loop: 1
     audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: cf86cf534d3088a45988796c78282aa2, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
+  - clip: {fileID: 8300000, guid: fa1eb13a7ac37e048bfef29c5efc4af5, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    audioMixer: {fileID: -981209151265028114, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
   audioMixer: {fileID: 24100000, guid: 8920600401ea09547b22c1b974b1fa40, type: 2}
 --- !u!114 &2743626251221848417
 MonoBehaviour:
@@ -189,6 +199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 168f7ee1f07b4034e99a83e63f525c70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainAnim: {fileID: 0}
   loadBtn: {fileID: 0}
   newBtn: {fileID: 0}
   settingsBtn: {fileID: 0}
