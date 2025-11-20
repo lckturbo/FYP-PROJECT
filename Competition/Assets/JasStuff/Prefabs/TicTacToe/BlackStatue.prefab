@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayer: 5
   m_SortingOrder: 0
   m_Sprite: {fileID: -2076528680, guid: 00492c49144b5cf4e9f01ac6015c8f63, type: 3}
-  m_Color: {r: 0.33962262, g: 0.33962262, b: 0.33962262, a: 1}
+  m_Color: {r: 0.5849056, g: 0.0082769515, b: 0.014715643, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -108,6 +108,7 @@ GameObject:
   - component: {fileID: 1107542242837478572}
   - component: {fileID: 1542961264267526567}
   - component: {fileID: 3931362745510428038}
+  - component: {fileID: 450486051365907397}
   m_Layer: 0
   m_Name: BlackStatue
   m_TagString: Untagged
@@ -188,3 +189,33 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1.006779}
   m_EdgeRadius: 0
+--- !u!114 &450486051365907397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7527228350419252702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7db70e0ea77f5ac47a8f4565a9406397, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShadowGroup: 0
+  m_ComponentVersion: 1
+  m_HasRenderer: 0
+  m_UseRendererSilhouette: 1
+  m_CastsShadows: 1
+  m_SelfShadows: 1
+  m_ApplyToSortingLayers: 000000009933d3aa31fdfd5d59f3521af7a94a80db65a98973006f59d91c3aeec37ff4f3
+  m_ShapePath:
+  - {x: -0.5, y: -0.5, z: 0}
+  - {x: -0.5, y: 0.50677896, z: 0}
+  - {x: 0.5, y: 0.50677896, z: 0}
+  - {x: 0.5, y: -0.5, z: 0}
+  m_ShapePathHash: 0
+  m_Mesh: {fileID: 0}
+  m_InstanceId: 186154
+  m_LocalBounds:
+    m_Center: {x: 0, y: 0.0033894777, z: 0}
+    m_Extent: {x: 0.5, y: 0.5033895, z: 0}

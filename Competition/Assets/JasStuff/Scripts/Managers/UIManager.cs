@@ -417,20 +417,20 @@ public class UIManager : MonoBehaviour, IDataPersistence
         {
             BattleManager.instance.SetBattlePaused(v);
             Debug.Log($"[UIManager] Battle paused: {v}");
+
+            if (BattleUIManager.instance != null)
+                BattleUIManager.instance.SetInteractable(!v);
         }
 
         ShowPauseUI(v);
 
         if (v && statsUI != null)
-        {
-            statsUI.SetActive(true);     
-        }
+            statsUI.SetActive(true);
 
         if (v && settingsUI != null)
-        {
-            settingsUI.SetActive(false);  
-        }
+            settingsUI.SetActive(false);
     }
+
 
     public void ShowPauseUI(bool v)
     {

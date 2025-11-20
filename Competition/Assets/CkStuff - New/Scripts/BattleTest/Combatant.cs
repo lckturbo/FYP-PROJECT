@@ -148,7 +148,7 @@ public class Combatant : MonoBehaviour
     public void TickStun()
     {
         if (!IsStunned) return;
-        
+
         stunTurnsLeft--;
         if (stunTurnsLeft <= 0)
         {
@@ -185,7 +185,7 @@ public class Combatant : MonoBehaviour
         if (_skill2CD > 0) _skill2CD--;
         turns++;
 
-        TickSilence(); 
+        TickSilence();
         TickStun();
 
         Debug.Log("turns: " + turns);
@@ -551,8 +551,9 @@ public class Combatant : MonoBehaviour
         }
 
         float stunChance;
-        if (appliesStun && !BattleManager.instance.IsBossBattle)
+        if (appliesStun && !BattleManager.instance.IsBossBattle && currentAttackType == AttackType.Skill1)
         {
+            if (currentTarget.IsStunned) return;
             stunChance = 0.25f;
 
             if (UnityEngine.Random.value <= stunChance)
@@ -571,8 +572,10 @@ public class Combatant : MonoBehaviour
             }
         }
 
-        if (!isPlayerTeam && silenceStun)
+        if (!isPlayerTeam && silenceStun && currentAttackType == AttackType.Skill1)
         {
+            if (currentTarget.IsSilenced) return;
+
             if (UnityEngine.Random.value <= 1f)
             {
                 var engine = FindObjectOfType<TurnEngine>();
@@ -658,6 +661,8 @@ public class Combatant : MonoBehaviour
             {
                 Combatant p = shuffled[i];
 
+                if (currentTarget.IsStunned) return;
+
                 bool willStun = UnityEngine.Random.value <= stunChance;
 
                 if (willStun)
@@ -669,13 +674,14 @@ public class Combatant : MonoBehaviour
 
                     p.ApplyStun(2);
                     Debug.Log($"[BOSS] Stunned {p.name}");
+                    return;
                 }
             }
 
             foreach (Combatant p in allPlayers)
             {
                 if (stunnedPlayers.Contains(p))
-                    continue; 
+                    continue;
 
                 p.health.TakeDamage(damageToApply, stats, NewElementType.None);
                 Debug.Log($"[BOSS] Damaged {p.name} for {damageToApply}");

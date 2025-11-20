@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7483173009894955386}
   - component: {fileID: 2735397900288888967}
   - component: {fileID: 4208319624081622684}
+  - component: {fileID: 989890842479609673}
   m_Layer: 0
   m_Name: ChessPiece
   m_TagString: Untagged
@@ -134,3 +135,18 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!114 &989890842479609673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7207532352724595391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bfc82ea32bdbf34c8ccdcaa43704f99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isWhite: 0
+  spriteRenderer: {fileID: 7483173009894955386}
+  highlightMaterial: {fileID: 2100000, guid: d02eec6aa3b36874082e036701b68150, type: 2}

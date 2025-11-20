@@ -40,6 +40,9 @@ public class PieceManager : BoardManager, IDataPersistence
         p.pieceType = type;
         p.SetWhite(isWhite);
         p.Init(boardTileMap, highlightTileMap, highlightTile, this);
+        var glow = spawned.GetComponent<PieceGlow>();
+        if (glow)
+            glow.isWhite = isWhite;
 
         if (!spawnedObjs.Contains(spawned))
             spawnedObjs.Add(spawned);
