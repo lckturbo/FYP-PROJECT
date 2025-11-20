@@ -140,13 +140,15 @@ public class FreezeFrame : BaseMinigame
         if (isInZone && poseMatch && isCorrectZone)
         {
             score++;
-            Debug.Log($"Correct! Score: {score}");
+            if(AudioManager.instance) AudioManager.instance.PlaySFXAtPoint("correctding", new Vector3(0, 0, 0));
             SetScoreText(score.ToString());
             StartCoroutine(FlashBorder(targetOutlines[hitZoneIndex], Color.green));
         }
         else
         {
-            Debug.Log("Wrong!");
+            score--;
+            if (AudioManager.instance) AudioManager.instance.PlaySFXAtPoint("wrongding", new Vector3(0, 0, 0));
+            SetScoreText(score.ToString());
             StartCoroutine(FlashBorder(targetOutlines[hitZoneIndex], Color.red));
         }
     }

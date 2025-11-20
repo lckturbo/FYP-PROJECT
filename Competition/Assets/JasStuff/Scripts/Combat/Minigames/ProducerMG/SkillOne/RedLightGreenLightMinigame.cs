@@ -34,14 +34,28 @@ public class RedLightGreenLightMinigame : BaseMinigame
         if (Input.GetKey(KeyCode.Space))
         {
             if (isGreenLight)
+            {
+                if (AudioManager.instance)
+                    AudioManager.instance.PlayLoopingSFXAtObject("sneak", gameObject);
                 player.anchoredPosition -= Vector2.right * moveSpeed * Time.unscaledDeltaTime;
+            }
             else
             {
                 running = false;
                 // lose minigame 
+                if (AudioManager.instance)
+                {
+                    AudioManager.instance.StopLoopingSFX(gameObject);
+                    AudioManager.instance.PlaySFXAtPoint("lose", new Vector3(0, 0, 0));
+                }
                 Result = MinigameManager.ResultType.Fail;
                 return;
             }
+        }
+        else
+        {
+            if (AudioManager.instance)
+                AudioManager.instance.StopLoopingSFX(gameObject);
         }
 
         if (player.anchoredPosition.x <= finishLine.anchoredPosition.x)
@@ -130,6 +144,12 @@ public class RedLightGreenLightMinigame : BaseMinigame
     }
     private void SetLight(bool green)
     {
+        if (green && !isGreenLight)
+        {
+            if (AudioManager.instance)
+                AudioManager.instance.PlaySFXAtPoint("gogo", Vector3.zero);
+        }
+
         isGreenLight = green;
         starter.rotation = Quaternion.Euler(0, green ? 0 : 180, 0);
         statusText.text = green ? "GREEN LIGHT" : "RED LIGHT";

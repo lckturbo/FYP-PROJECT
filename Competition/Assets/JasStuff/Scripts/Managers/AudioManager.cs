@@ -13,8 +13,10 @@ public class AudioManager : MonoBehaviour
     private Dictionary<string, Sound> soundDictionary;
     private Dictionary<string, float> savedMusicTime = new();
     private Dictionary<GameObject, AudioSource> loopingSFX = new();
+    private Dictionary<string, float> activeSFX = new();
 
     private AudioSource musicSource;
+    private AudioSource src;
     private string currentMusic = "";
 
     private void Awake()
@@ -87,7 +89,15 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        AudioSource src = AudioPool.instance.GetSource();
+        if (activeSFX.TryGetValue(clipName, out float endTime))
+        {
+            if (Time.unscaledTime < endTime)
+                return;
+            else
+                activeSFX.Remove(clipName);
+        }
+
+        src = AudioPool.instance.GetSource();
 
         src.transform.position = position;
         src.clip = sound.clip;
@@ -96,11 +106,17 @@ public class AudioManager : MonoBehaviour
         src.loop = false;
         src.spatialBlend = 0f;
         src.outputAudioMixerGroup = sound.audioMixer;
-       // src.ignoreListenerPause = true;
 
         src.Play();
 
+        float length = sound.clip.length / Mathf.Abs(sound.pitch);
+        activeSFX[clipName] = Time.unscaledTime + length;
+
         StartCoroutine(ReturnToPoolAfter(src, sound.clip.length / Mathf.Abs(sound.pitch)));
+    }
+    public void StopSFX()
+    {
+        src.Stop();
     }
 
     private IEnumerator ReturnToPoolAfter(AudioSource src, float time)
@@ -121,12 +137,12 @@ public class AudioManager : MonoBehaviour
         if (loopingSFX.ContainsKey(target))
             return;
 
-        AudioSource src = target.AddComponent<AudioSource>();
+        src = target.AddComponent<AudioSource>();
         src.clip = sound.clip;
         src.volume = sound.volume * volume;
         src.pitch = sound.pitch;
         src.loop = true;
-        src.spatialBlend = 1f;
+        src.spatialBlend = 0f;
         src.outputAudioMixerGroup = sound.audioMixer;
 
         src.Play();

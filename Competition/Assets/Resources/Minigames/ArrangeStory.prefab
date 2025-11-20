@@ -199,7 +199,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 5882252336495173294}
         m_TargetAssemblyTypeName: ArrangeStory, Assembly-CSharp
         m_MethodName: OnSubmit
         m_Mode: 1
@@ -361,6 +361,7 @@ GameObject:
   - component: {fileID: 7050887573557952712}
   - component: {fileID: 9009887658260670721}
   - component: {fileID: 4210465868502358584}
+  - component: {fileID: 7028241947979120593}
   m_Layer: 0
   m_Name: StoryBoarding
   m_TagString: Untagged
@@ -473,6 +474,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &7028241947979120593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695224018163856891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37f04204990bafe4aa593fe63560041f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &774515110741434539
 GameObject:
   m_ObjectHideFlags: 0
