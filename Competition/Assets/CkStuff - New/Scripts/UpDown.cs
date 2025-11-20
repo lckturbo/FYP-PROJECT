@@ -3,7 +3,7 @@ using UnityEngine;
 public class UpDown : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveAmount = 0.05f;
+    public float moveAmount;
     public float speed = 4f;
 
     private Vector3 _startPos;
