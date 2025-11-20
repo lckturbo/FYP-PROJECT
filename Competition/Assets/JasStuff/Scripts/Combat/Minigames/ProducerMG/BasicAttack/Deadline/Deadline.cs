@@ -133,12 +133,14 @@ public class Deadline : BaseMinigame
     }
     public void OnCatch()
     {
+        AudioManager.instance.PlaySFXAtPoint("ding-411634", transform.position);
         caught++;
         SetCaughtText(caught.ToString());
     }
 
     public void OnMiss()
     {
+        AudioManager.instance.PlaySFXAtPoint("whoosh-402320", transform.position);
         missed++;
         StartCoroutine(SetMissedText());
         SetCaughtText(caught.ToString());

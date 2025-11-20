@@ -36,7 +36,7 @@ public class RedLightGreenLightMinigame : BaseMinigame
             if (isGreenLight)
             {
                 if (AudioManager.instance)
-                    AudioManager.instance.PlayLoopingSFXAtObject("sneak", gameObject);
+                    AudioManager.instance.PlayLoopingSFXAtObject("walking-96582", gameObject);
                 player.anchoredPosition -= Vector2.right * moveSpeed * Time.unscaledDeltaTime;
             }
             else
@@ -61,6 +61,9 @@ public class RedLightGreenLightMinigame : BaseMinigame
         if (player.anchoredPosition.x <= finishLine.anchoredPosition.x)
         {
             running = false;
+
+            AudioManager.instance.PlaySFXAtPoint("finish_fanfare", transform.position);
+
 
             Result = timer > minigameDuration * 0.5f ? // 50% left -> 12.5s = perfect, else = success
                   MinigameManager.ResultType.Perfect
@@ -137,6 +140,8 @@ public class RedLightGreenLightMinigame : BaseMinigame
 
         if (!running || timer < 0f)
         {
+            AudioManager.instance.PlaySFXAtPoint("golden_fail", transform.position);
+
             running = false;
             Result = MinigameManager.ResultType.Fail;
         }
