@@ -74,7 +74,8 @@ public class PuzzleManager : MonoBehaviour, IDataPersistence
         PlayerInput playerInput = FindObjectOfType<PlayerInput>();
         if (playerInput != null) playerInput.enabled = false;
 
-        NewPlayerMovement newPlayerMovement = FindAnyObjectByType<NewPlayerMovement>();
+        NewPlayerMovement newPlayerMovement = GameObject.FindGameObjectWithTag("Player")
+            .GetComponent<NewPlayerMovement>();
         if (newPlayerMovement != null) newPlayerMovement.enabled = false;
 
         NewCameraController cam = FindObjectOfType<NewCameraController>();

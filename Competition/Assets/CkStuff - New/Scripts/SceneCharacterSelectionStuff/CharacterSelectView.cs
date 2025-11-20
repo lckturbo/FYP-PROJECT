@@ -229,8 +229,11 @@ public class CharacterSelectView : MonoBehaviour, IDataPersistence
         PlayerParty.instance.SetupParty(def, allies);
 
         SaveLoadSystem.instance.SaveGame();
-        GameManager.instance.ChangeScene("SampleScene");
+
+        // PLAY CUTSCENE BEFORE LOADING
+        CutsceneManager.instance.PlayCutsceneThenLoad("SampleScene");
     }
+
 
     public int GetCurrentIndex() => currentIndex;
 

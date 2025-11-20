@@ -178,7 +178,15 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
 
     private void SetPlayerControl(bool enabled)
     {
-        if (_playerInput) _playerInput.enabled = enabled;
+        if (_playerInput)
+        {
+            _playerInput.enabled = enabled;
+            Debug.Log($"[SwitchInteract] PlayerInput.enabled = {enabled}");
+        }
+        else
+        {
+            Debug.LogWarning("[SwitchInteract] SetPlayerControl called but _playerInput is NULL");
+        }
     }
 
     private IEnumerator WaitForCurrentAnimOrFallback(Animator anim, float fallbackSeconds)
@@ -204,27 +212,36 @@ public class SwitchInteract : MonoBehaviour, IDataPersistence
 
     private void TryBindPlayerInput()
     {
-        if (_playerMove == null)
-            _playerMove = FindObjectOfType<NewPlayerMovement>();
-
-        if (_playerMove != null)
+        if (_playerMove == null || _playerInput == null)
         {
-            if (_playerInput == null)
-                _playerInput = _playerMove.GetComponent<PlayerInput>();
-
-            if (_playerInput != null)
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
             {
-                UnsubscribeAction();
-
-                _interactAction = _playerInput.actions != null ? _playerInput.actions["Interaction"] : null;
-                if (_interactAction != null)
-                {
-                    _interactAction.Enable();
-                    SubscribeAction();
-                }
-
-                if (!returnFocus) returnFocus = _playerMove.transform;
+                _playerMove = player.GetComponent<NewPlayerMovement>();
+                _playerInput = player.GetComponent<PlayerInput>();
             }
+        }
+
+        if (_playerInput != null)
+        {
+            UnsubscribeAction();
+
+            _interactAction = _playerInput.actions != null ? _playerInput.actions["Interaction"] : null;
+            if (_interactAction != null)
+            {
+                _interactAction.Enable();
+                SubscribeAction();
+            }
+
+            if (!returnFocus && _playerMove != null)
+                returnFocus = _playerMove.transform;
+
+            // optional debug
+            Debug.Log($"[SwitchInteract] Bound PlayerInput from tagged Player: {_playerInput.name}");
+        }
+        else
+        {
+            Debug.LogWarning("[SwitchInteract] Could not find PlayerInput on object with tag 'Player'");
         }
     }
 

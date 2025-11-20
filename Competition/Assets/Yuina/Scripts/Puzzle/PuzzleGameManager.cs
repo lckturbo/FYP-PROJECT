@@ -109,7 +109,8 @@ public class PuzzleGameManager : MonoBehaviour
         puzzleSolved = true;
 
         // Disable movement
-        NewPlayerMovement playerMovement = FindObjectOfType<NewPlayerMovement>();
+        NewPlayerMovement playerMovement = GameObject.FindGameObjectWithTag("Player")
+            .GetComponent<NewPlayerMovement>();
         if (playerMovement != null) playerMovement.enabled = false;
 
         PlayerInput playerInput = FindObjectOfType<PlayerInput>();
