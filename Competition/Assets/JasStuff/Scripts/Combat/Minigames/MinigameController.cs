@@ -31,7 +31,7 @@ public class MinigameController : MonoBehaviour
         }
 
         if (!currCombatant.isLeader)
-            minigameChance = 10;
+            minigameChance = 100;
         else
             minigameChance = 20;
 
