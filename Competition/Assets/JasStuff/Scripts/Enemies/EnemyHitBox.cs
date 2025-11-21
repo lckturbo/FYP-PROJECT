@@ -5,6 +5,15 @@ public class EnemyHitbox : MonoBehaviour
 {
     private EnemyBase owner;
 
+    private void Awake()
+    {
+        // Auto-find the owner if Init() wasn't called yet
+        if (owner == null)
+        {
+            owner = GetComponentInParent<EnemyBase>();
+        }
+    }
+
     public void Init(EnemyBase enemy)
     {
         owner = enemy;
@@ -16,16 +25,12 @@ public class EnemyHitbox : MonoBehaviour
 
         StaticEnemy staticEnemy = owner as StaticEnemy;
 
-        // If this enemy has dialogue, play it FIRST
         if (staticEnemy != null && staticEnemy.attackDialogue != null)
         {
-            // Prevent double-trigger
             if (DialogueManager.Instance.IsDialogueActive) return;
 
-            // Disable movement & AI temporarily
             owner.enabled = false;
 
-            // Start dialogue AND wait for it to finish
             DialogueManager.Instance.StartDialogue(
                 staticEnemy.attackDialogue,
                 () => { owner.StartCoroutine(DelayedTriggerAttack()); }
@@ -33,17 +38,14 @@ public class EnemyHitbox : MonoBehaviour
         }
         else
         {
-            // No dialogue ? attack immediately
             owner.TriggerAttack();
         }
     }
 
     private IEnumerator DelayedTriggerAttack()
     {
-        // Wait one frame to ensure dialogue closed
         yield return null;
 
-        // Re-enable enemy logic
         owner.enabled = true;
 
         Debug.Log("Dialogue finished ? triggering attack!");
