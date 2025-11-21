@@ -110,6 +110,20 @@ public abstract class EnemyBase : MonoBehaviour
         if (!health) health = GetComponent<NewHealth>();
         health.ApplyStats(enemyStats);
 
+        WayPointArea area = WaypointManager.instance.GetAreaByID(areaID);
+        if (area != null)
+        {
+            waypoints = area.GetWaypoints();
+            currId = 0;
+            currTarget = waypoints[0].position;
+
+            transform.position = currTarget;
+        }
+        else
+        {
+            Debug.LogWarning($"{name} has invalid areaID: {areaID}");
+        }
+
         if (attackHitbox)
         {
             EnemyHitbox enemyHitBox = attackHitbox.GetComponent<EnemyHitbox>();

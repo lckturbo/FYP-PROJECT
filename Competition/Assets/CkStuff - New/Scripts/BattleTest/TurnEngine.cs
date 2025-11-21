@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class TurnEngine : MonoBehaviour
 {
@@ -101,19 +102,20 @@ public class TurnEngine : MonoBehaviour
     {
         if (!_running || _paused) return;
 
-        // cheat //
+        // cheat code //
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O))
         {
             Debug.Log("[CHEAT] FORCE WIN");
             ForceEnd(true);  // this triggers the normal win flow
-            return;
+            //return;
         }
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.L))
         {
             Debug.Log("[CHEAT] FORCE LOSE");
-            ForceEnd(false); // this triggers the normal lose flow
-            return;
+            var cheatL = _units.Find(u => u && u.isPlayerTeam && u.isLeader);
+            cheatL.health.TakeDamage(cheatL.health.GetCurrHealth() + 999, null);
+            //return;
         }
 
         // Leader death = instant lose
